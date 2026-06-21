@@ -1,4 +1,4 @@
-import bg2 from '../assets/bg_2.png'
+import bgScripples from '../assets/bg_scripples_new.png'
 
 export function NeatScripples() {
   return (
@@ -10,7 +10,7 @@ export function NeatScripples() {
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundImage: `url(${bg2})`,
+        backgroundImage: `url(${bgScripples})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',

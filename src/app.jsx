@@ -20,15 +20,10 @@ export function App() {
 
   // Theme Sync on Mount
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    // Force light theme by default to match the Figma design
+    const initialTheme = 'light';
     setTheme(initialTheme);
-    if (initialTheme === 'dark') {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
+    document.body.classList.remove('dark-mode');
   }, []);
 
   // Theme Switch handler
@@ -96,7 +91,7 @@ export function App() {
 
       {/* Bare Bones Sections */}
       <main style={{ paddingTop: '129px', minHeight: 'calc(100vh - 129px)' }}>
-        <section id="home" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-primary)' }}>
+        <section id="home" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div class="container text-center">
             <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>كليما ميديكس PWA</h1>
             <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
@@ -112,7 +107,7 @@ export function App() {
           </div>
         </section>
 
-        <section id="pillars" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-primary)' }}>
+        <section id="pillars" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div class="container text-center">
             <h2 style={{ color: 'var(--text-primary)' }}>الركائز</h2>
             <p style={{ color: 'var(--text-secondary)' }}>محتوى تجريبي لقسم "الركائز".</p>
@@ -126,7 +121,7 @@ export function App() {
           </div>
         </section>
 
-        <section id="training" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-primary)' }}>
+        <section id="training" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div class="container text-center">
             <h2 style={{ color: 'var(--text-primary)' }}>الدورات التدريبية</h2>
             <p style={{ color: 'var(--text-secondary)' }}>محتوى تجريبي لقسم "الدورات التدريبية".</p>

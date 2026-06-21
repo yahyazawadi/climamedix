@@ -4,6 +4,9 @@ import './app.css'
 // Import newly created Header & Footer components
 import { Header } from './components/Header'
 import { Footer } from './components/Footer'
+import { TopBackground } from './components/TopBackground'
+import { NeatScripples } from './components/NeatScripples'
+import { ColoredBackground } from './components/ColoredBackground'
 
 export function App() {
   const [theme, setTheme] = useState('light');
@@ -77,7 +80,12 @@ export function App() {
   };
 
   return (
-    <>
+    <div style={{ position: 'relative', overflow: 'hidden', minHeight: '100vh' }}>
+      {/* Background components */}
+      <TopBackground />
+      <NeatScripples />
+      <ColoredBackground />
+
       {/* Header component */}
       <Header 
         theme={theme} 
@@ -87,7 +95,7 @@ export function App() {
       />
 
       {/* Bare Bones Sections */}
-      <main style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)' }}>
+      <main style={{ paddingTop: '129px', minHeight: 'calc(100vh - 129px)' }}>
         <section id="home" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-primary)' }}>
           <div class="container text-center">
             <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>كليما ميديكس PWA</h1>
@@ -220,6 +228,6 @@ export function App() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }

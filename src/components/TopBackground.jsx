@@ -7,58 +7,46 @@ export function TopBackground() {
       className="top-background" 
       style={{
         position: 'absolute',
-        top: 0,
+        top: '80px',
         left: 0,
         right: 0,
-        height: '350px',
+        height: '450px',
         backgroundImage: `url(${footerBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
         zIndex: -1,
         pointerEvents: 'none',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '12px'
       }}
     >
-      <div 
+      <img 
+        src={footerLogo} 
+        alt="كليما ميديكس" 
         style={{
-          position: 'absolute',
-          top: '140px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '12px',
-          width: '100%',
-          maxWidth: '600px',
-          textAlign: 'center'
+          width: '240px',
+          height: '50px',
+          objectFit: 'contain',
+          opacity: 0.95
+        }}
+      />
+      <span 
+        style={{
+          color: '#ffffff',
+          fontFamily: 'Tajawal, sans-serif',
+          fontSize: '20px',
+          fontWeight: '700',
+          lineHeight: '1.5',
+          direction: 'rtl'
         }}
       >
-        <img 
-          src={footerLogo} 
-          alt="كليما ميديكس" 
-          style={{
-            width: '240px',
-            height: '50px',
-            objectFit: 'contain',
-            opacity: 0.95
-          }}
-        />
-        <span 
-          style={{
-            color: '#ffffff',
-            fontFamily: 'Tajawal, sans-serif',
-            fontSize: '20px',
-            fontWeight: '700',
-            lineHeight: '1.5',
-            direction: 'rtl'
-          }}
-        >
-          انضم إلينا في رحلتنا لدعم الصحة البيئية والتغيير المناخي!
-        </span>
-      </div>
+        انضم إلينا في رحلتنا لدعم الصحة البيئية والتغيير المناخي!
+      </span>
     </div>
   );
 }
-

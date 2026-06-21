@@ -78,7 +78,7 @@ body.dark-mode {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: var(--font-family);
+  font-family: var(--font-family) !important;
   -webkit-tap-highlight-color: transparent; /* Smooth mobile interaction */
 }
 

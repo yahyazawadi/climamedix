@@ -27,7 +27,7 @@ export function Header({ activeSection }) {
           <nav class="figma-nav-menu">
             
             {/* 6. اتصل بنا */}
-            <a href="#training" class={`figma-nav-item ${activeSection === 'training' ? 'active' : ''}`}>
+            <a href="#contact" class={`figma-nav-item ${activeSection === 'contact' ? 'active' : ''}`}>
               <img src={iconContact} class="figma-nav-icon" alt="اتصل بنا" />
               <span class="figma-nav-text">اتصل بنا</span>
             </a>
@@ -44,11 +44,12 @@ export function Header({ activeSection }) {
               <span class="figma-nav-text">أبحاث</span>
             </a>
 
-            {/* 3. المفضلة */}
+            {/* 3. المفضلة (Commented out)
             <a href="#pillars" class={`figma-nav-item ${activeSection === 'pillars' ? 'active' : ''}`}>
               <img src={iconFavorite} class="figma-nav-icon" alt="المفضلة" />
               <span class="figma-nav-text">المفضلة</span>
             </a>
+            */}
 
             {/* 2. من نحن */}
             <a href="#about" class={`figma-nav-item ${activeSection === 'about' ? 'active' : ''}`}>
@@ -95,10 +96,10 @@ export function Header({ activeSection }) {
         <nav class="drawer-nav">
           <a href="#home" onClick={() => setDrawerOpen(false)} class="drawer-link">الرئيسية</a>
           <a href="#about" onClick={() => setDrawerOpen(false)} class="drawer-link">من نحن</a>
-          <a href="#pillars" onClick={() => setDrawerOpen(false)} class="drawer-link">المفضلة</a>
+          {/* <a href="#pillars" onClick={() => setDrawerOpen(false)} class="drawer-link">المفضلة</a> */}
           <a href="#research" onClick={() => setDrawerOpen(false)} class="drawer-link">أبحاث</a>
           <a href="#training" onClick={() => setDrawerOpen(false)} class="drawer-link">دورات تدريبية</a>
-          <a href="#training" onClick={() => setDrawerOpen(false)} class="drawer-link">اتصل بنا</a>
+          <a href="#contact" onClick={() => setDrawerOpen(false)} class="drawer-link">اتصل بنا</a>
         </nav>
       </div>
       <div onClick={() => setDrawerOpen(false)} class={`drawer-overlay ${drawerOpen ? 'open' : ''}`}></div>

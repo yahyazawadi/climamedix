@@ -9,7 +9,7 @@ import contactWeb from '../assets/contact_web.svg'
 
 export function Footer({ onJoinClick }) {
   return (
-    <footer class="figma-footer">
+    <footer id="contact" class="figma-footer">
       <div class="figma-footer-container">
         
         {/* Right Side: Columns & Join Box (rendered first in HTML so it displays on the right in RTL) */}
@@ -34,7 +34,7 @@ export function Footer({ onJoinClick }) {
             <div class="figma-col">
               <h4>الروابط السريعة</h4>
               <ul>
-                <li><a href="#pillars">الأقسام</a></li>
+                {/* <li><a href="#pillars">الأقسام</a></li> */}
                 <li><a href="#training">الدورات التدريبية</a></li>
                 <li><a href="#about">من نحن</a></li>
                 <li><a href="#research">أحدث الأبحاث</a></li>

@@ -7,6 +7,28 @@ import { Footer } from './components/Footer'
 import { TopBackground } from './components/TopBackground'
 import { NeatScripples } from './components/NeatScripples'
 import { ColoredBackground } from './components/ColoredBackground'
+import { Button } from './components/Button'
+import { GlassCard } from './components/GlassCard'
+import doctorImg from './assets/bg_3.png'
+import whiteLogo from './assets/footer_logo.svg'
+
+// Import section assets
+import research1 from './assets/research_1.png'
+import research2 from './assets/research_2.png'
+import research3 from './assets/research_3.png'
+import research4 from './assets/bg_1.png'
+import training1 from './assets/training_1.png'
+import training2 from './assets/training_2.png'
+import training3 from './assets/training_3.png'
+import training4 from './assets/training_4.png'
+import upcoming1 from './assets/upcoming_1.png'
+import upcoming2 from './assets/upcoming_2.png'
+import iconHome from './assets/icon_home.svg'
+import iconAbout from './assets/icon_about.svg'
+import iconFavorite from './assets/icon_favorite.svg'
+import iconResearch from './assets/icon_research.svg'
+import iconTraining from './assets/icon_training.svg'
+import iconContact from './assets/icon_contact.svg'
 
 export function App() {
   const [theme, setTheme] = useState('light');
@@ -41,7 +63,7 @@ export function App() {
   // Scroll Spy for active section styling
   useEffect(() => {
     const handleScroll = () => {
-      const sections = document.querySelectorAll('section[id]');
+      const sections = document.querySelectorAll('section[id], footer[id]');
       const scrollY = window.scrollY;
       let currentSection = 'home';
       
@@ -90,48 +112,300 @@ export function App() {
       />
 
       {/* Bare Bones Sections */}
-      <main style={{ paddingTop: '129px', minHeight: 'calc(100vh - 129px)' }}>
-        <section id="home" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div class="container text-center">
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>كليما ميديكس PWA</h1>
-            <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
-              مرحبا بكم في الصفحة التجريبية الأساسية. تم تفعيل المكونات الرئيسية (الهيدر والتذييل) بنجاح.
+      <main className="figma-main-content">
+        <section id="home" className="figma-hero-section">
+          <div className="figma-hero-container">
+            {/* Frame 43 */}
+            <div className="figma-frame-43">
+              
+              {/* Left Side: Doctor Image Circle */}
+              <div className="figma-hero-doctor-wrap">
+                <img src={doctorImg} className="figma-hero-doctor-img" alt="ممارس صحي" />
+              </div>
+              
+              {/* Right Side: Text Column */}
+              <div className="figma-hero-text-col">
+                <div className="figma-hero-white-text-group">
+                  <img src={whiteLogo} className="figma-hero-white-logo" alt="كليما ميديكس" />
+                  <h2 className="figma-hero-subtitle">تمكين مقدمي الرعاية الصحية لأجل العمل المناخي.</h2>
+                </div>
+                <p className="figma-hero-description">
+                  نحن نسعى لتمكين الطاقم الصحي للعمل المناخي من خلال برامج تدريبية، أبحاث، وورش عمل.
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* About Section */}
+        <section id="about" className="figma-about-section">
+          <div className="figma-section-container">
+            <GlassCard className="figma-about-intro-box">
+              <h2 className="figma-about-box-title">من نحن؟</h2>
+              <p className="figma-about-intro-text">
+                في ClimaMedix، نؤمن بأن البحث العلمي هو الأساس لفهم تأثيرات التغير المناخي على الصحة العامة وتطوير الحلول المستدامة. نحن فريق من الباحثين والمتخصصين في المجال الطبي، نعمل على تمكين الطواقم الصحية بالمعرفة، وتزويدهم بالأدوات اللازمة لفهم التغيرات البيئية والتصدي لتحدياتها. نركز بشكل أساسي على دعم البحث العلمي، تمكين المهنيين الصحيين، ونشر التوعية حول العلاقة بين التغير المناخي والصحة.
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+                <Button variant="gradient" onClick={() => document.getElementById('research').scrollIntoView({ behavior: 'smooth' })}>
+                  عرض المزيد
+                </Button>
+              </div>
+            </GlassCard>
+            
+            <div className="figma-vision-mission-grid">
+              <GlassCard className="figma-vision-card">
+                <div className="figma-vision-card-header">
+                  <h3>الرؤية</h3>
+                </div>
+                <p>أن نكون المنصة البحثية الرائدة في مجال الصحة والتغير المناخي، من خلال إنتاج أبحاث متقدمة، تمكين الطواقم الطبية بالمعرفة، والمساهمة في بناء سياسات صحية مستدامة لمواجهة التحديات البيئية.</p>
+              </GlassCard>
+              <GlassCard className="figma-mission-card">
+                <div className="figma-vision-card-header">
+                  <h3>الرسالة</h3>
+                </div>
+                <p>نهدف إلى تمكين المهنيين في القطاع الصحي من لعب دور قيادي في الاستجابة العالمية لتغير المناخ، من خلال تعزيز البحث العلمي، تطوير دراسات ميدانية، ودعم الأبحاث التطبيقية التي تساعد في تقديم حلول فعالة. كما نعمل على بناء شبكة عالمية من الباحثين، ونوفر فرصاً للمشاركة في المشاريع البحثية التي تسهم في تحسين الصحة العامة.</p>
+              </GlassCard>
+            </div>
+          </div>
+        </section>
+
+        {/* Pillars Section (Commented Out as requested)
+        <section id="pillars" className="figma-pillars-section">
+          <div className="figma-section-container">
+            <h2 className="figma-section-title-main">الركائز الأساسية</h2>
+            <div className="figma-pillars-grid">
+              <div className="figma-pillar-card">
+                <div className="figma-pillar-icon-wrap">
+                  <img src={iconFavorite} alt="التمكين" />
+                </div>
+                <h3>التمكين</h3>
+                <p>نوفر الأدوات والتدريب اللازم لتمكين الطاقم الصحية من قيادة التغيير.</p>
+              </div>
+              <div className="figma-pillar-card">
+                <div className="figma-pillar-icon-wrap">
+                  <img src={iconResearch} alt="البحث العلمي" />
+                </div>
+                <h3>البحث العلمي</h3>
+                <p>نركز على الأبحاث والدراسات التي توفر حلولاً حقيقية لتحديات الصحة والتغير المناخي.</p>
+              </div>
+              <div className="figma-pillar-card">
+                <div className="figma-pillar-icon-wrap">
+                  <img src={iconAbout} alt="الابتكار" />
+                </div>
+                <h3>الابتكار</h3>
+                <p>تطوير منهجيات جديدة لتعزيز دور البحث في دعم الاستدامة الصحية.</p>
+              </div>
+              <div className="figma-pillar-card">
+                <div className="figma-pillar-icon-wrap">
+                  <img src={iconTraining} alt="التأثير المجتمعي" />
+                </div>
+                <h3>التأثير المجتمعي</h3>
+                <p>تحويل الأبحاث العلمية إلى حلول عملية تُطبَّق على أرض الواقع.</p>
+              </div>
+              <div className="figma-pillar-card">
+                <div className="figma-pillar-icon-wrap">
+                  <img src={iconContact} alt="الشراكات" />
+                </div>
+                <h3>الشراكات</h3>
+                <p>نعمل بالتعاون مع مؤسسات بحثية، جامعات، ومنظمات عالمية لدعم الأبحاث المتخصصة في الصحة البيئية.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        */}
+
+        {/* Research Section */}
+        <section id="research" className="figma-research-section">
+          <div className="figma-section-container">
+            <h2 className="figma-section-title-main">أحدث الأبحاث</h2>
+            
+            <div className="figma-cards-grid-4">
+              {/* Card 1 */}
+              <div className="figma-item-card">
+                <div className="figma-item-card-image-wrap">
+                  <img src={research1} alt="أثر تلوث الهواء" />
+                </div>
+                <div className="figma-item-card-content">
+                  <span className="figma-item-card-location">الموقع: فلسطين</span>
+                  <h3 className="figma-item-card-title">أثر تلوث الهواء على الأمراض التنفسية في المناطق الحضرية.</h3>
+                  <div className="figma-item-card-progress-wrap">
+                    <span className="figma-item-card-progress-text">التقدم: 85%</span>
+                    <div className="figma-item-card-progress-bar">
+                      <div className="figma-item-card-progress-fill" style={{ width: '85%' }}></div>
+                    </div>
+                  </div>
+                  <Button variant="more" onClick={() => setOpenedModal('policy')}>المزيد</Button>
+                </div>
+              </div>
+
+              {/* Card 2 */}
+              <div className="figma-item-card">
+                <div className="figma-item-card-image-wrap">
+                  <img src={research2} alt="تغير المناخ والأمراض المدارية" />
+                </div>
+                <div className="figma-item-card-content">
+                  <span className="figma-item-card-location">الموقع: الأردن</span>
+                  <h3 className="figma-item-card-title">تغير المناخ وانتشار الأمراض المدارية في البحر الأبيض المتوسط.</h3>
+                  <div className="figma-item-card-progress-wrap">
+                    <span className="figma-item-card-progress-text">التقدم: 60%</span>
+                    <div className="figma-item-card-progress-bar">
+                      <div className="figma-item-card-progress-fill" style={{ width: '60%' }}></div>
+                    </div>
+                  </div>
+                  <Button variant="more" onClick={() => setOpenedModal('policy')}>المزيد</Button>
+                </div>
+              </div>
+
+              {/* Card 3 */}
+              <div className="figma-item-card">
+                <div className="figma-item-card-image-wrap">
+                  <img src={research3} alt="الاستدامة في المستشفيات" />
+                </div>
+                <div className="figma-item-card-content">
+                  <span className="figma-item-card-location">الموقع: مصر</span>
+                  <h3 className="figma-item-card-title">تقييم الاستدامة البيئية في المستشفيات والمراكز الطبية.</h3>
+                  <div className="figma-item-card-progress-wrap">
+                    <span className="figma-item-card-progress-text">التقدم: 40%</span>
+                    <div className="figma-item-card-progress-bar">
+                      <div className="figma-item-card-progress-fill" style={{ width: '40%' }}></div>
+                    </div>
+                  </div>
+                  <Button variant="more" onClick={() => setOpenedModal('policy')}>المزيد</Button>
+                </div>
+              </div>
+
+              {/* Card 4 */}
+              <div className="figma-item-card">
+                <div className="figma-item-card-image-wrap">
+                  <img src={research4} alt="درجات الحرارة والعمال" />
+                </div>
+                <div className="figma-item-card-content">
+                  <span className="figma-item-card-location">الموقع: الخليج العربي</span>
+                  <h3 className="figma-item-card-title">تأثير درجات الحرارة المرتفعة على صحة العمال في قطاع البناء.</h3>
+                  <div className="figma-item-card-progress-wrap">
+                    <span className="figma-item-card-progress-text">التقدم: 95%</span>
+                    <div className="figma-item-card-progress-bar">
+                      <div className="figma-item-card-progress-fill" style={{ width: '95%' }}></div>
+                    </div>
+                  </div>
+                  <Button variant="more" onClick={() => setOpenedModal('policy')}>المزيد</Button>
+                </div>
+              </div>
+            </div>
+            
+            <div style={{ textAlign: 'center', marginTop: '30px' }}>
+              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => setOpenedModal('join')}>
+                تصفح جميع الأبحاث
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Newsletter/Join CTA Block (Frame 45) */}
+        <section className="figma-newsletter-cta-section">
+          <div className="figma-cta-section-wrap">
+            <h3 className="figma-cta-title">ابقَ على اطلاع بأحدث الأبحاث!</h3>
+            <p className="figma-cta-description">
+              نحن نخطط لإطلاق عدد من المشاريع البحثية الجديدة قريبًا. إذا كنت مهتمًا بالمشاركة، يمكنك التقديم عبر نموذج التسجيل أدناه.
             </p>
+            <Button variant="gradient" onClick={() => setOpenedModal('join')}>
+              انضم لفريق البحث
+            </Button>
           </div>
         </section>
 
-        <section id="about" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div class="container text-center">
-            <h2 style={{ color: 'var(--text-primary)' }}>عن المبادرة</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>محتوى تجريبي لقسم "عن المبادرة".</p>
+        {/* Training Section */}
+        <section id="training" className="figma-training-section">
+          <div className="figma-section-container">
+            <h2 className="figma-section-title-main">الدورات التدريبية</h2>
+            
+            <div className="figma-cards-grid-4">
+              {/* Card 1 */}
+              <div className="figma-item-card">
+                <div className="figma-item-card-image-wrap">
+                  <img src={training1} alt="دورات البحوث العلمية" />
+                </div>
+                <div className="figma-item-card-content">
+                  <h3 className="figma-item-card-title">دورات البحوث العلمية المتخصصة في قطاع الصحة والبيئة.</h3>
+                  <span className="figma-item-card-trainees">+1308 متدرب</span>
+                  <Button variant="more" onClick={() => setOpenedModal('join')}>سجل الآن</Button>
+                </div>
+              </div>
+
+              {/* Card 2 */}
+              <div className="figma-item-card">
+                <div className="figma-item-card-image-wrap">
+                  <img src={training2} alt="الاستجابة الطبية الطارئة" />
+                </div>
+                <div className="figma-item-card-content">
+                  <h3 className="figma-item-card-title">الاستجابة الطبية الطارئة للكوارث المناخية والبيئية.</h3>
+                  <span className="figma-item-card-trainees">+850 متدرب</span>
+                  <Button variant="more" onClick={() => setOpenedModal('join')}>سجل الآن</Button>
+                </div>
+              </div>
+
+              {/* Card 3 */}
+              <div className="figma-item-card">
+                <div className="figma-item-card-image-wrap">
+                  <img src={training3} alt="مبادئ الصحة العامة البيئية" />
+                </div>
+                <div className="figma-item-card-content">
+                  <h3 className="figma-item-card-title">مبادئ الصحة العامة البيئية وتطبيقاتها السريرية.</h3>
+                  <span className="figma-item-card-trainees">+1120 متدرب</span>
+                  <Button variant="more" onClick={() => setOpenedModal('join')}>سجل الآن</Button>
+                </div>
+              </div>
+
+              {/* Card 4 */}
+              <div className="figma-item-card">
+                <div className="figma-item-card-image-wrap">
+                  <img src={training4} alt="مهارات الكتابة العلمية" />
+                </div>
+                <div className="figma-item-card-content">
+                  <h3 className="figma-item-card-title">مهارات الكتابة العلمية للأبحاث الطبية والبيئية.</h3>
+                  <span className="figma-item-card-trainees">+950 متدرب</span>
+                  <Button variant="more" onClick={() => setOpenedModal('join')}>سجل الآن</Button>
+                </div>
+              </div>
+            </div>
+            
+            <div style={{ textAlign: 'center', marginTop: '30px' }}>
+              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => setOpenedModal('join')}>
+                تصفح جميع الدورات
+              </Button>
+            </div>
           </div>
         </section>
 
-        <section id="pillars" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div class="container text-center">
-            <h2 style={{ color: 'var(--text-primary)' }}>الركائز</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>محتوى تجريبي لقسم "الركائز".</p>
-          </div>
-        </section>
+        {/* Upcoming Section */}
+        <section id="upcoming" className="figma-upcoming-section">
+          <div className="figma-section-container">
+            <h2 className="figma-section-title-main" style={{ textTransform: 'uppercase' }}>UPCOMING</h2>
+            
+            <div className="figma-vision-mission-grid">
+              {/* Upcoming Card 1 */}
+              <div className="figma-item-card" style={{ flexDirection: 'row-reverse', height: '180px' }}>
+                <div className="figma-item-card-image-wrap" style={{ width: '40%', height: '100%', borderRadius: '0 18px 18px 0' }}>
+                  <img src={upcoming1} alt="دراسة وطنية شاملة" style={{ height: '100%' }} />
+                </div>
+                <div className="figma-item-card-content" style={{ padding: '24px', justifyContent: 'center' }}>
+                  <span className="figma-item-card-trainees" style={{ backgroundColor: '#e2effa', color: '#004c6d', padding: '4px 10px', borderRadius: '20px', width: 'fit-content', fontSize: '12px' }}>سبتمبر 2026</span>
+                  <h3 className="figma-item-card-title" style={{ fontSize: '18px', marginTop: '10px' }}>دراسة وطنية شاملة حول جودة الهواء والصحة العامة.</h3>
+                </div>
+              </div>
 
-        <section id="research" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div class="container text-center">
-            <h2 style={{ color: 'var(--text-primary)' }}>أحدث الأبحاث</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>محتوى تجريبي لقسم "أحدث الأبحاث".</p>
-          </div>
-        </section>
-
-        <section id="training" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div class="container text-center">
-            <h2 style={{ color: 'var(--text-primary)' }}>الدورات التدريبية</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>محتوى تجريبي لقسم "الدورات التدريبية".</p>
-          </div>
-        </section>
-
-        <section id="upcoming" style={{ padding: '80px 0', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div class="container text-center">
-            <h2 style={{ color: 'var(--text-primary)' }}>المشاريع القادمة</h2>
-            <p style={{ color: 'var(--text-secondary)' }}>محتوى تجريبي لقسم "المشاريع القادمة".</p>
+              {/* Upcoming Card 2 */}
+              <div className="figma-item-card" style={{ flexDirection: 'row-reverse', height: '180px' }}>
+                <div className="figma-item-card-image-wrap" style={{ width: '40%', height: '100%', borderRadius: '0 18px 18px 0' }}>
+                  <img src={upcoming2} alt="برنامج تدريبي متكامل" style={{ height: '100%' }} />
+                </div>
+                <div className="figma-item-card-content" style={{ padding: '24px', justifyContent: 'center' }}>
+                  <span className="figma-item-card-trainees" style={{ backgroundColor: '#e2effa', color: '#004c6d', padding: '4px 10px', borderRadius: '20px', width: 'fit-content', fontSize: '12px' }}>نوفمبر 2026</span>
+                  <h3 className="figma-item-card-title" style={{ fontSize: '18px', marginTop: '10px' }}>برنامج تدريبي متكامل لإعداد قيادات العمل المناخي الصحي.</h3>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>

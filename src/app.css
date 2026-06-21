@@ -1,0 +1,585 @@
+/* ==========================================================================
+   FIGMA HEADER & NAVIGATION STYLES
+   ========================================================================== */
+
+.figma-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 300; /* Above drawer (200) so hamburger X stays visible */
+  height: 129px;
+  background: linear-gradient(270deg, rgba(0, 76, 109, 1) 0%, rgba(11, 40, 73, 1) 100%);
+  border-bottom: 1px solid rgba(225, 239, 250, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 30px rgba(11, 40, 73, 0.15);
+  transition: all 0.3s ease;
+}
+
+.figma-header-container {
+  width: 100%;
+  max-width: 1440px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px 33px 30px 49px; /* Top, Right, Bottom, Left */
+  direction: ltr; /* Force Left-to-Right order: Logo -> Nav -> Hamburger */
+}
+
+/* Logo */
+.figma-logo-link {
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+.figma-logo-link:hover {
+  transform: scale(1.02);
+}
+.figma-logo-img {
+  width: 108.39px;
+  height: 73.52px;
+  object-fit: contain;
+}
+
+/* Nav Menu */
+.figma-nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 43px; /* Exact Figma gap */
+  direction: ltr;
+}
+
+.figma-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #E1EFFA;
+  text-decoration: none;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.figma-nav-item:hover {
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+.figma-nav-item.active {
+  color: #15b47a;
+}
+.figma-nav-icon {
+  height: 34px;
+  object-fit: contain;
+}
+.figma-nav-text {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Search Container */
+.figma-search-container {
+  position: relative;
+  width: 350px; /* Static literal Figma width */
+  height: 52px; /* Static literal Figma height */
+  display: flex;
+  align-items: center;
+  background: linear-gradient(90deg, rgba(184, 218, 230, 1) 0%, rgba(197, 224, 236, 1) 41%, rgba(223, 237, 249, 1) 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 2px 6px rgba(11, 40, 73, 0.08);
+  direction: rtl; /* RTL input flow inside LTR container */
+}
+.figma-search-input {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding-right: 48px; /* space for icon on the right */
+  padding-left: 15px;
+  font-family: 'Tajawal', sans-serif;
+  color: #0b2849;
+  font-size: 15px;
+  font-weight: 500;
+}
+.figma-search-input::placeholder {
+  color: rgba(11, 40, 73, 0.6);
+}
+.figma-search-icon {
+  position: absolute;
+  right: 15px;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Hamburger Trigger — hidden on desktop, shown by media query on mobile */
+.figma-hamburger-trigger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 36px;
+  height: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+}
+
+/* The three bars */
+.figma-hamburger-trigger span {
+  display: block;
+  width: 100%;
+  height: 3px;
+  background-color: #e1effa;
+  border-radius: 3px;
+  position: absolute;
+  left: 0;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity   0.25s ease,
+              top       0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              bottom    0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Default positions */
+.figma-hamburger-trigger span:nth-child(1) { top: 0; }
+.figma-hamburger-trigger span:nth-child(2) { top: 50%; transform: translateY(-50%); }
+.figma-hamburger-trigger span:nth-child(3) { bottom: 0; }
+
+/* ─── X state ─── */
+.figma-hamburger-trigger.is-open span:nth-child(1) {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+.figma-hamburger-trigger.is-open span:nth-child(2) {
+  opacity: 0;
+  transform: translateY(-50%) scaleX(0);
+}
+.figma-hamburger-trigger.is-open span:nth-child(3) {
+  bottom: 50%;
+  transform: translateY(50%) rotate(-45deg);
+}
+
+/* Drawer Overlay */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(5, 12, 26, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 104;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.drawer-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   MOBILE DRAWER NAV
+   ========================================================================== */
+
+.mobile-drawer {
+  position: fixed;
+  top: 129px; /* Start below the header so X stays visible */
+  right: -320px;
+  width: 300px;
+  height: calc(100vh - 129px); /* Fill remaining screen below header */
+  background: linear-gradient(180deg, #004c6d 0%, #0b2849 100%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  direction: rtl;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
+  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+.mobile-drawer.open {
+  right: 0;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(225, 239, 250, 0.1);
+}
+.drawer-title {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.close-drawer-btn {
+  background: none;
+  border: none;
+  color: #e1effa;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.close-drawer-btn:hover {
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+.drawer-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  flex: 1;
+}
+.drawer-link {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #c5dff0;
+  text-decoration: none;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(225, 239, 250, 0.07);
+  transition: background 0.2s ease, color 0.2s ease, padding-right 0.2s ease;
+}
+.drawer-link:hover {
+  background: rgba(21, 180, 122, 0.08);
+  color: #ffffff;
+  padding-right: 32px;
+  border-right: 3px solid #15b47a;
+}
+
+/* ==========================================================================
+   FIGMA FOOTER STYLES
+   ========================================================================== */
+
+.figma-footer {
+  background-image: url('./assets/footer background.png'); /* literal figma background design */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #e2effa;
+  padding: 80px 0 0;
+  font-family: 'Tajawal', sans-serif;
+  direction: rtl; /* RTL aligned footer content */
+}
+
+.figma-footer-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 60px;
+  display: flex;
+  gap: 80px;
+  justify-content: space-between;
+}
+
+/* Brand Card (Left Side) */
+.figma-footer-card {
+  width: 402px;
+  height: 430px;
+  background-image: url('./assets/bg_4.png'); /* literal card background design */
+  background-size: 112% 112%; /* Scale slightly to push white corners out of bounds */
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 40px;
+  overflow: hidden; /* Clip scaled white corners */
+  background-color: transparent;
+  padding: 53px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.figma-footer-logo-wrap img {
+  height: 40px;
+  object-fit: contain;
+}
+.figma-footer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.figma-section-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Horizontal rows for social and contact icons */
+.figma-social-row, .figma-contact-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.figma-social-row a, .figma-contact-row a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.figma-social-row a:hover, .figma-contact-row a:hover {
+  transform: scale(1.08);
+  opacity: 0.9;
+}
+
+/* Render icons at natural clear height with no filters */
+.figma-social-row img, .figma-contact-row img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Footer Content (Right Side) */
+.figma-footer-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 430px; /* Equal height with card to align elements cleanly */
+}
+
+/* Columns Grid */
+.figma-columns-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+.figma-col h4 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 24px;
+  position: relative;
+  padding-bottom: 8px;
+}
+.figma-col h4::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 3px;
+  background-color: #15b47a;
+  border-radius: 10px;
+}
+.figma-col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+}
+.figma-col a {
+  color: #adc1d6;
+  font-size: 17px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease, padding-right 0.2s ease;
+}
+.figma-col a:hover {
+  color: #ffffff;
+  padding-right: 4px;
+}
+
+/* Footer CTA Block */
+.figma-footer-cta-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 47px;
+  width: 100%;
+}
+.figma-cta-border-box {
+  flex: 1;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 20px;
+  text-align: right;
+  line-height: 1.5;
+}
+.figma-footer-join-btn {
+  background: linear-gradient(90deg, rgba(140, 197, 210, 1) 0%, rgba(150, 201, 214, 1) 12%, rgba(168, 210, 223, 1) 40%, rgba(180, 216, 228, 1) 69%, rgba(184, 218, 230, 1) 100%);
+  color: #0b2849;
+  font-family: 'Tajawal', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 12px 28px;
+  border-radius: 100px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(140, 197, 210, 0.3);
+  transition: all 0.2s ease;
+  border: none;
+  white-space: nowrap;
+}
+.figma-footer-join-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(140, 197, 210, 0.5);
+}
+
+/* Subfooter */
+.figma-subfooter {
+  border-top: 1px solid rgba(225, 239, 250, 0.1);
+  background-color: #0b2849; /* Deep blue from the header/design */
+  padding: 25px 0;
+  margin-top: 40px;
+}
+.figma-subfooter-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 60px;
+  text-align: center;
+  color: #adc1d6; /* Light blue-white from the design */
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (MEDIA QUERIES)
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+  .figma-header-container {
+    padding: 20px 24px;
+  }
+  .figma-nav-menu {
+    gap: 18px;
+  }
+  .figma-search-container {
+    width: 220px;
+  }
+  .figma-footer-container {
+    flex-direction: column;
+    gap: 40px;
+    padding: 0 24px;
+  }
+  .figma-footer-card {
+    width: 100%;
+    height: auto;
+    gap: 30px;
+    padding: 40px 30px; /* Reduced padding for tablets */
+  }
+  .figma-footer-content {
+    height: auto;
+    gap: 40px;
+  }
+  .figma-subfooter-container {
+    padding: 0 24px;
+  }
+}
+
+@media (max-width: 992px) {
+  .figma-nav-menu {
+    display: none; /* Hide on mobile/tablet, show Hamburger & Drawer */
+  }
+  .figma-hamburger-trigger {
+    display: flex;
+  }
+  .figma-columns-grid {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .figma-header {
+    height: 90px;
+  }
+  /* Drawer starts below the shorter mobile header */
+  .mobile-drawer {
+    top: 90px;
+    height: calc(100vh - 90px);
+  }
+  .figma-logo-img {
+    width: 80px;
+    height: auto;
+  }
+  .figma-footer-container {
+    padding: 0 16px;
+    gap: 30px;
+  }
+  .figma-footer-card {
+    padding: 30px 20px;
+    border-radius: 24px;
+  }
+  .figma-section-title {
+    font-size: 17px;
+  }
+  /* Keep 2 columns on medium-small screens */
+  .figma-columns-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .figma-col h4 {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+  .figma-col a {
+    font-size: 14px;
+  }
+  .figma-footer-cta-block {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .figma-cta-border-box {
+    font-size: 16px;
+    text-align: center;
+  }
+  .figma-footer-join-btn {
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    padding: 12px 24px;
+  }
+  /* Bigger icons on mobile */
+  .figma-social-row img,
+  .figma-contact-row img {
+    height: 44px;
+  }
+  .figma-social-row,
+  .figma-contact-row {
+    gap: 24px;
+    justify-content: flex-start; /* flex-start = RIGHT side in RTL */
+  }
+  /* Bigger footer logo */
+  .figma-footer-logo-wrap img {
+    height: 55px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* 3 columns for tiny screens so nothing wraps badly */
+  .figma-columns-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .figma-col h4 {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  .figma-col a {
+    font-size: 13px;
+  }
+  .figma-footer-card {
+    padding: 24px 16px;
+  }
+  .figma-social-row img,
+  .figma-contact-row img {
+    height: 40px;
+  }
+  .figma-footer-logo-wrap img {
+    height: 50px;
+  }
+}

@@ -1,4 +1,4 @@
-import bgTop from '../assets/bg_top_new.png'
+import bg2 from '../assets/bg_2.png'
 
 export function TopBackground() {
   return (
@@ -10,7 +10,7 @@ export function TopBackground() {
         left: 0,
         right: 0,
         height: '350px',
-        backgroundImage: `url(${bgTop})`,
+        backgroundImage: `url(${bg2})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',

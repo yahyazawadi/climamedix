@@ -199,6 +199,17 @@ export function DebugUIPage() {
   const [excludedCountries, setExcludedCountries] = useState([]);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
 
+  // Live Map Theme Configuration State
+  const [mapTheme, setMapTheme] = useState({
+    water_layer: "#0a192f",
+    land_layer: "#14B67A",
+    text_labels: "#ffffff",
+    text_halo_shadows: "#0a192f",
+    borders_and_roads: "#0a6e48",
+    critical_markers: "#ff4d4d",
+    safe_markers: "#ffffff"
+  });
+
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
 
@@ -264,7 +275,7 @@ export function DebugUIPage() {
     if (!leafletLoaded) return;
 
     if (!mapInstanceRef.current) {
-      window.mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || '';
+      window.mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
       
       mapInstanceRef.current = new window.mapboxgl.Map({
         container: 'leaflet-map-container',
@@ -275,50 +286,60 @@ export function DebugUIPage() {
       });
 
       mapInstanceRef.current.addControl(new window.mapboxgl.NavigationControl(), 'top-right');
-
-      mapInstanceRef.current.on('style.load', () => {
-        const style = mapInstanceRef.current.getStyle();
-        if (style && style.layers) {
-           style.layers.forEach(layer => {
-             // 1. Water Layers (Sea, Lakes, Rivers)
-             if (layer.id.includes('water')) {
-               if (layer.type === 'fill') {
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'fill-color', '#ffffff');
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'fill-opacity', 1);
-               } else if (layer.type === 'line') {
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'line-color', '#ffffff');
-               }
-             } 
-             // 2. Land and Everything Else
-             else {
-               if (layer.type === 'background') {
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'background-color', '#0f4a38'); // Deep dark green land
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'background-opacity', 1);
-               } else if (layer.type === 'fill') {
-                 // Force all landuse, parks, buildings to the same dark green
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'fill-color', '#0f4a38');
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'fill-opacity', 1);
-               } else if (layer.type === 'hillshade' || layer.type === 'raster') {
-                 // Hide terrain shadows or raster overlays that dull the color
-                 mapInstanceRef.current.setLayoutProperty(layer.id, 'visibility', 'none');
-               } else if (layer.type === 'symbol') {
-                 // Make labels visible against the dark green background
-                 if (layer.paint && layer.paint['text-color']) {
-                   mapInstanceRef.current.setPaintProperty(layer.id, 'text-color', '#e2f7ef'); // Light mint text
-                 }
-                 if (layer.paint && layer.paint['text-halo-color']) {
-                   mapInstanceRef.current.setPaintProperty(layer.id, 'text-halo-color', '#0a2e22'); // Dark green halo
-                   mapInstanceRef.current.setPaintProperty(layer.id, 'text-halo-width', 1.5);
-                 }
-               } else if (layer.type === 'line' && (layer.id.includes('road') || layer.id.includes('boundary') || layer.id.includes('admin'))) {
-                 // Soften roads and borders
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'line-color', 'rgba(21, 180, 122, 0.3)');
-               }
-             }
-           });
-        }
-      });
     }
+  }, [leafletLoaded]);
+
+  // Apply Live Map Theme Configuration
+  useEffect(() => {
+    if (!mapInstanceRef.current || !leafletLoaded) return;
+    
+    const applyColors = () => {
+      const style = mapInstanceRef.current.getStyle();
+      if (style && style.layers) {
+         style.layers.forEach(layer => {
+           if (layer.id.includes('water')) {
+             if (layer.type === 'fill') {
+               mapInstanceRef.current.setPaintProperty(layer.id, 'fill-color', mapTheme.water_layer);
+               mapInstanceRef.current.setPaintProperty(layer.id, 'fill-opacity', 1);
+             } else if (layer.type === 'line') {
+               mapInstanceRef.current.setPaintProperty(layer.id, 'line-color', mapTheme.water_layer);
+             }
+           } else {
+             if (layer.type === 'background') {
+               mapInstanceRef.current.setPaintProperty(layer.id, 'background-color', mapTheme.land_layer);
+               mapInstanceRef.current.setPaintProperty(layer.id, 'background-opacity', 1);
+             } else if (layer.type === 'fill') {
+               mapInstanceRef.current.setPaintProperty(layer.id, 'fill-color', mapTheme.land_layer);
+               mapInstanceRef.current.setPaintProperty(layer.id, 'fill-opacity', 1);
+             } else if (layer.type === 'hillshade' || layer.type === 'raster') {
+               mapInstanceRef.current.setLayoutProperty(layer.id, 'visibility', 'none');
+             } else if (layer.type === 'symbol') {
+               if (layer.paint && layer.paint['text-color']) {
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'text-color', mapTheme.text_labels);
+               }
+               if (layer.paint && layer.paint['text-halo-color']) {
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'text-halo-color', mapTheme.text_halo_shadows);
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'text-halo-width', 1.5);
+               }
+             } else if (layer.type === 'line' && (layer.id.includes('road') || layer.id.includes('boundary') || layer.id.includes('admin'))) {
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'line-color', mapTheme.borders_and_roads);
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'line-width', 1.5);
+             }
+           }
+         });
+      }
+    };
+
+    if (mapInstanceRef.current.isStyleLoaded()) {
+      applyColors();
+    } else {
+      mapInstanceRef.current.once('style.load', applyColors);
+    }
+  }, [mapTheme, leafletLoaded]);
+
+  // Update Markers when points or theme changes
+  useEffect(() => {
+    if (!leafletLoaded || !mapInstanceRef.current) return;
 
     // Clear old markers
     markersRef.current.forEach(marker => {
@@ -330,13 +351,13 @@ export function DebugUIPage() {
     if (Array.isArray(parsedMapPoints)) {
       parsedMapPoints.forEach(pt => {
         if (typeof pt.lat === 'number' && typeof pt.lng === 'number') {
-          const markerColor = pt.status === 'critical' ? '#ff4d4d' : '#ffffff';
+          const markerColor = pt.status === 'critical' ? mapTheme.critical_markers : mapTheme.safe_markers;
           
           const el = document.createElement('div');
           el.innerHTML = `
             <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; cursor: pointer;">
-              <div class="map-pulse-${pt.status || 'warning'}" style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background: ${pt.status === 'critical' ? 'rgba(255, 77, 77, 0.4)' : 'rgba(255, 255, 255, 0.4)'}; animation: mapRingPulse 2s infinite;"></div>
-              <div style="width: 10px; height: 10px; border-radius: 50%; background: ${markerColor}; border: 2px solid ${pt.status === 'critical' ? '#fff' : '#15b47a'}; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 10;"></div>
+              <div class="map-pulse-${pt.status || 'warning'}" style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background: ${pt.status === 'critical' ? mapTheme.critical_markers.replace(')', ', 0.4)').replace('rgb', 'rgba') : mapTheme.safe_markers.replace(')', ', 0.4)').replace('rgb', 'rgba')}; animation: mapRingPulse 2s infinite; opacity: 0.4;"></div>
+              <div style="width: 10px; height: 10px; border-radius: 50%; background: ${markerColor}; border: 2px solid ${pt.status === 'critical' ? '#fff' : mapTheme.land_layer}; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 10;"></div>
             </div>
           `;
 
@@ -352,7 +373,7 @@ export function DebugUIPage() {
         }
       });
     }
-  }, [leafletLoaded, parsedMapPoints]);
+  }, [leafletLoaded, parsedMapPoints, mapTheme]);
 
   const teamMembers = [
     { name: 'د. ياسمين السيد', role: 'خبير الصحة العامة والمناخ', bio: 'باحثة دولية في تأثيرات الحرارة المرتفعة على صحة الأطفال.' },
@@ -3051,17 +3072,17 @@ export function DebugUIPage() {
             </div>
 
             {/* Concept 32: Minimalist Map Window Widget */}
-            <div id="feature-card-32" className="imagination-card hover-id-container" style={{ gridColumn: '1 / -1', background: 'rgba(10, 25, 47, 0.95)', border: '1px solid rgba(21, 180, 122, 0.3)', color: '#fff', padding: '24px' }}>
+            <GlassCard id="feature-card-32" className="imagination-card hover-id-container" style={{ gridColumn: '1 / -1', padding: '24px', color: '#0b2849' }}>
               
               {/* Window Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(11,40,73,0.1)', paddingBottom: '12px', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{ display: 'flex', gap: '6px' }}>
                     <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ff5f56' }}></div>
                     <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ffbd2e' }}></div>
                     <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#27c93f' }}></div>
                   </div>
-                  <span style={{ fontSize: '13px', fontFamily: 'monospace', color: 'rgba(255,255,255,0.5)', marginRight: '10px' }}>map_widget_service.json</span>
+                  <span style={{ fontSize: '13px', fontFamily: 'monospace', color: 'rgba(11,40,73,0.6)', marginRight: '10px' }}>map_widget_service.json</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#15b47a', boxShadow: '0 0 8px #15b47a' }}></span>
@@ -3094,7 +3115,7 @@ export function DebugUIPage() {
                 {/* Right Side (JSON Editor Panel) */}
                 <div style={{ flex: '1', minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', fontWeight: 'bold' }}>بيانات الخريطة الجغرافية (JSON Input):</span>
+                    <span style={{ fontSize: '13px', color: 'rgba(11,40,73,0.8)', fontWeight: 'bold' }}>بيانات الخريطة الجغرافية (JSON Input):</span>
                     {jsonParseError ? (
                       <span style={{ fontSize: '11px', color: '#ff4d4d', fontWeight: 'bold' }}>JSON غير صالح</span>
                     ) : (
@@ -3107,11 +3128,11 @@ export function DebugUIPage() {
                     style={{ 
                       flex: 1, 
                       minHeight: '260px', 
-                      background: 'rgba(0,0,0,0.3)', 
-                      border: jsonParseError ? '1px solid #ff4d4d' : '1px solid rgba(255,255,255,0.1)', 
+                      background: 'rgba(255,255,255,0.6)', 
+                      border: jsonParseError ? '1px solid #ff4d4d' : '1px solid rgba(11,40,73,0.1)', 
                       borderRadius: '8px', 
                       padding: '12px', 
-                      color: '#00ffcc', 
+                      color: '#0b2849', 
                       fontFamily: 'monospace', 
                       fontSize: '12px', 
                       lineHeight: '1.5',
@@ -3124,14 +3145,45 @@ export function DebugUIPage() {
                       {jsonParseError}
                     </div>
                   )}
-                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
+                  <p style={{ fontSize: '11px', color: 'rgba(11,40,73,0.6)', margin: 0 }}>
                     * عدل إحداثيات خطوط العرض والطول (lat, lng) للنقاط لتغيير مواقعها الجغرافية الحقيقية على الخريطة مباشرة.
                   </p>
                 </div>
-
               </div>
 
-            </div>
+              {/* Map Theme Configurator */}
+              <div style={{ marginTop: '20px', background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(11,40,73,0.1)', borderRadius: '12px', padding: '15px' }}>
+                <h4 style={{ fontSize: '13px', color: '#0b2849', fontWeight: 'bold', marginBottom: '15px', borderBottom: '1px solid rgba(11,40,73,0.1)', paddingBottom: '10px', direction: 'ltr', textAlign: 'left' }}>Live Theme Configurator</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', direction: 'ltr' }}>
+                  {Object.entries(mapTheme).map(([key, value]) => {
+                    let pickerHex = '#ffffff';
+                    if (value.startsWith('#') && (value.length === 7 || value.length === 4)) {
+                      pickerHex = value;
+                    }
+                    return (
+                      <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <label style={{ fontSize: '11px', color: '#15b47a', fontFamily: 'monospace', fontWeight: 'bold' }}>{key}</label>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <input 
+                            type="color" 
+                            value={pickerHex} 
+                            onInput={(e) => setMapTheme(prev => ({ ...prev, [key]: e.target.value }))}
+                            style={{ width: '24px', height: '24px', border: '1px solid rgba(11,40,73,0.2)', background: 'none', cursor: 'pointer', padding: 0, borderRadius: '4px' }}
+                          />
+                          <input 
+                            type="text" 
+                            value={value} 
+                            onInput={(e) => setMapTheme(prev => ({ ...prev, [key]: e.target.value }))}
+                            style={{ flex: 1, background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(11,40,73,0.2)', color: '#0b2849', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'monospace', outline: 'none' }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+            </GlassCard>
 
           </div>
         </div>

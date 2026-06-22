@@ -9,6 +9,7 @@ import { NeatScripples } from './components/NeatScripples'
 import { ColoredBackground } from './components/ColoredBackground'
 import { Button } from './components/Button'
 import { GlassCard } from './components/GlassCard'
+import { AboutUsPage } from './components/AboutUsPage'
 import doctorImg from './assets/bg_3.png'
 import whiteLogo from './assets/footer_logo.svg'
 
@@ -34,18 +35,38 @@ export function App() {
   const [theme, setTheme] = useState('light');
   const [activeSection, setActiveSection] = useState('home');
   const [openedModal, setOpenedModal] = useState(null); // 'join', 'policy'
+  const [currentView, setCurrentView] = useState('home'); // 'home' or 'about-us'
   
   // Form States for Header/Footer modal triggers
   const [joinForm, setJoinForm] = useState({ name: '', email: '', profession: '' });
   const [joinSuccess, setJoinSuccess] = useState(false);
   const [joinSubmitting, setJoinSubmitting] = useState(false);
 
-  // Theme Sync on Mount
+  // Theme Sync on Mount + Hash Routing
   useEffect(() => {
-    // Force light theme by default to match the Figma design
-    const initialTheme = 'light';
-    setTheme(initialTheme);
+    // Force light theme
+    setTheme('light');
     document.body.classList.remove('dark-mode');
+
+    // Set initial view from URL hash
+    const hash = window.location.hash;
+    if (hash === '#about-us' || hash === '#about') {
+      setCurrentView('about-us');
+    } else {
+      setCurrentView('home');
+    }
+
+    // Listen for hash changes (browser back/forward)
+    const handleHashChange = () => {
+      const h = window.location.hash;
+      if (h === '#about-us' || h === '#about') {
+        setCurrentView('about-us');
+      } else {
+        setCurrentView('home');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   // Theme Switch handler
@@ -99,20 +120,39 @@ export function App() {
   return (
     <div style={{ position: 'relative', overflow: 'hidden', minHeight: '100vh' }}>
       {/* Background components */}
-      <TopBackground />
-      <NeatScripples />
-      <ColoredBackground />
+      {currentView === 'home' ? (
+        <>
+          <TopBackground />
+          <NeatScripples />
+          <ColoredBackground />
+        </>
+      ) : null}
 
       {/* Header component */}
       <Header 
         theme={theme} 
         toggleTheme={toggleTheme} 
         activeSection={activeSection} 
+        currentView={currentView}
+        onNavigate={(view, sectionId) => {
+          setCurrentView(view);
+          if (view === 'about-us') {
+            window.location.hash = '#about-us';
+          } else if (sectionId) {
+            window.location.hash = '#' + sectionId;
+            setTimeout(() => {
+              const el = document.getElementById(sectionId);
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          } else {
+            window.location.hash = '#home';
+          }
+        }}
         onJoinClick={() => setOpenedModal('join')} 
       />
 
-      {/* Bare Bones Sections */}
-      <main className="figma-main-content">
+      {currentView === 'home' ? (
+        <main className="figma-main-content">
         <section id="home" className="figma-hero-section">
           <div className="figma-hero-container">
             {/* Frame 43 */}
@@ -147,7 +187,7 @@ export function App() {
                 في ClimaMedix، نؤمن بأن البحث العلمي هو الأساس لفهم تأثيرات التغير المناخي على الصحة العامة وتطوير الحلول المستدامة. نحن فريق من الباحثين والمتخصصين في المجال الطبي، نعمل على تمكين الطواقم الصحية بالمعرفة، وتزويدهم بالأدوات اللازمة لفهم التغيرات البيئية والتصدي لتحدياتها. نركز بشكل أساسي على دعم البحث العلمي، تمكين المهنيين الصحيين، ونشر التوعية حول العلاقة بين التغير المناخي والصحة.
               </p>
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
-                <Button variant="gradient" onClick={() => document.getElementById('research').scrollIntoView({ behavior: 'smooth' })}>
+                <Button variant="gradient" onClick={() => setCurrentView('about-us')}>
                   عرض المزيد
                 </Button>
               </div>
@@ -409,11 +449,42 @@ export function App() {
           </div>
         </section>
       </main>
+      ) : (
+        <AboutUsPage
+          onJoinClick={() => setOpenedModal('join')}
+          onNavigate={(view, sectionId) => {
+            setCurrentView(view);
+            if (view === 'about-us') {
+              window.location.hash = '#about-us';
+            } else {
+              window.location.hash = sectionId ? '#' + sectionId : '#home';
+              setTimeout(() => {
+                const el = document.getElementById(sectionId);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }, 100);
+            }
+          }}
+        />
+      )}
 
       {/* Footer component */}
       <Footer 
         onJoinClick={() => setOpenedModal('join')} 
         onPolicyClick={() => setOpenedModal('policy')} 
+        onNavigate={(view, sectionId) => {
+            setCurrentView(view);
+            if (view === 'about-us') {
+              window.location.hash = '#about-us';
+            } else if (sectionId) {
+              window.location.hash = '#' + sectionId;
+              setTimeout(() => {
+                const el = document.getElementById(sectionId);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }, 100);
+            } else {
+              window.location.hash = '#home';
+            }
+          }}
       />
 
       {/* ==========================================================================

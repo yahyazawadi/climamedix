@@ -1,13 +1,6 @@
-import footerLogo from '../assets/footer_logo.svg'
-import socialIn from '../assets/social_in.svg'
-import socialFb from '../assets/social_fb.svg'
-import socialInsta from '../assets/social_insta.svg'
-import socialX from '../assets/social_x.svg'
-import contactMail from '../assets/contact_mail.svg'
-import contactPhone from '../assets/contact_phone.svg'
-import contactWeb from '../assets/contact_web.svg'
+import { FooterCard } from './FooterCard'
 
-export function Footer({ onJoinClick }) {
+export function Footer({ onJoinClick, onNavigate }) {
   return (
     <footer id="contact" class="figma-footer">
       <div class="figma-footer-container">
@@ -22,8 +15,8 @@ export function Footer({ onJoinClick }) {
             <div class="figma-col">
               <h4>الدعم والتواصل</h4>
               <ul>
-                <li><a href="#about">عن المنصة</a></li>
-                <li><a href="#training">تواصل معنا</a></li>
+                <li><a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('home', 'about'); }}>عن المنصة</a></li>
+                <li><a href="#training" onClick={(e) => { e.preventDefault(); onNavigate('home', 'contact'); }}>تواصل معنا</a></li>
                 <li><a href="#" onClick={(e) => { e.preventDefault(); }}>سياسة الاستخدام</a></li>
                 <li><a href="#">حقوق الملكية</a></li>
                 <li><a href="#">الأسئلة الشائعة</a></li>
@@ -35,11 +28,11 @@ export function Footer({ onJoinClick }) {
               <h4>الروابط السريعة</h4>
               <ul>
                 {/* <li><a href="#pillars">الأقسام</a></li> */}
-                <li><a href="#training">الدورات التدريبية</a></li>
-                <li><a href="#about">من نحن</a></li>
-                <li><a href="#research">أحدث الأبحاث</a></li>
-                <li><a href="#upcoming">المشاريع</a></li>
-                <li><a href="#upcoming">الأنشطة القادمة</a></li>
+                <li><a href="#training" onClick={(e) => { e.preventDefault(); onNavigate('home', 'training'); }}>الدورات التدريبية</a></li>
+                <li><a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('home', 'about'); }}>من نحن</a></li>
+                <li><a href="#research" onClick={(e) => { e.preventDefault(); onNavigate('home', 'research'); }}>أحدث الأبحاث</a></li>
+                <li><a href="#upcoming" onClick={(e) => { e.preventDefault(); onNavigate('home', 'upcoming'); }}>المشاريع</a></li>
+                <li><a href="#upcoming" onClick={(e) => { e.preventDefault(); onNavigate('home', 'upcoming'); }}>الأنشطة القادمة</a></li>
               </ul>
             </div>
 
@@ -69,30 +62,7 @@ export function Footer({ onJoinClick }) {
         </div>
 
         {/* Left Side: Brand Card (rendered second in HTML so it displays on the left in RTL) */}
-        <div class="figma-footer-card">
-          <div class="figma-footer-logo-wrap">
-            <img src={footerLogo} alt="كليما ميديكس" />
-          </div>
-          
-          <div class="figma-footer-section">
-            <span class="figma-section-title">تابعونا على مواقع التواصل الاجتماعي:</span>
-            <div class="figma-social-row">
-              <a href="#" aria-label="Facebook"><img src={socialFb} alt="Facebook" /></a>
-              <a href="#" aria-label="LinkedIn"><img src={socialIn} alt="LinkedIn" /></a>
-              <a href="#" aria-label="Instagram"><img src={socialInsta} alt="Instagram" /></a>
-              <a href="#" aria-label="Twitter"><img src={socialX} alt="Twitter" /></a>
-            </div>
-          </div>
-
-          <div class="figma-footer-section">
-            <span class="figma-section-title">تواصلوا معنا:</span>
-            <div class="figma-contact-row">
-              <a href="mailto:info@climamedix.org" aria-label="Email"><img src={contactMail} alt="Email" /></a>
-              <a href="https://www.climamedix.org" target="_blank" rel="noopener noreferrer" aria-label="Website"><img src={contactWeb} alt="Website" /></a>
-              <a href="tel:+970599123456" aria-label="Phone"><img src={contactPhone} alt="Phone" /></a>
-            </div>
-          </div>
-        </div>
+        <FooterCard />
 
       </div>
 

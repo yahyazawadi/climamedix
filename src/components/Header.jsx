@@ -9,7 +9,7 @@ import iconAbout from '../assets/icon_about.svg'
 import iconSearch from '../assets/icon_search.svg'
 import iconHamburger from '../assets/icon_hamburger.svg'
 
-export function Header({ activeSection }) {
+export function Header({ activeSection, currentView, onNavigate }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -19,7 +19,14 @@ export function Header({ activeSection }) {
         <div class="figma-header-container">
           
           {/* Left Side: Brand Logo */}
-          <a href="#home" class="figma-logo-link">
+          <a 
+            href="#home" 
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate('home', 'home');
+            }}
+            class="figma-logo-link"
+          >
             <img src={logo} class="figma-logo-img" alt="كليما ميديكس" />
           </a>
 
@@ -27,19 +34,40 @@ export function Header({ activeSection }) {
           <nav class="figma-nav-menu">
             
             {/* 6. اتصل بنا */}
-            <a href="#contact" class={`figma-nav-item ${activeSection === 'contact' ? 'active' : ''}`}>
+            <a 
+              href="#contact" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('home', 'contact');
+              }}
+              class={`figma-nav-item ${activeSection === 'contact' && currentView === 'home' ? 'active' : ''}`}
+            >
               <img src={iconContact} class="figma-nav-icon" alt="اتصل بنا" />
               <span class="figma-nav-text">اتصل بنا</span>
             </a>
 
             {/* 5. دورات تدريبية */}
-            <a href="#training" class={`figma-nav-item ${activeSection === 'training' ? 'active' : ''}`}>
+            <a 
+              href="#training" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('home', 'training');
+              }}
+              class={`figma-nav-item ${activeSection === 'training' && currentView === 'home' ? 'active' : ''}`}
+            >
               <img src={iconTraining} class="figma-nav-icon" alt="دورات تدريبية" />
               <span class="figma-nav-text">دورات تدريبية</span>
             </a>
 
             {/* 4. أبحاث */}
-            <a href="#research" class={`figma-nav-item ${activeSection === 'research' ? 'active' : ''}`}>
+            <a 
+              href="#research" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('home', 'research');
+              }}
+              class={`figma-nav-item ${activeSection === 'research' && currentView === 'home' ? 'active' : ''}`}
+            >
               <img src={iconResearch} class="figma-nav-icon" alt="أبحاث" />
               <span class="figma-nav-text">أبحاث</span>
             </a>
@@ -52,7 +80,14 @@ export function Header({ activeSection }) {
             */}
 
             {/* 2. من نحن */}
-            <a href="#about" class={`figma-nav-item ${activeSection === 'about' ? 'active' : ''}`}>
+            <a 
+              href="#about" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('home', 'about');
+              }}
+              class={`figma-nav-item ${activeSection === 'about' && currentView === 'home' ? 'active' : ''}`}
+            >
               <img src={iconAbout} class="figma-nav-icon" alt="من نحن" />
               <span class="figma-nav-text">من نحن</span>
             </a>
@@ -70,7 +105,14 @@ export function Header({ activeSection }) {
             </div>
 
             {/* 1. الرئيسية */}
-            <a href="#home" class={`figma-nav-item ${activeSection === 'home' ? 'active' : ''}`}>
+            <a 
+              href="#home" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('home', 'home');
+              }}
+              class={`figma-nav-item ${activeSection === 'home' && currentView === 'home' ? 'active' : ''}`}
+            >
               <img src={iconHome} class="figma-nav-icon" alt="الرئيسية" />
               <span class="figma-nav-text">الرئيسية</span>
             </a>
@@ -94,12 +136,12 @@ export function Header({ activeSection }) {
       {/* Mobile Drawer */}
       <div class={`mobile-drawer ${drawerOpen ? 'open' : ''}`}>
         <nav class="drawer-nav">
-          <a href="#home" onClick={() => setDrawerOpen(false)} class="drawer-link">الرئيسية</a>
-          <a href="#about" onClick={() => setDrawerOpen(false)} class="drawer-link">من نحن</a>
-          {/* <a href="#pillars" onClick={() => setDrawerOpen(false)} class="drawer-link">المفضلة</a> */}
-          <a href="#research" onClick={() => setDrawerOpen(false)} class="drawer-link">أبحاث</a>
-          <a href="#training" onClick={() => setDrawerOpen(false)} class="drawer-link">دورات تدريبية</a>
-          <a href="#contact" onClick={() => setDrawerOpen(false)} class="drawer-link">اتصل بنا</a>
+          <a href="#home" onClick={(e) => { e.preventDefault(); onNavigate('home', 'home'); setDrawerOpen(false); }} class="drawer-link">الرئيسية</a>
+          <a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('home', 'about'); setDrawerOpen(false); }} class="drawer-link">من نحن</a>
+          {/* <a href="#pillars" onClick={(e) => { e.preventDefault(); onNavigate('home', 'pillars'); setDrawerOpen(false); }} class="drawer-link">المفضلة</a> */}
+          <a href="#research" onClick={(e) => { e.preventDefault(); onNavigate('home', 'research'); setDrawerOpen(false); }} class="drawer-link">أبحاث</a>
+          <a href="#training" onClick={(e) => { e.preventDefault(); onNavigate('home', 'training'); setDrawerOpen(false); }} class="drawer-link">دورات تدريبية</a>
+          <a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate('home', 'contact'); setDrawerOpen(false); }} class="drawer-link">اتصل بنا</a>
         </nav>
       </div>
       <div onClick={() => setDrawerOpen(false)} class={`drawer-overlay ${drawerOpen ? 'open' : ''}`}></div>

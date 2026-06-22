@@ -277,16 +277,43 @@ export function DebugUIPage() {
       mapInstanceRef.current.addControl(new window.mapboxgl.NavigationControl(), 'top-right');
 
       mapInstanceRef.current.on('style.load', () => {
-        // Change core elements
-        mapInstanceRef.current.setPaintProperty('background', 'background-color', '#15b47a'); // Green land
-        mapInstanceRef.current.setPaintProperty('water', 'fill-color', '#ffffff'); // White sea
-        
-        // Ensure green land covers administrative boundaries and national parks
         const style = mapInstanceRef.current.getStyle();
         if (style && style.layers) {
            style.layers.forEach(layer => {
-             if (layer.type === 'fill' && !layer.id.includes('water')) {
-               mapInstanceRef.current.setPaintProperty(layer.id, 'fill-color', '#15b47a');
+             // 1. Water Layers (Sea, Lakes, Rivers)
+             if (layer.id.includes('water')) {
+               if (layer.type === 'fill') {
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'fill-color', '#ffffff');
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'fill-opacity', 1);
+               } else if (layer.type === 'line') {
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'line-color', '#ffffff');
+               }
+             } 
+             // 2. Land and Everything Else
+             else {
+               if (layer.type === 'background') {
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'background-color', '#0f4a38'); // Deep dark green land
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'background-opacity', 1);
+               } else if (layer.type === 'fill') {
+                 // Force all landuse, parks, buildings to the same dark green
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'fill-color', '#0f4a38');
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'fill-opacity', 1);
+               } else if (layer.type === 'hillshade' || layer.type === 'raster') {
+                 // Hide terrain shadows or raster overlays that dull the color
+                 mapInstanceRef.current.setLayoutProperty(layer.id, 'visibility', 'none');
+               } else if (layer.type === 'symbol') {
+                 // Make labels visible against the dark green background
+                 if (layer.paint && layer.paint['text-color']) {
+                   mapInstanceRef.current.setPaintProperty(layer.id, 'text-color', '#e2f7ef'); // Light mint text
+                 }
+                 if (layer.paint && layer.paint['text-halo-color']) {
+                   mapInstanceRef.current.setPaintProperty(layer.id, 'text-halo-color', '#0a2e22'); // Dark green halo
+                   mapInstanceRef.current.setPaintProperty(layer.id, 'text-halo-width', 1.5);
+                 }
+               } else if (layer.type === 'line' && (layer.id.includes('road') || layer.id.includes('boundary') || layer.id.includes('admin'))) {
+                 // Soften roads and borders
+                 mapInstanceRef.current.setPaintProperty(layer.id, 'line-color', 'rgba(21, 180, 122, 0.3)');
+               }
              }
            });
         }

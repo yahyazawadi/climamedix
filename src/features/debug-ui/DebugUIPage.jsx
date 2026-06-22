@@ -222,34 +222,30 @@ export function DebugUIPage() {
     }
   }, [mapPointsJson]);
 
-  // Load Leaflet Script and CSS dynamically
+  // Load Mapbox Script and CSS dynamically
   useEffect(() => {
-    let link = document.querySelector('link[href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"]');
+    let link = document.querySelector('link[href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css"]');
     if (!link) {
       link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-      link.crossOrigin = '';
+      link.href = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
       document.head.appendChild(link);
     }
 
-    if (window.L) {
+    if (window.mapboxgl) {
       setLeafletLoaded(true);
     } else {
-      let script = document.querySelector('script[src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"]');
+      let script = document.querySelector('script[src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"]');
       if (!script) {
         script = document.createElement('script');
-        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
-        script.crossOrigin = '';
+        script.src = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
         script.onload = () => setLeafletLoaded(true);
         document.head.appendChild(script);
       } else {
-        const checkL = setInterval(() => {
-          if (window.L) {
+        const checkM = setInterval(() => {
+          if (window.mapboxgl) {
             setLeafletLoaded(true);
-            clearInterval(checkL);
+            clearInterval(checkM);
           }
         }, 100);
       }
@@ -263,63 +259,73 @@ export function DebugUIPage() {
     };
   }, []);
 
-  // Initialize Map and Render Markers & Masks
+  // Initialize Mapbox and Render Markers
   useEffect(() => {
     if (!leafletLoaded) return;
 
     if (!mapInstanceRef.current) {
-      mapInstanceRef.current = window.L.map('leaflet-map-container', { zoomControl: false }).setView([28.0, 38.0], 5);
+      window.mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || '';
       
-      // CartoDB Dark Matter Tile Layer (Premium Minimalist Dark Map)
-      window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 20
-      }).addTo(mapInstanceRef.current);
+      mapInstanceRef.current = new window.mapboxgl.Map({
+        container: 'leaflet-map-container',
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [38.0, 28.0],
+        zoom: 4,
+        projection: 'mercator'
+      });
 
-      // Re-add Zoom control to top-right
-      window.L.control.zoom({ position: 'topright' }).addTo(mapInstanceRef.current);
+      mapInstanceRef.current.addControl(new window.mapboxgl.NavigationControl(), 'top-right');
+
+      mapInstanceRef.current.on('style.load', () => {
+        // Change core elements
+        mapInstanceRef.current.setPaintProperty('background', 'background-color', '#15b47a'); // Green land
+        mapInstanceRef.current.setPaintProperty('water', 'fill-color', '#ffffff'); // White sea
+        
+        // Ensure green land covers administrative boundaries and national parks
+        const style = mapInstanceRef.current.getStyle();
+        if (style && style.layers) {
+           style.layers.forEach(layer => {
+             if (layer.type === 'fill' && !layer.id.includes('water')) {
+               mapInstanceRef.current.setPaintProperty(layer.id, 'fill-color', '#15b47a');
+             }
+           });
+        }
+      });
     }
 
     // Clear old markers
     markersRef.current.forEach(marker => {
-      mapInstanceRef.current.removeLayer(marker);
+      marker.remove();
     });
     markersRef.current = [];
-
-
 
     // Add new markers
     if (Array.isArray(parsedMapPoints)) {
       parsedMapPoints.forEach(pt => {
         if (typeof pt.lat === 'number' && typeof pt.lng === 'number') {
-          const markerColor = pt.status === 'critical' ? '#ff4d4d' : '#15b47a';
+          const markerColor = pt.status === 'critical' ? '#ff4d4d' : '#ffffff';
           
-          // DivIcon with pulse effect
-          const customIcon = window.L.divIcon({
-            html: `
-              <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px;">
-                <div class="map-pulse-${pt.status || 'warning'}" style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background: ${pt.status === 'critical' ? 'rgba(255, 77, 77, 0.4)' : 'rgba(21, 180, 122, 0.4)'}; animation: mapRingPulse 2s infinite;"></div>
-                <div style="width: 10px; height: 10px; border-radius: 50%; background: ${markerColor}; border: 2px solid #fff; box-shadow: 0 0 10px ${markerColor}; z-index: 10;"></div>
-              </div>
-            `,
-            className: '',
-            iconSize: [24, 24],
-            iconAnchor: [12, 12]
-          });
+          const el = document.createElement('div');
+          el.innerHTML = `
+            <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; cursor: pointer;">
+              <div class="map-pulse-${pt.status || 'warning'}" style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background: ${pt.status === 'critical' ? 'rgba(255, 77, 77, 0.4)' : 'rgba(255, 255, 255, 0.4)'}; animation: mapRingPulse 2s infinite;"></div>
+              <div style="width: 10px; height: 10px; border-radius: 50%; background: ${markerColor}; border: 2px solid ${pt.status === 'critical' ? '#fff' : '#15b47a'}; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 10;"></div>
+            </div>
+          `;
 
-          const marker = window.L.marker([pt.lat, pt.lng], { icon: customIcon })
-            .addTo(mapInstanceRef.current);
-
-          marker.on('click', () => {
+          el.addEventListener('click', () => {
             setActiveMapPoint(pt);
           });
+
+          const marker = new window.mapboxgl.Marker({ element: el })
+            .setLngLat([pt.lng, pt.lat])
+            .addTo(mapInstanceRef.current);
 
           markersRef.current.push(marker);
         }
       });
     }
-  }, [leafletLoaded, parsedMapPoints, excludedCountries]);
+  }, [leafletLoaded, parsedMapPoints]);
 
   const teamMembers = [
     { name: 'د. ياسمين السيد', role: 'خبير الصحة العامة والمناخ', bio: 'باحثة دولية في تأثيرات الحرارة المرتفعة على صحة الأطفال.' },
@@ -1153,7 +1159,7 @@ export function DebugUIPage() {
           direction: rtl;
         }
 
-        
+
         /* Global ID Hover Tooltips */
         .hover-id-container { position: relative !important; }
         .hover-id-container[id]:hover::after,
@@ -3040,18 +3046,18 @@ export function DebugUIPage() {
               <div style={{ display: 'flex', flexDirection: 'row-reverse', gap: '20px', flexWrap: 'wrap' }}>
                 
                 {/* Left Side (Real Leaflet Map View) */}
-                <div style={{ flex: '1.2', minWidth: '320px', position: 'relative', background: '#0a192f', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', height: '380px', overflow: 'hidden' }}>
+                <div style={{ flex: '1.2', minWidth: '320px', position: 'relative', background: '#f4f8f7', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', height: '380px', overflow: 'hidden' }}>
                   
                   {/* Leaflet Container */}
                   <div id="leaflet-map-container" style={{ width: '100%', height: '100%', zIndex: 1 }}></div>
 
                   {/* Active Tooltip Details */}
                   {activeMapPoint && (
-                    <div style={{ position: 'absolute', bottom: '15px', right: '15px', left: '15px', background: 'rgba(10, 25, 47, 0.95)', border: '1px solid #15b47a', borderRadius: '8px', padding: '12px', zIndex: 1000, display: 'flex', justifyContent: 'space-between', alignItems: 'center', animation: 'fadeInUp 0.3s' }}>
+                    <div style={{ position: 'absolute', bottom: '15px', right: '15px', left: '15px', background: 'rgba(255, 255, 255, 0.95)', border: '1px solid #15b47a', borderRadius: '8px', padding: '12px', zIndex: 1000, display: 'flex', justifyContent: 'space-between', alignItems: 'center', animation: 'fadeInUp 0.3s', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
                       <div style={{ direction: 'rtl', textAlign: 'right' }}>
-                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>تفاصيل النقطة الجغرافية</div>
+                        <div style={{ fontSize: '11px', color: 'rgba(11, 40, 73, 0.6)' }}>تفاصيل النقطة الجغرافية</div>
                         <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#15b47a', marginTop: '2px' }}>{activeMapPoint.name} (LAT: {activeMapPoint.lat}, LNG: {activeMapPoint.lng})</div>
-                        <div style={{ fontSize: '12px', color: '#fff', marginTop: '4px' }}>{activeMapPoint.details}</div>
+                        <div style={{ fontSize: '12px', color: '#0b2849', marginTop: '4px' }}>{activeMapPoint.details}</div>
                       </div>
                       <button onClick={() => setActiveMapPoint(null)} style={{ background: 'transparent', border: 'none', color: '#ff4d4d', fontSize: '16px', cursor: 'pointer', padding: '5px' }}>&times;</button>
                     </div>

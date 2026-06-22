@@ -182,32 +182,174 @@ export function DebugUIPage() {
       .to(slideBg, { scale: 1, opacity: 1, duration: 0.4, ease: 'power2.out' }, '-=0.4');
   };
 
-  // State for Concept 32: Minimalist Map Window Widget
-  const [mapPointsJson, setMapPointsJson] = useState(JSON.stringify([
-    { "id": "loc1", "name": "القاهرة", "x": 180, "y": 140, "status": "critical", "details": "تأثير جودة الهواء على الأطفال 85%" },
-    { "id": "loc2", "name": "الرياض", "x": 300, "y": 190, "status": "warning", "details": "موجات حرارية قياسية وعواصف ترابية" },
-    { "id": "loc3", "name": "عمان", "x": 230, "y": 110, "status": "warning", "details": "شح المياه السطحية والجوفية" },
-    { "id": "loc4", "name": "بغداد", "x": 270, "y": 90, "status": "critical", "details": "جفاف الأراضي الزراعية وارتفاع الربو" }
-  ], null, 2));
+  // State for Concept 32: Minimalist Map Window Widget (using Leaflet Map API)
+  const [mapPointsJson, setMapPointsJson] = useState(JSON.stringify({
+    "excludedCountries": ["israel"],
+    "points": [
+      { "id": "loc1", "name": "القاهرة", "lat": 30.0444, "lng": 31.2357, "status": "critical", "details": "تأثير جودة الهواء على الأطفال 85%" },
+      { "id": "loc2", "name": "الرياض", "lat": 24.7136, "lng": 46.6753, "status": "warning", "details": "موجات حرارية قياسية وعواصف ترابية" },
+      { "id": "loc3", "name": "عمان", "lat": 31.9522, "lng": 35.9250, "status": "warning", "details": "شح المياه السطحية والجوفية" },
+      { "id": "loc4", "name": "بغداد", "lat": 33.3152, "lng": 44.3661, "status": "critical", "details": "جفاف الأراضي الزراعية وارتفاع الربو" }
+    ]
+  }, null, 2));
 
   const [activeMapPoint, setActiveMapPoint] = useState(null);
   const [jsonParseError, setJsonParseError] = useState(null);
   const [parsedMapPoints, setParsedMapPoints] = useState([]);
+  const [excludedCountries, setExcludedCountries] = useState([]);
+  const [leafletLoaded, setLeafletLoaded] = useState(false);
+
+  const mapInstanceRef = useRef(null);
+  const markersRef = useRef([]);
+  const maskLayersRef = useRef([]);
 
   // Sync and validate JSON on change
   useEffect(() => {
     try {
       const parsed = JSON.parse(mapPointsJson);
-      if (Array.isArray(parsed)) {
-        setParsedMapPoints(parsed);
-        setJsonParseError(null);
+      if (parsed && typeof parsed === 'object') {
+        if (Array.isArray(parsed.points)) {
+          setParsedMapPoints(parsed.points);
+          setExcludedCountries(parsed.excludedCountries || []);
+          setJsonParseError(null);
+        } else {
+          setJsonParseError('يجب أن تحتوي البيانات على مصفوفة points');
+        }
       } else {
-        setJsonParseError('يجب أن تكون البيانات عبارة عن مصفوفة (Array)');
+        setJsonParseError('يجب أن تكون البيانات عبارة عن كائن JSON Object');
       }
     } catch (err) {
       setJsonParseError('خطأ في تنسيق JSON: ' + err.message);
     }
   }, [mapPointsJson]);
+
+  // Load Leaflet Script and CSS dynamically
+  useEffect(() => {
+    let link = document.querySelector('link[href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+      link.crossOrigin = '';
+      document.head.appendChild(link);
+    }
+
+    if (window.L) {
+      setLeafletLoaded(true);
+    } else {
+      let script = document.querySelector('script[src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"]');
+      if (!script) {
+        script = document.createElement('script');
+        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+        script.crossOrigin = '';
+        script.onload = () => setLeafletLoaded(true);
+        document.head.appendChild(script);
+      } else {
+        const checkL = setInterval(() => {
+          if (window.L) {
+            setLeafletLoaded(true);
+            clearInterval(checkL);
+          }
+        }, 100);
+      }
+    }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // Initialize Map and Render Markers & Masks
+  useEffect(() => {
+    if (!leafletLoaded) return;
+
+    if (!mapInstanceRef.current) {
+      mapInstanceRef.current = window.L.map('leaflet-map-container', { zoomControl: false }).setView([28.0, 38.0], 5);
+      
+      // CartoDB Dark Matter Tile Layer (Premium Minimalist Dark Map)
+      window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+      }).addTo(mapInstanceRef.current);
+
+      // Re-add Zoom control to top-right
+      window.L.control.zoom({ position: 'topright' }).addTo(mapInstanceRef.current);
+    }
+
+    // Clear old markers
+    markersRef.current.forEach(marker => {
+      mapInstanceRef.current.removeLayer(marker);
+    });
+    markersRef.current = [];
+
+    // Clear old masks
+    maskLayersRef.current.forEach(layer => {
+      mapInstanceRef.current.removeLayer(layer);
+    });
+    maskLayersRef.current = [];
+
+    // Draw solid mask cover for excluded countries (e.g. Israel/إسرائيل)
+    if (Array.isArray(excludedCountries)) {
+      excludedCountries.forEach(country => {
+        const normalized = country.toLowerCase().trim();
+        if (normalized === 'israel' || normalized === 'إسرائيل') {
+          // Precise bounding polygon coordinates covering the country to mask it out
+          const border = [
+            [33.32, 35.02], [33.31, 35.63], [32.90, 35.62], [32.32, 35.55],
+            [31.97, 35.54], [31.78, 35.48], [31.33, 35.40], [30.95, 35.35],
+            [29.49, 34.90], [29.55, 34.88], [30.65, 34.40], [31.30, 34.22],
+            [31.85, 34.68], [32.55, 34.90], [33.10, 35.11]
+          ];
+          const mask = window.L.polygon(border, {
+            fillColor: '#0a192f', // matches dark map background
+            fillOpacity: 1.0,
+            color: '#0a192f',     // conceals borders
+            weight: 1.5,
+            interactive: false
+          }).addTo(mapInstanceRef.current);
+
+          maskLayersRef.current.push(mask);
+        }
+      });
+    }
+
+    // Add new markers
+    if (Array.isArray(parsedMapPoints)) {
+      parsedMapPoints.forEach(pt => {
+        if (typeof pt.lat === 'number' && typeof pt.lng === 'number') {
+          const markerColor = pt.status === 'critical' ? '#ff4d4d' : '#15b47a';
+          
+          // DivIcon with pulse effect
+          const customIcon = window.L.divIcon({
+            html: `
+              <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px;">
+                <div class="map-pulse-${pt.status || 'warning'}" style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background: ${pt.status === 'critical' ? 'rgba(255, 77, 77, 0.4)' : 'rgba(21, 180, 122, 0.4)'}; animation: mapRingPulse 2s infinite;"></div>
+                <div style="width: 10px; height: 10px; border-radius: 50%; background: ${markerColor}; border: 2px solid #fff; box-shadow: 0 0 10px ${markerColor}; z-index: 10;"></div>
+              </div>
+            `,
+            className: '',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+          });
+
+          const marker = window.L.marker([pt.lat, pt.lng], { icon: customIcon })
+            .addTo(mapInstanceRef.current);
+
+          marker.on('click', () => {
+            setActiveMapPoint(pt);
+          });
+
+          markersRef.current.push(marker);
+        }
+      });
+    }
+  }, [leafletLoaded, parsedMapPoints, excludedCountries]);
 
   const teamMembers = [
     { name: 'د. ياسمين السيد', role: 'خبير الصحة العامة والمناخ', bio: 'باحثة دولية في تأثيرات الحرارة المرتفعة على صحة الأطفال.' },
@@ -2927,75 +3069,18 @@ export function DebugUIPage() {
               {/* Window Content Layout */}
               <div style={{ display: 'flex', flexDirection: 'row-reverse', gap: '20px', flexWrap: 'wrap' }}>
                 
-                {/* Left Side (Map View) */}
-                <div style={{ flex: '1.2', minWidth: '320px', position: 'relative', background: '#0a192f', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', height: '360px', overflow: 'hidden' }}>
+                {/* Left Side (Real Leaflet Map View) */}
+                <div style={{ flex: '1.2', minWidth: '320px', position: 'relative', background: '#0a192f', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', height: '380px', overflow: 'hidden' }}>
                   
-                  {/* Grid Lines Overlay */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(rgba(21, 180, 122, 0.15) 1px, transparent 0)', backgroundSize: '24px 24px', opacity: 0.8, pointerEvents: 'none' }}></div>
-                  
-                  {/* Coordinate Axes */}
-                  <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '10px', color: 'rgba(21, 180, 122, 0.6)', fontFamily: 'monospace' }}>
-                    LAT: 30° N | LNG: 35° E
-                  </div>
-                  
-                  {/* Vector Map Graphic in Background */}
-                  <svg viewBox="0 0 500 360" style={{ position: 'absolute', width: '100%', height: '100%', opacity: 0.15, pointerEvents: 'none' }}>
-                    <path d="M50,150 L120,120 L200,90 L280,110 L350,180 L420,220 L300,320 L220,290 L120,280 Z" fill="none" stroke="#15b47a" strokeWidth="1.5" strokeDasharray="4 4" />
-                    <path d="M120,280 L180,240 L260,260 L310,220 L380,250" fill="none" stroke="#15b47a" strokeWidth="1" opacity="0.5" />
-                  </svg>
-                  
-                  {/* Markers */}
-                  {!jsonParseError && parsedMapPoints.map((pt) => (
-                    <div 
-                      key={pt.id} 
-                      onClick={() => setActiveMapPoint(pt)}
-                      style={{ 
-                        position: 'absolute', 
-                        left: `${(pt.x / 500) * 100}%`, 
-                        top: `${(pt.y / 360) * 100}%`, 
-                        width: '0px',
-                        height: '0px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        zIndex: 5
-                      }}
-                    >
-                      {/* Pulse Ring */}
-                      <div className={`map-pulse-${pt.status || 'warning'}`} style={{ 
-                        position: 'absolute', 
-                        width: '24px', 
-                        height: '24px', 
-                        borderRadius: '50%', 
-                        background: pt.status === 'critical' ? 'rgba(255, 77, 77, 0.4)' : 'rgba(21, 180, 122, 0.4)',
-                        animation: 'mapRingPulse 2s infinite'
-                      }}></div>
-                      
-                      {/* Inner Dot */}
-                      <div style={{ 
-                        position: 'absolute',
-                        width: '10px', 
-                        height: '10px', 
-                        borderRadius: '50%', 
-                        background: pt.status === 'critical' ? '#ff4d4d' : '#15b47a',
-                        border: '2px solid #fff',
-                        boxShadow: pt.status === 'critical' ? '0 0 10px #ff4d4d' : '0 0 10px #15b47a'
-                      }}></div>
-                      
-                      {/* Tiny Name Tag */}
-                      <div style={{ position: 'absolute', top: '12px', transform: 'translateX(-50%)', background: 'rgba(10, 25, 47, 0.9)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', fontSize: '9px', padding: '2px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
-                        {pt.name}
-                      </div>
-                    </div>
-                  ))}
+                  {/* Leaflet Container */}
+                  <div id="leaflet-map-container" style={{ width: '100%', height: '100%', zIndex: 1 }}></div>
 
                   {/* Active Tooltip Details */}
                   {activeMapPoint && (
-                    <div style={{ position: 'absolute', bottom: '15px', right: '15px', left: '15px', background: 'rgba(10, 25, 47, 0.95)', border: '1px solid #15b47a', borderRadius: '8px', padding: '12px', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', animation: 'fadeInUp 0.3s' }}>
+                    <div style={{ position: 'absolute', bottom: '15px', right: '15px', left: '15px', background: 'rgba(10, 25, 47, 0.95)', border: '1px solid #15b47a', borderRadius: '8px', padding: '12px', zIndex: 1000, display: 'flex', justifyContent: 'space-between', alignItems: 'center', animation: 'fadeInUp 0.3s' }}>
                       <div style={{ direction: 'rtl', textAlign: 'right' }}>
-                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>تفاصيل النقطة البيئية</div>
-                        <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#15b47a', marginTop: '2px' }}>{activeMapPoint.name} (X: {activeMapPoint.x}, Y: {activeMapPoint.y})</div>
+                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>تفاصيل النقطة الجغرافية</div>
+                        <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#15b47a', marginTop: '2px' }}>{activeMapPoint.name} (LAT: {activeMapPoint.lat}, LNG: {activeMapPoint.lng})</div>
                         <div style={{ fontSize: '12px', color: '#fff', marginTop: '4px' }}>{activeMapPoint.details}</div>
                       </div>
                       <button onClick={() => setActiveMapPoint(null)} style={{ background: 'transparent', border: 'none', color: '#ff4d4d', fontSize: '16px', cursor: 'pointer', padding: '5px' }}>&times;</button>
@@ -3006,7 +3091,7 @@ export function DebugUIPage() {
                 {/* Right Side (JSON Editor Panel) */}
                 <div style={{ flex: '1', minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', fontWeight: 'bold' }}>بيانات الخريطة (JSON Input):</span>
+                    <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', fontWeight: 'bold' }}>بيانات الخريطة الجغرافية (JSON Input):</span>
                     {jsonParseError ? (
                       <span style={{ fontSize: '11px', color: '#ff4d4d', fontWeight: 'bold' }}>JSON غير صالح</span>
                     ) : (
@@ -3037,7 +3122,7 @@ export function DebugUIPage() {
                     </div>
                   )}
                   <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-                    * عدل إحداثيات (x, y) بين (10 و 480) للنقاط لتغيير مواقعها على الخريطة مباشرة.
+                    * عدل إحداثيات خطوط العرض والطول (lat, lng) للنقاط لتغيير مواقعها الجغرافية الحقيقية على الخريطة مباشرة.
                   </p>
                 </div>
 

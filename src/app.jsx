@@ -43,35 +43,43 @@ export function App() {
   const [joinSuccess, setJoinSuccess] = useState(false);
   const [joinSubmitting, setJoinSubmitting] = useState(false);
 
-  // Theme Sync on Mount + Hash Routing
+  // Theme Sync on Mount + Path Routing
   useEffect(() => {
     // Force light theme
     setTheme('light');
     document.body.classList.remove('dark-mode');
 
-    // Set initial view from URL hash
-    const hash = window.location.hash;
-    if (hash === '#about-us' || hash === '#about') {
+    // Set initial view from URL path
+    const path = window.location.pathname.replace(/\/$/, "");
+    if (path === '/about-us' || path === '/about') {
       setCurrentView('about-us');
-    } else if (hash === '#debug') {
+    } else if (path === '/debug') {
       setCurrentView('debug');
     } else {
       setCurrentView('home');
+      // Scroll to segment if matching home section
+      const segment = window.location.pathname.substring(1);
+      if (['about', 'research', 'training', 'upcoming'].includes(segment)) {
+        setTimeout(() => {
+          const el = document.getElementById(segment);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      }
     }
 
-    // Listen for hash changes (browser back/forward)
-    const handleHashChange = () => {
-      const h = window.location.hash;
-      if (h === '#about-us' || h === '#about') {
+    // Listen for path changes (browser back/forward)
+    const handlePopState = () => {
+      const p = window.location.pathname.replace(/\/$/, "");
+      if (p === '/about-us' || p === '/about') {
         setCurrentView('about-us');
-      } else if (h === '#debug') {
+      } else if (p === '/debug') {
         setCurrentView('debug');
       } else {
         setCurrentView('home');
       }
     };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   // Theme Switch handler
@@ -142,15 +150,17 @@ export function App() {
         onNavigate={(view, sectionId) => {
           setCurrentView(view);
           if (view === 'about-us') {
-            window.location.hash = '#about-us';
+            window.history.pushState({}, '', '/about-us');
+          } else if (view === 'debug') {
+            window.history.pushState({}, '', '/debug');
           } else if (sectionId) {
-            window.location.hash = '#' + sectionId;
+            window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
               const el = document.getElementById(sectionId);
               if (el) el.scrollIntoView({ behavior: 'smooth' });
             }, 100);
           } else {
-            window.location.hash = '#home';
+            window.history.pushState({}, '', '/');
           }
         }}
         onJoinClick={() => setOpenedModal('join')} 
@@ -464,15 +474,17 @@ export function App() {
           onNavigate={(view, sectionId) => {
             setCurrentView(view);
             if (view === 'about-us') {
-              window.location.hash = '#about-us';
+              window.history.pushState({}, '', '/about-us');
             } else if (view === 'debug') {
-              window.location.hash = '#debug';
+              window.history.pushState({}, '', '/debug');
             } else {
-              window.location.hash = sectionId ? '#' + sectionId : '#home';
-              setTimeout(() => {
-                const el = document.getElementById(sectionId);
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }, 100);
+              window.history.pushState({}, '', sectionId ? '/' + sectionId : '/');
+              if (sectionId) {
+                setTimeout(() => {
+                  const el = document.getElementById(sectionId);
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+              }
             }
           }}
         />
@@ -485,15 +497,15 @@ export function App() {
         onNavigate={(view, sectionId) => {
             setCurrentView(view);
             if (view === 'about-us') {
-              window.location.hash = '#about-us';
+              window.history.pushState({}, '', '/about-us');
             } else if (sectionId) {
-              window.location.hash = '#' + sectionId;
+              window.history.pushState({}, '', '/' + sectionId);
               setTimeout(() => {
                 const el = document.getElementById(sectionId);
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }, 100);
             } else {
-              window.location.hash = '#home';
+              window.history.pushState({}, '', '/');
             }
           }}
       />

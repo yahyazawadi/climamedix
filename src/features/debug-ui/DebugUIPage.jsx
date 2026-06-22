@@ -201,7 +201,6 @@ export function DebugUIPage() {
 
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
-  const maskLayersRef = useRef([]);
 
   // Sync and validate JSON on change
   useEffect(() => {
@@ -288,46 +287,7 @@ export function DebugUIPage() {
     });
     markersRef.current = [];
 
-    // Clear old masks
-    maskLayersRef.current.forEach(layer => {
-      mapInstanceRef.current.removeLayer(layer);
-    });
-    maskLayersRef.current = [];
 
-    // Draw solid mask cover for excluded countries (e.g. Israel/إسرائيل)
-    if (Array.isArray(excludedCountries)) {
-      excludedCountries.forEach(country => {
-        const normalized = country.toLowerCase().trim();
-        if (normalized === 'israel' || normalized === 'إسرائيل') {
-          // Cover the "Israel" text label on the base map
-          const tileMask = window.L.circle([31.35, 34.85], {
-            radius: 35000, // 35 km cover radius
-            fillColor: '#091625', // matches CartoDB Dark matter tile color
-            fillOpacity: 1.0,
-            color: '#091625',
-            weight: 0,
-            interactive: false
-          }).addTo(mapInstanceRef.current);
-          maskLayersRef.current.push(tileMask);
-
-          // Place Palestine text label
-          const palestineIcon = window.L.divIcon({
-            html: `
-              <div style="background: rgba(10, 25, 47, 0.95); border: 1px solid #15b47a; color: #15b47a; padding: 4px 10px; border-radius: 6px; font-weight: bold; white-space: nowrap; font-size: 11px; box-shadow: 0 0 10px rgba(21, 180, 122, 0.4); direction: rtl;">
-                فلسطين / Palestine
-              </div>
-            `,
-            className: '',
-            iconSize: [120, 26],
-            iconAnchor: [60, 13]
-          });
-          
-          const palestineLabel = window.L.marker([31.95, 35.25], { icon: palestineIcon, interactive: false })
-            .addTo(mapInstanceRef.current);
-          maskLayersRef.current.push(palestineLabel);
-        }
-      });
-    }
 
     // Add new markers
     if (Array.isArray(parsedMapPoints)) {

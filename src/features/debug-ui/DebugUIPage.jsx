@@ -1078,7 +1078,7 @@ export function DebugUIPage() {
         .geometric-carousel {
           position: relative;
           width: 100%;
-          height: 420px;
+          height: 520px;
           background: #000;
           display: flex;
           align-items: center;
@@ -1115,20 +1115,23 @@ export function DebugUIPage() {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
-          width: 44px;
-          height: 44px;
+          width: 48px;
+          height: 48px;
           border-radius: 50%;
           background: rgba(255, 255, 255, 0.2);
           backdrop-filter: blur(10px);
           border: 1px solid rgba(255, 255, 255, 0.3);
           color: #fff;
-          font-size: 20px;
+          font-size: 24px;
+          font-family: Arial, sans-serif;
+          line-height: 1;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
           z-index: 10;
           transition: all 0.3s ease;
+          padding: 0 0 4px 0; /* subtle offset compensation for chevron alignment */
         }
         .carousel-nav-btn:hover {
           background: #15b47a;
@@ -1150,7 +1153,7 @@ export function DebugUIPage() {
           }
           .geometric-carousel {
             height: auto;
-            min-height: 420px;
+            min-height: 520px;
           }
           .carousel-nav-btn.prev {
             left: 10px;

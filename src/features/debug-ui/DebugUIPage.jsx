@@ -182,6 +182,33 @@ export function DebugUIPage() {
       .to(slideBg, { scale: 1, opacity: 1, duration: 0.4, ease: 'power2.out' }, '-=0.4');
   };
 
+  // State for Concept 32: Minimalist Map Window Widget
+  const [mapPointsJson, setMapPointsJson] = useState(JSON.stringify([
+    { "id": "loc1", "name": "القاهرة", "x": 180, "y": 140, "status": "critical", "details": "تأثير جودة الهواء على الأطفال 85%" },
+    { "id": "loc2", "name": "الرياض", "x": 300, "y": 190, "status": "warning", "details": "موجات حرارية قياسية وعواصف ترابية" },
+    { "id": "loc3", "name": "عمان", "x": 230, "y": 110, "status": "warning", "details": "شح المياه السطحية والجوفية" },
+    { "id": "loc4", "name": "بغداد", "x": 270, "y": 90, "status": "critical", "details": "جفاف الأراضي الزراعية وارتفاع الربو" }
+  ], null, 2));
+
+  const [activeMapPoint, setActiveMapPoint] = useState(null);
+  const [jsonParseError, setJsonParseError] = useState(null);
+  const [parsedMapPoints, setParsedMapPoints] = useState([]);
+
+  // Sync and validate JSON on change
+  useEffect(() => {
+    try {
+      const parsed = JSON.parse(mapPointsJson);
+      if (Array.isArray(parsed)) {
+        setParsedMapPoints(parsed);
+        setJsonParseError(null);
+      } else {
+        setJsonParseError('يجب أن تكون البيانات عبارة عن مصفوفة (Array)');
+      }
+    } catch (err) {
+      setJsonParseError('خطأ في تنسيق JSON: ' + err.message);
+    }
+  }, [mapPointsJson]);
+
   const teamMembers = [
     { name: 'د. ياسمين السيد', role: 'خبير الصحة العامة والمناخ', bio: 'باحثة دولية في تأثيرات الحرارة المرتفعة على صحة الأطفال.' },
     { name: 'م. طارق النجار', role: 'مهندس استدامة المستشفيات', bio: 'متخصص في تقليل الانبعاثات الكربونية في البيئة الطبية.' },
@@ -1161,6 +1188,15 @@ export function DebugUIPage() {
           .carousel-nav-btn.next {
             right: 10px;
           }
+        }
+        /* Concept 32: Map Widget Pulse Animations */
+        @keyframes mapRingPulse {
+          0% { transform: scale(0.4); opacity: 1; }
+          100% { transform: scale(1.8); opacity: 0; }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `}} />
       
@@ -2867,6 +2903,146 @@ export function DebugUIPage() {
                 <button className="carousel-nav-btn prev" onClick={handlePrevCourse}>&lt;</button>
                 <button className="carousel-nav-btn next" onClick={handleNextCourse}>&gt;</button>
               </div>
+            </div>
+
+            {/* Concept 32: Minimalist Map Window Widget */}
+            <div id="feature-card-32" className="imagination-card hover-id-container" style={{ gridColumn: '1 / -1', background: 'rgba(10, 25, 47, 0.95)', border: '1px solid rgba(21, 180, 122, 0.3)', color: '#fff', padding: '24px' }}>
+              
+              {/* Window Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '12px', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ff5f56' }}></div>
+                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ffbd2e' }}></div>
+                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#27c93f' }}></div>
+                  </div>
+                  <span style={{ fontSize: '13px', fontFamily: 'monospace', color: 'rgba(255,255,255,0.5)', marginRight: '10px' }}>map_widget_service.json</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#15b47a', boxShadow: '0 0 8px #15b47a' }}></span>
+                  <span style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace' }}>API CONNECTED</span>
+                </div>
+              </div>
+
+              {/* Window Content Layout */}
+              <div style={{ display: 'flex', flexDirection: 'row-reverse', gap: '20px', flexWrap: 'wrap' }}>
+                
+                {/* Left Side (Map View) */}
+                <div style={{ flex: '1.2', minWidth: '320px', position: 'relative', background: '#0a192f', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', height: '360px', overflow: 'hidden' }}>
+                  
+                  {/* Grid Lines Overlay */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(rgba(21, 180, 122, 0.15) 1px, transparent 0)', backgroundSize: '24px 24px', opacity: 0.8, pointerEvents: 'none' }}></div>
+                  
+                  {/* Coordinate Axes */}
+                  <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '10px', color: 'rgba(21, 180, 122, 0.6)', fontFamily: 'monospace' }}>
+                    LAT: 30° N | LNG: 35° E
+                  </div>
+                  
+                  {/* Vector Map Graphic in Background */}
+                  <svg viewBox="0 0 500 360" style={{ position: 'absolute', width: '100%', height: '100%', opacity: 0.15, pointerEvents: 'none' }}>
+                    <path d="M50,150 L120,120 L200,90 L280,110 L350,180 L420,220 L300,320 L220,290 L120,280 Z" fill="none" stroke="#15b47a" strokeWidth="1.5" strokeDasharray="4 4" />
+                    <path d="M120,280 L180,240 L260,260 L310,220 L380,250" fill="none" stroke="#15b47a" strokeWidth="1" opacity="0.5" />
+                  </svg>
+                  
+                  {/* Markers */}
+                  {!jsonParseError && parsedMapPoints.map((pt) => (
+                    <div 
+                      key={pt.id} 
+                      onClick={() => setActiveMapPoint(pt)}
+                      style={{ 
+                        position: 'absolute', 
+                        left: `${(pt.x / 500) * 100}%`, 
+                        top: `${(pt.y / 360) * 100}%`, 
+                        width: '0px',
+                        height: '0px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        zIndex: 5
+                      }}
+                    >
+                      {/* Pulse Ring */}
+                      <div className={`map-pulse-${pt.status || 'warning'}`} style={{ 
+                        position: 'absolute', 
+                        width: '24px', 
+                        height: '24px', 
+                        borderRadius: '50%', 
+                        background: pt.status === 'critical' ? 'rgba(255, 77, 77, 0.4)' : 'rgba(21, 180, 122, 0.4)',
+                        animation: 'mapRingPulse 2s infinite'
+                      }}></div>
+                      
+                      {/* Inner Dot */}
+                      <div style={{ 
+                        position: 'absolute',
+                        width: '10px', 
+                        height: '10px', 
+                        borderRadius: '50%', 
+                        background: pt.status === 'critical' ? '#ff4d4d' : '#15b47a',
+                        border: '2px solid #fff',
+                        boxShadow: pt.status === 'critical' ? '0 0 10px #ff4d4d' : '0 0 10px #15b47a'
+                      }}></div>
+                      
+                      {/* Tiny Name Tag */}
+                      <div style={{ position: 'absolute', top: '12px', transform: 'translateX(-50%)', background: 'rgba(10, 25, 47, 0.9)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', fontSize: '9px', padding: '2px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+                        {pt.name}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Active Tooltip Details */}
+                  {activeMapPoint && (
+                    <div style={{ position: 'absolute', bottom: '15px', right: '15px', left: '15px', background: 'rgba(10, 25, 47, 0.95)', border: '1px solid #15b47a', borderRadius: '8px', padding: '12px', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', animation: 'fadeInUp 0.3s' }}>
+                      <div style={{ direction: 'rtl', textAlign: 'right' }}>
+                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>تفاصيل النقطة البيئية</div>
+                        <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#15b47a', marginTop: '2px' }}>{activeMapPoint.name} (X: {activeMapPoint.x}, Y: {activeMapPoint.y})</div>
+                        <div style={{ fontSize: '12px', color: '#fff', marginTop: '4px' }}>{activeMapPoint.details}</div>
+                      </div>
+                      <button onClick={() => setActiveMapPoint(null)} style={{ background: 'transparent', border: 'none', color: '#ff4d4d', fontSize: '16px', cursor: 'pointer', padding: '5px' }}>&times;</button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Side (JSON Editor Panel) */}
+                <div style={{ flex: '1', minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', fontWeight: 'bold' }}>بيانات الخريطة (JSON Input):</span>
+                    {jsonParseError ? (
+                      <span style={{ fontSize: '11px', color: '#ff4d4d', fontWeight: 'bold' }}>JSON غير صالح</span>
+                    ) : (
+                      <span style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold' }}>JSON متطابق ✓</span>
+                    )}
+                  </div>
+                  <textarea 
+                    value={mapPointsJson}
+                    onInput={(e) => setMapPointsJson(e.target.value)}
+                    style={{ 
+                      flex: 1, 
+                      minHeight: '260px', 
+                      background: 'rgba(0,0,0,0.3)', 
+                      border: jsonParseError ? '1px solid #ff4d4d' : '1px solid rgba(255,255,255,0.1)', 
+                      borderRadius: '8px', 
+                      padding: '12px', 
+                      color: '#00ffcc', 
+                      fontFamily: 'monospace', 
+                      fontSize: '12px', 
+                      lineHeight: '1.5',
+                      resize: 'vertical',
+                      outline: 'none'
+                    }}
+                  />
+                  {jsonParseError && (
+                    <div style={{ fontSize: '11px', color: '#ff4d4d', background: 'rgba(255,77,77,0.1)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,77,77,0.2)' }}>
+                      {jsonParseError}
+                    </div>
+                  )}
+                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
+                    * عدل إحداثيات (x, y) بين (10 و 480) للنقاط لتغيير مواقعها على الخريطة مباشرة.
+                  </p>
+                </div>
+
+              </div>
+
             </div>
 
           </div>

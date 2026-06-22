@@ -5,6 +5,10 @@ import { GlassCard } from '../../components/GlassCard';
 import leftSvg from '../../assets/left-svg.svg';
 import rightSvg from '../../assets/right-svg.svg';
 import homeBg from '../../assets/bg_1.png';
+import training1 from '../../assets/training_1.png';
+import training2 from '../../assets/training_2.png';
+import training3 from '../../assets/training_3.png';
+import training4 from '../../assets/training_4.png';
 
 export function DebugUIPage() {
   const containerRef = useRef(null);
@@ -125,6 +129,58 @@ export function DebugUIPage() {
 
   // State for Concept 30 (Local Theme Swapper)
   const [localTheme, setLocalTheme] = useState('clinical'); // 'clinical' or 'eco'
+
+  // State for Concept 31 (Geometric Course Carousel)
+  const [activeCourseSlide, setActiveCourseSlide] = useState(0);
+  const slideContainerRef = useRef(null);
+
+  const coursesData = [
+    {
+      id: 1,
+      title: 'زمالة طب الكوارث المناخية والبيئية',
+      category: 'طبي بيئي',
+      desc: 'دراسة متعمقة في كيفية تخطيط المستشفيات والمراكز الطبية للتعامل مع الفيضانات، موجات الحرارة الشديدة، والأوبئة البيئية الطارئة.',
+      image: training1,
+    },
+    {
+      id: 2,
+      title: 'تلوث الهواء وتأثيره السريري المباشر',
+      category: 'أبحاث تطبيقية',
+      desc: 'تمكين الأطباء من تشخيص وتفسير الأعراض التنفسية والقلبية الحادة الناتجة عن ملوثات الهواء الدقيقة وتغير الغلاف الجوي.',
+      image: training2,
+    },
+    {
+      id: 3,
+      title: 'القيادة الصحية للعمل البيئي العالمي',
+      category: 'مهارات القيادة',
+      desc: 'تأهيل الكوادر الطبية لتمثيل القطاع الصحي في صياغة السياسات الوطنية والاتفاقيات الدولية المعنية بالاحتباس الحراري والصحة العامة.',
+      image: training3,
+    }
+  ];
+
+  const handleNextCourse = () => {
+    const nextSlide = (activeCourseSlide + 1) % coursesData.length;
+    animateCourseTransition(nextSlide);
+  };
+
+  const handlePrevCourse = () => {
+    const prevSlide = (activeCourseSlide - 1 + coursesData.length) % coursesData.length;
+    animateCourseTransition(prevSlide);
+  };
+
+  const animateCourseTransition = (nextIndex) => {
+    const slideOverlay = slideContainerRef.current.querySelector('.triangle-overlay');
+    const slideBg = slideContainerRef.current.querySelector('.course-bg-img');
+
+    gsap.timeline()
+      .to(slideOverlay, { opacity: 0, x: layoutLang === 'ar' ? 50 : -50, duration: 0.3 })
+      .to(slideBg, { scale: 1.05, opacity: 0.6, duration: 0.3 }, '-=0.3')
+      .call(() => {
+        setActiveCourseSlide(nextIndex);
+      })
+      .to(slideOverlay, { opacity: 1, x: 0, duration: 0.4, ease: 'power2.out' })
+      .to(slideBg, { scale: 1, opacity: 1, duration: 0.4, ease: 'power2.out' }, '-=0.4');
+  };
 
   const teamMembers = [
     { name: 'د. ياسمين السيد', role: 'خبير الصحة العامة والمناخ', bio: 'باحثة دولية في تأثيرات الحرارة المرتفعة على صحة الأطفال.' },
@@ -1016,6 +1072,92 @@ export function DebugUIPage() {
         .imagination-card:hover .library-label,
         .hover-id-container:hover .library-label {
           opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto;
+        }
+
+        /* Concept 31: Geometric Course Carousel Styles */
+        .geometric-carousel {
+          position: relative;
+          width: 100%;
+          height: 420px;
+          background: #000;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+        }
+        .course-bg-img {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          z-index: 1;
+          opacity: 0.95;
+        }
+        .triangle-overlay {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 60%;
+          height: 100%;
+          background: linear-gradient(135deg, rgba(11, 40, 73, 0.98) 20%, rgba(21, 180, 122, 0.9) 100%);
+          clip-path: polygon(12% 0%, 100% 0%, 100% 100%, 0% 100%);
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: flex-start;
+          padding: 40px 80px 40px 40px;
+          color: #fff;
+          z-index: 2;
+          direction: rtl;
+        }
+        .carousel-nav-btn {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.2);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: #fff;
+          font-size: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 10;
+          transition: all 0.3s ease;
+        }
+        .carousel-nav-btn:hover {
+          background: #15b47a;
+          border-color: #15b47a;
+          transform: translateY(-50%) scale(1.1);
+        }
+        .carousel-nav-btn.prev {
+          left: 20px;
+        }
+        .carousel-nav-btn.next {
+          right: 20px;
+        }
+        @media (max-width: 768px) {
+          .triangle-overlay {
+            width: 100%;
+            clip-path: none;
+            background: linear-gradient(0deg, rgba(11, 40, 73, 0.98) 50%, rgba(11, 40, 73, 0.7) 100%);
+            padding: 30px;
+          }
+          .geometric-carousel {
+            height: auto;
+            min-height: 420px;
+          }
+          .carousel-nav-btn.prev {
+            left: 10px;
+          }
+          .carousel-nav-btn.next {
+            right: 10px;
+          }
         }
       `}} />
       
@@ -2694,6 +2836,33 @@ export function DebugUIPage() {
 
               <div style={{ marginTop: '25px', padding: '15px', borderRadius: '12px', background: localTheme === 'eco' ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.6)', fontSize: '12px', lineHeight: '1.6' }}>
                 بفضل المتغيرات المتكيفة، تتغير خصائص الحاويات، الظلال، والنصوص فوراً دون الحاجة لإعادة تحميل الصفحة.
+              </div>
+            </div>
+
+            {/* Concept 31: Geometric Course Carousel */}
+            <div id="feature-card-31" className="imagination-card hover-id-container" style={{ gridColumn: '1 / -1', padding: 0, overflow: 'hidden' }}>
+              <div ref={slideContainerRef} className="geometric-carousel">
+                <img src={coursesData[activeCourseSlide].image} className="course-bg-img" alt={coursesData[activeCourseSlide].title} />
+                
+                {/* Triangular Effect Overlay */}
+                <div className="triangle-overlay">
+                  <span style={{ fontSize: '12px', background: 'rgba(21, 180, 122, 0.2)', border: '1px solid #15b47a', color: '#15b47a', padding: '4px 10px', borderRadius: '20px', fontWeight: 'bold', marginBottom: '15px', width: 'fit-content' }}>
+                    {coursesData[activeCourseSlide].category}
+                  </span>
+                  <h3 style={{ fontSize: '26px', fontWeight: 'bold', color: '#fff', marginBottom: '15px', lineHeight: '1.4', textAlign: 'right' }}>
+                    {coursesData[activeCourseSlide].title}
+                  </h3>
+                  <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.85)', lineHeight: '1.6', marginBottom: '30px', maxWidth: '480px', textAlign: 'right' }}>
+                    {coursesData[activeCourseSlide].desc}
+                  </p>
+                  <button id="btn-join-course-31" className="btn-showcase btn-neon" style={{ background: '#15b47a', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }} onMouseEnter={(e) => e.target.style.boxShadow = '0 0 15px #15b47a'} onMouseLeave={(e) => e.target.style.boxShadow = 'none'}>
+                    سجل في المساق الآن
+                  </button>
+                </div>
+
+                {/* Navigation Buttons */}
+                <button className="carousel-nav-btn prev" onClick={handlePrevCourse}>&lt;</button>
+                <button className="carousel-nav-btn next" onClick={handleNextCourse}>&gt;</button>
               </div>
             </div>
 

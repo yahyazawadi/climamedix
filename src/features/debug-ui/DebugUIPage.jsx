@@ -186,10 +186,10 @@ export function DebugUIPage() {
   const [mapPointsJson, setMapPointsJson] = useState(JSON.stringify({
     "excludedCountries": ["israel"],
     "points": [
-      { "id": "loc1", "name": "القاهرة", "lat": 30.0444, "lng": 31.2357, "status": "critical", "details": "تأثير جودة الهواء على الأطفال 85%" },
-      { "id": "loc2", "name": "الرياض", "lat": 24.7136, "lng": 46.6753, "status": "warning", "details": "موجات حرارية قياسية وعواصف ترابية" },
-      { "id": "loc3", "name": "عمان", "lat": 31.9522, "lng": 35.9250, "status": "warning", "details": "شح المياه السطحية والجوفية" },
-      { "id": "loc4", "name": "بغداد", "lat": 33.3152, "lng": 44.3661, "status": "critical", "details": "جفاف الأراضي الزراعية وارتفاع الربو" }
+      { "id": "loc1", "name": "القدس", "lat": 31.7683, "lng": 35.2137, "status": "critical", "details": "العاصمة التاريخية والأثرية لفلسطين" },
+      { "id": "loc2", "name": "غزة", "lat": 31.5016, "lng": 34.4668, "status": "critical", "details": "شح مائي حاد وأضرار بيئية في البنية التحتية" },
+      { "id": "loc3", "name": "رام الله", "lat": 31.9029, "lng": 35.2062, "status": "warning", "details": "تراجع منسوب المياه الجوفية والزراعية" },
+      { "id": "loc4", "name": "حيفا", "lat": 32.7940, "lng": 34.9896, "status": "warning", "details": "تلوث الهواء الصناعي الساحلي" }
     ]
   }, null, 2));
 
@@ -299,22 +299,32 @@ export function DebugUIPage() {
       excludedCountries.forEach(country => {
         const normalized = country.toLowerCase().trim();
         if (normalized === 'israel' || normalized === 'إسرائيل') {
-          // Precise bounding polygon coordinates covering the country to mask it out
-          const border = [
-            [33.32, 35.02], [33.31, 35.63], [32.90, 35.62], [32.32, 35.55],
-            [31.97, 35.54], [31.78, 35.48], [31.33, 35.40], [30.95, 35.35],
-            [29.49, 34.90], [29.55, 34.88], [30.65, 34.40], [31.30, 34.22],
-            [31.85, 34.68], [32.55, 34.90], [33.10, 35.11]
-          ];
-          const mask = window.L.polygon(border, {
-            fillColor: '#0a192f', // matches dark map background
+          // Cover the "Israel" text label on the base map
+          const tileMask = window.L.circle([31.35, 34.85], {
+            radius: 35000, // 35 km cover radius
+            fillColor: '#091625', // matches CartoDB Dark matter tile color
             fillOpacity: 1.0,
-            color: '#0a192f',     // conceals borders
-            weight: 1.5,
+            color: '#091625',
+            weight: 0,
             interactive: false
           }).addTo(mapInstanceRef.current);
+          maskLayersRef.current.push(tileMask);
 
-          maskLayersRef.current.push(mask);
+          // Place Palestine text label
+          const palestineIcon = window.L.divIcon({
+            html: `
+              <div style="background: rgba(10, 25, 47, 0.95); border: 1px solid #15b47a; color: #15b47a; padding: 4px 10px; border-radius: 6px; font-weight: bold; white-space: nowrap; font-size: 11px; box-shadow: 0 0 10px rgba(21, 180, 122, 0.4); direction: rtl;">
+                فلسطين / Palestine
+              </div>
+            `,
+            className: '',
+            iconSize: [120, 26],
+            iconAnchor: [60, 13]
+          });
+          
+          const palestineLabel = window.L.marker([31.95, 35.25], { icon: palestineIcon, interactive: false })
+            .addTo(mapInstanceRef.current);
+          maskLayersRef.current.push(palestineLabel);
         }
       });
     }

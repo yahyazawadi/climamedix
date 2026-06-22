@@ -9,7 +9,8 @@ import { NeatScripples } from './components/NeatScripples'
 import { ColoredBackground } from './components/ColoredBackground'
 import { Button } from './components/Button'
 import { GlassCard } from './components/GlassCard'
-import { AboutUsPage } from './components/AboutUsPage'
+import { AboutUsPage } from './features/about-us/AboutUsPage'
+import { DebugUIPage } from './features/debug-ui/DebugUIPage'
 import doctorImg from './assets/bg_3.png'
 import whiteLogo from './assets/footer_logo.svg'
 
@@ -52,6 +53,8 @@ export function App() {
     const hash = window.location.hash;
     if (hash === '#about-us' || hash === '#about') {
       setCurrentView('about-us');
+    } else if (hash === '#debug') {
+      setCurrentView('debug');
     } else {
       setCurrentView('home');
     }
@@ -61,6 +64,8 @@ export function App() {
       const h = window.location.hash;
       if (h === '#about-us' || h === '#about') {
         setCurrentView('about-us');
+      } else if (h === '#debug') {
+        setCurrentView('debug');
       } else {
         setCurrentView('home');
       }
@@ -170,7 +175,9 @@ export function App() {
                   <h2 className="figma-hero-subtitle">تمكين مقدمي الرعاية الصحية لأجل العمل المناخي.</h2>
                 </div>
                 <p className="figma-hero-description">
-                  نحن نسعى لتمكين الطاقم الصحي للعمل المناخي من خلال برامج تدريبية، أبحاث، وورش عمل.
+                  <span className="figma-hero-desc-top">نحن نسعى لتمكين الطاقم</span>
+                  {" "}
+                  <span className="figma-hero-desc-bottom">الصحي للعمل المناخي من خلال برامج تدريبية، أبحاث، وورش عمل.</span>
                 </p>
               </div>
 
@@ -449,6 +456,8 @@ export function App() {
           </div>
         </section>
       </main>
+      ) : currentView === 'debug' ? (
+        <DebugUIPage />
       ) : (
         <AboutUsPage
           onJoinClick={() => setOpenedModal('join')}
@@ -456,6 +465,8 @@ export function App() {
             setCurrentView(view);
             if (view === 'about-us') {
               window.location.hash = '#about-us';
+            } else if (view === 'debug') {
+              window.location.hash = '#debug';
             } else {
               window.location.hash = sectionId ? '#' + sectionId : '#home';
               setTimeout(() => {

@@ -1,9 +1,9 @@
-import iconEmpowerment  from '../assets/icon_empowerment.svg';
-import iconScience      from '../assets/icon_science.svg';
-import iconEmpowerment2 from '../assets/icon_empowerment2.svg';
-import iconInnovation   from '../assets/icon_innovation.svg';
-import iconCommunity    from '../assets/icon_community.svg';
-import aboutBg          from '../assets/svgbackground.svg';
+import iconEmpowerment  from '../../assets/icon_empowerment.svg';
+import iconScience      from '../../assets/icon_science.svg';
+import iconEmpowerment2 from '../../assets/icon_empowerment2.svg';
+import iconInnovation   from '../../assets/icon_innovation.svg';
+import iconCommunity    from '../../assets/icon_community.svg';
+import aboutBg          from '../../assets/svgbackground.svg';
 
 
 export function AboutUsPage({ onJoinClick }) {

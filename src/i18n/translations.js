@@ -6,17 +6,17 @@ export const translations = {
     research: 'أبحاث',
     training: 'دورات تدريبية',
     contact: 'اتصل بنا',
-    login: 'دخول / Login',
-    logout: 'خروج / Logout',
-    admin: 'لوحة التحكم / Admin',
+    login: 'دخول',
+    logout: 'خروج',
+    admin: 'لوحة التحكم',
     search: 'البحث...',
     language: 'اللغة',
-    
+
     // Hero
     heroSubtitle: 'تمكين مقدمي الرعاية الصحية لأجل العمل المناخي.',
     heroDescTop: 'نحن نسعى لتمكين الطاقم',
     heroDescBottom: 'الصحي للعمل المناخي من خلال برامج تدريبية، أبحاث، وورش عمل.',
-    
+
     // About Section
     whoWeAre: 'من نحن؟',
     aboutIntroText: 'في ClimaMedix، نؤمن بأن البحث العلمي هو الأساس لفهم تأثيرات التغير المناخي على الصحة العامة وتطوير الحلول المستدامة. نحن فريق من الباحثين والمتخصصين في المجال الطبي، نعمل على تمكين الطواقم الصحية بالمعرفة، وتزويدهم بالأدوات اللازمة لفهم التغيرات البيئية والتصدي لتحدياتها. نركز بشكل أساسي على دعم البحث العلمي، تمكين المهنيين الصحيين، ونشر التوعية حول العلاقة بين التغير المناخي والصحة.',
@@ -43,7 +43,7 @@ export const translations = {
     partnershipsDesc: 'نعمل بالتعاون مع مؤسسات بحثية، جامعات، ومنظمات عالمية لدعم الأبحاث المتخصصة في الصحة البيئية والتغير المناخي.',
     joinNow: 'انضم الآن',
     joinUs: 'انضم إلينا',
-    
+
     // Research Section
     latestResearch: 'أحدث الأبحاث',
     researchDesc: 'نقدم هنا نظرة عامة على الدراسات والأبحاث التي تم إعدادها بالتعاون مع المنصة.',
@@ -55,7 +55,7 @@ export const translations = {
     dengueMapDesc: 'تحليل بيئي وجغرافي يربط بين ارتفاع الرطوبة والحرارة ومعدلات تكاثر البعوض الناقل للمرض.',
     carbonCalculatorTitle: 'حاسبة البصمة الكربونية للمنشآت الصحية',
     carbonCalculatorDesc: 'أداة تفاعلية سريرية لتقدير الانبعاثات الناتجة عن استهلاك الطاقة، الغازات المخدرة، والنفايات الطبية.',
-    
+
     // Training Section
     trainingCourses: 'الدورات التدريبية',
     trainingDesc: 'برامجنا الأكاديمية والعملية المصممة لبناء قدرات الكوادر الصحية في طب المناخ.',
@@ -67,7 +67,7 @@ export const translations = {
     globalLeadershipDesc: 'تأهيل الكوادر الطبية لتمثيل القطاع الصحي في صياغة السياسات الوطنية والاتفاقيات الدولية المعنية بالاحتباس الحراري والصحة العامة.',
     hospitalWasteTitle: 'إدارة النفايات الطبية والاستدامة بالمستشفيات',
     hospitalWasteDesc: 'دليل عملي للمشرفين الصحيين لتقليل الانبعاثات الناتجة عن حرق النفايات وتحسين دورة تدوير المواد غير الخطرة.',
-    
+
     // Upcoming Section
     upcomingEvents: 'الأنشطة والمشاريع القادمة',
     upcomingDesc: 'كن جزءاً من الفعاليات القادمة وساهم في صياغة المستقبل الصحي البيئي.',
@@ -75,14 +75,14 @@ export const translations = {
     summitDesc: 'تجمع القمة مئات القيادات الصحية لاستعراض حلول الطاقة النظيفة والتخلص الآمن والبيئي من المخلفات الطبية.',
     researchGrantTitle: 'إطلاق منحة ClimaMedix للأبحاث الميدانية الناشئة 2026',
     researchGrantDesc: 'دعم مالي وفني للباحثين الشباب لإنجاز دراسات محلية تربط بين تلوث المناخ وتفشي الأمراض الصدرية.',
-    
+
     // Footer
     footerTitle: 'الدعم والتواصل',
     quickLinks: 'الروابط السريعة',
     myAccount: 'حسابي',
     copyright: 'جميع الحقوق محفوظة.',
     footerCtaText: 'انضم إلينا في رحلتنا لدعم الصحة البيئية والتغيير المناخي!',
-    
+
     // Auth Page Switch
     authTitleAr: 'مرحباً بك في ClimaMedix',
     authTitleEn: 'مرحباً بعودتك',
@@ -101,12 +101,12 @@ export const translations = {
     admin: 'Admin Dashboard',
     search: 'Search...',
     language: 'Language',
-    
+
     // Hero
     heroSubtitle: 'Empowering healthcare providers for climate action.',
     heroDescTop: 'We strive to empower',
     heroDescBottom: 'healthcare professionals for climate action through training programs, research, and workshops.',
-    
+
     // About Section
     whoWeAre: 'Who We Are?',
     aboutIntroText: 'At ClimaMedix, we believe that scientific research is the foundation for understanding the impacts of climate change on public health and developing sustainable solutions. We are a team of researchers and medical professionals working to empower healthcare workforces with knowledge, providing them with the necessary tools to understand environmental changes and address their challenges. We focus mainly on supporting scientific research, empowering health professionals, and raising awareness about the relationship between climate change and health.',
@@ -133,7 +133,7 @@ export const translations = {
     partnershipsDesc: 'We work in cooperation with research institutions, universities, and global organizations to support specialized research in environmental health and climate change.',
     joinNow: 'Join Now',
     joinUs: 'Join Us',
-    
+
     // Research Section
     latestResearch: 'Latest Research',
     researchDesc: 'Here we present an overview of studies and research prepared in cooperation with the platform.',
@@ -145,7 +145,7 @@ export const translations = {
     dengueMapDesc: 'Environmental and geographical analysis linking high humidity and temperature with breeding rates of vector mosquitoes.',
     carbonCalculatorTitle: 'Carbon Footprint Calculator for Health Facilities',
     carbonCalculatorDesc: 'An interactive clinical tool to estimate emissions resulting from energy consumption, anesthetic gases, and medical waste.',
-    
+
     // Training Section
     trainingCourses: 'Training Courses',
     trainingDesc: 'Our academic and practical programs designed to build the capacity of health workforces in climate medicine.',
@@ -157,7 +157,7 @@ export const translations = {
     globalLeadershipDesc: 'Qualifying medical cadres to represent the health sector in formulating national policies and international agreements on global warming and public health.',
     hospitalWasteTitle: 'Medical Waste Management and Hospital Sustainability',
     hospitalWasteDesc: 'A practical guide for health supervisors to reduce emissions from waste incineration and improve recycling of non-hazardous materials.',
-    
+
     // Upcoming Section
     upcomingEvents: 'Upcoming Activities & Projects',
     upcomingDesc: 'Be a part of upcoming events and contribute to shaping the environmental health future.',
@@ -165,14 +165,14 @@ export const translations = {
     summitDesc: 'The summit gathers hundreds of health leaders to review clean energy solutions and safe, environmental disposal of medical waste.',
     researchGrantTitle: 'Launch of the ClimaMedix Grant for Emerging Field Research 2026',
     researchGrantDesc: 'Financial and technical support for young researchers to complete local studies linking climate pollution and respiratory outbreaks.',
-    
+
     // Footer
     footerTitle: 'Support & Contact',
     quickLinks: 'Quick Links',
     myAccount: 'My Account',
     copyright: 'All rights reserved.',
     footerCtaText: 'Join us on our journey to support environmental health and climate change!',
-    
+
     // Auth Page Switch
     authTitleAr: 'Welcome to ClimaMedix',
     authTitleEn: 'Welcome Back',

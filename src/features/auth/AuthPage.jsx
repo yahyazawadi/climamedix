@@ -164,14 +164,40 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
                 placeholder="••••••••"
                 value={password}
                 onInput={(e) => setPassword(e.target.value)}
-                style={{ textAlign: !password || !/[\u0600-\u06FF]/.test(password[0]) ? 'left' : 'right', width: '100%', paddingTop: '14px', paddingBottom: '14px', paddingLeft: '48px', paddingRight: '16px', border: '1px solid rgba(11, 40, 73, 0.1)', borderRadius: '10px', fontSize: '16px', outline: 'none', background: 'rgba(255, 255, 255, 0.7)', transition: 'border-color 0.3s' }}
+                style={{ 
+                  textAlign: !password || !/[\u0600-\u06FF]/.test(password[0]) ? 'left' : 'right', 
+                  width: '100%', 
+                  paddingTop: '14px', 
+                  paddingBottom: '14px', 
+                  paddingLeft: lang === 'ar' ? '48px' : '16px', 
+                  paddingRight: lang === 'ar' ? '16px' : '48px', 
+                  border: '1px solid rgba(11, 40, 73, 0.1)', 
+                  borderRadius: '10px', 
+                  fontSize: '16px', 
+                  outline: 'none', 
+                  background: 'rgba(255, 255, 255, 0.7)', 
+                  transition: 'border-color 0.3s' 
+                }}
                 onFocus={(e) => e.target.style.borderColor = '#15b47a'}
                 onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.1)'}
               />
               <button 
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                style={{ position: 'absolute', left: '16px', background: 'none', border: 'none', padding: '0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(11, 40, 73, 0.4)', outline: 'none' }}
+                style={{ 
+                  position: 'absolute', 
+                  left: lang === 'ar' ? '16px' : 'auto', 
+                  right: lang === 'ar' ? 'auto' : '16px', 
+                  background: 'none', 
+                  border: 'none', 
+                  padding: '0', 
+                  cursor: 'pointer', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  color: 'rgba(11, 40, 73, 0.4)', 
+                  outline: 'none' 
+                }}
                 title={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (

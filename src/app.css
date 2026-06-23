@@ -20,6 +20,44 @@ div {
   font-family: 'Tajawal', sans-serif !important;
 }
 
+/* English Typography Override (Outfit Font - Bigger & Prettier) */
+html[lang="en"],
+html[lang="en"] body,
+html[lang="en"] button,
+html[lang="en"] input,
+html[lang="en"] select,
+html[lang="en"] textarea,
+html[lang="en"] span,
+html[lang="en"] p,
+html[lang="en"] h1,
+html[lang="en"] h2,
+html[lang="en"] h3,
+html[lang="en"] h4,
+html[lang="en"] h5,
+html[lang="en"] h6,
+html[lang="en"] a,
+html[lang="en"] div {
+  font-family: 'Outfit', sans-serif !important;
+}
+
+/* Base font-size scaling for English text */
+html[lang="en"] {
+  font-size: 104%;
+}
+
+/* Specific component enhancements in English */
+html[lang="en"] .figma-nav-item {
+  font-size: 19.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.2px;
+}
+
+html[lang="en"] .figma-nav-text {
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px;
+}
+
 /* ==========================================================================
    FIGMA HEADER & NAVIGATION STYLES
    ========================================================================== */

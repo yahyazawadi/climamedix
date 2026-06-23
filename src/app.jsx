@@ -471,7 +471,7 @@ function AppContent() {
       ) : currentView === 'debug' ? (
         <DebugUIPage />
       ) : currentView === 'auth' ? (
-        <AuthPage onAuthSuccess={() => { setCurrentView('home'); }} />
+        <AuthPage lang={lang} onAuthSuccess={() => { setCurrentView('home'); }} />
       ) : (
         <AboutUsPage
           lang={lang}

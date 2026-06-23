@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
 import { useAuth } from './hooks/useAuth';
 import { GlassCard } from '../shared/components/GlassCard';
 import { Button } from '../shared/components/Button';
 import { InteractiveParticles } from './InteractiveParticles';
 import gsap from 'gsap';
 
-export function AuthPage({ onAuthSuccess }) {
+export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
   const { signIn, signUp, signInWithOAuth } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -48,14 +48,14 @@ export function AuthPage({ onAuthSuccess }) {
     try {
       if (isSignUp) {
         await signUp(email, password);
-        showAlert('success', 'تم إرسال رابط تأكيد الحساب إلى بريدك الإلكتروني! / Confirmation link sent to your email!');
+        showAlert('success', lang === 'ar' ? 'تم إرسال رابط تأكيد الحساب إلى بريدك الإلكتروني!' : 'Confirmation link sent to your email!');
       } else {
         const data = await signIn(email, password);
-        showAlert('success', 'تم تسجيل الدخول بنجاح! / Logged in successfully!');
+        showAlert('success', lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Logged in successfully!');
         if (onAuthSuccess) onAuthSuccess(data.user);
       }
     } catch (err) {
-      showAlert('error', err.message || 'حدث خطأ ما / An error occurred');
+      showAlert('error', err.message || (lang === 'ar' ? 'حدث خطأ ما' : 'An error occurred'));
     } finally {
       setLoading(false);
     }
@@ -66,14 +66,14 @@ export function AuthPage({ onAuthSuccess }) {
     
     // Currently only Google is configured
     if (provider !== 'google') {
-      showAlert('warning', 'عذراً، طريقة تسجيل الدخول هذه قيد الإعداد حالياً. يرجى استخدام Google أو البريد الإلكتروني. / This login method is currently under setup. Please use Google or Email.');
+      showAlert('warning', lang === 'ar' ? 'عذراً، طريقة تسجيل الدخول هذه قيد الإعداد حالياً. يرجى استخدام Google أو البريد الإلكتروني.' : 'This login method is currently under setup. Please use Google or Email.');
       return;
     }
 
     try {
       await signInWithOAuth(provider);
     } catch (err) {
-      showAlert('error', err.message || 'خطأ في الاتصال بمزود الخدمة / Connection error');
+      showAlert('error', err.message || (lang === 'ar' ? 'خطأ في الاتصال بمزود الخدمة' : 'Connection error'));
     }
   };
 
@@ -88,28 +88,32 @@ export function AuthPage({ onAuthSuccess }) {
         <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(0, 76, 109, 0.15)', filter: 'blur(30px)', pointerEvents: 'none' }}></div>
 
         {/* Tab Toggle */}
-        <div className="auth-tabs auth-fade-in" style={{ display: 'flex', background: 'rgba(11, 40, 73, 0.05)', borderRadius: '10px', padding: '4px', marginBottom: '24px', direction: 'rtl' }}>
+        <div className="auth-tabs auth-fade-in" style={{ display: 'flex', background: 'rgba(11, 40, 73, 0.05)', borderRadius: '10px', padding: '4px', marginBottom: '24px', direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
           <button 
             onClick={() => setIsSignUp(false)} 
             style={{ flex: 1, padding: '10px', border: 'none', background: !isSignUp ? '#fff' : 'transparent', borderRadius: '8px', color: '#0b2849', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s', boxShadow: !isSignUp ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}
           >
-            تسجيل الدخول / Login
+            {lang === 'ar' ? 'تسجيل الدخول' : 'Login'}
           </button>
           <button 
             onClick={() => setIsSignUp(true)} 
             style={{ flex: 1, padding: '10px', border: 'none', background: isSignUp ? '#fff' : 'transparent', borderRadius: '8px', color: '#0b2849', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s', boxShadow: isSignUp ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}
           >
-            إنشاء حساب / Sign Up
+            {lang === 'ar' ? 'إنشاء حساب' : 'Sign Up'}
           </button>
         </div>
 
         {/* Header Text */}
         <div className="auth-header auth-fade-in" style={{ textAlign: 'center', marginBottom: '24px' }}>
           <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0b2849', marginBottom: '8px' }}>
-            {isSignUp ? 'مرحباً بك في ClimaMedix' : 'مرحباً بعودتك'}
+            {isSignUp 
+              ? (lang === 'ar' ? 'مرحباً بك في ClimaMedix' : 'Welcome to ClimaMedix') 
+              : (lang === 'ar' ? 'مرحباً بعودتك' : 'Welcome back')}
           </h2>
           <p style={{ fontSize: '13px', color: 'rgba(11, 40, 73, 0.6)' }}>
-            {isSignUp ? 'أنشئ حسابك للوصول إلى المنصة والأبحاث' : 'سجل الدخول للمتابعة إلى حسابك'}
+            {isSignUp 
+              ? (lang === 'ar' ? 'أنشئ حسابك للوصول إلى المنصة والأبحاث' : 'Create your account to access the platform and research') 
+              : (lang === 'ar' ? 'سجل الدخول للمتابعة إلى حسابك' : 'Sign in to continue to your account')}
           </p>
         </div>
 
@@ -132,7 +136,9 @@ export function AuthPage({ onAuthSuccess }) {
         {/* Form */}
         <form onSubmit={handleEmailAuth} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} className="auth-fade-in">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'rgba(11, 40, 73, 0.8)', textAlign: 'right' }}>البريد الإلكتروني / Email</label>
+            <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'rgba(11, 40, 73, 0.8)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
+              {lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}
+            </label>
             <input 
               type="email" 
               required
@@ -147,7 +153,9 @@ export function AuthPage({ onAuthSuccess }) {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'rgba(11, 40, 73, 0.8)', textAlign: 'right' }}>كلمة المرور / Password</label>
+            <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'rgba(11, 40, 73, 0.8)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
+              {lang === 'ar' ? 'كلمة المرور' : 'Password'}
+            </label>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input 
                 type={showPassword ? "text" : "password"} 
@@ -182,14 +190,20 @@ export function AuthPage({ onAuthSuccess }) {
           </div>
 
           <Button type="submit" disabled={loading} variant="gradient" style={{ padding: '12px', fontWeight: 'bold', marginTop: '8px' }}>
-            {loading ? 'جاري التحميل...' : isSignUp ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}
+            {loading 
+              ? (lang === 'ar' ? 'جاري التحميل...' : 'Loading...') 
+              : isSignUp 
+                ? (lang === 'ar' ? 'إنشاء حساب جديد' : 'Sign Up') 
+                : (lang === 'ar' ? 'تسجيل الدخول' : 'Log In')}
           </Button>
         </form>
 
         {/* Divider */}
         <div className="auth-divider auth-fade-in" style={{ display: 'flex', alignItems: 'center', margin: '24px 0', color: 'rgba(11, 40, 73, 0.4)', fontSize: '12px' }}>
           <div style={{ flex: 1, height: '1px', background: 'rgba(11, 40, 73, 0.1)' }}></div>
-          <span style={{ padding: '0 10px' }}>أو عبر وسائل التواصل / Or with</span>
+          <span style={{ padding: '0 10px' }}>
+            {lang === 'ar' ? 'أو عبر وسائل التواصل' : 'Or sign in with'}
+          </span>
           <div style={{ flex: 1, height: '1px', background: 'rgba(11, 40, 73, 0.1)' }}></div>
         </div>
 
@@ -291,9 +305,13 @@ export function AuthPage({ onAuthSuccess }) {
             textAlign: 'center',
             padding: '24px'
           }}>
-            <h3 style={{ fontSize: '28px', fontWeight: 'bold', margin: '0 0 12px 0', color: '#0b2849', fontFamily: "'Tajawal', sans-serif" }}>كلايما ميدكس / ClimaMedix</h3>
-            <p style={{ fontSize: '15px', color: '#4a607a', margin: 0, direction: 'rtl', fontFamily: "'Tajawal', sans-serif" }}>
-              العمل المناخي يبدأ من هنا. انضم إلى مجتمع الرعاية الصحية المستدامة.
+            <h3 style={{ fontSize: '28px', fontWeight: 'bold', margin: '0 0 12px 0', color: '#0b2849', fontFamily: "'Tajawal', sans-serif" }}>
+              كلايما ميدكس / ClimaMedix
+            </h3>
+            <p style={{ fontSize: '15px', color: '#4a607a', margin: 0, direction: lang === 'ar' ? 'rtl' : 'ltr', fontFamily: "'Tajawal', sans-serif" }}>
+              {lang === 'ar' 
+                ? 'العمل المناخي يبدأ من هنا. انضم إلى مجتمع الرعاية الصحية المستدامة.' 
+                : 'Climate action starts here. Join the sustainable healthcare community.'}
             </p>
           </div>
         </div>

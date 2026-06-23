@@ -10,6 +10,7 @@ export const translations = {
     logout: 'خروج / Logout',
     admin: 'لوحة التحكم / Admin',
     search: 'البحث...',
+    language: 'اللغة',
     
     // Hero
     heroSubtitle: 'تمكين مقدمي الرعاية الصحية لأجل العمل المناخي.',
@@ -99,6 +100,7 @@ export const translations = {
     logout: 'Logout',
     admin: 'Admin Dashboard',
     search: 'Search...',
+    language: 'Language',
     
     // Hero
     heroSubtitle: 'Empowering healthcare providers for climate action.',

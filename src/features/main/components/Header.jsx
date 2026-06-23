@@ -58,6 +58,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                 title="Select Language / اختيار اللغة"
               >
                 <img src={iconGlobe} class="figma-nav-icon" alt="Language" />
+                <span class="figma-nav-text">{t.language}</span>
               </button>
 
               {showLangDropdown && (

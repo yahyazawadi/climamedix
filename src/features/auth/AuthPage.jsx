@@ -169,8 +169,8 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
                   width: '100%', 
                   paddingTop: '14px', 
                   paddingBottom: '14px', 
-                  paddingLeft: lang === 'ar' ? '48px' : '16px', 
-                  paddingRight: lang === 'ar' ? '16px' : '48px', 
+                  paddingLeft: '16px', 
+                  paddingRight: '48px', 
                   border: '1px solid rgba(11, 40, 73, 0.1)', 
                   borderRadius: '10px', 
                   fontSize: '16px', 
@@ -186,8 +186,8 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
                 onClick={() => setShowPassword(!showPassword)}
                 style={{ 
                   position: 'absolute', 
-                  left: lang === 'ar' ? '16px' : 'auto', 
-                  right: lang === 'ar' ? 'auto' : '16px', 
+                  right: '16px', 
+                  left: 'auto', 
                   background: 'none', 
                   border: 'none', 
                   padding: '0', 

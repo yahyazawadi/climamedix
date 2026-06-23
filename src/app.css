@@ -2653,7 +2653,7 @@ div {
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 129px);
-  padding: 140px 24px 60px 24px;
+  padding: 180px 24px 60px 24px !important;
   box-sizing: border-box;
 }
 
@@ -2708,7 +2708,7 @@ div {
 
 @media (max-width: 992px) {
   .auth-page-container {
-    padding-top: 140px;
+    padding-top: 180px !important;
     min-height: calc(100vh - 140px);
   }
   .auth-split-wrapper {
@@ -2718,7 +2718,7 @@ div {
 
 @media (max-width: 768px) {
   .auth-page-container {
-    padding: 110px 16px 40px 16px;
+    padding: 135px 16px 40px 16px !important;
     min-height: calc(100vh - 90px);
   }
   .auth-split-wrapper {

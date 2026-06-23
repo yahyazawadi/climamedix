@@ -91,13 +91,13 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
         <div className="auth-tabs auth-fade-in" style={{ display: 'flex', background: 'rgba(11, 40, 73, 0.05)', borderRadius: '10px', padding: '4px', marginBottom: '24px', direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
           <button 
             onClick={() => setIsSignUp(false)} 
-            style={{ flex: 1, padding: '10px', border: 'none', background: !isSignUp ? '#fff' : 'transparent', borderRadius: '8px', color: '#0b2849', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s', boxShadow: !isSignUp ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}
+            style={{ flex: 1, padding: '12px 10px', border: 'none', background: !isSignUp ? '#fff' : 'transparent', borderRadius: '8px', color: '#0b2849', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer', transition: 'all 0.3s', boxShadow: !isSignUp ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}
           >
             {lang === 'ar' ? 'تسجيل الدخول' : 'Login'}
           </button>
           <button 
             onClick={() => setIsSignUp(true)} 
-            style={{ flex: 1, padding: '10px', border: 'none', background: isSignUp ? '#fff' : 'transparent', borderRadius: '8px', color: '#0b2849', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s', boxShadow: isSignUp ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}
+            style={{ flex: 1, padding: '12px 10px', border: 'none', background: isSignUp ? '#fff' : 'transparent', borderRadius: '8px', color: '#0b2849', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer', transition: 'all 0.3s', boxShadow: isSignUp ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}
           >
             {lang === 'ar' ? 'إنشاء حساب' : 'Sign Up'}
           </button>
@@ -105,12 +105,12 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
 
         {/* Header Text */}
         <div className="auth-header auth-fade-in" style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0b2849', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: '#0b2849', marginBottom: '8px' }}>
             {isSignUp 
               ? (lang === 'ar' ? 'مرحباً بك في ClimaMedix' : 'Welcome to ClimaMedix') 
               : (lang === 'ar' ? 'مرحباً بعودتك' : 'Welcome back')}
           </h2>
-          <p style={{ fontSize: '13px', color: 'rgba(11, 40, 73, 0.6)' }}>
+          <p style={{ fontSize: '15px', color: 'rgba(11, 40, 73, 0.6)', lineHeight: '1.4' }}>
             {isSignUp 
               ? (lang === 'ar' ? 'أنشئ حسابك للوصول إلى المنصة والأبحاث' : 'Create your account to access the platform and research') 
               : (lang === 'ar' ? 'سجل الدخول للمتابعة إلى حسابك' : 'Sign in to continue to your account')}
@@ -122,7 +122,7 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
           <div className="auth-alert" style={{ 
             padding: '12px 16px', 
             borderRadius: '8px', 
-            fontSize: '12px', 
+            fontSize: '14px', 
             marginBottom: '20px', 
             textAlign: 'center',
             background: message.type === 'success' ? 'rgba(21, 180, 122, 0.1)' : message.type === 'warning' ? 'rgba(255, 189, 46, 0.1)' : 'rgba(255, 77, 77, 0.1)',
@@ -134,9 +134,9 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
         )}
 
         {/* Form */}
-        <form onSubmit={handleEmailAuth} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} className="auth-fade-in">
+        <form onSubmit={handleEmailAuth} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }} className="auth-fade-in">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'rgba(11, 40, 73, 0.8)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
+            <label style={{ fontSize: '14px', fontWeight: 'bold', color: 'rgba(11, 40, 73, 0.8)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
               {lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}
             </label>
             <input 
@@ -146,14 +146,14 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
               placeholder="name@example.com"
               value={email}
               onInput={(e) => setEmail(e.target.value)}
-              style={{ textAlign: 'left', padding: '12px 16px', border: '1px solid rgba(11, 40, 73, 0.1)', borderRadius: '10px', fontSize: '14px', outline: 'none', background: 'rgba(255, 255, 255, 0.7)', transition: 'border-color 0.3s' }}
+              style={{ textAlign: 'left', padding: '14px 16px', border: '1px solid rgba(11, 40, 73, 0.1)', borderRadius: '10px', fontSize: '16px', outline: 'none', background: 'rgba(255, 255, 255, 0.7)', transition: 'border-color 0.3s' }}
               onFocus={(e) => e.target.style.borderColor = '#15b47a'}
               onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.1)'}
             />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'rgba(11, 40, 73, 0.8)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
+            <label style={{ fontSize: '14px', fontWeight: 'bold', color: 'rgba(11, 40, 73, 0.8)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
               {lang === 'ar' ? 'كلمة المرور' : 'Password'}
             </label>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
@@ -164,7 +164,7 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
                 placeholder="••••••••"
                 value={password}
                 onInput={(e) => setPassword(e.target.value)}
-                style={{ textAlign: !password || !/[\u0600-\u06FF]/.test(password[0]) ? 'left' : 'right', width: '100%', padding: '12px 16px', paddingLeft: '40px', border: '1px solid rgba(11, 40, 73, 0.1)', borderRadius: '10px', fontSize: '14px', outline: 'none', background: 'rgba(255, 255, 255, 0.7)', transition: 'border-color 0.3s' }}
+                style={{ textAlign: !password || !/[\u0600-\u06FF]/.test(password[0]) ? 'left' : 'right', width: '100%', padding: '14px 16px', paddingLeft: '40px', border: '1px solid rgba(11, 40, 73, 0.1)', borderRadius: '10px', fontSize: '16px', outline: 'none', background: 'rgba(255, 255, 255, 0.7)', transition: 'border-color 0.3s' }}
                 onFocus={(e) => e.target.style.borderColor = '#15b47a'}
                 onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.1)'}
               />
@@ -189,7 +189,7 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
             </div>
           </div>
 
-          <Button type="submit" disabled={loading} variant="gradient" style={{ padding: '12px', fontWeight: 'bold', marginTop: '8px' }}>
+          <Button type="submit" disabled={loading} variant="gradient" style={{ padding: '14px 12px', fontWeight: 'bold', fontSize: '16px', marginTop: '8px' }}>
             {loading 
               ? (lang === 'ar' ? 'جاري التحميل...' : 'Loading...') 
               : isSignUp 
@@ -199,7 +199,7 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
         </form>
 
         {/* Divider */}
-        <div className="auth-divider auth-fade-in" style={{ display: 'flex', alignItems: 'center', margin: '24px 0', color: 'rgba(11, 40, 73, 0.4)', fontSize: '12px' }}>
+        <div className="auth-divider auth-fade-in" style={{ display: 'flex', alignItems: 'center', margin: '24px 0', color: 'rgba(11, 40, 73, 0.4)', fontSize: '13px' }}>
           <div style={{ flex: 1, height: '1px', background: 'rgba(11, 40, 73, 0.1)' }}></div>
           <span style={{ padding: '0 10px' }}>
             {lang === 'ar' ? 'أو عبر وسائل التواصل' : 'Or sign in with'}

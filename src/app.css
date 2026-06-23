@@ -2753,7 +2753,9 @@ div {
 
 .lang-circle-btn:hover {
   transform: scale(1.08);
-  box-shadow: 0 4px 12px rgba(21, 180, 122, 0.3);
+  box-shadow: 0 4px 12px rgba(21, 180, 122, 0.45);
+  border-color: #15b47a !important;
+  color: #ffffff !important;
 }
 
 .lang-circle-btn:active {

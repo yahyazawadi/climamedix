@@ -79,7 +79,7 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
 
   return (
     <div className="auth-page-container">
-      <div className="auth-split-wrapper" style={{ direction: lang === 'ar' ? 'ltr' : 'rtl' }}>
+      <div className="auth-split-wrapper" style={{ direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
         <div className="auth-form-side" style={{ direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
           <GlassCard className="auth-card" style={{ maxWidth: '480px', width: '100%', padding: '40px 30px', color: '#0b2849', position: 'relative', overflow: 'hidden' }}>
         

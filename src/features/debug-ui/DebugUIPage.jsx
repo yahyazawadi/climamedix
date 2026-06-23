@@ -12,10 +12,10 @@ import training4 from '../../assets/training_4.png';
 
 export function DebugUIPage() {
   const containerRef = useRef(null);
-  
+
   // State for Concept 1 (Milestones)
   const [selectedMilestone, setSelectedMilestone] = useState(0);
-  
+
   // State for Concept 2 (Metrics)
   const [activeMetric, setActiveMetric] = useState('temp');
 
@@ -121,7 +121,7 @@ export function DebugUIPage() {
   const [activeHotspot, setActiveHotspot] = useState(null);
 
   // State for Concept 28 (ClimaBot AI Assistant)
-  const [botChat, setBotChat] = useState([ { sender: 'bot', text: 'أهلاً بك! كيف يمكنني مساعدتك في مجال المناخ والصحة؟' } ]);
+  const [botChat, setBotChat] = useState([{ sender: 'bot', text: 'أهلاً بك! كيف يمكنني مساعدتك في مجال المناخ والصحة؟' }]);
   const [isBotTyping, setIsBotTyping] = useState(false);
 
   // State for Concept 29 (Resource Library Download Center)
@@ -182,7 +182,7 @@ export function DebugUIPage() {
       .to(slideBg, { scale: 1, opacity: 1, duration: 0.4, ease: 'power2.out' }, '-=0.4');
   };
 
-  // State for Concept 32: Minimalist Map Window Widget (using Leaflet Map API)
+  // State for Concept 32: Minimalist Map Window Widget (using Mapbox Map API)
   const [mapPointsJson, setMapPointsJson] = useState(JSON.stringify({
     "excludedCountries": ["israel"],
     "points": [
@@ -197,7 +197,7 @@ export function DebugUIPage() {
   const [jsonParseError, setJsonParseError] = useState(null);
   const [parsedMapPoints, setParsedMapPoints] = useState([]);
   const [excludedCountries, setExcludedCountries] = useState([]);
-  const [leafletLoaded, setLeafletLoaded] = useState(false);
+  const [mapboxLoaded, setMapboxLoaded] = useState(false);
 
   // Live Map Theme Configuration State
   const [mapTheme, setMapTheme] = useState({
@@ -244,18 +244,18 @@ export function DebugUIPage() {
     }
 
     if (window.mapboxgl) {
-      setLeafletLoaded(true);
+      setMapboxLoaded(true);
     } else {
       let script = document.querySelector('script[src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"]');
       if (!script) {
         script = document.createElement('script');
         script.src = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
-        script.onload = () => setLeafletLoaded(true);
+        script.onload = () => setMapboxLoaded(true);
         document.head.appendChild(script);
       } else {
         const checkM = setInterval(() => {
           if (window.mapboxgl) {
-            setLeafletLoaded(true);
+            setMapboxLoaded(true);
             clearInterval(checkM);
           }
         }, 100);
@@ -272,13 +272,13 @@ export function DebugUIPage() {
 
   // Initialize Mapbox and Render Markers
   useEffect(() => {
-    if (!leafletLoaded) return;
+    if (!mapboxLoaded) return;
 
     if (!mapInstanceRef.current) {
       window.mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
-      
+
       mapInstanceRef.current = new window.mapboxgl.Map({
-        container: 'leaflet-map-container',
+        container: 'mapbox-map-container',
         style: 'mapbox://styles/mapbox/light-v11',
         center: [38.0, 28.0],
         zoom: 4,
@@ -287,46 +287,46 @@ export function DebugUIPage() {
 
       mapInstanceRef.current.addControl(new window.mapboxgl.NavigationControl(), 'top-right');
     }
-  }, [leafletLoaded]);
+  }, [mapboxLoaded]);
 
   // Apply Live Map Theme Configuration
   useEffect(() => {
-    if (!mapInstanceRef.current || !leafletLoaded) return;
-    
+    if (!mapInstanceRef.current || !mapboxLoaded) return;
+
     const applyColors = () => {
       const style = mapInstanceRef.current.getStyle();
       if (style && style.layers) {
-         style.layers.forEach(layer => {
-           if (layer.id.includes('water')) {
-             if (layer.type === 'fill') {
-               mapInstanceRef.current.setPaintProperty(layer.id, 'fill-color', mapTheme.water_layer);
-               mapInstanceRef.current.setPaintProperty(layer.id, 'fill-opacity', 1);
-             } else if (layer.type === 'line') {
-               mapInstanceRef.current.setPaintProperty(layer.id, 'line-color', mapTheme.water_layer);
-             }
-           } else {
-             if (layer.type === 'background') {
-               mapInstanceRef.current.setPaintProperty(layer.id, 'background-color', mapTheme.land_layer);
-               mapInstanceRef.current.setPaintProperty(layer.id, 'background-opacity', 1);
-             } else if (layer.type === 'fill') {
-               mapInstanceRef.current.setPaintProperty(layer.id, 'fill-color', mapTheme.land_layer);
-               mapInstanceRef.current.setPaintProperty(layer.id, 'fill-opacity', 1);
-             } else if (layer.type === 'hillshade' || layer.type === 'raster') {
-               mapInstanceRef.current.setLayoutProperty(layer.id, 'visibility', 'none');
-             } else if (layer.type === 'symbol') {
-               if (layer.paint && layer.paint['text-color']) {
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'text-color', mapTheme.text_labels);
-               }
-               if (layer.paint && layer.paint['text-halo-color']) {
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'text-halo-color', mapTheme.text_halo_shadows);
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'text-halo-width', 1.5);
-               }
-             } else if (layer.type === 'line' && (layer.id.includes('road') || layer.id.includes('boundary') || layer.id.includes('admin'))) {
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'line-color', mapTheme.borders_and_roads);
-                 mapInstanceRef.current.setPaintProperty(layer.id, 'line-width', 1.5);
-             }
-           }
-         });
+        style.layers.forEach(layer => {
+          if (layer.id.includes('water')) {
+            if (layer.type === 'fill') {
+              mapInstanceRef.current.setPaintProperty(layer.id, 'fill-color', mapTheme.water_layer);
+              mapInstanceRef.current.setPaintProperty(layer.id, 'fill-opacity', 1);
+            } else if (layer.type === 'line') {
+              mapInstanceRef.current.setPaintProperty(layer.id, 'line-color', mapTheme.water_layer);
+            }
+          } else {
+            if (layer.type === 'background') {
+              mapInstanceRef.current.setPaintProperty(layer.id, 'background-color', mapTheme.land_layer);
+              mapInstanceRef.current.setPaintProperty(layer.id, 'background-opacity', 1);
+            } else if (layer.type === 'fill') {
+              mapInstanceRef.current.setPaintProperty(layer.id, 'fill-color', mapTheme.land_layer);
+              mapInstanceRef.current.setPaintProperty(layer.id, 'fill-opacity', 1);
+            } else if (layer.type === 'hillshade' || layer.type === 'raster') {
+              mapInstanceRef.current.setLayoutProperty(layer.id, 'visibility', 'none');
+            } else if (layer.type === 'symbol') {
+              if (layer.paint && layer.paint['text-color']) {
+                mapInstanceRef.current.setPaintProperty(layer.id, 'text-color', mapTheme.text_labels);
+              }
+              if (layer.paint && layer.paint['text-halo-color']) {
+                mapInstanceRef.current.setPaintProperty(layer.id, 'text-halo-color', mapTheme.text_halo_shadows);
+                mapInstanceRef.current.setPaintProperty(layer.id, 'text-halo-width', 1.5);
+              }
+            } else if (layer.type === 'line' && (layer.id.includes('road') || layer.id.includes('boundary') || layer.id.includes('admin'))) {
+              mapInstanceRef.current.setPaintProperty(layer.id, 'line-color', mapTheme.borders_and_roads);
+              mapInstanceRef.current.setPaintProperty(layer.id, 'line-width', 1.5);
+            }
+          }
+        });
       }
     };
 
@@ -335,11 +335,11 @@ export function DebugUIPage() {
     } else {
       mapInstanceRef.current.once('style.load', applyColors);
     }
-  }, [mapTheme, leafletLoaded]);
+  }, [mapTheme, mapboxLoaded]);
 
   // Update Markers when points or theme changes
   useEffect(() => {
-    if (!leafletLoaded || !mapInstanceRef.current) return;
+    if (!mapboxLoaded || !mapInstanceRef.current) return;
 
     // Clear old markers
     markersRef.current.forEach(marker => {
@@ -352,7 +352,7 @@ export function DebugUIPage() {
       parsedMapPoints.forEach(pt => {
         if (typeof pt.lat === 'number' && typeof pt.lng === 'number') {
           const markerColor = pt.status === 'critical' ? mapTheme.critical_markers : mapTheme.safe_markers;
-          
+
           const el = document.createElement('div');
           el.innerHTML = `
             <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; cursor: pointer;">
@@ -373,7 +373,7 @@ export function DebugUIPage() {
         }
       });
     }
-  }, [leafletLoaded, parsedMapPoints, mapTheme]);
+  }, [mapboxLoaded, parsedMapPoints, mapTheme]);
 
   const teamMembers = [
     { name: 'د. ياسمين السيد', role: 'خبير الصحة العامة والمناخ', bio: 'باحثة دولية في تأثيرات الحرارة المرتفعة على صحة الأطفال.' },
@@ -452,7 +452,7 @@ export function DebugUIPage() {
         stagger: 0.1,
         ease: 'power3.out'
       });
-      
+
       // Pop in buttons
       gsap.from('.debug-btn-wrapper', {
         scale: 0.8,
@@ -492,7 +492,7 @@ export function DebugUIPage() {
 
       animateChart();
     }, containerRef);
-    
+
     // Countdown Timer Simulation
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -514,7 +514,7 @@ export function DebugUIPage() {
   // GSAP animation for milestone description changes
   const handleMilestoneClick = (index) => {
     setSelectedMilestone(index);
-    gsap.fromTo('.milestone-detail', 
+    gsap.fromTo('.milestone-detail',
       { opacity: 0, y: 15 },
       { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }
     );
@@ -621,7 +621,7 @@ export function DebugUIPage() {
     } else {
       setVoteCount(prev => prev + 1);
       setHasVoted(true);
-      gsap.fromTo('.vote-badge', 
+      gsap.fromTo('.vote-badge',
         { scale: 1.3 },
         { scale: 1, duration: 0.3, ease: 'power2.out' }
       );
@@ -717,9 +717,9 @@ export function DebugUIPage() {
 
   // Concept 16: Carbon Emissions Calculator logic
   const handleCalculateEmissions = () => {
-    const scope1 = anestheticVal * 2.1; 
-    const scope2 = electricityVal * 0.47; 
-    const scope3 = wasteVal * 0.85; 
+    const scope1 = anestheticVal * 2.1;
+    const scope2 = electricityVal * 0.47;
+    const scope3 = wasteVal * 0.85;
     const total = scope1 + scope2 + scope3;
 
     setCalculatedEmissions({
@@ -834,7 +834,7 @@ export function DebugUIPage() {
   const startImpactCounter = () => {
     if (statsStarted) return;
     setStatsStarted(true);
-    
+
     const targetObj = { learners: 0, co2: 0, countries: 0 };
     gsap.to(targetObj, {
       learners: 5240,
@@ -883,9 +883,10 @@ export function DebugUIPage() {
 
   return (
     <main ref={containerRef} style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', padding: '160px 20px 80px', direction: 'rtl', fontFamily: "'Tajawal', sans-serif" }}>
-      
+
       {/* CSS Stylesheet Injector for Premium Aesthetics */}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .imagination-card {
           background: rgba(255, 255, 255, 0.45);
           backdrop-filter: blur(25px);
@@ -1365,7 +1366,7 @@ export function DebugUIPage() {
           to { opacity: 1; transform: translateY(0); }
         }
       `}} />
-      
+
       {/* PWA simulated Notification banner if active */}
       {activeNotification && (
         <div className="pwa-push-banner">
@@ -1388,7 +1389,7 @@ export function DebugUIPage() {
       <img src={leftSvg} alt="" className="debug-floating-svg" style={{ position: 'absolute', top: '50%', left: 0, zIndex: -1, height: '300px', opacity: 0.8 }} />
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        
+
         {/* ==========================================
             SECTION 0: UI ELEMENTS LIBRARY (NEW BUTTONS & CARDS)
             ========================================== */}
@@ -1404,7 +1405,7 @@ export function DebugUIPage() {
             1. أزرار تفاعلية جديدة (New Interactive Buttons)
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-            
+
             <div id="feature-card-30" className="imagination-card hover-id-container hover-id-container" style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
               <button id="btn-neon-primary" className="btn-showcase btn-neon">زر النيون الأخضر</button>
               <div className="library-label">id="btn-neon-primary"</div>
@@ -1436,7 +1437,7 @@ export function DebugUIPage() {
             2. أنماط البطاقات المرجعية (Card Variations)
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-            
+
             <div id="card-glassmorphism-base" className="hover-id-container" style={{ position: 'relative', background: 'rgba(255,255,255,0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: '16px', padding: '20px', boxShadow: '0 8px 32px rgba(0,76,109,0.1)' }}>
               <h4 style={{ color: '#0b2849', margin: '0 0 10px' }}>البطاقة الزجاجية الأساسية</h4>
               <p style={{ fontSize: '13px', color: 'rgba(11,40,73,0.7)', margin: 0 }}>تستخدم في الخلفيات المعقدة.</p>
@@ -1466,8 +1467,8 @@ export function DebugUIPage() {
 
         <h2 style={{ color: '#0b2849', fontSize: '28px', borderBottom: '2px solid #15b47a', paddingBottom: '10px', marginBottom: '30px' }}>البطاقات (Cards)</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', marginBottom: '80px' }}>
-          
-          <GlassCard id="glass-card-1" className="hover-id-container" className="debug-card" style={{ padding: '30px', textAlign: 'center' }}>
+
+          <GlassCard id="glass-card-1" className="hover-id-container" style={{ padding: '30px', textAlign: 'center' }}>
             <h3 style={{ color: '#0b2849', fontSize: '22px', marginBottom: '15px' }}>GlassCard (Default)</h3>
             <p style={{ color: '#0b2849', fontSize: '16px' }}>Component: <code>&lt;GlassCard&gt;</code></p>
             <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '14px', marginTop: '10px' }}>بطاقة زجاجية شفافة تُستخدم لعرض المحتوى بشكل أنيق.</p>
@@ -1489,7 +1490,7 @@ export function DebugUIPage() {
 
         <h2 style={{ color: '#0b2849', fontSize: '28px', borderBottom: '2px solid #15b47a', paddingBottom: '10px', marginBottom: '30px' }}>الأزرار (Buttons)</h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px', justifyContent: 'center', alignItems: 'center', marginBottom: '100px' }}>
-          
+
           <div className="debug-btn-wrapper" style={{ textAlign: 'center' }}>
             <Button variant="gradient">زر متدرج</Button>
             <p style={{ color: '#0b2849', fontSize: '14px', marginTop: '15px' }}><code>variant="gradient"</code></p>
@@ -1525,7 +1526,7 @@ export function DebugUIPage() {
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '40px', marginBottom: '60px' }}>
-            
+
             {/* Concept 1: Interactive Learning Path */}
             <div id="feature-card-1" className="imagination-card hover-id-container">
               <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '8px', color: '#0b2849', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1538,8 +1539,8 @@ export function DebugUIPage() {
               <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 10px', marginBottom: '30px' }}>
                 <div className="glow-line"></div>
                 {milestones.map((m, idx) => (
-                  <div 
-                    key={idx} 
+                  <div
+                    key={idx}
                     className={`milestone-node ${selectedMilestone === idx ? 'active' : ''}`}
                     onClick={() => handleMilestoneClick(idx)}
                   >
@@ -1571,19 +1572,19 @@ export function DebugUIPage() {
               </p>
 
               <div style={{ display: 'flex', gap: '10px', marginBottom: '25px' }}>
-                <button 
+                <button
                   className={`tab-btn ${activeMetric === 'temp' ? 'active' : ''}`}
                   onClick={() => handleMetricTabClick('temp')}
                 >
                   الحرارة
                 </button>
-                <button 
+                <button
                   className={`tab-btn ${activeMetric === 'co2' ? 'active' : ''}`}
                   onClick={() => handleMetricTabClick('co2')}
                 >
                   الانبعاثات
                 </button>
-                <button 
+                <button
                   className={`tab-btn ${activeMetric === 'water' ? 'active' : ''}`}
                   onClick={() => handleMetricTabClick('water')}
                 >
@@ -1598,11 +1599,11 @@ export function DebugUIPage() {
                     تنبيه حي
                   </span>
                 </div>
-                
+
                 <div style={{ fontSize: '48px', fontWeight: 'bold', color: metricsData[activeMetric].color, marginBottom: '8px' }}>
                   {metricsData[activeMetric].val}
                 </div>
-                
+
                 <div style={{ fontSize: '15px', opacity: 0.9, lineHeight: '1.4', marginBottom: '15px' }}>
                   {metricsData[activeMetric].label}
                 </div>
@@ -1624,7 +1625,7 @@ export function DebugUIPage() {
                     لوحة تفاعلية مصممة خصيصاً للباحثين لربط الأبحاث المنشورة محلياً بمؤشرات أداء الاستجابة. هذه اللوحة
                     تستخدم حركات ميكروية لتبسيط قراءة البيانات المعقدة للمستخدمين.
                   </p>
-                  
+
                   <div style={{ display: 'flex', gap: '15px' }}>
                     <Button variant="gradient" className="imagination-pulse">تحميل التقرير الكامل</Button>
                     <Button variant="outline">عرض خريطة التلوث</Button>
@@ -1661,7 +1662,7 @@ export function DebugUIPage() {
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '40px', marginBottom: '60px' }}>
-            
+
             {/* Concept 4: Arab Countries Map Hub Mockup */}
             <div id="feature-card-4" className="imagination-card hover-id-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
@@ -1674,7 +1675,7 @@ export function DebugUIPage() {
               </div>
 
               <div className="map-interactive-container" style={{ marginBottom: '20px' }}>
-                
+
                 {/* Jordan Node */}
                 <div className="country-node" style={{ top: '110px', right: '230px' }} onClick={() => handleCountryClick('Jordan')}>
                   <div className="country-node-dot"></div>
@@ -1735,7 +1736,7 @@ export function DebugUIPage() {
                 <div style={{ fontSize: '13px', color: '#004c6d', fontWeight: 'bold', marginBottom: '8px' }}>
                   سؤال الدورة: ما هو العامل المناخي الأسرع تأثيراً على زيادة انتشار ناقلات الملاريا؟
                 </div>
-                
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <button className="quiz-option" onClick={() => handleQuizAnswer(false)}>
                     أ. ارتفاع مستويات الضوضاء في المدن
@@ -1753,7 +1754,7 @@ export function DebugUIPage() {
                 {quizStatus === 'idle' && (
                   <span style={{ fontSize: '14px', color: 'rgba(11, 40, 73, 0.5)', fontStyle: 'italic' }}>يرجى اختيار إجابة من الأعلى...</span>
                 )}
-                
+
                 {quizStatus === 'correct' && (
                   <div className="quiz-feedback-banner" style={{ background: 'rgba(21, 180, 122, 0.12)', border: '1px solid #15b47a', color: '#15b47a', padding: '12px 24px', borderRadius: '12px', fontWeight: 'bold', width: '100%', textAlign: 'center' }}>
                     تم التحقق بنجاح من إجابتك وتسجيل تقدمك.
@@ -1793,7 +1794,7 @@ export function DebugUIPage() {
                   .map((pub, idx) => (
                     <div className="card-3d-scene" key={idx}>
                       <div className="card-3d-inner">
-                        
+
                         {/* Front Side */}
                         <div className="card-3d-face card-3d-front">
                           <span style={{ fontSize: '12px', color: '#15b47a', fontWeight: 'bold', textTransform: 'uppercase' }}>
@@ -1814,7 +1815,7 @@ export function DebugUIPage() {
                             <div style={{ fontSize: '18px', fontWeight: 'bold', margin: '5px 0' }}>{pub.author}</div>
                             <span style={{ fontSize: '13px', opacity: 0.8 }}>سنة الإصدار والاعتماد: {pub.year}</span>
                           </div>
-                          
+
                           <Button variant="gradient" style={{ padding: '8px 16px', fontSize: '12px', width: 'fit-content', alignSelf: 'flex-end' }}>
                             تحميل المسودة الطبية (PDF)
                           </Button>
@@ -1842,7 +1843,7 @@ export function DebugUIPage() {
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '40px', marginBottom: '60px' }}>
-            
+
             {/* Concept 7: Holographic Certificate Generator */}
             <div id="feature-card-7" className="imagination-card hover-id-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
@@ -1854,8 +1855,8 @@ export function DebugUIPage() {
                 </p>
 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '25px' }}>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={certName}
                     onInput={(e) => setCertName(e.target.value)}
                     placeholder="اسم المتدرب..."
@@ -1886,7 +1887,7 @@ export function DebugUIPage() {
                       لاجتيازه بنجاح مسار: <br /><strong>{certCourse}</strong>
                     </div>
                   </div>
-                  
+
                   {/* Holographic Seal Stamp with bounce effect */}
                   <div className="cert-stamp">
                     ClimaMedix<br />Verified
@@ -1936,7 +1937,7 @@ export function DebugUIPage() {
 
                     <h4 style={{ fontSize: '22px', fontWeight: 'bold', color: '#0b2849', marginBottom: '15px' }}>{selectedOpp.title}</h4>
                     <p style={{ fontSize: '15px', lineHeight: '1.6', color: 'rgba(11, 40, 73, 0.8)', marginBottom: '30px' }}>{selectedOpp.desc}</p>
-                    
+
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                       <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#004c6d' }}>الاسم الكامل</label>
                       <input type="text" style={{ padding: '10px 15px', borderRadius: '8px', border: '1px solid rgba(11, 40, 73, 0.2)' }} />
@@ -1992,33 +1993,33 @@ export function DebugUIPage() {
                     return (
                       <g key={idx}>
                         {/* Interactive Bar */}
-                        <rect 
+                        <rect
                           className="chart-bar"
-                          x={x} 
-                          y={y} 
-                          width={barWidth} 
-                          height={height} 
-                          fill="url(#barGradient)" 
-                          rx="6" 
+                          x={x}
+                          y={y}
+                          width={barWidth}
+                          height={height}
+                          fill="url(#barGradient)"
+                          rx="6"
                           style={{ transition: 'all 0.5s ease-out' }}
                         />
                         {/* Text Label */}
-                        <text 
-                          x={x + barWidth / 2} 
-                          y="155" 
-                          fill="rgba(11, 40, 73, 0.6)" 
-                          fontSize="10" 
+                        <text
+                          x={x + barWidth / 2}
+                          y="155"
+                          fill="rgba(11, 40, 73, 0.6)"
+                          fontSize="10"
                           textAnchor="middle"
                           style={{ fontFamily: "'Tajawal', sans-serif" }}
                         >
                           {d.label}
                         </text>
                         {/* Value Hover Tooltip Mock */}
-                        <text 
-                          x={x + barWidth / 2} 
-                          y={y - 8} 
-                          fill="#004c6d" 
-                          fontSize="10" 
+                        <text
+                          x={x + barWidth / 2}
+                          y={y - 8}
+                          fill="#004c6d"
+                          fontSize="10"
                           fontWeight="bold"
                           textAnchor="middle"
                           style={{ fontFamily: "'Tajawal', sans-serif" }}
@@ -2056,7 +2057,7 @@ export function DebugUIPage() {
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '40px', marginBottom: '60px' }}>
-            
+
             {/* Concept 10: Event Countdown & Ticket Generator */}
             <div id="feature-card-10" className="imagination-card hover-id-container" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
@@ -2133,7 +2134,7 @@ export function DebugUIPage() {
                 <div style={{ background: '#ffffff', border: '1px solid rgba(11, 40, 73, 0.1)', borderRadius: '14px', padding: '16px', marginBottom: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                     <span style={{ fontWeight: 'bold', color: '#004c6d', fontSize: '14px' }}>أ. يمنى مراد</span>
-                    <button 
+                    <button
                       onClick={handleCommunityVote}
                       className="vote-badge"
                       style={{ background: hasVoted ? '#15b47a' : 'rgba(11, 40, 73, 0.05)', color: hasVoted ? '#ffffff' : '#0b2849', border: 'none', borderRadius: '20px', padding: '4px 12px', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px', transition: 'all 0.2s ease' }}
@@ -2159,8 +2160,8 @@ export function DebugUIPage() {
 
               {/* Add Comment Input Form */}
               <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '10px' }}>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={newCommentText}
                   onInput={(e) => setNewCommentText(e.target.value)}
                   placeholder="اكتب ردك ومساهمتك البيئية..."
@@ -2189,8 +2190,8 @@ export function DebugUIPage() {
               {moderationItems.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {moderationItems.map((item) => (
-                    <div 
-                      key={item.id} 
+                    <div
+                      key={item.id}
                       className={`mod-item-${item.id}`}
                       style={{ background: 'rgba(255, 255, 255, 0.65)', border: '1px solid rgba(11, 40, 73, 0.1)', borderRadius: '16px', padding: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}
                     >
@@ -2205,16 +2206,16 @@ export function DebugUIPage() {
                       </div>
 
                       <div style={{ display: 'flex', gap: '10px' }}>
-                        <Button 
-                          variant="gradient" 
-                          style={{ padding: '8px 16px', fontSize: '13px', background: '#15b47a' }} 
+                        <Button
+                          variant="gradient"
+                          style={{ padding: '8px 16px', fontSize: '13px', background: '#15b47a' }}
                           onClick={() => handleModerationAction(item.id, 'approve')}
                         >
                           اعتماد ونشر
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          style={{ padding: '8px 16px', fontSize: '13px', borderColor: '#ff4d4d', color: '#ff4d4d' }} 
+                        <Button
+                          variant="outline"
+                          style={{ padding: '8px 16px', fontSize: '13px', borderColor: '#ff4d4d', color: '#ff4d4d' }}
                           onClick={() => handleModerationAction(item.id, 'reject')}
                         >
                           رفض الطلب
@@ -2295,8 +2296,8 @@ export function DebugUIPage() {
                     محتويات وحدة المناخ والصحة (3 دروس)
                   </div>
                   {courseLessons.map((lesson, idx) => (
-                    <button 
-                      key={idx} 
+                    <button
+                      key={idx}
                       onClick={() => handleLessonSelect(lesson)}
                       className={`lesson-nav-btn ${currentLesson === lesson.title ? 'active' : ''}`}
                     >
@@ -2327,8 +2328,8 @@ export function DebugUIPage() {
 
                 {/* Search box & filter tags */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={searchQuery}
                     onInput={(e) => setSearchQuery(e.target.value)}
                     placeholder="ابحث بالعنوان أو الكاتب..."
@@ -2479,29 +2480,29 @@ export function DebugUIPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
                   <div>
                     <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#004c6d', display: 'block', marginBottom: '5px' }}>الكهرباء (kWh)</label>
-                    <input 
-                      type="number" 
-                      value={electricityVal} 
-                      onInput={(e) => setElectricityVal(Number(e.target.value))} 
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(11, 40, 73, 0.15)' }} 
+                    <input
+                      type="number"
+                      value={electricityVal}
+                      onInput={(e) => setElectricityVal(Number(e.target.value))}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(11, 40, 73, 0.15)' }}
                     />
                   </div>
                   <div>
                     <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#004c6d', display: 'block', marginBottom: '5px' }}>نفايات طبية (kg)</label>
-                    <input 
-                      type="number" 
-                      value={wasteVal} 
-                      onInput={(e) => setWasteVal(Number(e.target.value))} 
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(11, 40, 73, 0.15)' }} 
+                    <input
+                      type="number"
+                      value={wasteVal}
+                      onInput={(e) => setWasteVal(Number(e.target.value))}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(11, 40, 73, 0.15)' }}
                     />
                   </div>
                   <div style={{ gridColumn: 'span 2' }}>
                     <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#004c6d', display: 'block', marginBottom: '5px' }}>مخدر طبي غازي مستهلك (لتر)</label>
-                    <input 
-                      type="number" 
-                      value={anestheticVal} 
-                      onInput={(e) => setAnestheticVal(Number(e.target.value))} 
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(11, 40, 73, 0.15)' }} 
+                    <input
+                      type="number"
+                      value={anestheticVal}
+                      onInput={(e) => setAnestheticVal(Number(e.target.value))}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(11, 40, 73, 0.15)' }}
                     />
                   </div>
                 </div>
@@ -2516,7 +2517,7 @@ export function DebugUIPage() {
                   <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#0b2849', marginBottom: '10px', textAlign: 'center' }}>
                     مجموع الانبعاثات الكلي: {calculatedEmissions.total} كجم من مكافئ ثاني أكسيد الكربون
                   </div>
-                  
+
                   {/* Visual SVG chart breakdown */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div>
@@ -2575,8 +2576,8 @@ export function DebugUIPage() {
                     {layoutLang === 'ar' ? 'تأثير البيئة على صحة الإنسان' : 'Environmental Impact on Human Health'}
                   </h4>
                   <p style={{ fontSize: '13px', color: 'rgba(11,40,73,0.85)', lineHeight: '1.5', margin: 0 }}>
-                    {layoutLang === 'ar' ? 
-                      'تساهم مستويات الحرارة المرتفعة وتلوث الغلاف الجوي بزيادة نسبة الحساسية والأمراض الصدرية المزمنة في دول الشرق الأوسط بشكل متسارع.' : 
+                    {layoutLang === 'ar' ?
+                      'تساهم مستويات الحرارة المرتفعة وتلوث الغلاف الجوي بزيادة نسبة الحساسية والأمراض الصدرية المزمنة في دول الشرق الأوسط بشكل متسارع.' :
                       'Rising global temperatures and atmospheric pollution actively accelerate the rates of asthma and chronic respiratory diseases in Middle Eastern countries.'
                     }
                   </p>
@@ -2651,7 +2652,7 @@ export function DebugUIPage() {
               <p style={{ fontSize: '14px', color: 'rgba(11, 40, 73, 0.7)', marginBottom: '20px' }}>
                 اختبر تجربة القراءة وتغيير حجم الخطوط لذوي الاحتياجات البصرية
               </p>
-              
+
               <div style={{ background: 'rgba(255,255,255,0.7)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(11, 40, 73, 0.1)', maxHeight: '180px', overflowY: 'auto' }}>
                 <h4 style={{ fontSize: (18 * textSizeMultiplier) + 'px', color: '#004c6d', marginBottom: '10px', transition: 'font-size 0.3s' }}>العلاقة بين التلوث وأمراض القلب</h4>
                 <p style={{ fontSize: (14 * textSizeMultiplier) + 'px', color: '#0b2849', lineHeight: '1.8', transition: 'font-size 0.3s' }}>
@@ -2670,7 +2671,7 @@ export function DebugUIPage() {
                   {isOffline ? 'مقطوع الاتصال (Offline)' : 'متصل بالشبكة (Online)'}
                 </button>
               </div>
-              
+
               <Button variant="outline" style={{ width: '100%', marginBottom: '15px' }} onClick={handleOfflineAction}>
                 {isOffline ? 'إرسال طلب (سيتم حفظه محلياً)' : 'إرسال طلب'}
               </Button>
@@ -2722,7 +2723,7 @@ export function DebugUIPage() {
                   <>
                     <h4 style={{ fontSize: '18px', color: '#0b2849', marginBottom: '15px' }}>تأكيد الرمز السري OTP</h4>
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '15px', direction: 'ltr' }}>
-                      {[1,2,3,4].map(i => <input key={i} type="text" maxLength={1} style={{ width: '40px', height: '40px', textAlign: 'center', fontSize: '18px', borderRadius: '8px', border: '1px solid rgba(11, 40, 73, 0.2)' }} />)}
+                      {[1, 2, 3, 4].map(i => <input key={i} type="text" maxLength={1} style={{ width: '40px', height: '40px', textAlign: 'center', fontSize: '18px', borderRadius: '8px', border: '1px solid rgba(11, 40, 73, 0.2)' }} />)}
                     </div>
                     <Button variant="gradient" onClick={handleNextAuthStep}>تأكيد الدخول</Button>
                   </>
@@ -2788,11 +2789,11 @@ export function DebugUIPage() {
               <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '15px', color: '#0b2849' }}>
                 دليل خبراء المناخ والصحة (فريق العمل)
               </h3>
-              
+
               <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
                 {teamMembers.map((member, idx) => (
-                  <button 
-                    key={idx} 
+                  <button
+                    key={idx}
                     onClick={() => handleTeamClick(idx)}
                     style={{ flex: 1, padding: '10px', borderRadius: '12px', border: activeTeamMember === idx ? '2px solid #15b47a' : '1px solid rgba(11,40,73,0.1)', background: activeTeamMember === idx ? 'rgba(21, 180, 122, 0.1)' : 'rgba(255,255,255,0.5)', cursor: 'pointer', transition: 'all 0.2s' }}
                   >
@@ -2816,11 +2817,11 @@ export function DebugUIPage() {
               <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '15px', color: '#0b2849' }}>
                 المنهج الأكاديمي (Curriculum Accordion)
               </h3>
-              
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {curriculumModules.map((mod) => (
                   <div key={mod.id} style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(11, 40, 73, 0.1)', borderRadius: '12px', overflow: 'hidden' }}>
-                    <button 
+                    <button
                       onClick={() => handleAccordionClick(mod.id)}
                       style={{ width: '100%', padding: '15px', background: 'none', border: 'none', textAlign: 'right', fontWeight: 'bold', color: '#004c6d', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                     >
@@ -2842,10 +2843,10 @@ export function DebugUIPage() {
               <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '15px', color: '#0b2849', textAlign: 'center' }}>
                 منصة التواصل السريع (Contact Hub)
               </h3>
-              
+
               <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', padding: '20px' }}>
                 {['واتساب', 'لينكد إن', 'البريد الإلكتروني'].map((social, idx) => (
-                  <div 
+                  <div
                     key={idx}
                     onMouseEnter={() => setSocialHover(idx)}
                     onMouseLeave={() => setSocialHover(null)}
@@ -2873,19 +2874,19 @@ export function DebugUIPage() {
                   تحديث
                 </Button>
               </div>
-              
+
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', height: '140px' }}>
                 <svg width="120" height="120" viewBox="0 0 120 120" style={{ transform: 'rotate(-90deg)' }}>
                   <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(11,40,73,0.1)" strokeWidth="12" />
-                  <circle 
-                    cx="60" 
-                    cy="60" 
-                    r="50" 
-                    fill="none" 
-                    stroke="#15b47a" 
-                    strokeWidth="12" 
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="50"
+                    fill="none"
+                    stroke="#15b47a"
+                    strokeWidth="12"
                     strokeLinecap="round"
-                    strokeDasharray="314.159" 
+                    strokeDasharray="314.159"
                     strokeDashoffset={314.159 - (314.159 * donutProgress) / 100}
                     style={{ transition: 'stroke-dashoffset 0.1s' }}
                   />
@@ -2926,7 +2927,7 @@ export function DebugUIPage() {
                 <svg viewBox="0 0 400 200" style={{ width: '100%', height: '100%', opacity: 0.1 }}>
                   <path d="M50,100 Q100,50 200,100 T350,100" fill="none" stroke="#0b2849" strokeWidth="20" strokeLinecap="round" />
                 </svg>
-                
+
                 {/* Hotspots */}
                 <div style={{ position: 'absolute', top: '40%', left: '30%', cursor: 'pointer' }} onClick={() => handleHotspotClick('مصر')}>
                   <div style={{ width: '16px', height: '16px', background: '#ff4d4d', borderRadius: '50%', boxShadow: '0 0 10px #ff4d4d' }}></div>
@@ -2937,7 +2938,7 @@ export function DebugUIPage() {
                     </div>
                   )}
                 </div>
-                
+
                 <div style={{ position: 'absolute', top: '60%', left: '60%', cursor: 'pointer' }} onClick={() => handleHotspotClick('السعودية')}>
                   <div style={{ width: '16px', height: '16px', background: '#ff944d', borderRadius: '50%', boxShadow: '0 0 10px #ff944d' }}></div>
                   {activeHotspot === 'السعودية' && (
@@ -2983,7 +2984,7 @@ export function DebugUIPage() {
               <p style={{ fontSize: '13px', color: 'rgba(11, 40, 73, 0.7)', marginBottom: '15px' }}>
                 نموذج تفاعلي يعرض تقدم تحميل الملفات العلمية والإرشادات بصرياً.
               </p>
-              
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 {[
                   { id: 'doc1', title: 'إرشادات المستشفيات الخضراء 2026', size: '2.4 MB' },
@@ -2994,19 +2995,19 @@ export function DebugUIPage() {
                     {downloadProgress.id === doc.id && (
                       <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: `${downloadProgress.progress}%`, background: 'rgba(21, 180, 122, 0.1)', zIndex: 0, transition: 'width 0.1s' }}></div>
                     )}
-                    
+
                     <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
                         <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#0b2849' }}>{doc.title}</div>
                         <div style={{ fontSize: '11px', color: 'rgba(11, 40, 73, 0.5)', marginTop: '4px' }}>PDF Document • {doc.size}</div>
                       </div>
-                      <button 
+                      <button
                         onClick={() => handleDownload(doc.id)}
                         disabled={downloadProgress.id === doc.id}
                         style={{ background: downloadProgress.id === doc.id ? 'none' : downloadProgress.progress === 100 ? '#15b47a' : '#004c6d', color: downloadProgress.id === doc.id ? '#15b47a' : '#fff', border: downloadProgress.id === doc.id ? 'none' : 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
                       >
-                        {downloadProgress.id === doc.id 
-                          ? `${downloadProgress.progress}%` 
+                        {downloadProgress.id === doc.id
+                          ? `${downloadProgress.progress}%`
                           : downloadProgress.progress === 100 ? 'تم التحميل' : 'تحميل'}
                       </button>
                     </div>
@@ -3023,15 +3024,15 @@ export function DebugUIPage() {
               <p style={{ fontSize: '13px', color: localTheme === 'eco' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(11, 40, 73, 0.7)', marginBottom: '25px' }}>
                 تجربة تحويل الألوان بين المظهر العيادي (Clinical) والمظهر البيئي (Eco/Dark).
               </p>
-              
+
               <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
-                <button 
+                <button
                   onClick={() => localTheme !== 'clinical' && toggleLocalTheme()}
                   style={{ padding: '10px 20px', borderRadius: '12px', border: localTheme === 'clinical' ? '2px solid #004c6d' : '1px solid rgba(255,255,255,0.2)', background: localTheme === 'clinical' ? 'rgba(0, 76, 109, 0.1)' : 'transparent', color: localTheme === 'clinical' ? '#004c6d' : '#fff', fontWeight: 'bold', cursor: 'pointer' }}
                 >
                   Clinical Mode
                 </button>
-                <button 
+                <button
                   onClick={() => localTheme !== 'eco' && toggleLocalTheme()}
                   style={{ padding: '10px 20px', borderRadius: '12px', border: localTheme === 'eco' ? '2px solid #15b47a' : '1px solid rgba(11,40,73,0.2)', background: localTheme === 'eco' ? 'rgba(21, 180, 122, 0.1)' : 'transparent', color: localTheme === 'eco' ? '#15b47a' : '#0b2849', fontWeight: 'bold', cursor: 'pointer' }}
                 >
@@ -3048,7 +3049,7 @@ export function DebugUIPage() {
             <div id="feature-card-31" className="imagination-card hover-id-container" style={{ gridColumn: '1 / -1', padding: 0, overflow: 'hidden' }}>
               <div ref={slideContainerRef} className="geometric-carousel">
                 <img src={coursesData[activeCourseSlide].image} className="course-bg-img" alt={coursesData[activeCourseSlide].title} />
-                
+
                 {/* Triangular Effect Overlay */}
                 <div className="triangle-overlay">
                   <span style={{ fontSize: '12px', background: 'rgba(21, 180, 122, 0.2)', border: '1px solid #15b47a', color: '#15b47a', padding: '4px 10px', borderRadius: '20px', fontWeight: 'bold', marginBottom: '15px', width: 'fit-content' }}>
@@ -3073,7 +3074,7 @@ export function DebugUIPage() {
 
             {/* Concept 32: Minimalist Map Window Widget */}
             <GlassCard id="feature-card-32" className="imagination-card hover-id-container" style={{ gridColumn: '1 / -1', padding: '24px', color: '#0b2849' }}>
-              
+
               {/* Window Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(11,40,73,0.1)', paddingBottom: '12px', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -3092,12 +3093,12 @@ export function DebugUIPage() {
 
               {/* Window Content Layout */}
               <div style={{ display: 'flex', flexDirection: 'row-reverse', gap: '20px', flexWrap: 'wrap' }}>
-                
-                {/* Left Side (Real Leaflet Map View) */}
+
+                {/* Left Side (Real Mapbox Map View) */}
                 <div style={{ flex: '1.2', minWidth: '320px', position: 'relative', background: '#f4f8f7', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', height: '380px', overflow: 'hidden' }}>
-                  
-                  {/* Leaflet Container */}
-                  <div id="leaflet-map-container" style={{ width: '100%', height: '100%', zIndex: 1 }}></div>
+
+                  {/* Mapbox Container */}
+                  <div id="mapbox-map-container" style={{ width: '100%', height: '100%', zIndex: 1 }}></div>
 
                   {/* Active Tooltip Details */}
                   {activeMapPoint && (
@@ -3122,19 +3123,19 @@ export function DebugUIPage() {
                       <span style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold' }}>JSON متطابق ✓</span>
                     )}
                   </div>
-                  <textarea 
+                  <textarea
                     value={mapPointsJson}
                     onInput={(e) => setMapPointsJson(e.target.value)}
-                    style={{ 
-                      flex: 1, 
-                      minHeight: '260px', 
-                      background: 'rgba(255,255,255,0.6)', 
-                      border: jsonParseError ? '1px solid #ff4d4d' : '1px solid rgba(11,40,73,0.1)', 
-                      borderRadius: '8px', 
-                      padding: '12px', 
-                      color: '#0b2849', 
-                      fontFamily: 'monospace', 
-                      fontSize: '12px', 
+                    style={{
+                      flex: 1,
+                      minHeight: '260px',
+                      background: 'rgba(255,255,255,0.6)',
+                      border: jsonParseError ? '1px solid #ff4d4d' : '1px solid rgba(11,40,73,0.1)',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      color: '#0b2849',
+                      fontFamily: 'monospace',
+                      fontSize: '12px',
                       lineHeight: '1.5',
                       resize: 'vertical',
                       outline: 'none'
@@ -3164,15 +3165,15 @@ export function DebugUIPage() {
                       <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                         <label style={{ fontSize: '11px', color: '#15b47a', fontFamily: 'monospace', fontWeight: 'bold' }}>{key}</label>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <input 
-                            type="color" 
-                            value={pickerHex} 
+                          <input
+                            type="color"
+                            value={pickerHex}
                             onInput={(e) => setMapTheme(prev => ({ ...prev, [key]: e.target.value }))}
                             style={{ width: '24px', height: '24px', border: '1px solid rgba(11,40,73,0.2)', background: 'none', cursor: 'pointer', padding: 0, borderRadius: '4px' }}
                           />
-                          <input 
-                            type="text" 
-                            value={value} 
+                          <input
+                            type="text"
+                            value={value}
                             onInput={(e) => setMapTheme(prev => ({ ...prev, [key]: e.target.value }))}
                             style={{ flex: 1, background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(11,40,73,0.2)', color: '#0b2849', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'monospace', outline: 'none' }}
                           />

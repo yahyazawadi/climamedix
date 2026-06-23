@@ -4,12 +4,10 @@ import iconHome from '../assets/icon_home.svg'
 import iconContact from '../assets/icon_contact.svg'
 import iconTraining from '../assets/icon_training.svg'
 import iconResearch from '../assets/icon_research.svg'
-import iconFavorite from '../assets/icon_favorite.svg'
 import iconAbout from '../assets/icon_about.svg'
 import iconSearch from '../assets/icon_search.svg'
-import iconHamburger from '../assets/icon_hamburger.svg'
 
-export function Header({ activeSection, currentView, onNavigate }) {
+export function Header({ activeSection, currentView, onNavigate, user, userProfile, onLogout }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -33,6 +31,48 @@ export function Header({ activeSection, currentView, onNavigate }) {
           {/* Center-Right: Navigation Items (RTL order) */}
           <nav class="figma-nav-menu">
             
+            {/* Auth Item */}
+            {user ? (
+              <a 
+                href="#logout" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  onLogout();
+                }}
+                class="figma-nav-item"
+                style={{ color: '#ff4d4d' }}
+              >
+                <span class="figma-nav-text">خروج / Logout ({userProfile?.full_name || user.email})</span>
+              </a>
+            ) : (
+              <a 
+                href="#auth" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigate('auth');
+                }}
+                class={`figma-nav-item ${currentView === 'auth' ? 'active' : ''}`}
+                style={{ color: '#15b47a', fontWeight: 'bold' }}
+              >
+                <span class="figma-nav-text">دخول / Login</span>
+              </a>
+            )}
+
+            {/* Admin Dashboard link */}
+            {userProfile && userProfile.role === 'admin' && (
+              <a 
+                href="#debug" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigate('debug');
+                }}
+                class={`figma-nav-item ${currentView === 'debug' ? 'active' : ''}`}
+                style={{ color: '#15b47a', fontWeight: 'bold' }}
+              >
+                <span class="figma-nav-text">لوحة التحكم / Admin</span>
+              </a>
+            )}
+
             {/* 6. اتصل بنا */}
             <a 
               href="#contact" 
@@ -71,13 +111,6 @@ export function Header({ activeSection, currentView, onNavigate }) {
               <img src={iconResearch} class="figma-nav-icon" alt="أبحاث" />
               <span class="figma-nav-text">أبحاث</span>
             </a>
-
-            {/* 3. المفضلة (Commented out)
-            <a href="#pillars" class={`figma-nav-item ${activeSection === 'pillars' ? 'active' : ''}`}>
-              <img src={iconFavorite} class="figma-nav-icon" alt="المفضلة" />
-              <span class="figma-nav-text">المفضلة</span>
-            </a>
-            */}
 
             {/* 2. من نحن */}
             <a 
@@ -136,9 +169,16 @@ export function Header({ activeSection, currentView, onNavigate }) {
       {/* Mobile Drawer */}
       <div class={`mobile-drawer ${drawerOpen ? 'open' : ''}`}>
         <nav class="drawer-nav">
+          {user ? (
+            <a href="#logout" onClick={(e) => { e.preventDefault(); onLogout(); setDrawerOpen(false); }} class="drawer-link" style={{ color: '#ff4d4d' }}>خروج / Logout ({userProfile?.full_name || user.email})</a>
+          ) : (
+            <a href="#auth" onClick={(e) => { e.preventDefault(); onNavigate('auth'); setDrawerOpen(false); }} class="drawer-link" style={{ color: '#15b47a' }}>دخول / Login</a>
+          )}
+          {userProfile && userProfile.role === 'admin' && (
+            <a href="#debug" onClick={(e) => { e.preventDefault(); onNavigate('debug'); setDrawerOpen(false); }} class="drawer-link" style={{ color: '#15b47a', fontWeight: 'bold' }}>لوحة التحكم / Admin</a>
+          )}
           <a href="#home" onClick={(e) => { e.preventDefault(); onNavigate('home', 'home'); setDrawerOpen(false); }} class="drawer-link">الرئيسية</a>
           <a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('home', 'about'); setDrawerOpen(false); }} class="drawer-link">من نحن</a>
-          {/* <a href="#pillars" onClick={(e) => { e.preventDefault(); onNavigate('home', 'pillars'); setDrawerOpen(false); }} class="drawer-link">المفضلة</a> */}
           <a href="#research" onClick={(e) => { e.preventDefault(); onNavigate('home', 'research'); setDrawerOpen(false); }} class="drawer-link">أبحاث</a>
           <a href="#training" onClick={(e) => { e.preventDefault(); onNavigate('home', 'training'); setDrawerOpen(false); }} class="drawer-link">دورات تدريبية</a>
           <a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate('home', 'contact'); setDrawerOpen(false); }} class="drawer-link">اتصل بنا</a>

@@ -11,6 +11,8 @@ import { Button } from './components/Button'
 import { GlassCard } from './components/GlassCard'
 import { AboutUsPage } from './features/about-us/AboutUsPage'
 import { DebugUIPage } from './features/debug-ui/DebugUIPage'
+import { AuthPage } from './features/auth/AuthPage'
+import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import doctorImg from './assets/bg_3.png'
 import whiteLogo from './assets/footer_logo.svg'
 
@@ -33,10 +35,24 @@ import iconTraining from './assets/icon_training.svg'
 import iconContact from './assets/icon_contact.svg'
 
 export function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+
+function AppContent() {
   const [theme, setTheme] = useState('light');
   const [activeSection, setActiveSection] = useState('home');
   const [openedModal, setOpenedModal] = useState(null); // 'join', 'policy'
   const [currentView, setCurrentView] = useState('home'); // 'home' or 'about-us'
+  const { user, userProfile, signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    setCurrentView('home');
+  };
   
   // Form States for Header/Footer modal triggers
   const [joinForm, setJoinForm] = useState({ name: '', email: '', profession: '' });
@@ -55,6 +71,8 @@ export function App() {
       setCurrentView('about-us');
     } else if (path === '/debug') {
       setCurrentView('debug');
+    } else if (path === '/auth') {
+      setCurrentView('auth');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -74,6 +92,8 @@ export function App() {
         setCurrentView('about-us');
       } else if (p === '/debug') {
         setCurrentView('debug');
+      } else if (p === '/auth') {
+        setCurrentView('auth');
       } else {
         setCurrentView('home');
       }
@@ -147,12 +167,17 @@ export function App() {
         toggleTheme={toggleTheme} 
         activeSection={activeSection} 
         currentView={currentView}
+        user={user}
+        userProfile={userProfile}
+        onLogout={handleLogout}
         onNavigate={(view, sectionId) => {
           setCurrentView(view);
           if (view === 'about-us') {
             window.history.pushState({}, '', '/about-us');
           } else if (view === 'debug') {
             window.history.pushState({}, '', '/debug');
+          } else if (view === 'auth') {
+            window.history.pushState({}, '', '/auth');
           } else if (sectionId) {
             window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
@@ -468,6 +493,8 @@ export function App() {
       </main>
       ) : currentView === 'debug' ? (
         <DebugUIPage />
+      ) : currentView === 'auth' ? (
+        <AuthPage onAuthSuccess={() => { setCurrentView('home'); }} />
       ) : (
         <AboutUsPage
           onJoinClick={() => setOpenedModal('join')}

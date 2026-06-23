@@ -2618,3 +2618,114 @@ div {
     text-align: center;
   }
 }
+
+/* ==========================================================================
+   AUTH PAGE STYLES
+   ========================================================================== */
+.auth-page-container {
+  font-family: 'Tajawal', sans-serif;
+  direction: rtl;
+}
+
+.auth-card input {
+  transition: all 0.3s ease;
+}
+
+.auth-card input:focus {
+  border-color: #15b47a !important;
+  box-shadow: 0 0 0 3px rgba(21, 180, 122, 0.1);
+  background: #ffffff !important;
+}
+
+.auth-oauth-grid button {
+  box-shadow: 0 2px 8px rgba(11, 40, 73, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.auth-oauth-grid button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(21, 180, 122, 0.15) !important;
+}
+
+/* Auth Page Layout Spacing & Split Screen */
+.auth-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 129px);
+  padding: 140px 24px 60px 24px;
+  box-sizing: border-box;
+}
+
+.auth-split-wrapper {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  max-width: 1080px;
+  width: 100%;
+  gap: 48px;
+  align-items: center;
+}
+
+.auth-form-side {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.auth-image-side {
+  width: 100%;
+  height: 540px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(11, 40, 73, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.auth-image-side img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.auth-image-side:hover img {
+  transform: scale(1.03);
+}
+
+.auth-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 76, 109, 0.4) 0%, rgba(21, 180, 122, 0.2) 100%);
+  pointer-events: none;
+}
+
+@media (max-width: 992px) {
+  .auth-page-container {
+    padding-top: 140px;
+    min-height: calc(100vh - 140px);
+  }
+  .auth-split-wrapper {
+    gap: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-page-container {
+    padding: 110px 16px 40px 16px;
+    min-height: calc(100vh - 90px);
+  }
+  .auth-split-wrapper {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+  }
+  .auth-image-side {
+    display: none;
+  }
+}

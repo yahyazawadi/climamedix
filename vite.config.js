@@ -10,7 +10,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons.svg'],
       manifest: {
-        name: 'كليما ميديكس | العمل المناخي والصحة',
+        name: 'كلايما ميدكس | العمل المناخي والصحة',
         short_name: 'ClimaMedix',
         description: 'تمكين مقدمي الرعاية الصحية لأجل العمل المناخي',
         theme_color: '#0B2849',

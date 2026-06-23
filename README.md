@@ -1,4 +1,4 @@
-# ClimaMedix (كليما ميديكس)
+# ClimaMedix (كلايما ميدكس)
 
 An educational and community platform for Climate & Health in the Arab region. ClimaMedix is designed as a fast-loading, mobile-responsive Progressive Web Application (PWA) with full right-to-left (RTL) Arabic support (default) and left-to-right (LTR) English support.
 

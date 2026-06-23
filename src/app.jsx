@@ -206,7 +206,7 @@ function AppContent() {
               {/* Right Side: Text Column */}
               <div className="figma-hero-text-col">
                 <div className="figma-hero-white-text-group">
-                  <img src={whiteLogo} className="figma-hero-white-logo" alt="كليما ميديكس" />
+                  <img src={whiteLogo} className="figma-hero-white-logo" alt="كلايما ميدكس" />
                   <h2 className="figma-hero-subtitle">تمكين مقدمي الرعاية الصحية لأجل العمل المناخي.</h2>
                 </div>
                 <p className="figma-hero-description">

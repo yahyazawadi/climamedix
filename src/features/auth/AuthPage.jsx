@@ -291,7 +291,7 @@ export function AuthPage({ onAuthSuccess }) {
             textAlign: 'center',
             padding: '24px'
           }}>
-            <h3 style={{ fontSize: '28px', fontWeight: 'bold', margin: '0 0 12px 0', color: '#0b2849', fontFamily: "'Tajawal', sans-serif" }}>كليما ميديكس / ClimaMedix</h3>
+            <h3 style={{ fontSize: '28px', fontWeight: 'bold', margin: '0 0 12px 0', color: '#0b2849', fontFamily: "'Tajawal', sans-serif" }}>كلايما ميدكس / ClimaMedix</h3>
             <p style={{ fontSize: '15px', color: '#4a607a', margin: 0, direction: 'rtl', fontFamily: "'Tajawal', sans-serif" }}>
               العمل المناخي يبدأ من هنا. انضم إلى مجتمع الرعاية الصحية المستدامة.
             </p>

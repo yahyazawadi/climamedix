@@ -2732,7 +2732,7 @@ export function DebugUIPage() {
                   <>
                     <div style={{ fontSize: '40px', color: '#15b47a', marginBottom: '10px' }}>✓</div>
                     <h4 style={{ fontSize: '18px', color: '#15b47a', fontWeight: 'bold' }}>تم تسجيل الدخول بنجاح!</h4>
-                    <p style={{ fontSize: '13px', color: 'rgba(11, 40, 73, 0.7)', marginTop: '5px' }}>مرحباً بك في منصة كليما ميديكس.</p>
+                    <p style={{ fontSize: '13px', color: 'rgba(11, 40, 73, 0.7)', marginTop: '5px' }}>مرحباً بك في منصة كلايما ميدكس.</p>
                   </>
                 )}
               </div>

@@ -11,7 +11,7 @@ export function FooterCard() {
   return (
     <div class="figma-footer-card">
       <div class="figma-footer-logo-wrap">
-        <img src={footerLogo} alt="كليما ميديكس" />
+        <img src={footerLogo} alt="كلايما ميدكس" />
       </div>
       
       <div class="figma-footer-section">

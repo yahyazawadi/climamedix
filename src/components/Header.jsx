@@ -25,7 +25,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
             }}
             class="figma-logo-link"
           >
-            <img src={logo} class="figma-logo-img" alt="كليما ميديكس" />
+            <img src={logo} class="figma-logo-img" alt="كلايما ميدكس" />
           </a>
 
           {/* Center-Right: Navigation Items (RTL order) */}

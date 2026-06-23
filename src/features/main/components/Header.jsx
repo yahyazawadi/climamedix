@@ -32,7 +32,11 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
   return (
     <>
       <header class="figma-header">
-        <div class="figma-header-container">
+        <div class="figma-header-container" style={{ 
+          direction: lang === 'ar' ? 'rtl' : 'ltr',
+          paddingLeft: lang === 'ar' ? '33px' : '49px',
+          paddingRight: lang === 'ar' ? '49px' : '33px'
+        }}>
           
           {/* Left Side: Brand Logo */}
           <a 

@@ -13,6 +13,7 @@ import { AboutUsPage } from './features/about-us/AboutUsPage'
 import { DebugUIPage } from './features/debug-ui/DebugUIPage'
 import { AuthPage } from './features/auth/AuthPage'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
+import { translations } from './i18n/translations'
 import doctorImg from './assets/bg_3.png'
 import whiteLogo from './assets/footer_logo.svg'
 
@@ -44,6 +45,9 @@ export function App() {
 
 function AppContent() {
   const [theme, setTheme] = useState('light');
+  const [lang, setLang] = useState(() => {
+    return document.documentElement.getAttribute('lang') || 'ar';
+  });
   const [activeSection, setActiveSection] = useState('home');
   const [openedModal, setOpenedModal] = useState(null); // 'join', 'policy'
   const [currentView, setCurrentView] = useState('home'); // 'home' or 'about-us'
@@ -54,10 +58,19 @@ function AppContent() {
     setCurrentView('home');
   };
   
+  const toggleLanguage = () => {
+    const newLang = lang === 'ar' ? 'en' : 'ar';
+    setLang(newLang);
+    document.documentElement.setAttribute('lang', newLang);
+    document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
+  };
+
   // Form States for Header/Footer modal triggers
   const [joinForm, setJoinForm] = useState({ name: '', email: '', profession: '' });
   const [joinSuccess, setJoinSuccess] = useState(false);
   const [joinSubmitting, setJoinSubmitting] = useState(false);
+
+  const t = translations[lang] || translations.ar;
 
   // Theme Sync on Mount + Path Routing
   useEffect(() => {
@@ -177,6 +190,8 @@ function AppContent() {
         user={user}
         userProfile={userProfile}
         onLogout={handleLogout}
+        lang={lang}
+        toggleLanguage={toggleLanguage}
         onNavigate={(view, sectionId) => {
           setCurrentView(view);
           if (view === 'about-us') {
@@ -214,12 +229,12 @@ function AppContent() {
               <div className="figma-hero-text-col">
                 <div className="figma-hero-white-text-group">
                   <img src={whiteLogo} className="figma-hero-white-logo" alt="كلايما ميدكس" />
-                  <h2 className="figma-hero-subtitle">تمكين مقدمي الرعاية الصحية لأجل العمل المناخي.</h2>
+                  <h2 className="figma-hero-subtitle">{t.heroSubtitle}</h2>
                 </div>
                 <p className="figma-hero-description">
-                  <span className="figma-hero-desc-top">نحن نسعى لتمكين الطاقم</span>
+                  <span className="figma-hero-desc-top">{t.heroDescTop}</span>
                   {" "}
-                  <span className="figma-hero-desc-bottom">الصحي للعمل المناخي من خلال برامج تدريبية، أبحاث، وورش عمل.</span>
+                  <span className="figma-hero-desc-bottom">{t.heroDescBottom}</span>
                 </p>
               </div>
 
@@ -231,13 +246,13 @@ function AppContent() {
         <section id="about" className="figma-about-section">
           <div className="figma-section-container">
             <GlassCard className="figma-about-intro-box">
-              <h2 className="figma-about-box-title">من نحن؟</h2>
+              <h2 className="figma-about-box-title">{t.whoWeAre}</h2>
               <p className="figma-about-intro-text">
-                في ClimaMedix، نؤمن بأن البحث العلمي هو الأساس لفهم تأثيرات التغير المناخي على الصحة العامة وتطوير الحلول المستدامة. نحن فريق من الباحثين والمتخصصين في المجال الطبي، نعمل على تمكين الطواقم الصحية بالمعرفة، وتزويدهم بالأدوات اللازمة لفهم التغيرات البيئية والتصدي لتحدياتها. نركز بشكل أساسي على دعم البحث العلمي، تمكين المهنيين الصحيين، ونشر التوعية حول العلاقة بين التغير المناخي والصحة.
+                {t.aboutIntroText}
               </p>
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
                 <Button variant="gradient" onClick={() => setCurrentView('about-us')}>
-                  عرض المزيد
+                  {t.viewMore}
                 </Button>
               </div>
             </GlassCard>
@@ -245,69 +260,24 @@ function AppContent() {
             <div className="figma-vision-mission-grid">
               <GlassCard className="figma-vision-card">
                 <div className="figma-vision-card-header">
-                  <h3>الرؤية</h3>
+                  <h3>{t.vision}</h3>
                 </div>
-                <p>أن نكون المنصة البحثية الرائدة في مجال الصحة والتغير المناخي، من خلال إنتاج أبحاث متقدمة، تمكين الطواقم الطبية بالمعرفة، والمساهمة في بناء سياسات صحية مستدامة لمواجهة التحديات البيئية.</p>
+                <p>{t.visionText}</p>
               </GlassCard>
               <GlassCard className="figma-mission-card">
                 <div className="figma-vision-card-header">
-                  <h3>الرسالة</h3>
+                  <h3>{t.mission}</h3>
                 </div>
-                <p>نهدف إلى تمكين المهنيين في القطاع الصحي من لعب دور قيادي في الاستجابة العالمية لتغير المناخ، من خلال تعزيز البحث العلمي، تطوير دراسات ميدانية، ودعم الأبحاث التطبيقية التي تساعد في تقديم حلول فعالة. كما نعمل على بناء شبكة عالمية من الباحثين، ونوفر فرصاً للمشاركة في المشاريع البحثية التي تسهم في تحسين الصحة العامة.</p>
+                <p>{t.missionText}</p>
               </GlassCard>
             </div>
           </div>
         </section>
-
-        {/* Pillars Section (Commented Out as requested)
-        <section id="pillars" className="figma-pillars-section">
-          <div className="figma-section-container">
-            <h2 className="figma-section-title-main">الركائز الأساسية</h2>
-            <div className="figma-pillars-grid">
-              <div className="figma-pillar-card">
-                <div className="figma-pillar-icon-wrap">
-                  <img src={iconFavorite} alt="التمكين" />
-                </div>
-                <h3>التمكين</h3>
-                <p>نوفر الأدوات والتدريب اللازم لتمكين الطاقم الصحية من قيادة التغيير.</p>
-              </div>
-              <div className="figma-pillar-card">
-                <div className="figma-pillar-icon-wrap">
-                  <img src={iconResearch} alt="البحث العلمي" />
-                </div>
-                <h3>البحث العلمي</h3>
-                <p>نركز على الأبحاث والدراسات التي توفر حلولاً حقيقية لتحديات الصحة والتغير المناخي.</p>
-              </div>
-              <div className="figma-pillar-card">
-                <div className="figma-pillar-icon-wrap">
-                  <img src={iconAbout} alt="الابتكار" />
-                </div>
-                <h3>الابتكار</h3>
-                <p>تطوير منهجيات جديدة لتعزيز دور البحث في دعم الاستدامة الصحية.</p>
-              </div>
-              <div className="figma-pillar-card">
-                <div className="figma-pillar-icon-wrap">
-                  <img src={iconTraining} alt="التأثير المجتمعي" />
-                </div>
-                <h3>التأثير المجتمعي</h3>
-                <p>تحويل الأبحاث العلمية إلى حلول عملية تُطبَّق على أرض الواقع.</p>
-              </div>
-              <div className="figma-pillar-card">
-                <div className="figma-pillar-icon-wrap">
-                  <img src={iconContact} alt="الشراكات" />
-                </div>
-                <h3>الشراكات</h3>
-                <p>نعمل بالتعاون مع مؤسسات بحثية، جامعات، ومنظمات عالمية لدعم الأبحاث المتخصصة في الصحة البيئية.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-        */}
 
         {/* Research Section */}
         <section id="research" className="figma-research-section">
           <div className="figma-section-container">
-            <h2 className="figma-section-title-main">أحدث الأبحاث</h2>
+            <h2 className="figma-section-title-main">{t.latestResearch}</h2>
             
             <div className="figma-cards-grid-4">
               {/* Card 1 */}
@@ -316,15 +286,15 @@ function AppContent() {
                   <img src={research1} alt="أثر تلوث الهواء" />
                 </div>
                 <div className="figma-item-card-content">
-                  <span className="figma-item-card-location">الموقع: فلسطين</span>
-                  <h3 className="figma-item-card-title">أثر تلوث الهواء على الأمراض التنفسية في المناطق الحضرية.</h3>
+                  <span className="figma-item-card-location">{lang === 'ar' ? 'الموقع: فلسطين' : 'Location: Palestine'}</span>
+                  <h3 className="figma-item-card-title">{lang === 'ar' ? 'أثر تلوث الهواء على الأمراض التنفسية في المناطق الحضرية.' : 'Impact of air pollution on respiratory diseases in urban areas.'}</h3>
                   <div className="figma-item-card-progress-wrap">
-                    <span className="figma-item-card-progress-text">التقدم: 85%</span>
+                    <span className="figma-item-card-progress-text">{lang === 'ar' ? 'التقدم: 85%' : 'Progress: 85%'}</span>
                     <div className="figma-item-card-progress-bar">
                       <div className="figma-item-card-progress-fill" style={{ width: '85%' }}></div>
                     </div>
                   </div>
-                  <Button variant="more" onClick={() => setOpenedModal('policy')}>المزيد</Button>
+                  <Button variant="more" onClick={() => setOpenedModal('policy')}>{lang === 'ar' ? 'المزيد' : 'More'}</Button>
                 </div>
               </div>
 
@@ -334,15 +304,15 @@ function AppContent() {
                   <img src={research2} alt="تغير المناخ والأمراض المدارية" />
                 </div>
                 <div className="figma-item-card-content">
-                  <span className="figma-item-card-location">الموقع: الأردن</span>
-                  <h3 className="figma-item-card-title">تغير المناخ وانتشار الأمراض المدارية في البحر الأبيض المتوسط.</h3>
+                  <span className="figma-item-card-location">{lang === 'ar' ? 'الموقع: الأردن' : 'Location: Jordan'}</span>
+                  <h3 className="figma-item-card-title">{lang === 'ar' ? 'تغير المناخ وانتشار الأمراض المدارية في البحر الأبيض المتوسط.' : 'Climate change and vector-borne diseases in the Mediterranean.'}</h3>
                   <div className="figma-item-card-progress-wrap">
-                    <span className="figma-item-card-progress-text">التقدم: 60%</span>
+                    <span className="figma-item-card-progress-text">{lang === 'ar' ? 'التقدم: 60%' : 'Progress: 60%'}</span>
                     <div className="figma-item-card-progress-bar">
                       <div className="figma-item-card-progress-fill" style={{ width: '60%' }}></div>
                     </div>
                   </div>
-                  <Button variant="more" onClick={() => setOpenedModal('policy')}>المزيد</Button>
+                  <Button variant="more" onClick={() => setOpenedModal('policy')}>{lang === 'ar' ? 'المزيد' : 'More'}</Button>
                 </div>
               </div>
 
@@ -352,15 +322,15 @@ function AppContent() {
                   <img src={research3} alt="الاستدامة في المستشفيات" />
                 </div>
                 <div className="figma-item-card-content">
-                  <span className="figma-item-card-location">الموقع: مصر</span>
-                  <h3 className="figma-item-card-title">تقييم الاستدامة البيئية في المستشفيات والمراكز الطبية.</h3>
+                  <span className="figma-item-card-location">{lang === 'ar' ? 'الموقع: مصر' : 'Location: Egypt'}</span>
+                  <h3 className="figma-item-card-title">{lang === 'ar' ? 'تقييم الاستدامة البيئية في المستشفيات والمراكز الطبية.' : 'Environmental sustainability assessment in hospitals & medical centers.'}</h3>
                   <div className="figma-item-card-progress-wrap">
-                    <span className="figma-item-card-progress-text">التقدم: 40%</span>
+                    <span className="figma-item-card-progress-text">{lang === 'ar' ? 'التقدم: 40%' : 'Progress: 40%'}</span>
                     <div className="figma-item-card-progress-bar">
                       <div className="figma-item-card-progress-fill" style={{ width: '40%' }}></div>
                     </div>
                   </div>
-                  <Button variant="more" onClick={() => setOpenedModal('policy')}>المزيد</Button>
+                  <Button variant="more" onClick={() => setOpenedModal('policy')}>{lang === 'ar' ? 'المزيد' : 'More'}</Button>
                 </div>
               </div>
 
@@ -370,22 +340,22 @@ function AppContent() {
                   <img src={research4} alt="درجات الحرارة والعمال" />
                 </div>
                 <div className="figma-item-card-content">
-                  <span className="figma-item-card-location">الموقع: الخليج العربي</span>
-                  <h3 className="figma-item-card-title">تأثير درجات الحرارة المرتفعة على صحة العمال في قطاع البناء.</h3>
+                  <span className="figma-item-card-location">{lang === 'ar' ? 'الموقع: الخليج العربي' : 'Location: Arab Gulf'}</span>
+                  <h3 className="figma-item-card-title">{lang === 'ar' ? 'تأثير درجات الحرارة المرتفعة على صحة العمال في قطاع البناء.' : 'Impact of extreme high temperatures on construction worker health.'}</h3>
                   <div className="figma-item-card-progress-wrap">
-                    <span className="figma-item-card-progress-text">التقدم: 95%</span>
+                    <span className="figma-item-card-progress-text">{lang === 'ar' ? 'التقدم: 95%' : 'Progress: 95%'}</span>
                     <div className="figma-item-card-progress-bar">
                       <div className="figma-item-card-progress-fill" style={{ width: '95%' }}></div>
                     </div>
                   </div>
-                  <Button variant="more" onClick={() => setOpenedModal('policy')}>المزيد</Button>
+                  <Button variant="more" onClick={() => setOpenedModal('policy')}>{lang === 'ar' ? 'المزيد' : 'More'}</Button>
                 </div>
               </div>
             </div>
             
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
               <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => setOpenedModal('join')}>
-                تصفح جميع الأبحاث
+                {lang === 'ar' ? 'تصفح جميع الأبحاث' : 'Browse All Research'}
               </Button>
             </div>
           </div>
@@ -394,12 +364,12 @@ function AppContent() {
         {/* Newsletter/Join CTA Block (Frame 45) */}
         <section className="figma-newsletter-cta-section">
           <div className="figma-cta-section-wrap">
-            <h3 className="figma-cta-title">ابقَ على اطلاع بأحدث الأبحاث!</h3>
+            <h3 className="figma-cta-title">{lang === 'ar' ? 'ابقَ على اطلاع بأحدث الأبحاث!' : 'Stay updated with the latest research!'}</h3>
             <p className="figma-cta-description">
-              نحن نخطط لإطلاق عدد من المشاريع البحثية الجديدة قريبًا. إذا كنت مهتمًا بالمشاركة، يمكنك التقديم عبر نموذج التسجيل أدناه.
+              {lang === 'ar' ? 'نحن نخطط لإطلاق عدد من المشاريع البحثية الجديدة قريبًا. إذا كنت مهتمًا بالمشاركة، يمكنك التقديم عبر نموذج التسجيل أدناه.' : 'We plan to launch several new research projects soon. If you are interested in participating, you can apply via the registration form below.'}
             </p>
             <Button variant="gradient" onClick={() => setOpenedModal('join')}>
-              انضم لفريق البحث
+              {lang === 'ar' ? 'انضم لفريق البحث' : 'Join the Research Team'}
             </Button>
           </div>
         </section>
@@ -407,7 +377,7 @@ function AppContent() {
         {/* Training Section */}
         <section id="training" className="figma-training-section">
           <div className="figma-section-container">
-            <h2 className="figma-section-title-main">الدورات التدريبية</h2>
+            <h2 className="figma-section-title-main">{t.trainingCourses}</h2>
             
             <div className="figma-cards-grid-4">
               {/* Card 1 */}
@@ -416,9 +386,9 @@ function AppContent() {
                   <img src={training1} alt="دورات البحوث العلمية" />
                 </div>
                 <div className="figma-item-card-content">
-                  <h3 className="figma-item-card-title">دورات البحوث العلمية المتخصصة في قطاع الصحة والبيئة.</h3>
-                  <span className="figma-item-card-trainees">+1308 متدرب</span>
-                  <Button variant="more" onClick={() => setOpenedModal('join')}>سجل الآن</Button>
+                  <h3 className="figma-item-card-title">{lang === 'ar' ? 'دورات البحوث العلمية المتخصصة في قطاع الصحة والبيئة.' : 'Specialized research training courses in the health and environment sector.'}</h3>
+                  <span className="figma-item-card-trainees">{lang === 'ar' ? '+1308 متدرب' : '+1308 Trainees'}</span>
+                  <Button variant="more" onClick={() => setOpenedModal('join')}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
                 </div>
               </div>
 
@@ -428,9 +398,9 @@ function AppContent() {
                   <img src={training2} alt="الاستجابة الطبية الطارئة" />
                 </div>
                 <div className="figma-item-card-content">
-                  <h3 className="figma-item-card-title">الاستجابة الطبية الطارئة للكوارث المناخية والبيئية.</h3>
-                  <span className="figma-item-card-trainees">+850 متدرب</span>
-                  <Button variant="more" onClick={() => setOpenedModal('join')}>سجل الآن</Button>
+                  <h3 className="figma-item-card-title">{lang === 'ar' ? 'الاستجابة الطبية الطارئة للكوارث المناخية والبيئية.' : 'Emergency medical response to climate and environmental disasters.'}</h3>
+                  <span className="figma-item-card-trainees">{lang === 'ar' ? '+850 متدرب' : '+850 Trainees'}</span>
+                  <Button variant="more" onClick={() => setOpenedModal('join')}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
                 </div>
               </div>
 
@@ -440,9 +410,9 @@ function AppContent() {
                   <img src={training3} alt="مبادئ الصحة العامة البيئية" />
                 </div>
                 <div className="figma-item-card-content">
-                  <h3 className="figma-item-card-title">مبادئ الصحة العامة البيئية وتطبيقاتها السريرية.</h3>
-                  <span className="figma-item-card-trainees">+1120 متدرب</span>
-                  <Button variant="more" onClick={() => setOpenedModal('join')}>سجل الآن</Button>
+                  <h3 className="figma-item-card-title">{lang === 'ar' ? 'مبادئ الصحة العامة البيئية وتطبيقاتها السريرية.' : 'Principles of environmental public health and clinical applications.'}</h3>
+                  <span className="figma-item-card-trainees">{lang === 'ar' ? '+1120 متدرب' : '+1120 Trainees'}</span>
+                  <Button variant="more" onClick={() => setOpenedModal('join')}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
                 </div>
               </div>
 
@@ -452,16 +422,16 @@ function AppContent() {
                   <img src={training4} alt="مهارات الكتابة العلمية" />
                 </div>
                 <div className="figma-item-card-content">
-                  <h3 className="figma-item-card-title">مهارات الكتابة العلمية للأبحاث الطبية والبيئية.</h3>
-                  <span className="figma-item-card-trainees">+950 متدرب</span>
-                  <Button variant="more" onClick={() => setOpenedModal('join')}>سجل الآن</Button>
+                  <h3 className="figma-item-card-title">{lang === 'ar' ? 'مهارات الكتابة العلمية للأبحاث الطبية والبيئية.' : 'Scientific writing skills for medical and environmental research.'}</h3>
+                  <span className="figma-item-card-trainees">{lang === 'ar' ? '+950 متدرب' : '+950 Trainees'}</span>
+                  <Button variant="more" onClick={() => setOpenedModal('join')}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
                 </div>
               </div>
             </div>
             
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
               <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => setOpenedModal('join')}>
-                تصفح جميع الدورات
+                {lang === 'ar' ? 'تصفح جميع الدورات' : 'Browse All Courses'}
               </Button>
             </div>
           </div>
@@ -470,7 +440,7 @@ function AppContent() {
         {/* Upcoming Section */}
         <section id="upcoming" className="figma-upcoming-section">
           <div className="figma-section-container">
-            <h2 className="figma-section-title-main" style={{ textTransform: 'uppercase' }}>UPCOMING</h2>
+            <h2 className="figma-section-title-main">{lang === 'ar' ? 'الأنشطة القادمة' : 'UPCOMING ACTIVITIES'}</h2>
             
             <div className="figma-vision-mission-grid">
               {/* Upcoming Card 1 */}
@@ -479,8 +449,8 @@ function AppContent() {
                   <img src={upcoming1} alt="دراسة وطنية شاملة" style={{ height: '100%' }} />
                 </div>
                 <div className="figma-item-card-content" style={{ padding: '24px', justifyContent: 'center' }}>
-                  <span className="figma-item-card-trainees" style={{ backgroundColor: '#e2effa', color: '#004c6d', padding: '4px 10px', borderRadius: '20px', width: 'fit-content', fontSize: '12px' }}>سبتمبر 2026</span>
-                  <h3 className="figma-item-card-title" style={{ fontSize: '18px', marginTop: '10px' }}>دراسة وطنية شاملة حول جودة الهواء والصحة العامة.</h3>
+                  <span className="figma-item-card-trainees" style={{ backgroundColor: '#e2effa', color: '#004c6d', padding: '4px 10px', borderRadius: '20px', width: 'fit-content', fontSize: '12px' }}>{lang === 'ar' ? 'سبتمبر 2026' : 'September 2026'}</span>
+                  <h3 className="figma-item-card-title" style={{ fontSize: '18px', marginTop: '10px' }}>{lang === 'ar' ? 'دراسة وطنية شاملة حول جودة الهواء والصحة العامة.' : 'A comprehensive national study on air quality and public health.'}</h3>
                 </div>
               </div>
 
@@ -490,8 +460,8 @@ function AppContent() {
                   <img src={upcoming2} alt="برنامج تدريبي متكامل" style={{ height: '100%' }} />
                 </div>
                 <div className="figma-item-card-content" style={{ padding: '24px', justifyContent: 'center' }}>
-                  <span className="figma-item-card-trainees" style={{ backgroundColor: '#e2effa', color: '#004c6d', padding: '4px 10px', borderRadius: '20px', width: 'fit-content', fontSize: '12px' }}>نوفمبر 2026</span>
-                  <h3 className="figma-item-card-title" style={{ fontSize: '18px', marginTop: '10px' }}>برنامج تدريبي متكامل لإعداد قيادات العمل المناخي الصحي.</h3>
+                  <span className="figma-item-card-trainees" style={{ backgroundColor: '#e2effa', color: '#004c6d', padding: '4px 10px', borderRadius: '20px', width: 'fit-content', fontSize: '12px' }}>{lang === 'ar' ? 'نوفمبر 2026' : 'November 2026'}</span>
+                  <h3 className="figma-item-card-title" style={{ fontSize: '18px', marginTop: '10px' }}>{lang === 'ar' ? 'برنامج تدريبي متكامل لإعداد قيادات العمل المناخي الصحي.' : 'An integrated training program to prepare healthcare climate leaders.'}</h3>
                 </div>
               </div>
             </div>
@@ -504,6 +474,7 @@ function AppContent() {
         <AuthPage onAuthSuccess={() => { setCurrentView('home'); }} />
       ) : (
         <AboutUsPage
+          lang={lang}
           onJoinClick={() => setOpenedModal('join')}
           onNavigate={(view, sectionId) => {
             setCurrentView(view);
@@ -526,6 +497,7 @@ function AppContent() {
 
       {/* Footer component */}
       <Footer 
+        lang={lang}
         onJoinClick={() => setOpenedModal('join')} 
         onPolicyClick={() => setOpenedModal('policy')} 
         onNavigate={(view, sectionId) => {
@@ -552,31 +524,31 @@ function AppContent() {
       <div class={`modal-overlay ${openedModal === 'join' ? 'open' : ''}`}>
         <div class="modal-card">
           <div class="modal-header">
-            <h3>الانضمام لفريق ClimaMedix</h3>
+            <h3>{lang === 'ar' ? 'الانضمام لفريق ClimaMedix' : 'Join the ClimaMedix Team'}</h3>
             <button onClick={() => setOpenedModal(null)} class="close-modal-btn">&times;</button>
           </div>
           {joinSuccess ? (
             <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
               <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
-              <h4 style={{ color: 'var(--success)', marginBottom: '0.5rem' }}>تم إرسال طلبك بنجاح!</h4>
-              <p style={{ color: 'var(--text-secondary)' }}>سيتواصل معك منسق الفريق عبر البريد الإلكتروني في غضون 48 ساعة.</p>
+              <h4 style={{ color: 'var(--success)', marginBottom: '0.5rem' }}>{lang === 'ar' ? 'تم إرسال طلبك بنجاح!' : 'Your request was sent successfully!'}</h4>
+              <p style={{ color: 'var(--text-secondary)' }}>{lang === 'ar' ? 'سيتواصل معك منسق الفريق عبر البريد الإلكتروني في غضون 48 ساعة.' : 'The team coordinator will contact you via email within 48 hours.'}</p>
             </div>
           ) : (
             <form class="modal-form" onSubmit={handleJoinSubmit}>
-              <p class="form-intro">سجل بياناتك للانضمام إلى قائمة الباحثين والمسعفين المتطوعين في دراسات المناخ والصحة.</p>
+              <p class="form-intro">{lang === 'ar' ? 'سجل بياناتك للانضمام إلى قائمة الباحثين والمسعفين المتطوعين في دراسات المناخ والصحة.' : 'Register your details to join the team of volunteer researchers and medical staff.'}</p>
               
               <div class="form-group">
-                <label>الاسم الكامل *</label>
+                <label>{lang === 'ar' ? 'الاسم الكامل *' : 'Full Name *'}</label>
                 <input 
                   type="text" 
                   required 
-                  placeholder="أدخل اسمك الكامل" 
+                  placeholder={lang === 'ar' ? 'أدخل اسمك الكامل' : 'Enter your full name'}
                   value={joinForm.name} 
                   onInput={(e) => setJoinForm({ ...joinForm, name: e.target.value })}
                 />
               </div>
               <div class="form-group">
-                <label>البريد الإلكتروني *</label>
+                <label>{lang === 'ar' ? 'البريد الإلكتروني *' : 'Email *'}</label>
                 <input 
                   type="email" 
                   required 
@@ -586,21 +558,21 @@ function AppContent() {
                 />
               </div>
               <div class="form-group">
-                <label>التخصص المهني *</label>
+                <label>{lang === 'ar' ? 'التخصص المهني *' : 'Professional Specialty *'}</label>
                 <select 
                   required 
                   value={joinForm.profession}
                   onChange={(e) => setJoinForm({ ...joinForm, profession: e.target.value })}
                 >
-                  <option value="" disabled selected>اختر تخصصك</option>
-                  <option value="doctor">طبيب / ممارس صحي</option>
-                  <option value="researcher">باحث بيئي / علمي</option>
-                  <option value="student">طالب علوم صحية</option>
-                  <option value="other">أخرى</option>
+                  <option value="" disabled selected>{lang === 'ar' ? 'اختر تخصصك' : 'Select your specialty'}</option>
+                  <option value="doctor">{lang === 'ar' ? 'طبيب / ممارس صحي' : 'Doctor / Health Practitioner'}</option>
+                  <option value="researcher">{lang === 'ar' ? 'باحث بيئي / علمي' : 'Environmental / Scientific Researcher'}</option>
+                  <option value="student">{lang === 'ar' ? 'طالب علوم صحية' : 'Health Sciences Student'}</option>
+                  <option value="other">{lang === 'ar' ? 'أخرى' : 'Other'}</option>
                 </select>
               </div>
               <button type="submit" disabled={joinSubmitting} class="btn btn-primary btn-full">
-                {joinSubmitting ? 'جاري إرسال طلبك...' : 'إرسال طلب الانضمام'}
+                {joinSubmitting ? (lang === 'ar' ? 'جاري إرسال طلبك...' : 'Submitting your request...') : (lang === 'ar' ? 'إرسال طلب الانضمام' : 'Submit Join Request')}
               </button>
             </form>
           )}
@@ -611,17 +583,17 @@ function AppContent() {
       <div class={`modal-overlay ${openedModal === 'policy' ? 'open' : ''}`}>
         <div class="modal-card">
           <div class="modal-header">
-            <h3>سياسة الاستخدام وحماية البيانات</h3>
+            <h3>{lang === 'ar' ? 'سياسة الاستخدام وحماية البيانات' : 'Terms of Use & Data Protection'}</h3>
             <button onClick={() => setOpenedModal(null)} class="close-modal-btn">&times;</button>
           </div>
-          <div class="modal-body" style={{ lineHeight: '1.8', fontSize: '0.95rem', color: 'var(--text-secondary)', textAlign: 'right' }}>
-            <p style={{ marginBottom: '1rem' }}>نحن في ClimaMedix نلتزم بأعلى معايير السرية والأمان البيولوجي والرقمي للمعلومات السريرية أو الشخصية:</p>
-            <ul style={{ paddingRight: '1.5rem', marginBottom: '1.5rem' }}>
-              <li>يتم جمع البيانات عبر نماذج التسجيل حصراً لغرض الاتصال بخصوص أبحاثنا وتدريباتنا.</li>
-              <li>لا نقوم بمشاركة أي بيانات شخصية مع أطراف ثالثة لأغراض تجارية على الإطلاق.</li>
-              <li>تلتزم أبحاثنا الميدانية ببروتوكولات الموافقة المسبقة المستنيرة للمشاركين.</li>
+          <div class="modal-body" style={{ lineHeight: '1.8', fontSize: '0.95rem', color: 'var(--text-secondary)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
+            <p style={{ marginBottom: '1rem' }}>{lang === 'ar' ? 'نحن في ClimaMedix نلتزم بأعلى معايير السرية والأمان البيولوجي والرقمي للمعلومات السريرية أو الشخصية:' : 'At ClimaMedix, we are committed to the highest standards of confidentiality and digital safety for all clinical and personal information:'}</p>
+            <ul style={{ paddingRight: lang === 'ar' ? '1.5rem' : '0', paddingLeft: lang === 'en' ? '1.5rem' : '0', marginBottom: '1.5rem' }}>
+              <li>{lang === 'ar' ? 'يتم جمع البيانات عبر نماذج التسجيل حصراً لغرض الاتصال بخصوص أبحاثنا وتدريباتنا.' : 'Data is collected via registration forms solely for communications regarding our research.'}</li>
+              <li>{lang === 'ar' ? 'لا نقوم بمشاركة أي بيانات شخصية مع أطراف ثالثة لأغراض تجارية على الإطلاق.' : 'We never share any personal data with third parties for commercial purposes.'}</li>
+              <li>{lang === 'ar' ? 'تلتزم أبحاثنا الميدانية ببروتوكولات الموافقة المسبقة المستنيرة للمشاركين.' : 'Our field research strictly complies with informed consent protocols.'}</li>
             </ul>
-            <p>لأي استفسارات إضافية، يرجى مراسلة مكتب التنسيق الطبي التابع للمبادرة.</p>
+            <p>{lang === 'ar' ? 'لأي استفسارات إضافية، يرجى مراسلة مكتب التنسيق الطبي التابع للمبادرة.' : 'For any further inquiries, please contact the coordinator office of the initiative.'}</p>
           </div>
         </div>
       </div>

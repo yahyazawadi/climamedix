@@ -7,7 +7,7 @@ import contactMail from '../../../assets/contact_mail.svg'
 import contactPhone from '../../../assets/contact_phone.svg'
 import contactWeb from '../../../assets/contact_web.svg'
 
-export function FooterCard() {
+export function FooterCard({ lang }) {
   return (
     <div class="figma-footer-card">
       <div class="figma-footer-logo-wrap">
@@ -15,7 +15,9 @@ export function FooterCard() {
       </div>
       
       <div class="figma-footer-section">
-        <span class="figma-section-title">تابعونا على مواقع التواصل الاجتماعي:</span>
+        <span class="figma-section-title">
+          {lang === 'ar' ? 'تابعونا على مواقع التواصل الاجتماعي:' : 'Follow us on social media:'}
+        </span>
         <div class="figma-social-row">
           <a href="#" aria-label="Facebook"><img src={socialFb} alt="Facebook" /></a>
           <a href="#" aria-label="LinkedIn"><img src={socialIn} alt="LinkedIn" /></a>
@@ -25,7 +27,9 @@ export function FooterCard() {
       </div>
 
       <div class="figma-footer-section">
-        <span class="figma-section-title">تواصلوا معنا:</span>
+        <span class="figma-section-title">
+          {lang === 'ar' ? 'تواصلوا معنا:' : 'Contact us:'}
+        </span>
         <div class="figma-contact-row">
           <a href="mailto:info@climamedix.org" aria-label="Email"><img src={contactMail} alt="Email" /></a>
           <a href="https://www.climamedix.org" target="_blank" rel="noopener noreferrer" aria-label="Website"><img src={contactWeb} alt="Website" /></a>

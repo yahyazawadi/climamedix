@@ -2729,3 +2729,33 @@ div {
     display: none;
   }
 }
+
+/* Language Dropdown and Circle Buttons */
+.lang-dropdown-menu {
+  animation: fadeInDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.lang-circle-btn {
+  font-family: 'Tajawal', sans-serif;
+  transition: all 0.25s ease !important;
+}
+
+.lang-circle-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(21, 180, 122, 0.3);
+}
+
+.lang-circle-btn:active {
+  transform: scale(0.95);
+}

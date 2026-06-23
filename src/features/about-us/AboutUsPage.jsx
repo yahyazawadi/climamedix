@@ -4,11 +4,13 @@ import iconEmpowerment2 from '../../assets/icon_empowerment2.svg';
 import iconInnovation   from '../../assets/icon_innovation.svg';
 import iconCommunity    from '../../assets/icon_community.svg';
 import aboutBg          from '../../assets/svgbackground.svg';
+import { translations } from '../../i18n/translations';
 
+export function AboutUsPage({ onJoinClick, lang }) {
+  const t = translations[lang] || translations.ar;
 
-export function AboutUsPage({ onJoinClick }) {
   return (
-    <main className="au-page" dir="rtl">
+    <main className="au-page" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
 
       {/* Full-page SVG background */}
       <div className="au-bg-wrap" aria-hidden="true">
@@ -18,10 +20,9 @@ export function AboutUsPage({ onJoinClick }) {
       {/* ══ VISION ══ */}
       <section className="au-section">
         <div className="au-container">
-          <h2 className="au-heading">رؤيتنا</h2>
+          <h2 className="au-heading">{t.ourVision}</h2>
           <p className="au-body">
-            أن نكون المنصة البحثية الرائدة في مجال الصحة والتغير المناخي، من خلال إنتاج أبحاث متقدمة،
-            تمكين الطواقم الطبية بالمعرفة، والمساهمة في بناء سياسات صحية مستدامة لمواجهة التحديات البيئية.
+            {t.visionText}
           </p>
         </div>
       </section>
@@ -29,12 +30,9 @@ export function AboutUsPage({ onJoinClick }) {
       {/* ══ MISSION ══ */}
       <section className="au-section">
         <div className="au-container">
-          <h2 className="au-heading">مهمتنا</h2>
+          <h2 className="au-heading">{t.ourMission}</h2>
           <p className="au-body">
-            نهدف إلى تمكين المهنيين في القطاع الصحي من لعب دور قيادي في الاستجابة العالمية لتغير المناخ،
-            من خلال تعزيز البحث العلمي، تطوير دراسات ميدانية، ودعم الأبحاث التطبيقية التي تساعد في تقديم
-            حلول فعالة. كما نعمل على بناء شبكة عالمية من الباحثين، ونوفر فرصاً للمشاركة في المشاريع
-            البحثية التي تسهم في تحسين الصحة العامة.
+            {t.missionText}
           </p>
         </div>
       </section>
@@ -42,39 +40,39 @@ export function AboutUsPage({ onJoinClick }) {
       {/* ══ VALUES ══ */}
       <section className="au-section">
         <div className="au-container">
-          <h2 className="au-heading">قيمنا</h2>
+          <h2 className="au-heading">{t.ourValues}</h2>
 
           <div className="au-values-grid">
             <div className="au-value-card">
               <div className="au-value-icon-wrap">
-                <img src={iconEmpowerment} alt="التمكين" />
+                <img src={iconEmpowerment} alt={t.empowerment} />
               </div>
-              <h3 className="au-value-title">التمكين:</h3>
-              <p className="au-value-desc">نوفر الأدوات والتدريب اللازم لتمكين الطواقم الصحية من قيادة التغيير.</p>
+              <h3 className="au-value-title">{t.empowerment}:</h3>
+              <p className="au-value-desc">{t.empowermentDesc}</p>
             </div>
 
             <div className="au-value-card">
               <div className="au-value-icon-wrap">
-                <img src={iconScience} alt="البحث العلمي" />
+                <img src={iconScience} alt={t.scientificResearch} />
               </div>
-              <h3 className="au-value-title">البحث العلمي:</h3>
-              <p className="au-value-desc">نركز على الأبحاث والدراسات التي توفر حلولاً حقيقية لتحديات الصحة والتغير المناخي.</p>
+              <h3 className="au-value-title">{t.scientificResearch}:</h3>
+              <p className="au-value-desc">{t.scientificResearchDesc}</p>
             </div>
 
             <div className="au-value-card">
               <div className="au-value-icon-wrap">
-                <img src={iconEmpowerment2} alt="التمكين" />
+                <img src={iconEmpowerment2} alt={t.empowerment} />
               </div>
-              <h3 className="au-value-title">التمكين:</h3>
-              <p className="au-value-desc">بناء شبكة عالمية من الباحثين والأكاديميين لدعم وتطوير المعرفة العلمية.</p>
+              <h3 className="au-value-title">{t.empowerment}:</h3>
+              <p className="au-value-desc">{t.globalNetwork}</p>
             </div>
 
             <div className="au-value-card">
               <div className="au-value-icon-wrap">
-                <img src={iconInnovation} alt="الابتكار" />
+                <img src={iconInnovation} alt={t.innovation} />
               </div>
-              <h3 className="au-value-title">الابتكار:</h3>
-              <p className="au-value-desc">تطوير منهجيات جديدة لتعزيز دور البحث في دعم الاستدامة الصحية.</p>
+              <h3 className="au-value-title">{t.innovation}:</h3>
+              <p className="au-value-desc">{t.innovationDesc}</p>
             </div>
           </div>
 
@@ -82,13 +80,12 @@ export function AboutUsPage({ onJoinClick }) {
           <div className="au-values-center-row">
             <div className="au-value-card">
               <div className="au-value-icon-wrap">
-                <img src={iconCommunity} alt="التأثير المجتمعي" />
+                <img src={iconCommunity} alt={t.communityImpact} />
               </div>
-              <h3 className="au-value-title">التأثير المجتمعي:</h3>
-              <p className="au-value-desc">تحويل الأبحاث العلمية إلى حلول عملية تُطبَّق على أرض الواقع.</p>
+              <h3 className="au-value-title">{t.communityImpact}:</h3>
+              <p className="au-value-desc">{t.communityImpactDesc}</p>
             </div>
           </div>
-
 
         </div>
       </section>
@@ -96,19 +93,31 @@ export function AboutUsPage({ onJoinClick }) {
       {/* ══ PARTNERSHIPS ══ */}
       <section className="au-section">
         <div className="au-container">
-          <h2 className="au-heading">شراكاتنا</h2>
+          <h2 className="au-heading">{t.ourPartnerships}</h2>
           <p className="au-body">
-            نعمل بالتعاون مع مؤسسات بحثية، جامعات، ومنظمات عالمية لدعم الأبحاث المتخصصة في الصحة
-            البيئية. هذه الشراكات تتيح لنا تنفيذ دراسات موسعة، وتبادل الخبرات بين الباحثين،
-            والمشاركة في المؤتمرات العلمية.
+            {lang === 'ar' 
+              ? 'نعمل بالتعاون مع مؤسسات بحثية، جامعات، ومنظمات عالمية لدعم الأبحاث المتخصصة في الصحة البيئية. هذه الشراكات تتيح لنا تنفيذ دراسات موسعة، وتبادل الخبرات بين الباحثين، والمشاركة في المؤتمرات العلمية.'
+              : 'We work in cooperation with research institutions, universities, and global organizations to support specialized research in environmental health. These partnerships allow us to conduct extensive studies, exchange expertise, and participate in scientific conferences.'}
           </p>
           <ul className="au-checklist">
-            <li>إذا كنت مهتماً بالبحث العلمي في مجال الصحة والتغير المناخي، يمكنك الانضمام إلى فريق ClimaMedix البحثي.</li>
-            <li>نحن نبحث عن باحثين وعلميين مهتمين بتطوير حلول علمية لمشاكل الصحة البيئية.</li>
-            <li>شارك في أبحاثنا وكن جزءاً من فريق يقود التغيير العلمي نحو مستقبل صحي مستدام.</li>
+            <li>
+              {lang === 'ar' 
+                ? 'إذا كنت مهتماً بالبحث العلمي في مجال الصحة والتغير المناخي، يمكنك الانضمام إلى فريق ClimaMedix البحثي.'
+                : 'If you are interested in scientific research in health and climate change, you can join the ClimaMedix research team.'}
+            </li>
+            <li>
+              {lang === 'ar'
+                ? 'نحن نبحث عن باحثين وعلميين مهتمين بتطوير حلول علمية لمشاكل الصحة البيئية.'
+                : 'We look for researchers and scientists interested in developing scientific solutions to environmental health issues.'}
+            </li>
+            <li>
+              {lang === 'ar'
+                ? 'شارك في أبحاثنا وكن جزءاً من فريق يقود التغيير العلمي نحو مستقبل صحي مستدام.'
+                : 'Participate in our research and be part of a team leading scientific change towards a healthy, sustainable future.'}
+            </li>
           </ul>
           <button className="au-btn-primary" onClick={onJoinClick}>
-            انضم لفريق البحث
+            {lang === 'ar' ? 'انضم لفريق البحث' : 'Join the Research Team'}
           </button>
         </div>
       </section>
@@ -116,11 +125,11 @@ export function AboutUsPage({ onJoinClick }) {
       {/* ══ HISTORY ══ */}
       <section className="au-section">
         <div className="au-container">
-          <h2 className="au-heading">تاريخنا</h2>
+          <h2 className="au-heading">{lang === 'ar' ? 'تاريخنا' : 'Our History'}</h2>
           <p className="au-body">
-            بدأت ClimaMedix كمبادرة بحثية تهدف إلى سد الفجوة بين الصحة والتغير المناخي. منذ انطلاقنا،
-            ركزنا على دعم الباحثين وتوفير بيئة علمية مناسبة لإجراء دراسات متخصصة تساهم في إيجاد حلول
-            عملية للمشاكل الصحية الناتجة عن التغيرات البيئية.
+            {lang === 'ar'
+              ? 'بدأت ClimaMedix كمبادرة بحثية تهدف إلى سد الفجوة بين الصحة والتغير المناخي. منذ انطلاقنا، ركزنا على دعم الباحثين وتوفير بيئة علمية مناسبة لإجراء دراسات متخصصة تساهم في إيجاد حلول عملية للمشاكل الصحية الناتجة عن التغيرات البيئية.'
+              : 'ClimaMedix began as a research initiative aiming to bridge the gap between health and climate change. Since our launch, we have focused on supporting researchers and providing an appropriate scientific environment to conduct specialized studies.'}
           </p>
         </div>
       </section>
@@ -128,10 +137,11 @@ export function AboutUsPage({ onJoinClick }) {
       {/* ══ COMMITMENT ══ */}
       <section className="au-section">
         <div className="au-container">
-          <h2 className="au-heading">التزامنا تجاه المجتمع</h2>
+          <h2 className="au-heading">{lang === 'ar' ? 'التزامنا تجاه المجتمع' : 'Our Commitment to Community'}</h2>
           <p className="au-body">
-            نحن ملتزمون بنشر المعرفة العلمية، وتطوير أبحاث طبية قائمة على الأدلة، وتعزيز الوعي الصحي
-            حول تأثيرات المناخ. هدفنا أن نجعل البحث العلمي أداة فعالة في بناء مجتمع صحي ومستدام للجميع.
+            {lang === 'ar'
+              ? 'نحن ملتزمون بنشر المعرفة العلمية، وتطوير أبحاث طبية قائمة على الأدلة، وتعزيز الوعي الصحي حول تأثيرات المناخ. هدفنا أن نجعل البحث العلمي أداة فعالة في بناء مجتمع صحي ومستدام للجميع.'
+              : 'We are committed to disseminating scientific knowledge, developing evidence-based medical research, and promoting health awareness. Our goal is to make scientific research an effective tool in building a healthy and sustainable community.'}
           </p>
         </div>
       </section>

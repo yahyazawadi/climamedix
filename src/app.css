@@ -81,13 +81,12 @@ html[lang="en"] .figma-nav-text {
 
 .figma-header-container {
   width: 100%;
-  max-width: 1440px;
+  max-width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 26px 33px 30px 49px;
-  /* Top, Right, Bottom, Left */
+  padding: 0 48px;
   direction: ltr;
   /* Force Left-to-Right order: Logo -> Nav -> Hamburger */
 }
@@ -381,9 +380,9 @@ html[lang="en"] .figma-nav-text {
 
 .figma-footer-container {
   width: 100%;
-  max-width: 1440px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 60px;
+  padding: 0 48px;
   display: flex;
   gap: 80px;
   justify-content: space-between;
@@ -519,19 +518,19 @@ html[lang="en"] .figma-nav-text {
 /* Footer CTA Block */
 .figma-footer-cta-block {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 47px;
+  gap: 16px;
   width: 100%;
 }
 
 .figma-cta-border-box {
-  flex: 1;
   color: #ffffff;
   font-weight: 700;
   font-size: 20px;
-  text-align: right;
+  text-align: center;
   line-height: 1.5;
+  width: 100%;
 }
 
 .figma-footer-join-btn {

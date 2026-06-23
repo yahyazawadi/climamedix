@@ -1,11 +1,12 @@
 import { useState } from 'preact/hooks'
-import logo from '../assets/logo.svg'
-import iconHome from '../assets/icon_home.svg'
-import iconContact from '../assets/icon_contact.svg'
-import iconTraining from '../assets/icon_training.svg'
-import iconResearch from '../assets/icon_research.svg'
-import iconAbout from '../assets/icon_about.svg'
-import iconSearch from '../assets/icon_search.svg'
+import logo from '../../../assets/logo.svg'
+import iconHome from '../../../assets/icon_home.svg'
+import iconContact from '../../../assets/icon_contact.svg'
+import iconTraining from '../../../assets/icon_training.svg'
+import iconResearch from '../../../assets/icon_research.svg'
+import iconAbout from '../../../assets/icon_about.svg'
+import iconSearch from '../../../assets/icon_search.svg'
+import iconProfile from '../../../assets/icon_profile.svg'
 
 export function Header({ activeSection, currentView, onNavigate, user, userProfile, onLogout }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -42,6 +43,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                 class="figma-nav-item"
                 style={{ color: '#ff4d4d' }}
               >
+                <img src={iconProfile} class="figma-nav-icon" alt="الملف الشخصي" />
                 <span class="figma-nav-text">خروج / Logout ({userProfile?.full_name || user.email})</span>
               </a>
             ) : (
@@ -52,8 +54,8 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                   onNavigate('auth');
                 }}
                 class={`figma-nav-item ${currentView === 'auth' ? 'active' : ''}`}
-                style={{ color: '#15b47a', fontWeight: 'bold' }}
               >
+                <img src={iconProfile} class="figma-nav-icon" alt="دخول / Login" />
                 <span class="figma-nav-text">دخول / Login</span>
               </a>
             )}
@@ -67,7 +69,6 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                   onNavigate('debug');
                 }}
                 class={`figma-nav-item ${currentView === 'debug' ? 'active' : ''}`}
-                style={{ color: '#15b47a', fontWeight: 'bold' }}
               >
                 <span class="figma-nav-text">لوحة التحكم / Admin</span>
               </a>

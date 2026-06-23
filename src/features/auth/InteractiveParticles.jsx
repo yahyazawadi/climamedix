@@ -39,11 +39,39 @@ export function InteractiveParticles() {
     };
 
     // Initialize particles
+    const spawnMargin = 40;
     for (let i = 0; i < particleCount; i++) {
       const template = colorTemplates[Math.floor(Math.random() * colorTemplates.length)];
+      
+      let startX = spawnMargin + Math.random() * (width - 2 * spawnMargin);
+      let startY = spawnMargin + Math.random() * (height - 2 * spawnMargin);
+      
+      if (i > 0) {
+        let maxMinDist = -1;
+        const candidatesCount = 8;
+        for (let c = 0; c < candidatesCount; c++) {
+          const testX = spawnMargin + Math.random() * (width - 2 * spawnMargin);
+          const testY = spawnMargin + Math.random() * (height - 2 * spawnMargin);
+          let minDist = Infinity;
+          for (let j = 0; j < i; j++) {
+            const dx = particles[j].x - testX;
+            const dy = particles[j].y - testY;
+            const distSq = dx * dx + dy * dy;
+            if (distSq < minDist) {
+              minDist = distSq;
+            }
+          }
+          if (minDist > maxMinDist) {
+            maxMinDist = minDist;
+            startX = testX;
+            startY = testY;
+          }
+        }
+      }
+
       particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
+        x: startX,
+        y: startY,
         vx: (Math.random() - 0.5) * 0.8,
         vy: (Math.random() - 0.5) * 0.8,
         radius: Math.random() * 4 + 1.5,
@@ -199,6 +227,12 @@ export function InteractiveParticles() {
           p.vy -= (1 - (height - p.y) / borderZone) * nudgeStrength;
         }
 
+        // 1.5. Gentle center gravity (very subtle pull towards the center)
+        const dxCenter = (width / 2) - p.x;
+        const dyCenter = (height / 2) - p.y;
+        p.vx += dxCenter * 0.00012;
+        p.vy += dyCenter * 0.00012;
+
         // 2. Off-screen recycling & random entropy
         let shouldRespawn = false;
         const margin = 5;
@@ -222,9 +256,37 @@ export function InteractiveParticles() {
           p.alpha -= 0.02; // slow fade-out over ~50 frames
           if (p.alpha <= 0) {
             p.alpha = 0;
-            // Teleport and reset once fully invisible
-            p.x = Math.random() * width;
-            p.y = Math.random() * height;
+            
+            // Best Candidate Spawning: find a location with maximum distance from other particles
+            let bestX = spawnMargin + Math.random() * (width - 2 * spawnMargin);
+            let bestY = spawnMargin + Math.random() * (height - 2 * spawnMargin);
+            let maxMinDist = -1;
+            const candidatesCount = 10;
+            
+            for (let c = 0; c < candidatesCount; c++) {
+              const testX = spawnMargin + Math.random() * (width - 2 * spawnMargin);
+              const testY = spawnMargin + Math.random() * (height - 2 * spawnMargin);
+              let minDist = Infinity;
+              
+              for (let j = 0; j < particles.length; j++) {
+                if (j === idx) continue;
+                const dx = particles[j].x - testX;
+                const dy = particles[j].y - testY;
+                const distSq = dx * dx + dy * dy;
+                if (distSq < minDist) {
+                  minDist = distSq;
+                }
+              }
+              
+              if (minDist > maxMinDist) {
+                maxMinDist = minDist;
+                bestX = testX;
+                bestY = testY;
+              }
+            }
+            
+            p.x = bestX;
+            p.y = bestY;
             p.vx = (Math.random() - 0.5) * 0.8;
             p.vy = (Math.random() - 0.5) * 0.8;
             p.originalVx = p.vx;

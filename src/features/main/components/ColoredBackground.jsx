@@ -1,4 +1,4 @@
-import bg1 from '../assets/bg_1.png'
+import bg1 from '../../../assets/bg_1.png'
 
 export function ColoredBackground() {
   return (

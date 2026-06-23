@@ -1,5 +1,5 @@
-import leftScribble from '../assets/left-svg.svg';
-import rightScribble from '../assets/right-svg.svg';
+import leftScribble from '../../../assets/left-svg.svg';
+import rightScribble from '../../../assets/right-svg.svg';
 
 export function NeatScripples() {
   return (

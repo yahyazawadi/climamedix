@@ -1,6 +1,58 @@
-# ClimaMedix (كلايما ميدكس)
+# ClimaMedix (كلايما ميدكس) 🌍🩺
 
 An educational and community platform for Climate & Health in the Arab region. ClimaMedix is designed as a fast-loading, mobile-responsive Progressive Web Application (PWA) with full right-to-left (RTL) Arabic support (default) and left-to-right (LTR) English support.
+
+---
+
+## 📋 Platform Development Todo List
+
+This checklist tracks the current state of implementation, completed features, recent updates, and upcoming development goals.
+
+### 🛠️ Core Infrastructure & Layout
+*   [x] **Custom Design System:** Harmonious HSL/RGB palettes, dark mode tokens, and glassmorphism.
+*   [x] **Clean Routing:** Zero-hash path-based routing (`/`, `/about-us`, `/auth`, `/debug`).
+*   [x] **Mobile Optimization:** Full responsive layout adjustments, viewport scalability, and drawer navigation.
+*   [x] **Direction & Fonts Override:** Full RTL structure by default with automatic font overrides (`Tajawal` forced globally).
+
+### 🔐 Authentication Feature (Supabase)
+*   [x] **Supabase Auth Integration:** Email authentication (Login/Sign Up) and OAuth (Google) support.
+*   [x] **Visual Polish & Spacing:** Balanced header clearance padding adjusted to `180px` on desktop and `135px` on mobile (clearing the fixed navigation bar cleanly).
+*   [x] **Password Visibility Toggle:** Interactive show/hide action for form credentials.
+*   [x] **Interactive Particles Background (`InteractiveParticles.jsx`):**
+    *   [x] **Mitchell's Best-Candidate Spawning:** Particle spawns are mathematically placed in the emptiest regions of the canvas, avoiding edge areas to prevent sudden boundary recycling.
+    *   [x] **Center Gravity Pull:** A subtle center-seeking gravity force (`0.00012` per frame) gently drifts free particles inward to keep the network layout cohesive.
+    *   [x] **Fluid Physics:** Mouse attraction, heavy viscosity damping (15% frame deceleration on proximity), and Brownian cluster agitation.
+
+### 🏠 Home Page Sections
+*   [x] **Hero Section:** Logo integration, responsive title text grid, and main call to actions.
+*   [x] **About Intro:** Glassmorphic card summarizing the ClimaMedix mission.
+*   [x] **Vision & Mission:** Split card grid detailing organizational values.
+*   [x] **Research Showcase:** Cards grid highlighting regional studies, completion progress bars, and modal controls.
+*   [x] **Training Courses:** Category indicators, enrollment rates, and interactive CTA buttons.
+*   [x] **Upcoming Section:** Schedule layout displaying future research programs.
+*   [x] **Newsletter Banner:** Embedded subscription block.
+
+### 🗺️ Community & Map Widget
+*   [x] **Concept 32 Map Widget:** Upgraded default map widget to high-performance Mapbox GL JS.
+*   [x] **Custom Styling:** Solid dark green landmass rendering (`#004c6d`) paired with crisp white ocean surfaces.
+*   [x] **Palestine Label Overlay:** Custom overlay placing Palestine prominently on the region map.
+*   *   [x] **Regional Exclusion Masking:** Dynamic boundary masks to hide default country labels.
+*   *   [x] **JSON Theme Simulator:** Live state controller allowing color modifications on the fly.
+
+### 🎓 Learning Hub (LMS)
+*   [x] **Concept 31 Geometric Course Carousel:** Swipeable cards carousel featuring custom arrow alignments.
+*   [ ] **Video Streaming Integration:** Secure video playback with presigned URL authorization.
+*   [ ] **PDF Resources:** Secure asset downloader.
+*   [ ] **User Dashboard:** Progress counters, completed courses, and quiz records.
+
+### 🧪 Research Center & Opportunities
+*   [ ] **Publications abstract registry:** Searchable table of academic documents.
+*   [ ] **Opportunities Directory:** Grants, fellowships, and scholarships database.
+*   [ ] **Recruitment forms:** Team registration inputs.
+
+### 🛠️ Live Debug & Admin Panel
+*   [x] **Concept 32 Theme Configurator:** Real-time color picker interface linking directly to Mapbox layer styles.
+*   [ ] **CRUD interfaces:** Admin database loaders for events, opportunities, and courses.
 
 ---
 
@@ -16,8 +68,6 @@ An educational and community platform for Climate & Health in the Arab region. C
 ---
 
 ## 📂 Folder & Feature Structure
-
-We organize the codebase using a **feature-based folder structure** under `src/features/`. Each feature contains its respective `components/`, `hooks/`, and `services/` to keep imports modular and highly scalable.
 
 ```
 src/
@@ -40,77 +90,6 @@ src/
     ├── admin/          # Admin CRUD panels for courses, users, and events
     └── auth/           # Login, registration, student profile tracking
 ```
-
----
-
-## 📋 Platform Specifications & Requirements
-
-### 1. Home Page
-*   **Hero Banner:** Main title, short description, and Call-to-Actions (Explore Programs, Join Community).
-*   **About ClimaMedix:** Short overview.
-*   **Impact Statistics:** Learners count, participating countries, courses, and active projects.
-*   **Featured sections:** Latest opportunities, partners, and contact info.
-
-### 2. About Us
-*   **Sub-pages / Sections:** Our Story, Vision, Mission, Core Values, Team Members, and Partners.
-
-### 3. Programs
-*   **Dynamic Program pages:** Title, Cover Image, Description, Objectives, Duration, Eligibility, and Apply Button.
-*   *Examples:* VSCHEF Fellowship, Climate Health Academy, Research Program.
-
-### 4. Learning Hub (LMS)
-*   **Course Features:** Categories, Video Lessons (streamed securely), PDF Resources, Quizzes, Progress Tracking, and Certificates.
-*   **User Dashboard:** Enrolled courses, completed courses, certificates achieved, and quiz results.
-
-### 5. Research Center
-*   **Sections:** Research Projects, Publications (Title, Authors, Abstract, PDF Download), Database, and Apply to Join Research Team.
-
-### 6. Opportunities
-*   **Admin-published entries:** Fellowships, Scholarships, Internships, Conferences, and Grants (with description, eligibility, deadline, and application links).
-
-### 7. Community
-*   **Sections:** Fellows Network, Ambassadors, Country Representatives.
-*   **Visual Map:** Interactive map showing participating Arab countries.
-
-### 8. Events
-*   **View:** Calendar View of all upcoming and past events.
-*   **Details:** Event Title, Date, Description, and Registration Link.
-
-### 9. News & Blog
-*   **Admin-published entries:** Articles, Announcements, News.
-*   **Categories:** Climate Health, Research, Opportunities, Events.
-
-### 10. Contact Us
-*   **Features:** Contact form, official email, and social media directories.
-
-### 11. Admin Panel
-*   **Actions:** Create/Edit/Delete Courses, upload lesson videos/resources, manage certificates, publish opportunities/events/news, and view analytics.
-
-### 12. User Accounts
-*   **Actions:** Registration/Login, course enrollment, taking quizzes, downloading certificates, and tracking learning progress.
----
-
-## 🚀 Advanced PWA Features & Planned Enhancements
-
-To deliver a top-tier experience across various network conditions in the Arab region, the platform will implement:
-
-### 13. Offline-First Capability & Background Sync
-*   **Service Worker Caching:** Caches core shell assets, translation files, and course metadata via Workbox.
-*   **Background Sync API:** Automatically queues quiz answers and contact form submissions when offline, and synchronizes them to Supabase as soon as the device regains connectivity.
-
-### 14. Regional i18n & Automatic Direction Layouts
-*   **Unified Context:** Switches language key-value pairs between Arabic (default) and English.
-*   **CSS Direction Swap:** Automatically applies `dir="rtl"` or `dir="ltr"` on the root layout with adjustments to flex layouts, spacing parameters, and GSAP transition vectors.
-
-### 15. Healthcare Facility Carbon Calculator
-*   **Action:** A simple tool for Arab medical clinics to estimate their greenhouse gas emissions based on grid electricity consumption, medical waste generation, and inhalational anesthetic usage.
-*   **Results:** Displays clean comparative charts showing pathways to net-zero healthcare.
-
-### 16. Web Push Notifications
-*   **Notifications:** Broadcasts alerts for upcoming webinars, course enrollments, certificate signature updates, and new fellowship calls.
-
-### 17. Client-side PDF Certificate Compiler
-*   **Action:** Uses client-side libraries to dynamically generate secure, print-ready PDF certificates with verification QR codes without invoking backend computational assets.
 
 ---
 

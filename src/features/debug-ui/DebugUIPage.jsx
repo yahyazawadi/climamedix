@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import gsap from 'gsap';
-import { Button } from '../../components/Button';
-import { GlassCard } from '../../components/GlassCard';
+import { Button } from '../shared/components/Button';
+import { GlassCard } from '../shared/components/GlassCard';
 import leftSvg from '../../assets/left-svg.svg';
 import rightSvg from '../../assets/right-svg.svg';
 import homeBg from '../../assets/bg_1.png';

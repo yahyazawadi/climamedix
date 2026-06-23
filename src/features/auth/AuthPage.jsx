@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { useAuth } from './hooks/useAuth';
-import { GlassCard } from '../../components/GlassCard';
-import { Button } from '../../components/Button';
+import { GlassCard } from '../shared/components/GlassCard';
+import { Button } from '../shared/components/Button';
 import { InteractiveParticles } from './InteractiveParticles';
 import gsap from 'gsap';
 

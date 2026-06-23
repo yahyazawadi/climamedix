@@ -2,13 +2,13 @@ import { useState, useEffect } from 'preact/hooks'
 import './app.css'
 
 // Import newly created Header & Footer components
-import { Header } from './components/Header'
-import { Footer } from './components/Footer'
-import { TopBackground } from './components/TopBackground'
-import { NeatScripples } from './components/NeatScripples'
-import { ColoredBackground } from './components/ColoredBackground'
-import { Button } from './components/Button'
-import { GlassCard } from './components/GlassCard'
+import { Header } from './features/main/components/Header'
+import { Footer } from './features/main/components/Footer'
+import { TopBackground } from './features/main/components/TopBackground'
+import { NeatScripples } from './features/main/components/NeatScripples'
+import { ColoredBackground } from './features/main/components/ColoredBackground'
+import { Button } from './features/shared/components/Button'
+import { GlassCard } from './features/shared/components/GlassCard'
 import { AboutUsPage } from './features/about-us/AboutUsPage'
 import { DebugUIPage } from './features/debug-ui/DebugUIPage'
 import { AuthPage } from './features/auth/AuthPage'
@@ -101,6 +101,13 @@ function AppContent() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // Scroll to top when navigating to auth view
+  useEffect(() => {
+    if (currentView === 'auth') {
+      window.scrollTo(0, 0);
+    }
+  }, [currentView]);
 
   // Theme Switch handler
   const toggleTheme = () => {

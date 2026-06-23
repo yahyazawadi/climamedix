@@ -1,11 +1,11 @@
-import footerLogo from '../assets/footer_logo.svg'
-import socialIn from '../assets/social_in.svg'
-import socialFb from '../assets/social_fb.svg'
-import socialInsta from '../assets/social_insta.svg'
-import socialX from '../assets/social_x.svg'
-import contactMail from '../assets/contact_mail.svg'
-import contactPhone from '../assets/contact_phone.svg'
-import contactWeb from '../assets/contact_web.svg'
+import footerLogo from '../../../assets/footer_logo.svg'
+import socialIn from '../../../assets/social_in.svg'
+import socialFb from '../../../assets/social_fb.svg'
+import socialInsta from '../../../assets/social_insta.svg'
+import socialX from '../../../assets/social_x.svg'
+import contactMail from '../../../assets/contact_mail.svg'
+import contactPhone from '../../../assets/contact_phone.svg'
+import contactWeb from '../../../assets/contact_web.svg'
 
 export function FooterCard() {
   return (

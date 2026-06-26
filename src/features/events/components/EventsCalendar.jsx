@@ -14,7 +14,7 @@ const ENGLISH_MONTHS = [
 const DAYS_OF_WEEK_AR = ['أحد', 'إثن', 'ثلاث', 'أربع', 'خميس', 'جمع', 'سبت'];
 const DAYS_OF_WEEK_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents = {}, isArabic = true }) {
+export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents = {}, isArabic = true, canManageEvents, onAddEvent }) {
   const MONTHS = isArabic ? ARABIC_MONTHS : ENGLISH_MONTHS;
   const DAYS_OF_WEEK = isArabic ? DAYS_OF_WEEK_AR : DAYS_OF_WEEK_EN;
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
@@ -90,7 +90,26 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
           {isArabic ? 'الندوات والفعاليات البيئية' : 'Environmental Events & Seminars'}
         </h3>
         
-        <div style={{ display: 'flex', background: 'rgba(0, 76, 109, 0.08)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(11, 40, 73, 0.1)' }}>
+        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
+          {canManageEvents && (
+            <button 
+              onClick={onAddEvent}
+              style={{
+                background: 'linear-gradient(90deg, #15b47a, #004c6d)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '8px 20px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '13.5px',
+                boxShadow: '0 4px 10px rgba(21, 180, 122, 0.2)'
+              }}
+            >
+              {isArabic ? '+ إضافة فعالية' : '+ Add Event'}
+            </button>
+          )}
+          <div style={{ display: 'flex', background: 'rgba(0, 76, 109, 0.08)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(11, 40, 73, 0.1)' }}>
           <button
             onClick={() => setViewMode('list')}
             style={{
@@ -125,6 +144,7 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
           </button>
         </div>
       </div>
+    </div>
 
       {viewMode === 'list' ? (
         /* ================== LIST VIEW ================== */

@@ -151,6 +151,17 @@ html[lang="en"] .figma-nav-text {
   transform: rotate(-25deg);
 }
 
+/* Specific icon size adjustments */
+a[href="#training"] .figma-nav-icon {
+  height: 28px;
+  /* reduced size */
+}
+
+a[href="#about"] .figma-nav-icon {
+  height: 38px;
+  /* increased size */
+}
+
 .figma-nav-text {
   font-size: 16px;
   font-weight: 500;
@@ -643,8 +654,8 @@ html[lang="en"] .figma-nav-text {
 }
 
 .figma-hero-white-logo {
-  width: 108.39px;
-  height: 73.52px;
+  width: 155px;
+  height: 105px;
   object-fit: contain;
   /* No align-self override — inherits flex-end, stays right-aligned with text */
 }
@@ -654,7 +665,7 @@ html[lang="en"] .figma-nav-text {
   font-size: 22px;
   font-weight: 500;
   color: #ffffff;
-  margin: 6px 0 0 0;
+  margin: -10px 0 0 0;
   line-height: 1.4;
   text-shadow: 0 2px 4px rgba(11, 40, 73, 0.25);
   width: 100%;
@@ -775,7 +786,7 @@ html[lang="en"] .figma-nav-text {
   }
 
   .figma-hero-white-logo {
-    width: 80px;
+    width: 125px;
     height: auto;
     margin-bottom: 4px;
   }
@@ -783,7 +794,7 @@ html[lang="en"] .figma-nav-text {
   .figma-hero-subtitle {
     font-size: 14px;
     color: #ffffff;
-    margin: 0;
+    margin: 12px 0 0 0;
     text-align: right;
     line-height: 1.35;
     text-shadow: 0 1px 3px rgba(11, 40, 73, 0.2);
@@ -793,13 +804,14 @@ html[lang="en"] .figma-nav-text {
     width: 100%;
     margin-left: 0;
     padding-left: 0;
-    margin-top: 90px;
+    margin-top: 0;
     text-align: right;
     font-size: 15px;
     line-height: 1.4;
     color: #0b2849;
     display: flex;
     flex-direction: column;
+    transform: translateY(-20px);
   }
 
   .figma-hero-desc-top {
@@ -911,6 +923,7 @@ html[lang="en"] .figma-nav-text {
 
   .figma-hero-subtitle {
     font-size: 13px;
+    margin-top: 12px;
   }
 
   .figma-hero-description {
@@ -2748,6 +2761,7 @@ html[lang="en"] .figma-nav-text {
     padding-top: 180px !important;
     min-height: calc(100vh - 140px);
   }
+
   .auth-split-wrapper {
     gap: 32px;
   }
@@ -2758,10 +2772,12 @@ html[lang="en"] .figma-nav-text {
     padding: 135px 16px 40px 16px !important;
     min-height: calc(100vh - 90px);
   }
+
   .auth-split-wrapper {
     grid-template-columns: 1fr;
     max-width: 480px;
   }
+
   .auth-image-side {
     display: none;
   }
@@ -2777,6 +2793,7 @@ html[lang="en"] .figma-nav-text {
     opacity: 0;
     transform: translate(-50%, -10px);
   }
+
   to {
     opacity: 1;
     transform: translate(-50%, 0);
@@ -3002,9 +3019,11 @@ html[lang="en"] .figma-nav-text {
     min-width: 100%;
     max-width: 100%;
   }
+
   .discovery-nav-btn.prev {
     left: 5px;
   }
+
   .discovery-nav-btn.next {
     right: 5px;
   }
@@ -3075,7 +3094,9 @@ body.dark-mode .search-filter-tag.active {
 
 /* Spinner Animation */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Mobile responsive styles */
@@ -3083,7 +3104,7 @@ body.dark-mode .search-filter-tag.active {
   .opportunities-directory {
     padding: 0 10px;
   }
-  
+
   .search-filter-tag {
     font-size: 13px !important;
     padding: 6px 16px !important;

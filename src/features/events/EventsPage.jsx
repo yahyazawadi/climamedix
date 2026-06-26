@@ -25,7 +25,8 @@ export function EventsPage({ lang, onNavigate }) {
     description_en: '',
     event_date: '',
     time: '',
-    type: '',
+    type_ar: '',
+    type_en: '',
     registration_link: ''
   });
 
@@ -47,7 +48,7 @@ export function EventsPage({ lang, onNavigate }) {
         title: isArabic ? db.title_ar : (db.title_en || db.title_ar),
         date: db.event_date ? db.event_date.split('T')[0] : '', 
         time: db.time,
-        type: db.type,
+        type: isArabic ? (db.type_ar || db.type) : (db.type_en || db.type_ar || db.type),
         desc: isArabic ? db.description_ar : (db.description_en || db.description_ar),
         link: db.registration_link
       }));
@@ -81,7 +82,8 @@ export function EventsPage({ lang, onNavigate }) {
       description_en: formData.description_en,
       event_date: isoDate,
       time: formData.time,
-      type: formData.type,
+      type_ar: formData.type_ar,
+      type_en: formData.type_en,
       registration_link: formData.registration_link
     }]);
 
@@ -90,7 +92,7 @@ export function EventsPage({ lang, onNavigate }) {
       setIsModalOpen(false);
       setFormData({
         title_ar: '', title_en: '', description_ar: '', description_en: '',
-        event_date: '', time: '', type: '', registration_link: ''
+        event_date: '', time: '', type_ar: '', type_en: '', registration_link: ''
       });
       fetchEvents();
     } else {
@@ -170,14 +172,6 @@ export function EventsPage({ lang, onNavigate }) {
               background: 'linear-gradient(90deg, #15b47a, #004c6d)'
             }}></div>
             
-            {canManageEvents && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-                <Button variant="gradient" onClick={() => setIsModalOpen(true)}>
-                  {isArabic ? '+ إضافة فعالية جديدة' : '+ Add New Event'}
-                </Button>
-              </div>
-            )}
-
             {loading ? (
               <div style={{ textAlign: 'center', padding: '40px', color: '#0b2849' }}>
                 {isArabic ? 'جاري تحميل الفعاليات...' : 'Loading events...'}
@@ -188,6 +182,8 @@ export function EventsPage({ lang, onNavigate }) {
                 onRegisterEvent={handleRegisterCalendarEvent} 
                 registeredEvents={registeredEvents} 
                 isArabic={isArabic}
+                canManageEvents={canManageEvents}
+                onAddEvent={() => setIsModalOpen(true)}
               />
             )}
           </div>
@@ -245,18 +241,25 @@ export function EventsPage({ lang, onNavigate }) {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#0b2849', display: 'block', marginBottom: '8px' }}>
-                    {isArabic ? 'النوع (ورشة، مؤتمر..)' : 'Type'}
+                    {isArabic ? 'النوع (بالعربية)' : 'Type (Arabic)'}
                   </label>
-                  <input required type="text" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} 
+                  <input required type="text" value={formData.type_ar} onChange={e => setFormData({...formData, type_ar: e.target.value})} 
                     style={{ width: '100%', padding: '10px 15px', borderRadius: '10px', border: '1px solid rgba(11,40,73,0.15)', boxSizing: 'border-box' }} />
                 </div>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#0b2849', display: 'block', marginBottom: '8px' }}>
-                    {isArabic ? 'رابط التسجيل' : 'Registration Link'}
+                    {isArabic ? 'النوع (بالإنجليزية)' : 'Type (English)'}
                   </label>
-                  <input type="url" value={formData.registration_link} onChange={e => setFormData({...formData, registration_link: e.target.value})} 
+                  <input type="text" value={formData.type_en} onChange={e => setFormData({...formData, type_en: e.target.value})} 
                     style={{ width: '100%', padding: '10px 15px', borderRadius: '10px', border: '1px solid rgba(11,40,73,0.15)', boxSizing: 'border-box' }} />
                 </div>
+              </div>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#0b2849', display: 'block', marginBottom: '8px' }}>
+                  {isArabic ? 'رابط التسجيل' : 'Registration Link'}
+                </label>
+                <input type="url" value={formData.registration_link} onChange={e => setFormData({...formData, registration_link: e.target.value})} 
+                  style={{ width: '100%', padding: '10px 15px', borderRadius: '10px', border: '1px solid rgba(11,40,73,0.15)', boxSizing: 'border-box' }} />
               </div>
               <div>
                 <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#0b2849', display: 'block', marginBottom: '8px' }}>

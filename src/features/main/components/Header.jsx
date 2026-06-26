@@ -10,6 +10,7 @@ import iconOpportunities from '../../../assets/icon_opportunities.svg'
 import iconSearch from '../../../assets/icon_search.svg'
 import iconProfile from '../../../assets/icon_profile.svg'
 import iconGlobe from '../../../assets/icon_globe.svg'
+import iconCommunity from '../../../assets/icon_community.svg'
 import { translations } from '../../../i18n/translations'
 
 export function Header({ activeSection, currentView, onNavigate, user, userProfile, onLogout, lang, toggleLanguage }) {
@@ -483,6 +484,19 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               <span class="figma-nav-text">{t.contact}</span>
             </a>
 
+            {/* Join Us */}
+            <a 
+              href="#join-us" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('join-us');
+              }}
+              class={`figma-nav-item ${currentView === 'join-us' ? 'active' : ''}`}
+            >
+              <img src={iconCommunity} class="figma-nav-icon" alt="انضم إلينا" />
+              <span class="figma-nav-text">{t.joinUs}</span>
+            </a>
+
             {/* 5.5 الفرص */}
             <a 
               href="#opportunities" 
@@ -658,6 +672,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
           <a href="#research" onClick={(e) => { e.preventDefault(); onNavigate('home', 'research'); setDrawerOpen(false); }} class="drawer-link">{t.research}</a>
           <a href="#training" onClick={(e) => { e.preventDefault(); onNavigate('home', 'training'); setDrawerOpen(false); }} class="drawer-link">{t.training}</a>
           <a href="#opportunities" onClick={(e) => { e.preventDefault(); onNavigate('opportunities'); setDrawerOpen(false); }} class="drawer-link">{t.opportunities}</a>
+          <a href="#join-us" onClick={(e) => { e.preventDefault(); onNavigate('join-us'); setDrawerOpen(false); }} class="drawer-link">{t.joinUs}</a>
           <a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate('home', 'contact'); setDrawerOpen(false); }} class="drawer-link">{t.contact}</a>
         </nav>
       </div>

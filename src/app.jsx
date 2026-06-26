@@ -12,6 +12,7 @@ import { GlassCard } from './features/shared/components/GlassCard'
 import { AboutUsPage } from './features/about-us/AboutUsPage'
 import { DebugUIPage } from './features/debug-ui/DebugUIPage'
 import { AuthPage } from './features/auth/AuthPage'
+import { JoinUsPage } from './features/join-us/JoinUsPage'
 import { OpportunitiesPage } from './features/opportunities/components/OpportunitiesPage'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
@@ -178,6 +179,8 @@ function AppContent() {
       setCurrentView('auth');
     } else if (path === '/opportunities') {
       setCurrentView('opportunities');
+    } else if (path === '/join-us') {
+      setCurrentView('join-us');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -201,6 +204,8 @@ function AppContent() {
         setCurrentView('auth');
       } else if (p === '/opportunities') {
         setCurrentView('opportunities');
+      } else if (p === '/join-us') {
+        setCurrentView('join-us');
       } else {
         setCurrentView('home');
       }
@@ -296,6 +301,8 @@ function AppContent() {
             window.history.pushState({}, '', '/auth');
           } else if (view === 'opportunities') {
             window.history.pushState({}, '', '/opportunities');
+          } else if (view === 'join-us') {
+            window.history.pushState({}, '', '/join-us');
           } else if (sectionId) {
             window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
@@ -306,7 +313,7 @@ function AppContent() {
             window.history.pushState({}, '', '/');
           }
         }}
-        onJoinClick={() => setOpenedModal('join')} 
+        onJoinClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }} 
       />
 
       {currentView === 'home' ? (
@@ -510,7 +517,7 @@ function AppContent() {
             </div>
             
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
-              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => setOpenedModal('join')}>
+              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>
                 {lang === 'ar' ? 'تصفح جميع الأبحاث' : 'Browse All Research'}
               </Button>
             </div>
@@ -524,7 +531,7 @@ function AppContent() {
             <p className="figma-cta-description">
               {lang === 'ar' ? 'نحن نخطط لإطلاق عدد من المشاريع البحثية الجديدة قريبًا. إذا كنت مهتمًا بالمشاركة، يمكنك التقديم عبر نموذج التسجيل أدناه.' : 'We plan to launch several new research projects soon. If you are interested in participating, you can apply via the registration form below.'}
             </p>
-            <Button variant="gradient" onClick={() => setOpenedModal('join')}>
+            <Button variant="gradient" onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>
               {lang === 'ar' ? 'انضم لفريق البحث' : 'Join the Research Team'}
             </Button>
           </div>
@@ -544,7 +551,7 @@ function AppContent() {
                 <div className="figma-item-card-content">
                   <h3 className="figma-item-card-title">{lang === 'ar' ? 'دورات البحوث العلمية المتخصصة في قطاع الصحة والبيئة.' : 'Specialized research training courses in the health and environment sector.'}</h3>
                   <span className="figma-item-card-trainees">{lang === 'ar' ? '+1308 متدرب' : '+1308 Trainees'}</span>
-                  <Button variant="more" onClick={() => setOpenedModal('join')}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
+                  <Button variant="more" onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
                 </div>
               </div>
 
@@ -556,7 +563,7 @@ function AppContent() {
                 <div className="figma-item-card-content">
                   <h3 className="figma-item-card-title">{lang === 'ar' ? 'الاستجابة الطبية الطارئة للكوارث المناخية والبيئية.' : 'Emergency medical response to climate and environmental disasters.'}</h3>
                   <span className="figma-item-card-trainees">{lang === 'ar' ? '+850 متدرب' : '+850 Trainees'}</span>
-                  <Button variant="more" onClick={() => setOpenedModal('join')}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
+                  <Button variant="more" onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
                 </div>
               </div>
 
@@ -568,7 +575,7 @@ function AppContent() {
                 <div className="figma-item-card-content">
                   <h3 className="figma-item-card-title">{lang === 'ar' ? 'مبادئ الصحة العامة البيئية وتطبيقاتها السريرية.' : 'Principles of environmental public health and clinical applications.'}</h3>
                   <span className="figma-item-card-trainees">{lang === 'ar' ? '+1120 متدرب' : '+1120 Trainees'}</span>
-                  <Button variant="more" onClick={() => setOpenedModal('join')}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
+                  <Button variant="more" onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
                 </div>
               </div>
 
@@ -580,13 +587,13 @@ function AppContent() {
                 <div className="figma-item-card-content">
                   <h3 className="figma-item-card-title">{lang === 'ar' ? 'مهارات الكتابة العلمية للأبحاث الطبية والبيئية.' : 'Scientific writing skills for medical and environmental research.'}</h3>
                   <span className="figma-item-card-trainees">{lang === 'ar' ? '+950 متدرب' : '+950 Trainees'}</span>
-                  <Button variant="more" onClick={() => setOpenedModal('join')}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
+                  <Button variant="more" onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
                 </div>
               </div>
             </div>
             
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
-              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => setOpenedModal('join')}>
+              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>
                 {lang === 'ar' ? 'تصفح جميع الدورات' : 'Browse All Courses'}
               </Button>
             </div>
@@ -633,10 +640,15 @@ function AppContent() {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />
+      ) : currentView === 'join-us' ? (
+        <JoinUsPage lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
       ) : (
         <AboutUsPage
           lang={lang}
-          onJoinClick={() => setOpenedModal('join')}
+          onJoinClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}
           onNavigate={(view, sectionId) => {
             setCurrentView(view);
             if (view === 'about-us') {
@@ -659,7 +671,7 @@ function AppContent() {
       {/* Footer component */}
       <Footer 
         lang={lang}
-        onJoinClick={() => setOpenedModal('join')} 
+        onJoinClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }} 
         onPolicyClick={() => setOpenedModal('policy')} 
         onNavigate={(view, sectionId) => {
             setCurrentView(view);
@@ -667,6 +679,8 @@ function AppContent() {
               window.history.pushState({}, '', '/about-us');
             } else if (view === 'opportunities') {
               window.history.pushState({}, '', '/opportunities');
+            } else if (view === 'join-us') {
+              window.history.pushState({}, '', '/join-us');
             } else if (sectionId) {
               window.history.pushState({}, '', '/' + sectionId);
               setTimeout(() => {

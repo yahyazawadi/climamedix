@@ -1318,3 +1318,37 @@ GRANT SELECT ON public.publications_accessible TO anon, authenticated;
 GRANT SELECT ON public.news_articles_accessible TO anon, authenticated;
 GRANT SELECT ON public.opportunities_accessible TO anon, authenticated;
 GRANT SELECT ON public.quiz_options_accessible TO anon, authenticated;
+
+-- ------------------------------------------------------------
+-- 11. Join Requests
+-- ------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS public.join_requests (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    profession TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.join_requests ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public insert join requests" ON public.join_requests FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public insert join requests" ON public.join_requests FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow admin view join requests" ON public.join_requests FOR SELECT USING (
+    public.has_permission(auth.uid(), 'approve:users')
+);
+
+-- Add cv_url column to join_requests
+ALTER TABLE public.join_requests ADD COLUMN IF NOT EXISTS cv_url TEXT;
+
+-- Add new fields for expanded join request form
+ALTER TABLE public.join_requests ADD COLUMN IF NOT EXISTS city TEXT;
+ALTER TABLE public.join_requests ADD COLUMN IF NOT EXISTS country TEXT;
+ALTER TABLE public.join_requests ADD COLUMN IF NOT EXISTS birth_date DATE;
+ALTER TABLE public.join_requests ADD COLUMN IF NOT EXISTS university_org TEXT;
+ALTER TABLE public.join_requests ADD COLUMN IF NOT EXISTS work TEXT;
+ALTER TABLE public.join_requests ADD COLUMN IF NOT EXISTS is_activist BOOLEAN DEFAULT false;
+ALTER TABLE public.join_requests ADD COLUMN IF NOT EXISTS activist_field TEXT;
+ALTER TABLE public.join_requests ADD COLUMN IF NOT EXISTS bio TEXT;
+

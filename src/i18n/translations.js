@@ -90,7 +90,35 @@ export const translations = {
     authTitleAr: 'مرحباً بك في ClimaMedix',
     authTitleEn: 'مرحباً بعودتك',
     authDescAr: 'أنشئ حسابك للوصول إلى المنصة والأبحاث',
-    authDescEn: 'سجل الدخول للمتابعة إلى حسابك'
+    authDescEn: 'سجل الدخول للمتابعة إلى حسابك',
+    
+    // Join Us Page
+    joinUsPageTitle: 'الانضمام لفريق ClimaMedix',
+    joinUsPageIntro: 'سجل بياناتك للانضمام إلى قائمة الباحثين والمسعفين المتطوعين في دراسات المناخ والصحة.',
+    fullNameLabel: 'الاسم الكامل *',
+    fullNamePlaceholder: 'أدخل اسمك الكامل',
+    emailLabel: 'البريد الإلكتروني *',
+    professionLabel: 'التخصص المهني *',
+    professionPlaceholder: 'اختر تخصصك',
+    professionDoctor: 'طبيب / ممارس صحي',
+    professionResearcher: 'باحث بيئي / علمي',
+    professionStudent: 'طالب علوم صحية',
+    professionOther: 'أخرى',
+    birthDateLabel: 'تاريخ الميلاد',
+    universityLabel: 'الجامعة / المنظمة',
+    universityPlaceholder: 'اذكر اسم جامعتك أو المنظمة التي تنتمي إليها',
+    workLabel: 'العمل الحالي',
+    workPlaceholder: 'ما هو مسماك الوظيفي؟',
+    isActivistLabel: 'هل أنت ناشط في مجال معين؟',
+    activistFieldLabel: 'في أي مجال؟ (مثال: الصحة العامة)',
+    activistFieldPlaceholder: 'اذكر مجال نشاطك',
+    bioLabel: 'نبذة عنك (أخبرنا عن نفسك)',
+    bioPlaceholder: 'حدثنا عن اهتماماتك وخبراتك...',
+    submitJoinReq: 'إرسال طلب الانضمام',
+    submittingJoinReq: 'جاري إرسال طلبك...',
+    joinSuccessTitle: 'تم إرسال طلبك بنجاح!',
+    joinSuccessDesc: 'سيتواصل معك منسق الفريق عبر البريد الإلكتروني في غضون 48 ساعة.',
+    adminJoinRequestsTitle: 'طلبات الانضمام'
   },
   en: {
     // Header
@@ -183,6 +211,34 @@ export const translations = {
     authTitleAr: 'Welcome to ClimaMedix',
     authTitleEn: 'Welcome Back',
     authDescAr: 'Create your account to access the platform and research',
-    authDescEn: 'Log in to continue to your account'
+    authDescEn: 'Log in to continue to your account',
+    
+    // Join Us Page
+    joinUsPageTitle: 'Join the ClimaMedix Team',
+    joinUsPageIntro: 'Register your details to join the team of volunteer researchers and medical staff.',
+    fullNameLabel: 'Full Name *',
+    fullNamePlaceholder: 'Enter your full name',
+    emailLabel: 'Email *',
+    professionLabel: 'Professional Specialty *',
+    professionPlaceholder: 'Select your specialty',
+    professionDoctor: 'Doctor / Health Practitioner',
+    professionResearcher: 'Environmental / Scientific Researcher',
+    professionStudent: 'Health Sciences Student',
+    professionOther: 'Other',
+    birthDateLabel: 'Birth Date',
+    universityLabel: 'University / Organization',
+    universityPlaceholder: 'Enter your university or organization name',
+    workLabel: 'Current Work',
+    workPlaceholder: 'What is your job title?',
+    isActivistLabel: 'Are you an activist in a specific field?',
+    activistFieldLabel: 'In what field? (e.g. Public Health)',
+    activistFieldPlaceholder: 'Specify your field of activism',
+    bioLabel: 'Bio (Tell us about yourself)',
+    bioPlaceholder: 'Tell us about your interests and experiences...',
+    submitJoinReq: 'Submit Join Request',
+    submittingJoinReq: 'Submitting your request...',
+    joinSuccessTitle: 'Your request was sent successfully!',
+    joinSuccessDesc: 'The team coordinator will contact you via email within 48 hours.',
+    adminJoinRequestsTitle: 'Join Requests'
   }
 };

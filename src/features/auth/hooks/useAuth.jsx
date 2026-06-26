@@ -31,14 +31,14 @@ export const ROLE_PERMISSIONS = {
     'view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research',
     'write:articles', 'manage:any_course', 'manage:any_article', 'manage:any_publication',
     'approve:users', 'issue:certs', 'review:posts', 'write:opportunities', 'manage:any_opportunity',
-    'write:events', 'manage:any_event', 'write:courses'
+    'write:events', 'manage:any_event', 'write:courses', 'view:join_requests'
   ],
   superadmin: [
     'view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research',
     'write:articles', 'manage:any_course', 'manage:any_article', 'manage:any_publication',
     'approve:users', 'issue:certs', 'review:posts', 'write:opportunities', 'manage:any_opportunity',
     'write:events', 'manage:any_event', 'write:courses', 'write:research', 'apply:specialized_roles',
-    'manage:system'
+    'manage:system', 'view:join_requests'
   ]
 };
 

@@ -1,9 +1,12 @@
-import { useState } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
+import { supabase } from '../../../utils/supabaseClient';
 import { GlassCard } from '../../shared/components/GlassCard';
 import { Button } from '../../shared/components/Button';
+import { useAuth } from '../../auth/hooks/useAuth';
 
 export function AdminCRUD() {
-  const [activeSection, setActiveSection] = useState('courses'); // 'courses', 'events', 'opps'
+  const { hasPermission } = useAuth();
+  const [activeSection, setActiveSection] = useState('courses'); // 'courses', 'events', 'opps', 'joinRequests'
   const [items, setItems] = useState({
     courses: [
       { id: 1, title: 'زمالة طب الكوارث المناخية', category: 'طبي بيئي', enrolled: 125 },
@@ -16,8 +19,29 @@ export function AdminCRUD() {
     opps: [
       { id: 1, title: 'زمالة VSCHEF للأبحاث البيئية', deadline: '2026-07-15', applications: 31 },
       { id: 2, title: 'منحة ماجستير الصحة العامة الخضراء', deadline: '2026-08-30', applications: 18 }
-    ]
+    ],
+    joinRequests: []
   });
+
+  const [loadingRequests, setLoadingRequests] = useState(false);
+
+  useEffect(() => {
+    if (activeSection === 'joinRequests') {
+      const fetchRequests = async () => {
+        setLoadingRequests(true);
+        const { data, error } = await supabase
+          .from('join_requests')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (!error && data) {
+          setItems(prev => ({ ...prev, joinRequests: data }));
+        }
+        setLoadingRequests(false);
+      };
+      fetchRequests();
+    }
+  }, [activeSection]);
 
   const [formInputs, setFormInputs] = useState({
     courses: { title: '', category: '' },
@@ -64,7 +88,7 @@ export function AdminCRUD() {
     <div className="admin-crud-component" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', direction: 'rtl', textAlign: 'right' }}>
       
       {/* Sub-Header Navigation */}
-      <div style={{ display: 'flex', gap: '15px', marginBottom: '30px', borderBottom: '1px solid rgba(11,40,73,0.1)', paddingBottom: '15px' }}>
+      <div style={{ display: 'flex', gap: '15px', marginBottom: '30px', borderBottom: '1px solid rgba(11,40,73,0.1)', paddingBottom: '15px', flexWrap: 'wrap' }}>
         {['courses', 'events', 'opps'].map(sect => (
           <button
             key={sect}
@@ -81,14 +105,33 @@ export function AdminCRUD() {
               transition: 'all 0.2s'
             }}
           >
-            {sect === 'courses' ? 'إدارة المساقات (LMS)' : sect === 'events' ? 'إدارة الفعاليات' : 'إدارة الفرص والمنح'}
+            {sect === 'courses' ? 'إدارة المساقات (LMS)' : sect === 'events' ? 'إدارة الفعاليات' : sect === 'opps' ? 'إدارة الفرص والمنح' : 'طلبات الانضمام'}
           </button>
         ))}
+        {hasPermission('approve:users') && (
+          <button
+            onClick={() => setActiveSection('joinRequests')}
+            style={{
+              background: activeSection === 'joinRequests' ? '#004c6d' : 'transparent',
+              color: activeSection === 'joinRequests' ? '#ffffff' : '#0b2849',
+              border: 'none',
+              padding: '8px 20px',
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              fontSize: '13px',
+              transition: 'all 0.2s'
+            }}
+          >
+            طلبات الانضمام
+          </button>
+        )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '30px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: activeSection === 'joinRequests' ? '1fr' : 'repeat(auto-fit, minmax(360px, 1fr))', gap: '30px' }}>
         
         {/* Left Column: Create Form */}
+        {activeSection !== 'joinRequests' && (
         <GlassCard style={{ padding: '24px', height: 'fit-content' }}>
           <h3 style={{ color: '#0b2849', fontSize: '18px', fontWeight: 'bold', marginBottom: '20px' }}>
             إضافة جديد (إنشاء سجل)
@@ -161,6 +204,7 @@ export function AdminCRUD() {
             </Button>
           </form>
         </GlassCard>
+        )}
 
         {/* Right Column: Manage List */}
         <div>
@@ -201,9 +245,38 @@ export function AdminCRUD() {
                         <span>الطلبات: {item.applications}</span>
                       </>
                     )}
+                    {activeSection === 'joinRequests' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                          <span>البريد: {item.email}</span>
+                          <span>التخصص: {item.profession}</span>
+                          <span>التاريخ: {new Date(item.created_at).toLocaleDateString('ar-EG')}</span>
+                          {item.city && item.country && <span>الموقع: {item.city}, {item.country}</span>}
+                        </div>
+                        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                          {item.birth_date && <span>الميلاد: {new Date(item.birth_date).toLocaleDateString('ar-EG')}</span>}
+                          {item.university_org && <span>الجامعة/المنظمة: {item.university_org}</span>}
+                          {item.work && <span>العمل: {item.work}</span>}
+                          {item.is_activist && <span>ناشط: نعم ({item.activist_field || 'غير محدد'})</span>}
+                        </div>
+                        {item.bio && (
+                          <div style={{ marginTop: '4px', fontStyle: 'italic', color: 'rgba(11,40,73,0.7)' }}>
+                            نبذة: "{item.bio}"
+                          </div>
+                        )}
+                        {item.cv_url && (
+                          <div style={{ marginTop: '4px' }}>
+                            <a href={item.cv_url} target="_blank" rel="noreferrer" style={{ color: '#15b47a', textDecoration: 'underline' }}>
+                              عرض السيرة الذاتية
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
+                {activeSection !== 'joinRequests' && (
                 <button 
                   onClick={() => handleDelete(activeSection, item.id)}
                   style={{
@@ -222,10 +295,15 @@ export function AdminCRUD() {
                 >
                   حذف السجل
                 </button>
+                )}
               </GlassCard>
             ))}
 
-            {items[activeSection].length === 0 && (
+            {loadingRequests && activeSection === 'joinRequests' && (
+              <div style={{ textAlign: 'center', padding: '40px' }}>جاري التحميل...</div>
+            )}
+
+            {items[activeSection].length === 0 && !loadingRequests && (
               <div style={{ textAlign: 'center', padding: '40px', background: 'rgba(255,255,255,0.4)', borderRadius: '20px', border: '1px dashed rgba(11,40,73,0.2)', color: 'rgba(11, 40, 73, 0.5)' }}>
                 لا توجد سجلات حالياً في هذا القسم.
               </div>

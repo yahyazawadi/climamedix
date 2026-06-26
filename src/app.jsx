@@ -14,6 +14,7 @@ import { DebugUIPage } from './features/debug-ui/DebugUIPage'
 import { AuthPage } from './features/auth/AuthPage'
 import { JoinUsPage } from './features/join-us/JoinUsPage'
 import { OpportunitiesPage } from './features/opportunities/components/OpportunitiesPage'
+import { EventsPage } from './features/events/EventsPage'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import doctorImg from './assets/bg_3.png'
@@ -181,6 +182,8 @@ function AppContent() {
       setCurrentView('opportunities');
     } else if (path === '/join-us') {
       setCurrentView('join-us');
+    } else if (path === '/events') {
+      setCurrentView('events');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -206,6 +209,8 @@ function AppContent() {
         setCurrentView('opportunities');
       } else if (p === '/join-us') {
         setCurrentView('join-us');
+      } else if (p === '/events') {
+        setCurrentView('events');
       } else {
         setCurrentView('home');
       }
@@ -303,6 +308,8 @@ function AppContent() {
             window.history.pushState({}, '', '/opportunities');
           } else if (view === 'join-us') {
             window.history.pushState({}, '', '/join-us');
+          } else if (view === 'events') {
+            window.history.pushState({}, '', '/events');
           } else if (sectionId) {
             window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
@@ -645,6 +652,11 @@ function AppContent() {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />
+      ) : currentView === 'events' ? (
+        <EventsPage lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
       ) : (
         <AboutUsPage
           lang={lang}
@@ -681,6 +693,8 @@ function AppContent() {
               window.history.pushState({}, '', '/opportunities');
             } else if (view === 'join-us') {
               window.history.pushState({}, '', '/join-us');
+            } else if (view === 'events') {
+              window.history.pushState({}, '', '/events');
             } else if (sectionId) {
               window.history.pushState({}, '', '/' + sectionId);
               setTimeout(() => {

@@ -1,17 +1,17 @@
 import { Button } from '../../shared/components/Button';
 import { GlassCard } from '../../shared/components/GlassCard';
 
-export function EventCard({ title, date, time, type, desc, onRegister, isRegistered }) {
-  // Format Arabic Date representation (e.g. 15 يوليو 2026)
-  const formattedDate = new Date(date).toLocaleDateString('ar-EG', {
+export function EventCard({ title, date, time, type, desc, onRegister, isRegistered, isArabic = true }) {
+  const locale = isArabic ? 'ar-EG' : 'en-US';
+  
+  const formattedDate = new Date(date).toLocaleDateString(locale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   });
 
-  // Extract day and month for the calendar icon
   const day = new Date(date).getDate();
-  const month = new Date(date).toLocaleDateString('ar-EG', { month: 'short' });
+  const month = new Date(date).toLocaleDateString(locale, { month: 'short' });
 
   return (
     <GlassCard className="event-card" style={{ padding: '24px', display: 'flex', gap: '20px', alignItems: 'center', opacity: 0, height: '100%' }}>
@@ -73,7 +73,7 @@ export function EventCard({ title, date, time, type, desc, onRegister, isRegiste
               color: isRegistered ? '#15b47a' : undefined
             }}
           >
-            {isRegistered ? '✓ مسجل' : 'سجل الآن'}
+            {isRegistered ? (isArabic ? '✓ مسجل' : '✓ Registered') : (isArabic ? 'سجل الآن' : 'Register Now')}
           </Button>
         </div>
       </div>

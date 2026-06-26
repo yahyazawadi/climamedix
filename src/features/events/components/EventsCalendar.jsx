@@ -6,10 +6,17 @@ const ARABIC_MONTHS = [
   'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
   'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
 ];
+const ENGLISH_MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
 
-const DAYS_OF_WEEK = ['أحد', 'إثن', 'ثلاث', 'أربع', 'خميس', 'جمع', 'سبت'];
+const DAYS_OF_WEEK_AR = ['أحد', 'إثن', 'ثلاث', 'أربع', 'خميس', 'جمع', 'سبت'];
+const DAYS_OF_WEEK_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents = {} }) {
+export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents = {}, isArabic = true }) {
+  const MONTHS = isArabic ? ARABIC_MONTHS : ENGLISH_MONTHS;
+  const DAYS_OF_WEEK = isArabic ? DAYS_OF_WEEK_AR : DAYS_OF_WEEK_EN;
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
   const [currentMonth, setCurrentMonth] = useState(6); // Default: July 2026 (6)
   const [currentYear, setCurrentYear] = useState(2026);
@@ -79,7 +86,9 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
       
       {/* View Switcher Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '35px', flexWrap: 'wrap', gap: '15px' }}>
-        <h3 style={{ color: '#0b2849', fontSize: '20px', fontWeight: 'bold', margin: 0 }}>الندوات والفعاليات البيئية</h3>
+        <h3 style={{ color: '#0b2849', fontSize: '20px', fontWeight: 'bold', margin: 0 }}>
+          {isArabic ? 'الندوات والفعاليات البيئية' : 'Environmental Events & Seminars'}
+        </h3>
         
         <div style={{ display: 'flex', background: 'rgba(0, 76, 109, 0.08)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(11, 40, 73, 0.1)' }}>
           <button
@@ -96,7 +105,7 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
               transition: 'all 0.25s'
             }}
           >
-            عرض القائمة
+            {isArabic ? 'عرض القائمة' : 'List View'}
           </button>
           <button
             onClick={() => setViewMode('calendar')}
@@ -112,7 +121,7 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
               transition: 'all 0.25s'
             }}
           >
-            عرض التقويم
+            {isArabic ? 'عرض التقويم' : 'Calendar View'}
           </button>
         </div>
       </div>
@@ -126,6 +135,7 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
               {...e}
               onRegister={() => onRegisterEvent(e.id)}
               isRegistered={!!registeredEvents[e.id]}
+              isArabic={isArabic}
             />
           ))}
         </div>
@@ -137,10 +147,10 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
           <div style={{ background: 'rgba(255, 255, 255, 0.45)', backdropFilter: 'blur(20px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', padding: '24px', boxShadow: '0 12px 30px rgba(0, 76, 109, 0.05)' }}>
             
             {/* Header Controls */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <button onClick={handlePrevMonth} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#004c6d', fontWeight: 'bold' }}>&gt;</button>
-              <strong style={{ color: '#0b2849', fontSize: '16px' }}>{ARABIC_MONTHS[currentMonth]} {currentYear}</strong>
-              <button onClick={handleNextMonth} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#004c6d', fontWeight: 'bold' }}>&lt;</button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', direction: 'ltr' }}>
+              <button onClick={handlePrevMonth} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#004c6d', fontWeight: 'bold' }}>&lt;</button>
+              <strong style={{ color: '#0b2849', fontSize: '16px' }}>{MONTHS[currentMonth]} {currentYear}</strong>
+              <button onClick={handleNextMonth} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#004c6d', fontWeight: 'bold' }}>&gt;</button>
             </div>
 
             {/* Days of Week Row */}
@@ -167,7 +177,9 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
                       fontSize: '13px',
                       fontWeight: cell.day ? 'bold' : 'normal',
                       cursor: cell.hasEvent ? 'pointer' : 'default',
-                      background: isSelected 
+                      background: !cell.day
+                        ? '#0b2849' 
+                        : isSelected 
                         ? '#004c6d' 
                         : cell.hasEvent 
                           ? 'rgba(21, 180, 122, 0.15)' 
@@ -213,17 +225,22 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
                     {...e}
                     onRegister={() => onRegisterEvent(e.id)}
                     isRegistered={!!registeredEvents[e.id]}
+                    isArabic={isArabic}
                   />
                 ))
               ) : (
                 <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(11, 40, 73, 0.5)', background: 'rgba(255,255,255,0.4)', borderRadius: '20px', border: '1px dashed rgba(11,40,73,0.2)' }}>
-                  لا توجد فعاليات في هذا اليوم.
+                  {isArabic ? 'لا توجد فعاليات في هذا اليوم.' : 'No events on this day.'}
                 </div>
               )
             ) : (
               <div style={{ textAlign: 'center', padding: '50px 20px', color: 'rgba(11, 40, 73, 0.5)', background: 'rgba(255,255,255,0.4)', borderRadius: '20px', border: '1px dashed rgba(11,40,73,0.2)' }}>
-                <h4 style={{ margin: '0 0 5px 0', color: '#0b2849', fontSize: '15px' }}>تصفح فعاليات التقويم</h4>
-                <p style={{ margin: 0, fontSize: '13px' }}>انقر على الأيام الملونة بالأخضر لعرض تفاصيل الفعاليات.</p>
+                <h4 style={{ margin: '0 0 5px 0', color: '#0b2849', fontSize: '15px' }}>
+                  {isArabic ? 'تصفح فعاليات التقويم' : 'Browse Calendar Events'}
+                </h4>
+                <p style={{ margin: 0, fontSize: '13px' }}>
+                  {isArabic ? 'انقر على الأيام الملونة بالأخضر لعرض تفاصيل الفعاليات.' : 'Click on the green highlighted days to view event details.'}
+                </p>
               </div>
             )}
           </div>

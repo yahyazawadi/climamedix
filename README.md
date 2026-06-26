@@ -164,7 +164,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [x] **Interactive map showing participating Arab countries:** Custom Mapbox GL JS map widget with regional label exclusions, default theme custom settings, and Palestine overlay.
 
 ### 8. 📅 Events
-*   [ ] **Events Section:** Calendar View interface.
+*   [x] **Events Section:** Calendar View interface.
 *   [ ] **Event Detail Fields:** Title, Date, Description, and Registration Link.
 
 ### 9. 📰 News & Blog

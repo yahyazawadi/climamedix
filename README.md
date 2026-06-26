@@ -141,7 +141,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
     *   [x] Research Projects Showcase
     *   [ ] Publications Abstract Registry
     *   [ ] Research Database
-    *   [ ] Join Research Team Form
+    *   [x] Join Research Team Form (Join Us Page with Cloudflare R2 CV upload, IP tracking, and granular 'approve:users' admin view)
 *   [ ] **Publication Detail Fields:**
     *   [ ] Title & Authors
     *   [ ] Abstract

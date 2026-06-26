@@ -23,6 +23,8 @@ export function JoinUsPage({ lang, onNavigate }) {
     work: '',
     is_activist: false,
     activist_field: '',
+    is_researcher: false,
+    researcher_field: '',
     bio: '',
     cv: null,
     city: '',
@@ -94,6 +96,8 @@ export function JoinUsPage({ lang, onNavigate }) {
             work: form.work,
             is_activist: form.is_activist,
             activist_field: form.activist_field,
+            is_researcher: form.is_researcher,
+            researcher_field: form.researcher_field,
             bio: form.bio,
             cv_url: cvUrl,
             city: form.city,
@@ -110,7 +114,7 @@ export function JoinUsPage({ lang, onNavigate }) {
       setSelectedTrack(null);
       setForm({ 
         name: '', email: '', profession: '', birth_date: '', university_org: '', 
-        work: '', is_activist: false, activist_field: '', bio: '', cv: null, city: '', country: ''
+        work: '', is_activist: false, activist_field: '', is_researcher: false, researcher_field: '', bio: '', cv: null, city: '', country: ''
       });
       if (fileInputRef.current) fileInputRef.current.value = '';
       setTimeout(() => {
@@ -256,6 +260,7 @@ export function JoinUsPage({ lang, onNavigate }) {
                         {item.university_org && <span><strong>{isArabic ? 'الجامعة/المنظمة:' : 'Org:'}</strong> {item.university_org}</span>}
                         {item.work && <span><strong>{isArabic ? 'العمل:' : 'Work:'}</strong> {item.work}</span>}
                         {item.is_activist && <span><strong>{isArabic ? 'ناشط:' : 'Activist:'}</strong> {isArabic ? 'نعم' : 'Yes'} ({item.activist_field || (isArabic ? 'غير محدد' : 'Unspecified')})</span>}
+                        {item.is_researcher && <span><strong>{isArabic ? 'باحث:' : 'Researcher:'}</strong> {isArabic ? 'نعم' : 'Yes'} ({item.researcher_field || (isArabic ? 'غير محدد' : 'Unspecified')})</span>}
                       </div>
                       {item.bio && (
                         <div style={{ marginTop: '8px', fontStyle: 'italic', background: 'rgba(11,40,73,0.03)', padding: '10px', borderRadius: '8px' }}>
@@ -518,6 +523,32 @@ export function JoinUsPage({ lang, onNavigate }) {
                     <input 
                       type="text" required placeholder={t.activistFieldPlaceholder}
                       value={form.activist_field} onInput={(e) => setForm({ ...form, activist_field: e.target.value })}
+                      style={inputStyle}
+                      onFocus={(e) => e.target.style.borderColor = '#15b47a'}
+                      onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
+                    />
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input 
+                    type="checkbox" 
+                    id="isResearcher"
+                    checked={form.is_researcher}
+                    onChange={(e) => setForm({ ...form, is_researcher: e.target.checked })}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#15b47a' }}
+                  />
+                  <label htmlFor="isResearcher" style={{ fontSize: '14px', color: '#0b2849', cursor: 'pointer', fontWeight: 'bold' }}>
+                    {t.isResearcherLabel}
+                  </label>
+                </div>
+
+                {form.is_researcher && (
+                  <div>
+                    <label style={labelStyle}>{t.researcherFieldLabel}</label>
+                    <input 
+                      type="text" required placeholder={t.researcherFieldPlaceholder}
+                      value={form.researcher_field} onInput={(e) => setForm({ ...form, researcher_field: e.target.value })}
                       style={inputStyle}
                       onFocus={(e) => e.target.style.borderColor = '#15b47a'}
                       onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}

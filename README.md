@@ -19,6 +19,8 @@ To properly register and track healthcare practitioners and climate advocates, p
 *   **Specialty / التخصص الدقيق**
 *   **Activist Status / هل أنت ناشط؟:** Boolean toggle
 *   **Field of Activism / مجال النشاط:** (e.g., Public Health / الصحة العامة)
+*   **Researcher Status / هل أنت باحث؟:** Boolean toggle
+*   **Research Field / مجال البحث:** (e.g., Environmental Health / الصحة البيئية)
 *   **Bio / نبذة تعريفية:** A short description of the user or a link to an uploaded CV.
 
 ### 2. 📚 Learning Hub (LMS) & Progress Tracking
@@ -141,7 +143,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
     *   [x] Research Projects Showcase
     *   [ ] Publications Abstract Registry
     *   [ ] Research Database
-    *   [x] Join Research Team Form (Join Us Page with Cloudflare R2 CV upload, IP tracking, and granular 'approve:users' admin view)
+    *   [x] Join Research Team Form (Join Us Page with track selection [Research Track / Community Health Educator], "Are you a researcher?" conditional field, Cloudflare R2 CV upload, IP-based location detection, and granular 'approve:users' admin view)
 *   [ ] **Publication Detail Fields:**
     *   [ ] Title & Authors
     *   [ ] Abstract

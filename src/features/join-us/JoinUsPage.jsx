@@ -13,6 +13,7 @@ export function JoinUsPage({ lang, onNavigate }) {
   const t = translations[lang] || translations.ar;
   const isArabic = lang === 'ar';
   
+  const [selectedTrack, setSelectedTrack] = useState(null);
   const [form, setForm] = useState({ 
     name: '', 
     email: '', 
@@ -96,7 +97,8 @@ export function JoinUsPage({ lang, onNavigate }) {
             bio: form.bio,
             cv_url: cvUrl,
             city: form.city,
-            country: form.country
+            country: form.country,
+            track: selectedTrack
           }
         ]);
         
@@ -105,6 +107,7 @@ export function JoinUsPage({ lang, onNavigate }) {
       }
       
       setSuccess(true);
+      setSelectedTrack(null);
       setForm({ 
         name: '', email: '', profession: '', birth_date: '', university_org: '', 
         work: '', is_activist: false, activist_field: '', bio: '', cv: null, city: '', country: ''
@@ -245,6 +248,7 @@ export function JoinUsPage({ lang, onNavigate }) {
                         <span><strong>{isArabic ? 'البريد:' : 'Email:'}</strong> {item.email}</span>
                         <span><strong>{isArabic ? 'التخصص:' : 'Profession:'}</strong> {item.profession}</span>
                         <span><strong>{isArabic ? 'التاريخ:' : 'Date:'}</strong> {new Date(item.created_at).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US')}</span>
+                        {item.track && <span><strong>{t.trackLabel}:</strong> {item.track === 'research' ? t.trackResearch : t.trackEducator}</span>}
                         {item.city && item.country && <span><strong>{isArabic ? 'الموقع:' : 'Location:'}</strong> {item.city}, {item.country}</span>}
                       </div>
                       <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
@@ -277,10 +281,14 @@ export function JoinUsPage({ lang, onNavigate }) {
             ) : success ? (
               <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
                 <div style={{ 
-                  fontSize: '64px', 
                   marginBottom: '20px',
-                  animation: 'bounce 1s ease infinite alternate'
-                }}>🎉</div>
+                  animation: 'bounce 1s ease infinite alternate',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  width: '72px', height: '72px', borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #15b47a, #004c6d)'
+                }}>
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
                 <h3 style={{ 
                   color: '#15b47a', 
                   fontSize: '24px', 
@@ -299,8 +307,105 @@ export function JoinUsPage({ lang, onNavigate }) {
                   {t.joinSuccessDesc}
                 </p>
               </div>
+            ) : !selectedTrack ? (
+              /* Track Selection Step */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '10px 0' }}>
+                <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+                  <h3 style={{
+                    color: '#0b2849', fontSize: '22px', fontWeight: 'bold', marginBottom: '10px',
+                    fontFamily: isArabic ? 'Tajawal, sans-serif' : 'Outfit, sans-serif'
+                  }}>{t.trackSelectionTitle}</h3>
+                  <p style={{ color: 'rgba(11, 40, 73, 0.6)', fontSize: '14px', lineHeight: '1.6' }}>{t.trackSelectionDesc}</p>
+                </div>
+
+                {/* Research Track Card */}
+                <div
+                  onClick={() => setSelectedTrack('research')}
+                  style={{
+                    padding: '28px 24px', borderRadius: '16px', cursor: 'pointer',
+                    border: '2px solid rgba(21, 180, 122, 0.2)',
+                    background: 'linear-gradient(135deg, rgba(21, 180, 122, 0.04) 0%, rgba(0, 76, 109, 0.04) 100%)',
+                    transition: 'all 0.3s ease', position: 'relative', overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#15b47a'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(21, 180, 122, 0.15)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(21, 180, 122, 0.2)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}>
+                    <div style={{
+                      width: '48px', height: '48px', borderRadius: '14px',
+                      background: 'linear-gradient(135deg, #15b47a, #004c6d)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="1"/><path d="M16 2v4"/><path d="M12 2v4"/><path d="M12 6a4 4 0 0 1 4 4c0 5-6 10-6 10S4 15 4 10a4 4 0 0 1 4-4h4z"/><path d="M16 6a4 4 0 0 1 4 4c0 2.5-2 5.5-4 7.5"/></svg>
+                    </div>
+                    <h4 style={{ margin: 0, color: '#0b2849', fontSize: '17px', fontWeight: 'bold',
+                      fontFamily: isArabic ? 'Tajawal, sans-serif' : 'Outfit, sans-serif'
+                    }}>{t.trackResearch}</h4>
+                  </div>
+                  <p style={{ margin: 0, color: 'rgba(11, 40, 73, 0.65)', fontSize: '13.5px', lineHeight: '1.7' }}>{t.trackResearchDesc}</p>
+                </div>
+
+                {/* Community Health Educator Card */}
+                <div
+                  onClick={() => setSelectedTrack('educator')}
+                  style={{
+                    padding: '28px 24px', borderRadius: '16px', cursor: 'pointer',
+                    border: '2px solid rgba(0, 76, 109, 0.2)',
+                    background: 'linear-gradient(135deg, rgba(0, 76, 109, 0.04) 0%, rgba(21, 180, 122, 0.04) 100%)',
+                    transition: 'all 0.3s ease', position: 'relative', overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#004c6d'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 76, 109, 0.15)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(0, 76, 109, 0.2)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}>
+                    <div style={{
+                      width: '48px', height: '48px', borderRadius: '14px',
+                      background: 'linear-gradient(135deg, #004c6d, #15b47a)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+                    </div>
+                    <h4 style={{ margin: 0, color: '#0b2849', fontSize: '17px', fontWeight: 'bold',
+                      fontFamily: isArabic ? 'Tajawal, sans-serif' : 'Outfit, sans-serif'
+                    }}>{t.trackEducator}</h4>
+                  </div>
+                  <p style={{ margin: 0, color: 'rgba(11, 40, 73, 0.65)', fontSize: '13.5px', lineHeight: '1.7' }}>{t.trackEducatorDesc}</p>
+                </div>
+              </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {/* Track indicator + back button */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  padding: '12px 16px', borderRadius: '12px',
+                  background: selectedTrack === 'research'
+                    ? 'linear-gradient(135deg, rgba(21, 180, 122, 0.08), rgba(0, 76, 109, 0.08))'
+                    : 'linear-gradient(135deg, rgba(0, 76, 109, 0.08), rgba(21, 180, 122, 0.08))',
+                  border: `1px solid ${selectedTrack === 'research' ? 'rgba(21, 180, 122, 0.2)' : 'rgba(0, 76, 109, 0.2)'}`
+                }}>
+                  <div style={{
+                    width: '32px', height: '32px', borderRadius: '8px',
+                    background: selectedTrack === 'research'
+                      ? 'linear-gradient(135deg, #15b47a, #004c6d)'
+                      : 'linear-gradient(135deg, #004c6d, #15b47a)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                  }}>
+                    {selectedTrack === 'research'
+                      ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="1"/><path d="M16 2v4"/><path d="M12 2v4"/><path d="M12 6a4 4 0 0 1 4 4c0 5-6 10-6 10S4 15 4 10a4 4 0 0 1 4-4h4z"/><path d="M16 6a4 4 0 0 1 4 4c0 2.5-2 5.5-4 7.5"/></svg>
+                      : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+                    }
+                  </div>
+                  <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#0b2849', flex: 1,
+                    fontFamily: isArabic ? 'Tajawal, sans-serif' : 'Outfit, sans-serif'
+                  }}>{selectedTrack === 'research' ? t.trackResearch : t.trackEducator}</span>
+                  <button type="button" onClick={() => setSelectedTrack(null)} style={{
+                    background: 'none', border: 'none', color: '#15b47a', cursor: 'pointer',
+                    fontSize: '13px', fontWeight: 'bold', textDecoration: 'underline',
+                    fontFamily: isArabic ? 'Tajawal, sans-serif' : 'Outfit, sans-serif'
+                  }}>{isArabic ? 'تغيير' : 'Change'}</button>
+                </div>
                 {errorMsg && (
                   <div style={{ 
                     padding: '14px 16px', 

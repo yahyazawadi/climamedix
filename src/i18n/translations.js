@@ -118,7 +118,14 @@ export const translations = {
     submittingJoinReq: 'جاري إرسال طلبك...',
     joinSuccessTitle: 'تم إرسال طلبك بنجاح!',
     joinSuccessDesc: 'سيتواصل معك منسق الفريق عبر البريد الإلكتروني في غضون 48 ساعة.',
-    adminJoinRequestsTitle: 'طلبات الانضمام'
+    adminJoinRequestsTitle: 'طلبات الانضمام',
+    trackSelectionTitle: 'اختر المسار',
+    trackSelectionDesc: 'اختر المسار الذي ترغب بالانضمام إليه',
+    trackResearch: 'مسار البحث العلمي',
+    trackResearchDesc: 'انضم إلى فريق الباحثين وشارك في دراسات المناخ والصحة',
+    trackEducator: 'مثقف صحي مجتمعي',
+    trackEducatorDesc: 'كن جزءاً من برنامج التثقيف الصحي المجتمعي وساهم في نشر الوعي',
+    trackLabel: 'المسار'
   },
   en: {
     // Header
@@ -239,6 +246,13 @@ export const translations = {
     submittingJoinReq: 'Submitting your request...',
     joinSuccessTitle: 'Your request was sent successfully!',
     joinSuccessDesc: 'The team coordinator will contact you via email within 48 hours.',
-    adminJoinRequestsTitle: 'Join Requests'
+    adminJoinRequestsTitle: 'Join Requests',
+    trackSelectionTitle: 'Choose Your Track',
+    trackSelectionDesc: 'Select the track you want to join',
+    trackResearch: 'Research Track',
+    trackResearchDesc: 'Join the research team and participate in climate & health studies',
+    trackEducator: 'Community Health Educator',
+    trackEducatorDesc: 'Be part of the community health education program and help spread awareness',
+    trackLabel: 'Track'
   }
 };

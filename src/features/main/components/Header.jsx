@@ -6,6 +6,7 @@ import iconContact from '../../../assets/icon_contact.svg'
 import iconTraining from '../../../assets/icon_training.svg'
 import iconResearch from '../../../assets/icon_research.svg'
 import iconAbout from '../../../assets/icon_about.svg'
+import iconOpportunities from '../../../assets/icon_opportunities.svg'
 import iconSearch from '../../../assets/icon_search.svg'
 import iconProfile from '../../../assets/icon_profile.svg'
 import iconGlobe from '../../../assets/icon_globe.svg'
@@ -491,11 +492,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               }}
               class={`figma-nav-item ${currentView === 'opportunities' ? 'active' : ''}`}
             >
-              <svg class="figma-nav-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
-                <rect x="3" y="8" width="18" height="12" rx="2.5" stroke="#15b47a" stroke-width="2.5" fill="none" />
-                <path d="M9 8V5C9 4.4 9.4 4 10 4H14C14.6 4 15 4.4 15 5V8" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" fill="none" />
-                <circle cx="12" cy="14" r="1.8" fill="#ffffff" />
-              </svg>
+              <img src={iconOpportunities} class="figma-nav-icon" alt="الفرص" />
               <span class="figma-nav-text">{t.opportunities}</span>
             </a>
 

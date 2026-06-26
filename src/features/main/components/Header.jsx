@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks'
 import logo from '../../../assets/logo.svg'
-import { useAuth } from '../../auth/hooks/useAuth'
+import { useAuth, ROLE_PERMISSIONS } from '../../auth/hooks/useAuth'
 import iconHome from '../../../assets/icon_home.svg'
 import iconContact from '../../../assets/icon_contact.svg'
 import iconTraining from '../../../assets/icon_training.svg'
@@ -11,26 +11,6 @@ import iconProfile from '../../../assets/icon_profile.svg'
 import iconGlobe from '../../../assets/icon_globe.svg'
 import { translations } from '../../../i18n/translations'
 
-const ROLE_PERMISSIONS = {
-  user: ['view:free_content', 'apply:specialized_roles'],
-  subscriber: ['view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research', 'apply:specialized_roles'],
-  researcher: ['view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research', 'write:research', 'write:courses', 'write:articles'],
-  educator: ['view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research', 'write:events', 'write:articles'],
-  admin: [
-    'view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research',
-    'write:articles', 'manage:any_course', 'manage:any_article', 'manage:any_publication',
-    'approve:users', 'issue:certs', 'review:posts', 'write:opportunities', 'manage:any_opportunity',
-    'write:events', 'manage:any_event', 'write:courses'
-  ],
-  superadmin: [
-    'view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research',
-    'write:articles', 'manage:any_course', 'manage:any_article', 'manage:any_publication',
-    'approve:users', 'issue:certs', 'review:posts', 'write:opportunities', 'manage:any_opportunity',
-    'write:events', 'manage:any_event', 'write:courses', 'write:research', 'apply:specialized_roles',
-    'manage:system'
-  ]
-};
-
 export function Header({ activeSection, currentView, onNavigate, user, userProfile, onLogout, lang, toggleLanguage }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,7 +18,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showPermsList, setShowPermsList] = useState(false);
   const [logoClicks, setLogoClicks] = useState(0);
-  const { verifyAndSetDevAdmin } = useAuth();
+  const { verifyAndSetDevAdmin, disabledPermissions, togglePermission } = useAuth();
   
   const t = translations[lang] || translations.ar;
 
@@ -317,76 +297,95 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                     </div>
                     <div style={{ borderBottom: '1px solid rgba(225, 239, 250, 0.1)', marginBottom: '12px' }}></div>
 
-                    {/* Permissions Collapsible Dropdown */}
-                    <div style={{ marginBottom: '12px' }}>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowPermsList(!showPermsList);
-                        }}
-                        style={{
-                          width: '100%',
-                          background: 'rgba(225, 239, 250, 0.05)',
-                          border: '1px solid rgba(225, 239, 250, 0.1)',
-                          borderRadius: '8px',
-                          padding: '8px 12px',
-                          color: '#E1EFFA',
-                          fontSize: '12.5px',
-                          fontWeight: 'bold',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          outline: 'none',
-                          fontFamily: lang === 'ar' ? 'Tajawal, sans-serif' : 'Outfit, sans-serif'
-                        }}
-                      >
-                        <span>{lang === 'ar' ? 'صلاحيات الحساب النشطة' : 'Active Account Permissions'}</span>
-                        <span style={{ 
-                          fontSize: '10px', 
-                          transform: showPermsList ? 'rotate(180deg)' : 'rotate(0deg)',
-                          transition: 'transform 0.2s',
-                          marginLeft: lang === 'ar' ? '0' : '6px',
-                          marginRight: lang === 'ar' ? '6px' : '0'
-                        }}>▼</span>
-                      </button>
-                      
-                      {showPermsList && (
-                        <div style={{
-                          marginTop: '6px',
-                          background: 'rgba(5, 12, 26, 0.4)',
-                          border: '1px solid rgba(225, 239, 250, 0.08)',
-                          borderRadius: '8px',
-                          maxHeight: '130px',
-                          overflowY: 'auto',
-                          padding: '8px 10px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '6px'
-                        }}>
-                          {(ROLE_PERMISSIONS[userProfile?.role] || ROLE_PERMISSIONS.user).map(perm => (
-                            <div 
-                              key={perm}
-                              style={{
-                                fontSize: '12px',
-                                color: '#15b47a',
-                                background: 'rgba(21, 180, 122, 0.1)',
-                                padding: '6px 10px',
-                                borderRadius: '6px',
-                                fontFamily: 'monospace',
-                                textAlign: 'left',
-                                direction: 'ltr',
-                                lineHeight: '1.4',
-                                border: '1px solid rgba(21, 180, 122, 0.2)'
-                              }}
-                              title={perm}
-                            >
-                              {perm}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    {/* Permissions Collapsible Dropdown (Superadmins only) */}
+                    {userProfile?.role === 'superadmin' && (
+                      <div style={{ marginBottom: '12px' }}>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowPermsList(!showPermsList);
+                          }}
+                          style={{
+                            width: '100%',
+                            background: 'rgba(225, 239, 250, 0.05)',
+                            border: '1px solid rgba(225, 239, 250, 0.1)',
+                            borderRadius: '8px',
+                            padding: '8px 12px',
+                            color: '#E1EFFA',
+                            fontSize: '12.5px',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            outline: 'none',
+                            fontFamily: lang === 'ar' ? 'Tajawal, sans-serif' : 'Outfit, sans-serif'
+                          }}
+                        >
+                          <span>{lang === 'ar' ? 'صلاحيات الحساب النشطة' : 'Active Account Permissions'}</span>
+                          <span style={{ 
+                            fontSize: '10px', 
+                            transform: showPermsList ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.2s',
+                            marginLeft: lang === 'ar' ? '0' : '6px',
+                            marginRight: lang === 'ar' ? '6px' : '0'
+                          }}>▼</span>
+                        </button>
+                        
+                        {showPermsList && (
+                          <div style={{
+                            marginTop: '6px',
+                            background: 'rgba(5, 12, 26, 0.4)',
+                            border: '1px solid rgba(225, 239, 250, 0.08)',
+                            borderRadius: '8px',
+                            maxHeight: '180px',
+                            overflowY: 'auto',
+                            padding: '8px 10px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '6px'
+                          }}>
+                            {ROLE_PERMISSIONS.superadmin.map(perm => {
+                              const isDisabled = disabledPermissions?.includes(perm);
+                              return (
+                                <div 
+                                  key={perm}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    togglePermission(perm);
+                                  }}
+                                  style={{
+                                    fontSize: '12px',
+                                    color: isDisabled ? '#94a3b8' : '#15b47a',
+                                    background: isDisabled ? 'rgba(148, 163, 184, 0.08)' : 'rgba(21, 180, 122, 0.1)',
+                                    padding: '6px 10px',
+                                    borderRadius: '6px',
+                                    fontFamily: 'monospace',
+                                    textAlign: 'left',
+                                    direction: 'ltr',
+                                    lineHeight: '1.4',
+                                    border: isDisabled ? '1px solid rgba(148, 163, 184, 0.2)' : '1px solid rgba(21, 180, 122, 0.2)',
+                                    cursor: 'pointer',
+                                    textDecoration: isDisabled ? 'line-through' : 'none',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    userSelect: 'none',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                  title={perm}
+                                >
+                                  <span>{perm}</span>
+                                  <span style={{ fontSize: '10px', opacity: 0.7 }}>
+                                    {isDisabled ? (lang === 'ar' ? 'معطلة' : 'Disabled') : '✓'}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Action Buttons */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

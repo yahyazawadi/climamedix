@@ -22,6 +22,26 @@ async function sha256(message) {
   return hashHex;
 }
 
+export const ROLE_PERMISSIONS = {
+  user: ['view:free_content', 'apply:specialized_roles'],
+  subscriber: ['view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research', 'apply:specialized_roles'],
+  researcher: ['view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research', 'write:research', 'write:courses', 'write:articles'],
+  educator: ['view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research', 'write:events', 'write:articles'],
+  admin: [
+    'view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research',
+    'write:articles', 'manage:any_course', 'manage:any_article', 'manage:any_publication',
+    'approve:users', 'issue:certs', 'review:posts', 'write:opportunities', 'manage:any_opportunity',
+    'write:events', 'manage:any_event', 'write:courses'
+  ],
+  superadmin: [
+    'view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research',
+    'write:articles', 'manage:any_course', 'manage:any_article', 'manage:any_publication',
+    'approve:users', 'issue:certs', 'review:posts', 'write:opportunities', 'manage:any_opportunity',
+    'write:events', 'manage:any_event', 'write:courses', 'write:research', 'apply:specialized_roles',
+    'manage:system'
+  ]
+};
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
@@ -29,6 +49,30 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [devAdminMode, setDevAdminMode] = useState(false);
+  const [disabledPermissions, setDisabledPermissions] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('disabled_permissions') || '[]');
+    } catch (e) {
+      return [];
+    }
+  });
+
+  const togglePermission = (perm) => {
+    setDisabledPermissions(prev => {
+      const next = prev.includes(perm) ? prev.filter(p => p !== perm) : [...prev, perm];
+      localStorage.setItem('disabled_permissions', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const hasPermission = (perm) => {
+    if (disabledPermissions.includes(perm)) return false;
+    const role = devAdminMode ? 'superadmin' : userProfile?.role;
+    if (!role) return false;
+    if (role === 'superadmin') return true;
+    const rolePerms = ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.user;
+    return rolePerms.includes(perm);
+  };
 
   const verifyAndSetDevAdmin = async () => {
     setDevAdminMode(true);
@@ -223,6 +267,9 @@ export function AuthProvider({ children }) {
     signInWithOAuth,
     signOut,
     verifyAndSetDevAdmin,
+    disabledPermissions,
+    togglePermission,
+    hasPermission,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

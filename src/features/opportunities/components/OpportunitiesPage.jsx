@@ -9,7 +9,7 @@ const CATEGORY_KEYS = ['all', 'fellowship', 'scholarship', 'conference', 'intern
 
 export function OpportunitiesPage({ lang }) {
   const { opportunities, loading, error, refreshOpportunities } = useOpportunities();
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, hasPermission } = useAuth();
   const [activeCategory, setActiveCategory] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -32,7 +32,8 @@ export function OpportunitiesPage({ lang }) {
 
   const t = translations[lang] || translations.ar;
 
-  const canPost = userProfile?.role === 'superadmin' || userProfile?.role === 'admin';
+  const canPost = userProfile?.role === 'admin' || 
+                  (hasPermission ? hasPermission('write:opportunities') : userProfile?.role === 'superadmin');
 
   const teaserPermissionOptions = [
     { 

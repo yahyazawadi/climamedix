@@ -7,4 +7,15 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase URL or Anon Key is missing from environment variables.')
 }
 
-export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder')
+export const supabase = createClient(
+  supabaseUrl,
+  supabaseAnonKey,
+  {
+    auth: {
+      detectSessionInUrl: true,
+      flowType: 'pkce',
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+  }
+)

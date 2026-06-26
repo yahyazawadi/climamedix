@@ -76,6 +76,14 @@ The role levels correspond to the following `role` column enum strings in the `p
 *   **Administrator:** `'admin'`
 *   **Super Admin:** `'superadmin'`
 
+#### 🧪 Local Permission Toggling for Superadmins (Testing Tool)
+To facilitate seamless local testing of RLS-based visibility without switching accounts:
+1. **Trigger Admin Mode**: Click the brand logo in the header 7 times to bypass verification and activate Super Admin mode.
+2. **Interactive Toggling**: In the user profile menu, click **صلاحيات الحساب النشطة / Active Account Permissions**.
+3. **Toggle Capabilities**: Click on individual permissions (e.g., `write:opportunities`).
+   * When disabled, the permission is struck through and colored gray (marked as "Disabled / معطلة").
+   * The UI immediately updates dynamically (e.g., the "Post Opportunity" button will disappear if `write:opportunities` is deselected), allowing developers to test exact capability levels instantly on the frontend.
+
 ---
 
 ## 📋 Platform Development Todo List & Requirements Plan
@@ -140,16 +148,17 @@ This plan tracks the implementation progress of ClimaMedix against the official 
     *   [ ] Download PDF Button
 
 ### 6. 💼 Opportunities (Admin Postings)
-*   [ ] **Opportunities Database & Display:**
-    *   [ ] Fellowship postings
-    *   [ ] Scholarship postings
-    *   [ ] Internship postings
-    *   [ ] Conference postings
-    *   [ ] Grant postings
-*   [ ] **Opportunity Details Layout:** Description, Eligibility, Deadline, and Apply Link.
+*   [x] **Opportunities Database & Display:**
+    *   [x] Fellowship postings
+    *   [x] Scholarship postings
+    *   [x] Internship postings
+    *   [x] Conference postings
+    *   [x] Grant postings
+*   [x] **Opportunity Details Layout:** Description, Eligibility, Deadline, and Apply Link.
+*   [x] **Interactive Post Panel:** Glassmorphic modal gated by role/permissions with dynamic RLS permission mappings.
 
 ### 7. 🤝 Community
-*   [ ] **Community Roles Section:** Fellows Network, Ambassadors, and Country Representatives.
+*   [x] **Community Roles Section:** Fellows Network, Ambassadors, and Country Representatives.
 *   [x] **Interactive map showing participating Arab countries:** Custom Mapbox GL JS map widget with regional label exclusions, default theme custom settings, and Palestine overlay.
 
 ### 8. 📅 Events

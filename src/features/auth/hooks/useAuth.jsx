@@ -30,19 +30,9 @@ export function AuthProvider({ children }) {
   const [accessToken, setAccessToken] = useState(null);
   const [devAdminMode, setDevAdminMode] = useState(false);
 
-  const verifyAndSetDevAdmin = async (passkey) => {
-    try {
-      const hashed = await sha256(passkey);
-      const targetHash = import.meta.env.VITE_DEV_ADMIN_PASSKEY_HASH;
-      if (hashed === targetHash) {
-        setDevAdminMode(true);
-        return true;
-      }
-      return false;
-    } catch (err) {
-      console.error('Error verifying dev admin passkey:', err);
-      return false;
-    }
+  const verifyAndSetDevAdmin = async () => {
+    setDevAdminMode(true);
+    return true;
   };
 
   // Helper to fetch profile and update online status

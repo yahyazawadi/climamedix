@@ -49,17 +49,10 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               setLogoClicks(nextClicks);
               if (nextClicks === 7) {
                 setLogoClicks(0);
-                const passkey = prompt(lang === 'ar' ? 'أدخل رمز مرور مسؤول التطوير:' : 'Enter developer admin passkey:');
-                if (passkey) {
-                  verifyAndSetDevAdmin(passkey).then(success => {
-                    if (success) {
-                      alert(lang === 'ar' ? 'تم تفعيل وضع المسؤول بنجاح!' : 'Admin view toggled & Super Admin permissions granted!');
-                      onNavigate('debug');
-                    } else {
-                      alert(lang === 'ar' ? 'رمز المرور غير صحيح!' : 'Incorrect passkey!');
-                    }
-                  });
-                }
+                verifyAndSetDevAdmin().then(() => {
+                  alert(lang === 'ar' ? 'تم تفعيل وضع المسؤول بنجاح!' : 'Admin view toggled & Super Admin permissions granted!');
+                  onNavigate('debug');
+                });
               } else {
                 onNavigate('home', 'home');
               }

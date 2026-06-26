@@ -4,58 +4,274 @@ An educational and community platform for Climate & Health in the Arab region. C
 
 ---
 
-## 📋 Platform Development Todo List
+## 📊 Detailed Functional Specifications & Role Permissions
 
-This checklist tracks the current state of implementation, completed features, recent updates, and upcoming development goals.
+This section defines the precise data schemas, content options, and role-based access control (RBAC) matrix for the platform.
 
-### 🛠️ Core Infrastructure & Layout
-*   [x] **Custom Design System:** Harmonious HSL/RGB palettes, dark mode tokens, and glassmorphism.
-*   [x] **Clean Routing:** Zero-hash path-based routing (`/`, `/about-us`, `/auth`, `/debug`).
-*   [x] **Mobile Optimization:** Full responsive layout adjustments, viewport scalability, and drawer navigation.
-*   [x] **Direction & Fonts Override:** Full RTL structure by default with automatic font overrides (`Tajawal` forced globally).
+### 1. 👤 User Profiles & Registration Fields
+To properly register and track healthcare practitioners and climate advocates, profiles must store the following details in the database:
+*   **Title / اللقب:** Translatable Enum field (`Dr` / دكتور, `Prof` / بروفيسور, `Mr` / سيد, `Ms` / سيدة) to support localization.
+*   **Full Name / الاسم الكامل**
+*   **Location / الموقع الجغرافي:** City (المدينة) and Country (الدولة)
+*   **Birth Date / تاريخ الميلاد**
+*   **University or Organization / الجامعة أو المؤسسة**
+*   **Current Profession/Work / العمل الحالي**
+*   **Specialty / التخصص الدقيق**
+*   **Activist Status / هل أنت ناشط؟:** Boolean toggle
+*   **Field of Activism / مجال النشاط:** (e.g., Public Health / الصحة العامة)
+*   **Bio / نبذة تعريفية:** A short description of the user or a link to an uploaded CV.
 
-### 🔐 Authentication Feature (Supabase)
-*   [x] **Supabase Auth Integration:** Email authentication (Login/Sign Up) and OAuth (Google) support.
-*   [x] **Visual Polish & Spacing:** Balanced header clearance padding adjusted to `180px` on desktop and `135px` on mobile (clearing the fixed navigation bar cleanly).
-*   [x] **Password Visibility Toggle:** Interactive show/hide action for form credentials.
-*   [x] **Interactive Particles Background (`InteractiveParticles.jsx`):**
-    *   [x] **Mitchell's Best-Candidate Spawning:** Particle spawns are mathematically placed in the emptiest regions of the canvas, avoiding edge areas to prevent sudden boundary recycling.
-    *   [x] **Center Gravity Pull:** A subtle center-seeking gravity force (`0.00012` per frame) gently drifts free particles inward to keep the network layout cohesive.
-    *   [x] **Fluid Physics:** Mouse attraction, heavy viscosity damping (15% frame deceleration on proximity), and Brownian cluster agitation.
+### 2. 📚 Learning Hub (LMS) & Progress Tracking
+*   **Course Formats:**
+    *   **Text-Based Lessons:** Includes an interactive **Text-to-Speech (TTS)** voice option for accessibility and listening on the go.
+    *   **Video Lessons:** Standard video streaming lessons.
+*   **Engagement Tracking:**
+    *   **Course Progress:** Track individual student lesson completions and progress percentages.
+    *   **Engagement Metrics:** Collect and display total **Views**, **Likes**, and **Comments** for courses, articles, and research publications.
 
-### 🏠 Home Page Sections
-*   [x] **Hero Section:** Logo integration, responsive title text grid, and main call to actions.
-*   [x] **About Intro:** Glassmorphic card summarizing the ClimaMedix mission.
-*   [x] **Vision & Mission:** Split card grid detailing organizational values.
-*   [x] **Research Showcase:** Cards grid highlighting regional studies, completion progress bars, and modal controls.
-*   [x] **Training Courses:** Category indicators, enrollment rates, and interactive CTA buttons.
-*   [x] **Upcoming Section:** Schedule layout displaying future research programs.
-*   [x] **Newsletter Banner:** Embedded subscription block.
+### 3. 🧪 Research Tracks
+1.  **Track 1: Community Health Educator (مسار التثقيف الصحي المجتمعي):** Primarily focused on course completion and community guidance.
+2.  **Track 2: Professional Research Track (مسار البحوث والدراسات):** Users can sign in to participate in advanced courses and contribute scientific findings.
 
-### 🗺️ Community & Map Widget
-*   [x] **Concept 32 Map Widget:** Upgraded default map widget to high-performance Mapbox GL JS.
-*   [x] **Custom Styling:** Solid dark green landmass rendering (`#004c6d`) paired with crisp white ocean surfaces.
-*   [x] **Palestine Label Overlay:** Custom overlay placing Palestine prominently on the region map.
-*   *   [x] **Regional Exclusion Masking:** Dynamic boundary masks to hide default country labels.
-*   *   [x] **JSON Theme Simulator:** Live state controller allowing color modifications on the fly.
+### 4. 🔑 Access Control & Role Permissions Matrix
 
-### 🎓 Learning Hub (LMS)
-*   [x] **Concept 31 Geometric Course Carousel:** Swipeable cards carousel featuring custom arrow alignments.
-*   [ ] **Video Streaming Integration:** Secure video playback with presigned URL authorization.
-*   [ ] **PDF Resources:** Secure asset downloader.
-*   [ ] **User Dashboard:** Progress counters, completed courses, and quiz records.
+The system enforces distinct user access levels to safeguard content copyright and incentivize registration/payment. To support a clean Object-Oriented Programming (OOP) model, permissions are stored in a dedicated database schema.
 
-### 🧪 Research Center & Opportunities
-*   [ ] **Publications abstract registry:** Searchable table of academic documents.
-*   [ ] **Opportunities Directory:** Grants, fellowships, and scholarships database.
-*   [ ] **Recruitment forms:** Team registration inputs.
+#### 🗄️ Permissions Database Schema (OOP Security Model)
+Instead of hardcoding roles, permissions are mapped dynamically in the database via the following relational tables:
+1. `roles` (id, role_name, description)
+2. `permissions` (id, perm_key, description) - e.g., `manage:courses`, `write:articles`, `approve:users`, `issue:certs`, `review:posts`
+3. `role_permissions` (role_id, permission_id) - maps roles to their authorized capabilities
+4. `user_roles` (user_id, role_id) - assigns roles to users
 
-### 🛠️ Live Debug & Admin Panel
-*   [x] **Concept 32 Theme Configurator:** Real-time color picker interface linking directly to Mapbox layer styles.
-*   [ ] **CRUD interfaces:** Admin database loaders for events, opportunities, and courses.
+#### 👥 Platform Roles Hierarchy
+
+| Role / Access Level | Home Page | News & Articles | Research Papers | Courses | Publishing & Action Rights | Admin & Moderation Powers |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **1. Unsigned User (غير مسجل)** | Full View | Titles & Thumbnails only (Teaser prompts) | Titles & Thumbnails only (Teaser prompts) | Titles & Thumbnails only (Teaser prompts) | None | None |
+| **2. Unpaid Signed User (مسجل مجاني)** | Full View | Selected/Free Articles only | Selected/Free Research only | Selected/Free Courses only | Can submit application forms to become a Researcher or Community Health Educator | None |
+| **3. Paid Signed User (مشترك مسجل)** | Full View | All Articles | All Research Papers | All Courses | None | None |
+| **4. Researcher (باحث معتمد)** | Full View | All Articles | All Research Papers | All Courses | Can write & publish research/articles, and create courses | None |
+| **4.5. Community Health Educator (مثقف صحي مجتمعي)** | Full View | All Articles | All Research Papers | All Courses | Can host & schedule lectures (in-person or online) | None |
+| **5. Administrator (مشرف)** | Full View | All Articles | All Research Papers | All Courses | Can create courses and write articles | Moderation control based on specialized sub-roles (see Admin Role Types) |
+| **6. Super Admin (مدير النظام)** | Full View | All Articles | All Research Papers | All Courses | Full publishing rights | Full System Control (logs on via a secret method; edits system configurations & DB logs) |
+
+#### 🛡️ Administrator Sub-Roles & Granular Permissions
+Admins are assigned granular permission bits to prevent data abuse and isolate duties:
+*   **Course Manager (إدارة المسارات):** Permission `manage:courses` - Create, edit, and delete courses.
+*   **Content Writer (كتابة المقالات):** Permission `write:articles` - Draft and edit blog posts, news, and resources.
+*   **Enrollment Officer (قبول المستخدمين):** Permission `approve:users` - Review and approve applications for Researchers and Educators.
+*   **Certification Officer (منح الشهادات):** Permission `issue:certs` - Authorize and sign student certificates.
+*   **Research Reviewer (اعتماد الأبحاث ومراجعة المنشورات):** Permission `review:posts` - Approve or delete articles and publications.
+
+*Note: Normal users must write and submit a recruitment application ("انضم إلى فريق البحث" or "مثقف صحي مجتمعي") to be approved by admins before getting specialized rights.*
+
+#### 🗃️ Database Enum Role Mapping
+The role levels correspond to the following `role` column enum strings in the `profiles` table:
+*   **Unsigned User:** Not stored in database (session-level guest).
+*   **Unpaid Signed User:** `'user'`
+*   **Paid Signed User:** `'subscriber'`
+*   **Researcher:** `'researcher'`
+*   **Community Health Educator:** `'educator'`
+*   **Administrator:** `'admin'`
+*   **Super Admin:** `'superadmin'`
 
 ---
 
+## 📋 Platform Development Todo List & Requirements Plan
+
+This plan tracks the implementation progress of ClimaMedix against the official website requirements.
+
+### 1. 🏠 Home Page Sections
+*   [x] **Hero Banner:**
+    *   [x] Main title
+    *   [x] Short description
+    *   [x] CTA Buttons: Explore Programs, Join Community
+*   [x] **About ClimaMedix (Short Version):** Introduction section.
+*   [x] **Featured Programs:** Visual cards grid.
+*   [x] **Impact Statistics:**
+    *   [x] Number of learners
+    *   [x] Number of countries
+    *   [x] Number of courses
+    *   [x] Number of projects
+*   [x] **Latest Opportunities:** Interactive cards grid.
+*   [x] **Partners Section:** Slide logo wrap.
+*   [x] **Contact Section:** Form inputs and social integrations.
+
+### 2. ℹ️ About Us Subpages
+*   [x] **Our Story:**
+    *   [x] Vision & Mission
+    *   [x] Core Values
+    *   [x] Team Members
+    *   [x] Partners
+
+### 3. 🎓 Programs (Dynamic Management)
+*   [ ] **Dynamic program detail pages** managed through the admin panel.
+*   [x] **Standard Program Details Card/Layout:**
+    *   [x] Title & Description
+    *   [x] Cover Image
+    *   [x] Objectives & Duration
+    *   [x] Eligibility & Apply Button
+    *   [x] Examples integrated: VSCHEF Fellowship, Climate Health Academy, Research Program
+
+### 4. 📚 Learning Hub (LMS)
+*   [ ] **Learning Management System (LMS) Features:**
+    *   [x] Course Categories (Training Courses Carousel)
+    *   [ ] Video Lessons
+    *   [ ] PDF Resources
+    *   [ ] Quizzes
+    *   [ ] Progress Tracking
+    *   [ ] Certificates
+*   [ ] **User Dashboard:**
+    *   [ ] My Courses
+    *   [ ] Completed Courses
+    *   [ ] Certificates
+    *   [ ] Quiz Results
+
+### 5. 🧪 Research Center
+*   [x] **Sections Layout:**
+    *   [x] Research Projects Showcase
+    *   [ ] Publications Abstract Registry
+    *   [ ] Research Database
+    *   [ ] Join Research Team Form
+*   [ ] **Publication Detail Fields:**
+    *   [ ] Title & Authors
+    *   [ ] Abstract
+    *   [ ] Download PDF Button
+
+### 6. 💼 Opportunities (Admin Postings)
+*   [ ] **Opportunities Database & Display:**
+    *   [ ] Fellowship postings
+    *   [ ] Scholarship postings
+    *   [ ] Internship postings
+    *   [ ] Conference postings
+    *   [ ] Grant postings
+*   [ ] **Opportunity Details Layout:** Description, Eligibility, Deadline, and Apply Link.
+
+### 7. 🤝 Community
+*   [ ] **Community Roles Section:** Fellows Network, Ambassadors, and Country Representatives.
+*   [x] **Interactive map showing participating Arab countries:** Custom Mapbox GL JS map widget with regional label exclusions, default theme custom settings, and Palestine overlay.
+
+### 8. 📅 Events
+*   [ ] **Events Section:** Calendar View interface.
+*   [ ] **Event Detail Fields:** Title, Date, Description, and Registration Link.
+
+### 9. 📰 News & Blog
+*   [ ] **News Publishing System:** Articles & Announcements.
+*   [ ] **News Categories:** Climate Health, Research, Opportunities, and Events.
+
+### 10. 📞 Contact Us
+*   [x] **Contact Details:** Form submission panel, email links, and social media handles.
+
+### 11. 🛡️ Admin Panel
+*   [ ] **Admin Dashboards:**
+    *   [ ] Create/Edit/Delete Courses
+    *   [ ] Upload Videos & Resources
+    *   [ ] Manage Users & Certificates
+    *   [ ] Publish Opportunities, Events, and News
+    *   [ ] View Analytics
+
+### 12. 👤 User Accounts
+*   [x] **Register/Login:** Supabase Auth Integration (Email sign-in/sign-up & Google OAuth) with beautiful Mitchell's best-candidate particle canvas background, layout swaps, and Outfit/Tajawal font custom settings.
+*   [ ] **LMS Interactions:** Enroll in courses, take quizzes, download certificates, and track progress.
+
+### 13. ⚙️ Technical Requirements
+*   [x] Mobile Responsive Layouts
+*   [x] SEO Friendly Structure
+*   [x] Fast Loading (Vite/Preact build)
+*   [x] Secure Authentication (Supabase)
+*   [x] Arabic RTL Support (Default)
+*   [x] English LTR Support
+*   [ ] Certificate Generation System
+*   [ ] LMS Integration
+*   [ ] Analytics Dashboard
+
+---
+
+## 🗺️ ClimaMedix Feature Implementation Roadmap
+
+This roadmap orders the remaining website requirements from **easiest to most complex** based on dependencies, existing UI components, and implementation effort.
+
+```mermaid
+graph TD
+    P1[Phase 1: Easy Content Views] --> P2[Phase 2: Dynamic Detail Modals]
+    P2 --> P3[Phase 3: Interactive Features & LMS UI]
+    P3 --> P4[Phase 4: Video/PDF Storage & Certificates]
+    P4 --> P5[Phase 5: Admin Panel & CRUD Dashboards]
+    style P1 fill:#e1f0fe,stroke:#4190df,stroke-width:2px
+    style P2 fill:#e2f5e8,stroke:#15b47a,stroke-width:2px
+    style P3 fill:#fff4e5,stroke:#f0a841,stroke-width:2px
+    style P4 fill:#fce8e6,stroke:#ea4335,stroke-width:2px
+    style P5 fill:#f3e8fd,stroke:#a142f4,stroke-width:2px
+```
+
+### 🟢 Phase 1: Content Showcase & Feed Views (Easiest)
+*These sections are primarily read-only frontend feeds that leverage existing grid layouts and simple Supabase database fetches.*
+
+1. **💼 Opportunities Directory**
+   * **Why next:** Easy to adapt from the existing Research Showcase grid.
+   * **Scope:** 
+     * Create a simple listing grid categorized by Fellowships, Scholarships, Internships, Conferences, and Grants.
+     * Each card lists: Description summary, Eligibility badge, Deadline, and an "Apply" external link.
+2. **📅 Events List & Calendar View**
+   * **Why next:** Simple date-ordered cards with an option to display in a basic monthly grid/calendar library.
+   * **Scope:**
+     * A simple grid of upcoming workshops, seminars, and webinars.
+     * Each event card has: Title, Date, Description, and a "Register" button.
+3. **📰 News & Blog**
+   * **Why next:** Standard blogging structure, categorizable by tag buttons.
+   * **Scope:**
+     * A clean articles feed with tabs for "Climate Health," "Research," "Opportunities," and "Events."
+     * Allows users to read announcement updates.
+
+### 🟡 Phase 2: Dynamic Overlays & Network Details (Moderate)
+*These features require page routing/modals and structured relationships with database records.*
+
+4. **🎓 Program Detail Dynamic Modals**
+   * **Why next:** We already have the homepage cards for programs. We just need to load and overlay the full detail pages dynamically.
+   * **Scope:**
+     * Add modal popups for program cards (VSCHEF, Climate Health Academy, Research Program) displaying full cover images, objectives, duration, eligibility text, and application forms.
+5. **🤝 Community Network Directory**
+   * **Why next:** Expands the interactive Mapbox widget.
+   * **Scope:**
+     * Add a cards list or slider below the map to showcase participating fellows, ambassadors, and country representatives.
+     * Filter network profiles by country when a region on the map is clicked.
+
+### 🟠 Phase 3: Interactive Features & LMS UI (Intermediate)
+*First phase of the Learning Hub. Focuses on the frontend visual interfaces, user state, and enrollment flows.*
+
+6. **📚 Learning Hub (LMS) View & Course Enrollment**
+   * **Scope:**
+     * Develop the user LMS dashboard displaying "My Courses," "Completed Courses," and "Quiz Results."
+     * Create the Course detail pages displaying lesson indexes, progress bars, and basic text lessons.
+     * Connect the "Enroll" buttons to log records in the database.
+7. **📝 Interactive Quizzes**
+   * **Scope:**
+     * Build a step-by-step multiple-choice quiz component for the end of lessons.
+     * Grade responses on submit and display pass/fail scores.
+
+### 🔴 Phase 4: Secure Storage & PDF/Certificates (Complex)
+*Requires backend file management, secure authentication checks, and PDF canvas generation.*
+
+8. **🔒 Cloudflare R2 Video/PDF Secure Streaming**
+   * **Scope:**
+     * Set up a Cloudflare Worker/Supabase Edge Function to verify a user's enrollment before generating short-lived presigned URLs.
+     * Connect the video player to stream securely from the private bucket.
+9. **🎖️ PDF Certificate Generation System**
+   * **Scope:**
+     * Generate custom-named completion certificates (using HTML canvas or PDF libraries) once progress tracking reaches 100%.
+     * Enable immediate PDF download options.
+
+### 🟣 Phase 5: Administration & Analytics (Most Complex)
+*Built last, once all database schemas and content consumption patterns are fully established.*
+
+10. **🛡️ Admin Panel & CRUD Dashboards**
+    * **Scope:**
+      * Add role-based security ensuring only verified admins can access `/admin`.
+      * Create database CRUD interfaces to publish courses, upload videos/resources, publish opportunities/events, and manage certificate approvals.
+      * Incorporate simple analytics charts (total active students, completions, sign-ups).
+
+---
 ## 🛠️ Technology Stack
 
 *   **Frontend:** Preact, Vite (for super-fast loading and minimal bundle size)
@@ -102,3 +318,29 @@ To keep egress bandwidth costs at **$0**, the platform integrates Cloudflare R2 
 3.  **Enrollment Check:** The function queries the Supabase database to verify if the user is authenticated and enrolled in the course.
 4.  **Presigned URL:** If verified, the worker generates a short-lived (e.g., 15 minutes), read-only presigned URL for the video/PDF.
 5.  **Stream:** The client receives the presigned URL and streams/downloads the file directly from Cloudflare R2.
+
+---
+
+## ❓ Unresolved Details & Questions for the Organization
+
+To finalize the production setup and keep the architecture clean and simple, please clarify the following questions with the organization:
+
+### 1. 📚 Course & Video hosting
+* **Current status:** We implemented a mock video lesson player showing secure streaming options.
+* **Question for Org:** Do you prefer storing course videos directly on a secure private bucket (like Cloudflare R2) to limit sharing, or is embedding videos from platforms like YouTube (Unlisted) or Vimeo Pro acceptable and easier for your admins to upload?
+
+### 2. 🎖️ Certificate Authenticity & Signatures
+* **Current status:** We implemented an HTML Canvas-based certificate generator that auto-populates the recipient name, course title, and unique verification ID.
+* **Question for Org:** Who are the official signatories for the certificates? Do you have PNG images of the signatures and an official seal that should be embedded on the template?
+
+### 3. 🤝 Community Network & Representatives
+* **Current status:** We built a Mapbox interactive map filtering delegates by country.
+* **Question for Org:** How do new ambassadors/representatives apply to join the network map? Should there be a registration form that adds them to a moderation queue, or do admins insert them manually?
+
+### 4. 🧪 Research Publications
+* **Current status:** We created a research center showcase.
+* **Question for Org:** Will research papers be uploaded directly as PDF documents onto our servers, or will we link out to external academic registries (like DOI, PubMed, or ResearchGate)?
+
+### 5. 📧 Email Notifications & Alerts
+* **Current status:** We have mock push notification triggers.
+* **Question for Org:** Do you want email notifications sent automatically when a user receives a certificate or registers for an event? If yes, do you have an SMTP email provider (like SendGrid, Mailgun, or Resend) ready?

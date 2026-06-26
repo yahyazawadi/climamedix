@@ -2,13 +2,58 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import gsap from 'gsap';
 import { Button } from '../shared/components/Button';
 import { GlassCard } from '../shared/components/GlassCard';
-import leftSvg from '../../assets/left-svg.svg';
+import { supabase } from '../../utils/supabaseClient';
+import leftSvg from '../../assets/leftsvg.svg';
 import rightSvg from '../../assets/right-svg.svg';
 import homeBg from '../../assets/bg_1.png';
 import training1 from '../../assets/training_1.png';
 import training2 from '../../assets/training_2.png';
 import training3 from '../../assets/training_3.png';
 import training4 from '../../assets/training_4.png';
+import { OpportunitiesGrid } from '../opportunities/components/OpportunitiesGrid';
+import { EventsCalendar } from '../events/components/EventsCalendar';
+import { NewsFeed } from '../news-blog/components/NewsFeed';
+import { ProgramDetailModal } from '../programs/components/ProgramDetailModal';
+import { NetworkDirectory } from '../community/components/NetworkDirectory';
+import { LMSDashboard } from '../learning-hub/components/LMSDashboard';
+import { CourseDetailModal } from '../learning-hub/components/CourseDetailModal';
+import { CertificateGenerator } from '../learning-hub/components/CertificateGenerator';
+import { AdminCRUD } from '../admin/components/AdminCRUD';
+import { AnalyticsDashboard } from '../admin/components/AnalyticsDashboard';
+
+const MOCK_EVENTS = [
+  { id: 1, title: 'ورشة عمل: تقييم الأثر البيئي للمستشفيات', date: '2026-07-05', time: '10:00 ص', type: 'ورشة عمل', desc: 'تدريب عملي على أدوات قياس استهلاك الطاقة وإدارة النفايات الطبية.', link: '#' },
+  { id: 2, title: 'ندوة: أزمة المياه وتأثيرها على الصحة العامة في العراق', date: '2026-07-12', time: '06:00 م', type: 'ندوة افتراضية', desc: 'جلسة حوارية مع خبراء البيئة لمناقشة انتشار الأمراض المنقولة بالمياه.', link: '#' },
+  { id: 3, title: 'مؤتمر المناخ الطبي العربي الأول', date: '2026-07-20', time: '09:00 ص', type: 'مؤتمر حضوري', desc: 'تجمع سنوي للأطباء وصناع السياسات لبحث إستراتيجيات التكيف المناخي في الوطن العربي.', link: '#' },
+  { id: 4, title: 'محاضرة: جودة الهواء والأمراض الصدرية عند الأطفال', date: '2026-07-26', time: '04:00 م', type: 'محاضرة علمية', desc: 'استعراض أحدث الأبحاث السريرية حول ملوثات الغلاف الجوي وصحة الرئتين.', link: '#' }
+];
+
+const MOCK_ARTICLES = [
+  {
+    title: 'كيف يساهم الأطباء العرب في مكافحة التغير المناخي؟',
+    category: 'المناخ والصحة',
+    date: '24 يونيو 2026',
+    author: 'د. ياسمين السيد',
+    summary: 'مقالة تسلط الضوء على المبادرات الطبية المحلية في مصر والأردن لمواجهة ارتفاع درجات الحرارة وتأثيرها السريري.',
+    content: 'المحتوى الكامل هنا... تشهد المنطقة العربية تزايداً في المبادرات الطبية التي يقودها أطباء وممرضون للتوعية بمخاطر الإجهاد الحراري وتأثير ملوثات الهواء على صحة الأطفال وكبار السن.'
+  },
+  {
+    title: 'إطلاق زمالة VSCHEF الجديدة للأبحاث البيئية',
+    category: 'فرص وتطوير',
+    date: '20 يونيو 2026',
+    author: 'أكاديمية كلايما ميدكس',
+    summary: 'نعلن عن فتح باب التقديم لزمالة التغير المناخي والصحة العامة المخصصة لطلاب الكليات الطبية بالوطن العربي.',
+    content: 'المحتوى الكامل هنا... يهدف البرنامج إلى تزويد المشاركين بالمهارات الأساسية لكتابة المقترحات السياساتية وإجراء المسوح الميدانية البيئية.'
+  },
+  {
+    title: 'دراسة حديثة: تلوث الهواء يرفع نسب الإصابة بالربو بالخليج',
+    category: 'الأبحاث والابتكار',
+    date: '15 يونيو 2026',
+    author: 'مركز البحوث الطبية البيئية',
+    summary: 'نشر الباحثون نتائج تقييم أثر جزيئات الغبار العالقة PM2.5 على زيادة حالات الطوارئ التنفسية بمستشفيات المنطقة.',
+    content: 'المحتوى الكامل هنا... كشفت الدراسة عن علاقة طردية واضحة بين زيادة العواصف الرملية ونسب مراجعة طوارئ الأطفال للمستشفيات.'
+  }
+];
 
 export function DebugUIPage() {
   const containerRef = useRef(null);
@@ -31,9 +76,12 @@ export function DebugUIPage() {
 
   // State for Concept 7 (Holographic Certificate Generator)
   const [certName, setCertName] = useState('د. مريم العتيبي');
+  const [certEmail, setCertEmail] = useState('doctor.maryam@climamedix.org');
   const [certCourse, setCertCourse] = useState('زمالة VSCHEF للمناخ والصحة');
   const [certGenerating, setCertGenerating] = useState(false);
   const [certGenerated, setCertGenerated] = useState(false);
+  const [verificationLink, setVerificationLink] = useState('');
+  const [verificationResult, setVerificationResult] = useState(null);
 
   // State for Concept 8 (Opportunities Slide-in Drawer)
   const [selectedOpp, setSelectedOpp] = useState(null);
@@ -76,6 +124,138 @@ export function DebugUIPage() {
 
   // State for Concept 15 (Gamified Profile)
   const [badgeDetail, setBadgeDetail] = useState(null);
+
+  // States for Events & News
+  const [registeredEvents, setRegisteredEvents] = useState({});
+  const [selectedArticle, setSelectedArticle] = useState(null);
+
+  // States for Phase 2-5 components
+  const [selectedProgram, setSelectedProgram] = useState(null);
+  const [selectedCountryName, setSelectedCountryName] = useState('all');
+  const [enrolledCoursesList, setEnrolledCoursesList] = useState([
+    { id: 1, title: 'زمالة طب الكوارث المناخية والبيئية', category: 'طبي بيئي', progress: 50, remainingLessons: 1, lessons: [
+      { 
+        title: 'مقدمة في رصد الأوبئة وتأثير الحرارة', 
+        content: 'يعد رصد الأوبئة من الركائز الأساسية في مواجهة الأزمات الصحية الطارئة. مع تسارع وتيرة الاحتباس الحراري، تتعرض بعض المناطق لموجات حرارية غير مسبوقة تزيد من حدة انتشار النواقل الحشرية المسؤولة عن نقل أمراض مثل حمى الضنك والملاريا.',
+        quiz: [
+          {
+            text: 'ما هي النواقل الحشرية الأكثر تأثراً بالاحتباس الحراري في نقل الأوبئة؟',
+            options: ['القراد والبعوض', 'القوارض', 'الذباب المنزلي', 'كل ما سبق'],
+            correctAnswer: 0
+          }
+        ]
+      },
+      { 
+        title: 'إدارة مخلفات المستشفيات وأثرها الكربوني', 
+        content: 'تساهم إدارة النفايات الطبية غير الصحيحة بنسبة كبيرة في انبعاثات الغازات الدفيئة والملوثات السامة.',
+        quiz: [
+          {
+            text: 'ما هي الطريقة الأفضل بيئياً للتخلص من النفايات الطبية غير الحادة مقارنة بالحرق؟',
+            options: ['الدفن المباشر في التراب', 'التعقيم البخاري (الموصدة)', 'الإلقاء في مجاري المياه', 'الرمي العشوائي'],
+            correctAnswer: 1
+          }
+        ]
+      }
+    ]}
+  ]);
+  const [completedCoursesList, setCompletedCoursesList] = useState([]);
+  const [activeLearningCourse, setActiveLearningCourse] = useState(null);
+  const [certRecipientCourse, setCertRecipientCourse] = useState(null);
+
+  useEffect(() => {
+    window.setSelectedCountry = (country) => {
+      setSelectedCountryName(country);
+    };
+    return () => {
+      delete window.setSelectedCountry;
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchCertificate = async () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('verifyCert') === 'true') {
+        const id = params.get('id');
+        const fallbackObj = {
+          id: id || 'CMX-TEMP-999',
+          name: params.get('name') || 'مستخدم تجريبي',
+          course: params.get('course') || 'مسار عام',
+          email: params.get('email') || 'doctor.maryam@climamedix.org'
+        };
+
+        if (id) {
+          try {
+            const { data, error } = await supabase.from('certificates').select('*').eq('id', id).single();
+            if (data && !error) {
+              setVerificationResult(data);
+              return;
+            }
+          } catch (e) {
+            console.warn('Supabase query failed, falling back to URL parameters/localStorage:', e);
+          }
+
+          // LocalStorage fallback
+          try {
+            const localCerts = JSON.parse(localStorage.getItem('climamedix_certs') || '{}');
+            if (localCerts[id]) {
+              setVerificationResult(localCerts[id]);
+              return;
+            }
+          } catch (e) {}
+        }
+        
+        setVerificationResult(fallbackObj);
+      }
+    };
+    fetchCertificate();
+  }, []);
+
+  const handleRegisterCalendarEvent = (eventId) => {
+    setRegisteredEvents(prev => ({
+      ...prev,
+      [eventId]: !prev[eventId]
+    }));
+  };
+
+  const handleSelectCourse = (course) => {
+    setActiveLearningCourse(course);
+  };
+
+  const handleLessonCompleted = (courseId, progressPct, remaining) => {
+    setEnrolledCoursesList(prev => prev.map(c => {
+      if (c.id === courseId) {
+        const updated = { ...c, progress: progressPct, remainingLessons: remaining };
+        if (progressPct === 100) {
+          setCompletedCoursesList(old => {
+            if (!old.some(o => o.id === courseId)) {
+              return [...old, { ...updated, quizScore: '95%' }];
+            }
+            return old;
+          });
+        }
+        return updated;
+      }
+      return c;
+    }));
+  };
+
+  const handleOpenCertificateGenerator = (courseName) => {
+    setCertRecipientCourse(courseName);
+  };
+
+  const handleEnrollFromProgram = (programId) => {
+    if (!enrolledCoursesList.some(c => c.id === programId)) {
+      const newCourse = {
+        id: programId,
+        title: selectedProgram.title,
+        category: selectedProgram.category || 'طبي بيئي',
+        progress: 0,
+        remainingLessons: 2
+      };
+      setEnrolledCoursesList(prev => [...prev, newCourse]);
+    }
+    setSelectedProgram(null);
+  };
 
   // State for Concept 16 (Healthcare Facility Carbon Calculator)
   const [electricityVal, setElectricityVal] = useState(1200);
@@ -201,13 +381,13 @@ export function DebugUIPage() {
 
   // Live Map Theme Configuration State
   const [mapTheme, setMapTheme] = useState({
-    water_layer: "#0a192f",
-    land_layer: "#14B67A",
-    text_labels: "#ffffff",
-    text_halo_shadows: "#0a192f",
-    borders_and_roads: "#0a6e48",
-    critical_markers: "#ff4d4d",
-    safe_markers: "#ffffff"
+    water_layer: "#014C6D",
+    land_layer: "#2FAD78",
+    text_labels: "#EEF6FC",
+    text_halo_shadows: "#08294A",
+    borders_and_roads: "#014C6D",
+    critical_markers: "#4dff82",
+    safe_markers: "#EEF6FC"
   });
 
   const mapInstanceRef = useRef(null);
@@ -549,14 +729,81 @@ export function DebugUIPage() {
     );
   };
 
+  const handleEmailChange = async (email) => {
+    setCertEmail(email);
+
+    // 1. Search in mock profiles
+    const mockRep = [
+      { email: 'm.otaibi@climamedix.org', name: 'د. مريم العتيبي' },
+      { email: 'k.jaber@climamedix.org', name: 'أ. د. خالد الجابر' },
+      { email: 'y.sabry@climamedix.org', name: 'د. يوسف صبري' },
+      { email: 'r.haddad@climamedix.org', name: 'د. رانيا الحداد' },
+      { email: 'a.hussein@climamedix.org', name: 'د. علي حسين' }
+    ].find(rep => rep.email.toLowerCase() === email.trim().toLowerCase());
+
+    if (mockRep) {
+      setCertName(mockRep.name);
+      return;
+    }
+
+    // 2. Search in Supabase profiles
+    if (email.includes('@') && email.length > 5) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('name, full_name, display_name')
+          .eq('email', email.trim())
+          .maybeSingle();
+
+        if (data && !error) {
+          const fetchedName = data.full_name || data.name || data.display_name;
+          if (fetchedName) {
+            setCertName(fetchedName);
+          }
+        }
+      } catch (err) {
+        console.warn('Could not auto-fetch name from profiles:', err);
+      }
+    }
+  };
+
   // Holographic Certificate Generation Anim
-  const handleGenerateCertificate = () => {
+  const handleGenerateCertificate = async () => {
     setCertGenerating(true);
     setCertGenerated(false);
+    setVerificationLink('');
+
+    const uniqueId = `CMX-${Math.floor(10000 + Math.random() * 90000)}-2026`;
+    const certRecord = {
+      id: uniqueId,
+      name: certName,
+      course: certCourse,
+      email: certEmail,
+      issued_at: new Date().toISOString()
+    };
+
+    // Storing in database
+    try {
+      const { error } = await supabase.from('certificates').insert([certRecord]);
+      if (error) {
+        console.warn('Database insert failed, using fallback persistence:', error.message);
+      }
+    } catch (e) {
+      console.warn('Database error:', e);
+    }
+
+    // LocalStorage fallback for robustness/offline fallback validation
+    try {
+      const localCerts = JSON.parse(localStorage.getItem('climamedix_certs') || '{}');
+      localCerts[uniqueId] = certRecord;
+      localStorage.setItem('climamedix_certs', JSON.stringify(localCerts));
+    } catch(e) {}
 
     setTimeout(() => {
       setCertGenerating(false);
       setCertGenerated(true);
+      const url = `${window.location.origin}${window.location.pathname}?verifyCert=true&id=${uniqueId}&name=${encodeURIComponent(certName)}&course=${encodeURIComponent(certCourse)}&email=${encodeURIComponent(certEmail)}`;
+      setVerificationLink(url);
 
       // Animate Certificate Paper and Holographic Stamp
       gsap.fromTo('.cert-paper-mock',
@@ -1854,44 +2101,87 @@ export function DebugUIPage() {
                   أدخل اسمك لتجربة محاكاة إصدار وتوقيع شهادة الاعتماد الطبي المناخي
                 </p>
 
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '25px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '25px' }}>
                   <input
                     type="text"
                     value={certName}
                     onInput={(e) => setCertName(e.target.value)}
                     placeholder="اسم المتدرب..."
-                    style={{ flex: 1, padding: '10px 15px', borderRadius: '12px', border: '1px solid rgba(11, 40, 73, 0.15)', background: 'rgba(255,255,255,0.7)', fontFamily: "'Tajawal', sans-serif" }}
+                    style={{ width: '100%', padding: '10px 15px', borderRadius: '12px', border: '1px solid rgba(11, 40, 73, 0.15)', background: 'rgba(255,255,255,0.7)', fontFamily: "'Tajawal', sans-serif" }}
                   />
-                  <Button variant="gradient" onClick={handleGenerateCertificate} disabled={certGenerating}>
-                    {certGenerating ? 'جاري التوقيع...' : 'إصدار'}
+                  <input
+                    type="email"
+                    value={certEmail}
+                    onInput={(e) => handleEmailChange(e.target.value)}
+                    placeholder="البريد الإلكتروني..."
+                    style={{ width: '100%', padding: '10px 15px', borderRadius: '12px', border: '1px solid rgba(11, 40, 73, 0.15)', background: 'rgba(255,255,255,0.7)', fontFamily: "'Tajawal', sans-serif" }}
+                  />
+                  <Button variant="gradient" onClick={handleGenerateCertificate} disabled={certGenerating} style={{ width: '100%' }}>
+                    {certGenerating ? 'جاري التوقيع...' : 'إصدار الشهادة وحفظها'}
                   </Button>
                 </div>
               </div>
 
               {certGenerated ? (
-                <div className="cert-paper-mock">
-                  <div style={{ textAlign: 'center', color: '#0b2849' }}>
-                    <div style={{ fontSize: '12px', letterSpacing: '2px', fontWeight: 'bold', color: '#15b47a', marginBottom: '15px' }}>
-                      CLIMAMEDIX ACADIFICATE
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  <div className="cert-paper-mock">
+                    <div style={{ textAlign: 'center', color: '#0b2849' }}>
+                      <div style={{ fontSize: '12px', letterSpacing: '2px', fontWeight: 'bold', color: '#15b47a', marginBottom: '15px' }}>
+                        CLIMAMEDIX ACADIFICATE
+                      </div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold', fontFamily: "'Tajawal', sans-serif", marginBottom: '10px' }}>
+                        شهادة كفاءة معتمدة
+                      </div>
+                      <div style={{ fontSize: '13px', color: 'rgba(11, 40, 73, 0.6)', marginBottom: '20px' }}>
+                        تُمنح هذه الشهادة رسمياً إلى الممارس الصحي
+                      </div>
+                      <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#004c6d', marginBottom: '15px', borderBottom: '1px solid #e5d3b3', display: 'inline-block', paddingBottom: '5px' }}>
+                        {certName}
+                      </div>
+                      <div style={{ fontSize: '14px', color: 'rgba(11, 40, 73, 0.8)' }}>
+                        لاجتيازه بنجاح مسار: <br /><strong>{certCourse}</strong>
+                      </div>
                     </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', fontFamily: "'Tajawal', sans-serif", marginBottom: '10px' }}>
-                      شهادة كفاءة معتمدة
-                    </div>
-                    <div style={{ fontSize: '13px', color: 'rgba(11, 40, 73, 0.6)', marginBottom: '20px' }}>
-                      تُمنح هذه الشهادة رسمياً إلى الممارس الصحي
-                    </div>
-                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#004c6d', marginBottom: '15px', borderBottom: '1px solid #e5d3b3', display: 'inline-block', paddingBottom: '5px' }}>
-                      {certName}
-                    </div>
-                    <div style={{ fontSize: '14px', color: 'rgba(11, 40, 73, 0.8)' }}>
-                      لاجتيازه بنجاح مسار: <br /><strong>{certCourse}</strong>
+
+                    {/* Holographic Seal Stamp with bounce effect */}
+                    <div className="cert-stamp">
+                      ClimaMedix<br />Verified
                     </div>
                   </div>
 
-                  {/* Holographic Seal Stamp with bounce effect */}
-                  <div className="cert-stamp">
-                    ClimaMedix<br />Verified
-                  </div>
+                  {/* Verification Reference Link Display */}
+                  {verificationLink && (
+                    <div style={{ background: 'rgba(21, 180, 122, 0.06)', border: '1px dashed #15b47a', borderRadius: '12px', padding: '15px', marginTop: '10px', textAlign: 'right' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#0b2849', display: 'block', marginBottom: '6px' }}>
+                        رابط التحقق المرجعي للشهادة:
+                      </span>
+                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <input 
+                          type="text" 
+                          readOnly 
+                          value={verificationLink} 
+                          style={{ flex: 1, padding: '6px 10px', borderRadius: '8px', border: '1px solid rgba(11,40,73,0.15)', fontSize: '11px', background: '#fff', color: '#004c6d' }}
+                        />
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(verificationLink);
+                            alert('تم نسخ رابط التحقق المرجعي للشهادة!');
+                          }}
+                          style={{ background: '#004c6d', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
+                        >
+                          نسخ
+                        </button>
+                        <a 
+                          href={verificationLink} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          style={{ background: '#15b47a', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', textDecoration: 'none', textAlign: 'center' }}
+                        >
+                          فتح
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div style={{ height: '220px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed rgba(11, 40, 73, 0.15)', borderRadius: '12px', background: 'rgba(255,255,255,0.2)' }}>
@@ -3061,7 +3351,14 @@ export function DebugUIPage() {
                   <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.85)', lineHeight: '1.6', marginBottom: '30px', maxWidth: '480px', textAlign: 'right' }}>
                     {coursesData[activeCourseSlide].desc}
                   </p>
-                  <button id="btn-join-course-31" className="btn-showcase btn-neon" style={{ background: '#15b47a', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }} onMouseEnter={(e) => e.target.style.boxShadow = '0 0 15px #15b47a'} onMouseLeave={(e) => e.target.style.boxShadow = 'none'}>
+                  <button 
+                    id="btn-join-course-31" 
+                    className="btn-showcase btn-neon" 
+                    onClick={() => setSelectedProgram(coursesData[activeCourseSlide])}
+                    style={{ background: '#15b47a', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }} 
+                    onMouseEnter={(e) => e.target.style.boxShadow = '0 0 15px #15b47a'} 
+                    onMouseLeave={(e) => e.target.style.boxShadow = 'none'}
+                  >
                     سجل في المساق الآن
                   </button>
                 </div>
@@ -3188,6 +3485,269 @@ export function DebugUIPage() {
 
           </div>
         </div>
+
+        {/* ==========================================
+            SECTION 10: OPPORTUNITIES DIRECTORY (AT BOTTOM)
+            ========================================== */}
+        <div id="section-opportunities-bottom" style={{ marginTop: '80px', marginBottom: '40px', padding: '40px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(25px)', borderRadius: '24px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 16px 40px rgba(0, 76, 109, 0.08)' }}>
+          <h2 style={{ color: '#0b2849', fontSize: '32px', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>
+            دليل الفرص والزمالات (Opportunities Directory)
+          </h2>
+          <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '16px', textAlign: 'center', marginBottom: '40px' }}>
+            مكون شبكة الفرص مع الفلترة الحية (المرحلة الأولى من خريطة الطريق)
+          </p>
+          <OpportunitiesGrid opportunities={opportunities} />
+        </div>
+
+        {/* ==========================================
+            SECTION 11: EVENTS CALENDAR
+            ========================================== */}
+        <div id="section-events-bottom" style={{ marginBottom: '40px', padding: '40px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(25px)', borderRadius: '24px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 16px 40px rgba(0, 76, 109, 0.08)' }}>
+          <h2 style={{ color: '#0b2849', fontSize: '32px', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>
+            تقويم الفعاليات والندوات (Events Calendar)
+          </h2>
+          <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '16px', textAlign: 'center', marginBottom: '40px' }}>
+            تقويم تفاعلي يعرض الفعاليات والندوات الطبية البيئية
+          </p>
+          <EventsCalendar 
+            events={MOCK_EVENTS} 
+            onRegisterEvent={handleRegisterCalendarEvent} 
+            registeredEvents={registeredEvents} 
+          />
+        </div>
+
+        {/* ==========================================
+            SECTION 12: NEWS FEED
+            ========================================== */}
+        <div id="section-news-bottom" style={{ marginBottom: '80px', padding: '40px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(25px)', borderRadius: '24px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 16px 40px rgba(0, 76, 109, 0.08)' }}>
+          <h2 style={{ color: '#0b2849', fontSize: '32px', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>
+            مركز الأخبار والمقالات (News & Articles Feed)
+          </h2>
+          <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '16px', textAlign: 'center', marginBottom: '40px' }}>
+            آخر مقالات المناخ والصحة والأبحاث الطبية
+          </p>
+          <NewsFeed 
+            articles={MOCK_ARTICLES} 
+            onReadArticle={(art) => setSelectedArticle(art)} 
+          />
+        </div>
+
+        {/* Article Reader Modal */}
+        {selectedArticle && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(5, 12, 26, 0.5)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}>
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '24px',
+              border: '1px solid rgba(11, 40, 73, 0.15)',
+              maxWidth: '650px',
+              width: '100%',
+              maxHeight: '85vh',
+              overflowY: 'auto',
+              padding: '30px',
+              direction: 'rtl',
+              textAlign: 'right',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}>
+              <button 
+                onClick={() => setSelectedArticle(null)}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  left: '20px',
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  color: '#0b2849',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  zIndex: 10
+                }}
+              >
+                &times;
+              </button>
+
+              <span style={{ 
+                background: 'rgba(21, 180, 122, 0.1)', 
+                color: '#15b47a', 
+                padding: '4px 12px', 
+                borderRadius: '20px', 
+                fontSize: '12px', 
+                fontWeight: 'bold',
+                display: 'inline-block',
+                marginBottom: '15px'
+              }}>
+                {selectedArticle.category}
+              </span>
+
+              <h2 style={{ color: '#0b2849', fontSize: '24px', fontWeight: 'bold', marginBottom: '10px', marginTop: 0, lineHeight: '1.4' }}>
+                {selectedArticle.title}
+              </h2>
+
+              <div style={{ display: 'flex', gap: '15px', color: 'rgba(11, 40, 73, 0.5)', fontSize: '13px', marginBottom: '25px' }}>
+                <span>الكاتب: {selectedArticle.author}</span>
+                <span>التاريخ: {selectedArticle.date}</span>
+              </div>
+
+              <div style={{ color: '#0b2849', fontSize: '15px', lineHeight: '1.8', whiteSpace: 'pre-wrap' }}>
+                {selectedArticle.content}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ==========================================
+            SECTION 13: COMMUNITY NETWORK DIRECTORY
+            ========================================== */}
+        <div id="section-network-bottom" style={{ marginBottom: '40px', padding: '40px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(25px)', borderRadius: '24px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 16px 40px rgba(0, 76, 109, 0.08)' }}>
+          <h2 style={{ color: '#0b2849', fontSize: '32px', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>
+            دليل سفراء وممثلي الدول (Network Directory)
+          </h2>
+          <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '16px', textAlign: 'center', marginBottom: '40px' }}>
+            أعضاء الشبكة والمنسقين المحليين (المرحلة الثانية - متصل بالخريطة التفاعلية)
+          </p>
+          <NetworkDirectory selectedCountry={selectedCountryName} />
+        </div>
+
+        {/* ==========================================
+            SECTION 14: LEARNING HUB & LMS DASHBOARD
+            ========================================== */}
+        <div id="section-lms-bottom" style={{ marginBottom: '40px', padding: '40px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(25px)', borderRadius: '24px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 16px 40px rgba(0, 76, 109, 0.08)' }}>
+          <h2 style={{ color: '#0b2849', fontSize: '32px', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>
+            لوحة تحكم التعليم والطلاب (LMS Dashboard)
+          </h2>
+          <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '16px', textAlign: 'center', marginBottom: '40px' }}>
+            متابعة المساقات النشطة والشهادات المكتسبة مع اختبارات الدروس
+          </p>
+          <LMSDashboard 
+            enrolledCourses={enrolledCoursesList} 
+            completedCourses={completedCoursesList} 
+            onSelectCourse={handleSelectCourse} 
+            onGenerateCertificate={handleOpenCertificateGenerator} 
+          />
+        </div>
+
+        {/* ==========================================
+            SECTION 15: ADMIN CRUD & ANALYTICS
+            ========================================== */}
+        <div id="section-admin-bottom" style={{ marginBottom: '80px', padding: '40px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(25px)', borderRadius: '24px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 16px 40px rgba(0, 76, 109, 0.08)' }}>
+          <h2 style={{ color: '#0b2849', fontSize: '32px', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>
+            لوحة الإشراف والإحصائيات (Admin Control & Analytics)
+          </h2>
+          <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '16px', textAlign: 'center', marginBottom: '40px' }}>
+            إدارة المحتوى وقراءة إحصائيات التفاعل ونمو الطلاب (المرحلة الخامسة)
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+            <AnalyticsDashboard />
+            <AdminCRUD />
+          </div>
+        </div>
+
+        {/* Program Detail Modal Overlay */}
+        {selectedProgram && (
+          <ProgramDetailModal 
+            program={selectedProgram} 
+            onClose={() => setSelectedProgram(null)} 
+            onApply={handleEnrollFromProgram} 
+          />
+        )}
+
+        {/* Course LMS Reader Overlay */}
+        {activeLearningCourse && (
+          <CourseDetailModal 
+            course={activeLearningCourse} 
+            onClose={() => setActiveLearningCourse(null)} 
+            onLessonCompleted={handleLessonCompleted} 
+          />
+        )}
+
+        {/* Certificate Render Overlay */}
+        {certRecipientCourse && (
+          <CertificateGenerator 
+            courseTitle={certRecipientCourse} 
+            onClose={() => setCertRecipientCourse(null)} 
+          />
+        )}
+
+        {/* Certificate Verification Modal */}
+        {verificationResult && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(5, 12, 26, 0.6)',
+            backdropFilter: 'blur(15px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000,
+            padding: '20px'
+          }}>
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '28px',
+              border: '2px solid #15b47a',
+              maxWidth: '500px',
+              width: '100%',
+              padding: '30px',
+              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.3)',
+              textAlign: 'center',
+              direction: 'rtl'
+            }}>
+              <div style={{ fontSize: '50px', marginBottom: '15px' }}>🛡️</div>
+              <h3 style={{ color: '#15b47a', fontSize: '22px', fontWeight: 'bold', marginBottom: '10px' }}>
+                تم التحقق من صحة الشهادة بنجاح!
+              </h3>
+              <p style={{ color: 'rgba(11, 40, 73, 0.6)', fontSize: '13px', marginBottom: '20px' }}>
+                تحمل هذه الشهادة الرقم المرجعي الموثق في قواعد بيانات كلايما ميدكس
+              </p>
+
+              <div style={{ background: 'rgba(21, 180, 122, 0.05)', borderRadius: '16px', padding: '20px', marginBottom: '25px', textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '10px', border: '1px solid rgba(21, 180, 122, 0.2)' }}>
+                <div>
+                  <span style={{ fontSize: '12px', color: 'rgba(11, 40, 73, 0.5)' }}>الرقم المرجعي:</span>
+                  <strong style={{ fontSize: '14px', color: '#004c6d', display: 'block', fontFamily: 'monospace' }}>{verificationResult.id}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '12px', color: 'rgba(11, 40, 73, 0.5)' }}>اسم الخريج:</span>
+                  <strong style={{ fontSize: '15px', color: '#0b2849', display: 'block' }}>{verificationResult.name}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '12px', color: 'rgba(11, 40, 73, 0.5)' }}>البريد الإلكتروني للمستلم:</span>
+                  <strong style={{ fontSize: '14px', color: '#0b2849', display: 'block' }}>{verificationResult.email || 'غير متوفر'}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '12px', color: 'rgba(11, 40, 73, 0.5)' }}>المسار التدريبي المنجز:</span>
+                  <strong style={{ fontSize: '14px', color: '#0b2849', display: 'block' }}>{verificationResult.course}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '12px', color: 'rgba(11, 40, 73, 0.5)' }}>الحالة:</span>
+                  <span style={{ fontSize: '12px', background: 'rgba(21,180,122,0.15)', color: '#15b47a', padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold', display: 'inline-block', marginTop: '4px' }}>✓ معتمد ونشط</span>
+                </div>
+              </div>
+
+              <Button 
+                variant="gradient" 
+                onClick={() => {
+                  setVerificationResult(null);
+                  const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                  window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+                }}
+                style={{ padding: '10px 30px', fontSize: '13.5px', width: '100%' }}
+              >
+                إغلاق النافذة
+              </Button>
+            </div>
+          </div>
+        )}
 
       </div>
     </main>

@@ -5,12 +5,15 @@ export const translations = {
     about: 'من نحن',
     research: 'أبحاث',
     training: 'دورات تدريبية',
+    opportunities: 'الفرص',
     contact: 'اتصل بنا',
     login: 'دخول',
     logout: 'خروج',
     admin: 'لوحة التحكم',
     search: 'البحث...',
     language: 'اللغة',
+    opportunitiesTitle: 'فرص التطوير والتمويل',
+    opportunitiesSubtitle: 'استكشف الزمالات، المنح، المؤتمرات، والفرص التدريبية المتاحة لبناء قدراتك في مجال العمل المناخي والصحي',
 
     // Hero
     heroSubtitle: 'تمكين مقدمي الرعاية الصحية لأجل العمل المناخي.',
@@ -95,12 +98,15 @@ export const translations = {
     about: 'About Us',
     research: 'Research',
     training: 'Training',
+    opportunities: 'Opportunities',
     contact: 'Contact Us',
     login: 'Login',
     logout: 'Logout',
     admin: 'Admin Dashboard',
     search: 'Search...',
     language: 'Language',
+    opportunitiesTitle: 'Development & Funding Opportunities',
+    opportunitiesSubtitle: 'Explore fellowships, scholarships, conferences, and training opportunities available to build your capacity in climate and health action',
 
     // Hero
     heroSubtitle: 'Empowering healthcare providers for climate action.',

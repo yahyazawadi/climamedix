@@ -14,12 +14,36 @@ const AuthContext = createContext({
   signOut: async () => {},
 });
 
+async function sha256(message) {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
+  const [devAdminMode, setDevAdminMode] = useState(false);
+
+  const verifyAndSetDevAdmin = async (passkey) => {
+    try {
+      const hashed = await sha256(passkey);
+      const targetHash = import.meta.env.VITE_DEV_ADMIN_PASSKEY_HASH;
+      if (hashed === targetHash) {
+        setDevAdminMode(true);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Error verifying dev admin passkey:', err);
+      return false;
+    }
+  };
 
   // Helper to fetch profile and update online status
   const fetchProfileAndSetOnline = async (userId) => {
@@ -182,6 +206,7 @@ export function AuthProvider({ children }) {
   const signOut = async () => {
     setError(null);
     try {
+      setDevAdminMode(false);
       await authService.signOut(user?.id);
       setUser(null);
       setUserProfile(null);
@@ -193,13 +218,21 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
-    userProfile,
+    userProfile: userProfile ? {
+      ...userProfile,
+      role: devAdminMode ? 'superadmin' : userProfile.role
+    } : (devAdminMode ? {
+      role: 'superadmin',
+      full_name: 'Developer Superadmin',
+      email: 'dev@climamedix.local'
+    } : null),
     loading,
     error,
     signIn,
     signUp,
     signInWithOAuth,
     signOut,
+    verifyAndSetDevAdmin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

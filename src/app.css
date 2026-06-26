@@ -2798,3 +2798,326 @@ html[lang="en"] .figma-nav-text {
 .lang-circle-btn:active {
   transform: scale(0.95);
 }
+
+/* ==========================================================================
+   HOMEPAGE DYNAMIC DISCOVERY CAROUSEL
+   ========================================================================== */
+.figma-discovery-section {
+  padding: 60px 0;
+  background: rgba(225, 239, 250, 0.15);
+  position: relative;
+  border-top: 1px solid rgba(11, 40, 73, 0.05);
+  border-bottom: 1px solid rgba(11, 40, 73, 0.05);
+  direction: rtl;
+}
+
+.discovery-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.discovery-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.discovery-title {
+  color: #0b2849;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.discovery-subtitle {
+  color: rgba(11, 40, 73, 0.7);
+  font-size: 15px;
+}
+
+.discovery-carousel-outer {
+  position: relative;
+  overflow: hidden;
+  padding: 10px 0;
+}
+
+.discovery-carousel-inner {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 24px;
+}
+
+.discovery-card {
+  min-width: calc(33.333% - 16px);
+  max-width: calc(33.333% - 16px);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(11, 40, 73, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(11, 40, 73, 0.05);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.discovery-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(11, 40, 73, 0.1);
+  border-color: rgba(21, 180, 122, 0.3);
+}
+
+.discovery-thumb-wrap {
+  width: 100%;
+  height: 180px;
+  position: relative;
+  overflow: hidden;
+}
+
+.discovery-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.discovery-card:hover .discovery-thumb {
+  transform: scale(1.05);
+}
+
+.discovery-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #004c6d;
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  z-index: 2;
+}
+
+.discovery-badge.research {
+  background: #15b47a;
+}
+
+.discovery-badge.article {
+  background: #8e44ad;
+}
+
+.discovery-badge.post {
+  background: #e67e22;
+}
+
+.discovery-card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  text-align: right;
+}
+
+.discovery-card-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #0b2849;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.discovery-metrics-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(11, 40, 73, 0.08);
+  font-size: 12px;
+  color: rgba(11, 40, 73, 0.6);
+  justify-content: flex-start;
+  direction: rtl;
+}
+
+.discovery-metric-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.discovery-metric-item:hover {
+  color: #15b47a;
+}
+
+.discovery-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(11, 40, 73, 0.1);
+  box-shadow: 0 4px 12px rgba(11, 40, 73, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.25s ease;
+  color: #0b2849;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.discovery-nav-btn:hover {
+  background: #15b47a;
+  color: #ffffff;
+  border-color: #15b47a;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.discovery-nav-btn.prev {
+  left: -22px;
+}
+
+.discovery-nav-btn.next {
+  right: -22px;
+}
+
+/* Mobile responsive */
+@media (max-width: 991px) {
+  .discovery-card {
+    min-width: calc(50% - 12px);
+    max-width: calc(50% - 12px);
+  }
+}
+
+@media (max-width: 600px) {
+  .discovery-card {
+    min-width: 100%;
+    max-width: 100%;
+  }
+  .discovery-nav-btn.prev {
+    left: 5px;
+  }
+  .discovery-nav-btn.next {
+    right: 5px;
+  }
+}
+
+/* ==========================================================================
+   OPPORTUNITIES DIRECTORY STYLES (Mobile Responsive & Glassmorphism)
+   ========================================================================== */
+
+.search-filter-tag {
+  font-family: 'Tajawal', 'Outfit', sans-serif;
+  background: rgba(225, 239, 250, 0.08);
+  border: 1px solid rgba(11, 40, 73, 0.12);
+  color: #0b2849;
+  font-weight: 600;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+}
+
+.search-filter-tag:hover {
+  background: rgba(21, 180, 122, 0.08);
+  border-color: rgba(21, 180, 122, 0.3);
+  color: #15b47a;
+  transform: translateY(-1px);
+}
+
+.search-filter-tag.active {
+  background: linear-gradient(135deg, #0b2849 0%, #004c6d 100%);
+  border-color: #004c6d;
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 76, 109, 0.25);
+}
+
+/* Dark mode support */
+body.dark-mode .search-filter-tag {
+  background: rgba(225, 239, 250, 0.05);
+  border-color: rgba(225, 239, 250, 0.15);
+  color: #E1EFFA;
+}
+
+body.dark-mode .search-filter-tag:hover {
+  background: rgba(21, 180, 122, 0.15);
+  color: #15b47a;
+  border-color: #15b47a;
+}
+
+body.dark-mode .search-filter-tag.active {
+  background: linear-gradient(135deg, #15b47a 0%, #12a978 100%);
+  border-color: #15b47a;
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(21, 180, 122, 0.3);
+}
+
+/* Premium Opportunity Card Hover Styles */
+.opportunity-card {
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.opportunity-card:hover {
+  transform: translateY(-6px) scale(1.01) !important;
+  border-color: rgba(21, 180, 122, 0.35) !important;
+  box-shadow: 0 20px 40px rgba(11, 40, 73, 0.08), 0 1px 3px rgba(21, 180, 122, 0.1) !important;
+}
+
+/* Spinner Animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .opportunities-directory {
+    padding: 0 10px;
+  }
+  
+  .search-filter-tag {
+    font-size: 13px !important;
+    padding: 6px 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .opportunities-directory {
+    padding: 0 5px;
+  }
+
+  .search-filter-tag {
+    font-size: 12px !important;
+    padding: 6px 12px !important;
+  }
+}
+
+/* Specific styling for filter tags inside the green banner */
+.opportunities-banner .search-filter-tag {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(10px);
+}
+
+.opportunities-banner .search-filter-tag:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+.opportunities-banner .search-filter-tag.active {
+  background: #0b2849 !important;
+  border-color: #0b2849 !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(11, 40, 73, 0.35) !important;
+}

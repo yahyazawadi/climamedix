@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'preact/hooks'
 import logo from '../../../assets/logo.svg'
+import { useAuth } from '../../auth/hooks/useAuth'
 import iconHome from '../../../assets/icon_home.svg'
 import iconContact from '../../../assets/icon_contact.svg'
 import iconTraining from '../../../assets/icon_training.svg'
@@ -14,20 +15,25 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [logoClicks, setLogoClicks] = useState(0);
+  const { verifyAndSetDevAdmin } = useAuth();
   
   const t = translations[lang] || translations.ar;
 
-  // Close dropdown on click outside
+  // Close dropdowns on click outside
   useEffect(() => {
-    if (!showLangDropdown) return;
     const handleOutsideClick = (e) => {
-      if (!e.target.closest('.language-toggle-btn') && !e.target.closest('.lang-dropdown-menu')) {
+      if (showLangDropdown && !e.target.closest('.language-toggle-btn') && !e.target.closest('.lang-dropdown-menu')) {
         setShowLangDropdown(false);
+      }
+      if (showProfileDropdown && !e.target.closest('.user-profile-dropdown-container')) {
+        setShowProfileDropdown(false);
       }
     };
     document.addEventListener('click', handleOutsideClick);
     return () => document.removeEventListener('click', handleOutsideClick);
-  }, [showLangDropdown]);
+  }, [showLangDropdown, showProfileDropdown]);
 
   return (
     <>
@@ -39,7 +45,24 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
             href="#home" 
             onClick={(e) => {
               e.preventDefault();
-              onNavigate('home', 'home');
+              const nextClicks = logoClicks + 1;
+              setLogoClicks(nextClicks);
+              if (nextClicks === 7) {
+                setLogoClicks(0);
+                const passkey = prompt(lang === 'ar' ? 'أدخل رمز مرور مسؤول التطوير:' : 'Enter developer admin passkey:');
+                if (passkey) {
+                  verifyAndSetDevAdmin(passkey).then(success => {
+                    if (success) {
+                      alert(lang === 'ar' ? 'تم تفعيل وضع المسؤول بنجاح!' : 'Admin view toggled & Super Admin permissions granted!');
+                      onNavigate('debug');
+                    } else {
+                      alert(lang === 'ar' ? 'رمز المرور غير صحيح!' : 'Incorrect passkey!');
+                    }
+                  });
+                }
+              } else {
+                onNavigate('home', 'home');
+              }
             }}
             class="figma-logo-link"
           >
@@ -140,20 +163,215 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               )}
             </div>
 
-            {/* Auth Item */}
+            {/* Auth Item / User Profile Dropdown */}
             {user ? (
-              <a 
-                href="#logout" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  onLogout();
-                }}
-                class="figma-nav-item"
-                style={{ color: '#ff4d4d' }}
+              <div 
+                class="figma-nav-item user-profile-dropdown-container"
+                style={{ position: 'relative', cursor: 'pointer' }}
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
               >
-                <img src={iconProfile} class="figma-nav-icon" alt="الملف الشخصي" />
-                <span class="figma-nav-text">{t.logout} ({userProfile?.full_name || user.email})</span>
-              </a>
+                <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
+                  <img 
+                    src={userProfile?.avatar_url || iconProfile} 
+                    class="figma-nav-icon" 
+                    alt="الملف الشخصي" 
+                    style={userProfile?.avatar_url ? { 
+                      borderRadius: '50%', 
+                      width: '40px', 
+                      height: '40px', 
+                      objectFit: 'cover', 
+                      border: '2px solid rgba(21, 180, 122, 0.4)' 
+                    } : {
+                      width: '34px', 
+                      height: '34px',
+                      objectFit: 'contain'
+                    }}
+                  />
+                  <span style={{ 
+                    position: 'absolute', 
+                    bottom: '0px', 
+                    right: '0px', 
+                    width: '10px', 
+                    height: '10px', 
+                    borderRadius: '50%', 
+                    backgroundColor: '#15b47a', 
+                    border: '2px solid #004c6d' 
+                  }}></span>
+                </div>
+                <span class="figma-nav-text" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {t.myAccount}
+                </span>
+
+                {/* Dropdown Menu */}
+                {showProfileDropdown && (
+                  <div 
+                    class="premium-profile-dropdown"
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      right: lang === 'ar' ? '0' : 'auto',
+                      left: lang === 'ar' ? 'auto' : '0',
+                      marginTop: '12px',
+                      width: '260px',
+                      background: 'rgba(11, 40, 73, 0.98)',
+                      backdropFilter: 'blur(16px)',
+                      borderRadius: '16px',
+                      border: '1px solid rgba(225, 239, 250, 0.15)',
+                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+                      padding: '16px',
+                      zIndex: 1000,
+                      textAlign: lang === 'ar' ? 'right' : 'left',
+                      direction: lang === 'ar' ? 'rtl' : 'ltr',
+                      color: '#ffffff'
+                    }}
+                  >
+                    {/* User Info Header */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+                      <img 
+                        src={userProfile?.avatar_url || iconProfile} 
+                        style={userProfile?.avatar_url ? { 
+                          width: '58px', 
+                          height: '58px', 
+                          borderRadius: '50%', 
+                          objectFit: 'cover', 
+                          border: '2px solid #15b47a' 
+                        } : { 
+                          width: '48px', 
+                          height: '48px',
+                          objectFit: 'contain'
+                        }}
+                      />
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                        <span style={{ fontWeight: 'bold', fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#ffffff' }}>
+                          {userProfile?.full_name || user.email.split('@')[0]}
+                        </span>
+                        <span style={{ fontSize: '12px', opacity: 0.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#E1EFFA' }}>
+                          {user.email}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Roles & Info tags */}
+                    <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', flexWrap: 'wrap' }}>
+                      {userProfile?.role === 'superadmin' ? (
+                        <span style={{ 
+                          backgroundColor: 'rgba(21, 180, 122, 0.2)', 
+                          color: '#15b47a', 
+                          padding: '4px 8px', 
+                          borderRadius: '6px', 
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          border: '1px solid rgba(21, 180, 122, 0.3)'
+                        }}>
+                          {lang === 'ar' ? 'مسؤول خارق' : 'Super Admin'}
+                        </span>
+                      ) : userProfile?.role === 'admin' ? (
+                        <span style={{ 
+                          backgroundColor: 'rgba(21, 180, 122, 0.2)', 
+                          color: '#15b47a', 
+                          padding: '4px 8px', 
+                          borderRadius: '6px', 
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          border: '1px solid rgba(21, 180, 122, 0.3)'
+                        }}>
+                          {lang === 'ar' ? 'مسؤول' : 'Admin'}
+                        </span>
+                      ) : (
+                        <span style={{ 
+                          backgroundColor: 'rgba(225, 239, 250, 0.1)', 
+                          color: '#E1EFFA', 
+                          padding: '4px 8px', 
+                          borderRadius: '6px', 
+                          fontSize: '11px',
+                          fontWeight: 'bold'
+                        }}>
+                          {lang === 'ar' ? 'مستخدم' : 'Student / User'}
+                        </span>
+                      )}
+                      {userProfile?.profession && (
+                        <span style={{ 
+                          backgroundColor: 'rgba(225, 239, 250, 0.05)', 
+                          color: '#E1EFFA', 
+                          padding: '4px 8px', 
+                          borderRadius: '6px', 
+                          fontSize: '11px'
+                        }}>
+                          {userProfile.profession}
+                        </span>
+                      )}
+                    </div>
+
+                    <div style={{ borderBottom: '1px solid rgba(225, 239, 250, 0.1)', marginBottom: '12px' }}></div>
+
+                    {/* Action Buttons */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      {(userProfile?.role === 'admin' || userProfile?.role === 'superadmin') && (
+                        <a 
+                          href="#debug"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onNavigate('debug');
+                            setShowProfileDropdown(false);
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '10px 12px',
+                            borderRadius: '8px',
+                            color: '#E1EFFA',
+                            textDecoration: 'none',
+                            fontSize: '14px',
+                            fontWeight: 'bold',
+                            background: 'rgba(225, 239, 250, 0.05)',
+                            border: '1px solid rgba(225, 239, 250, 0.1)',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = 'rgba(21, 180, 122, 0.15)';
+                            e.target.style.color = '#15b47a';
+                            e.target.style.borderColor = 'rgba(21, 180, 122, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'rgba(225, 239, 250, 0.05)';
+                            e.target.style.color = '#E1EFFA';
+                            e.target.style.borderColor = 'rgba(225, 239, 250, 0.1)';
+                          }}
+                        >
+                          {lang === 'ar' ? 'لوحة التحكم' : 'Control Panel'}
+                        </a>
+                      )}
+                      
+                      <a 
+                        href="#logout"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onLogout();
+                          setShowProfileDropdown(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          color: '#ff4d4d',
+                          textDecoration: 'none',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          marginTop: '4px',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.target.style.background = 'rgba(255, 77, 77, 0.1)'}
+                        onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                      >
+                        {t.logout}
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <a 
                 href="#auth" 
@@ -168,20 +386,6 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               </a>
             )}
 
-            {/* Admin Dashboard link */}
-            {userProfile && userProfile.role === 'admin' && (
-              <a 
-                href="#debug" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  onNavigate('debug');
-                }}
-                class={`figma-nav-item ${currentView === 'debug' ? 'active' : ''}`}
-              >
-                <span class="figma-nav-text">{t.admin}</span>
-              </a>
-            )}
-
             {/* 6. اتصل بنا */}
             <a 
               href="#contact" 
@@ -193,6 +397,23 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
             >
               <img src={iconContact} class="figma-nav-icon" alt="اتصل بنا" />
               <span class="figma-nav-text">{t.contact}</span>
+            </a>
+
+            {/* 5.5 الفرص */}
+            <a 
+              href="#opportunities" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('opportunities');
+              }}
+              class={`figma-nav-item ${currentView === 'opportunities' ? 'active' : ''}`}
+            >
+              <svg class="figma-nav-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
+                <rect x="3" y="8" width="18" height="12" rx="2.5" stroke="#15b47a" stroke-width="2.5" fill="none" />
+                <path d="M9 8V5C9 4.4 9.4 4 10 4H14C14.6 4 15 4.4 15 5V8" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" fill="none" />
+                <circle cx="12" cy="14" r="1.8" fill="#ffffff" />
+              </svg>
+              <span class="figma-nav-text">{t.opportunities}</span>
             </a>
 
             {/* 5. دورات تدريبية */}
@@ -282,17 +503,81 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
             {lang === 'ar' ? 'English (EN)' : 'العربية (AR)'}
           </a>
           {user ? (
-            <a href="#logout" onClick={(e) => { e.preventDefault(); onLogout(); setDrawerOpen(false); }} class="drawer-link" style={{ color: '#ff4d4d' }}>{t.logout} ({userProfile?.full_name || user.email})</a>
+            <div style={{ 
+              background: 'rgba(255, 255, 255, 0.05)', 
+              borderRadius: '12px', 
+              padding: '16px', 
+              marginBottom: '16px',
+              border: '1px solid rgba(225, 239, 250, 0.15)',
+              textAlign: lang === 'ar' ? 'right' : 'left',
+              color: '#ffffff',
+              direction: lang === 'ar' ? 'rtl' : 'ltr'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                <img 
+                  src={userProfile?.avatar_url || iconProfile} 
+                  style={userProfile?.avatar_url ? { 
+                    width: '50px', 
+                    height: '50px', 
+                    borderRadius: '50%', 
+                    objectFit: 'cover', 
+                    border: '2px solid #15b47a' 
+                  } : { 
+                    width: '42px', 
+                    height: '42px',
+                    objectFit: 'contain'
+                  }}
+                />
+                <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                  <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {userProfile?.full_name || user.email.split('@')[0]}
+                  </span>
+                  <span style={{ fontSize: '11px', color: 'rgba(225, 239, 250, 0.6)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {user.email}
+                  </span>
+                </div>
+              </div>
+
+              {/* Roles Badge & Actions */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                {userProfile?.role === 'admin' ? (
+                  <span style={{ backgroundColor: '#15b47a', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                    {lang === 'ar' ? 'مسؤول' : 'Admin'}
+                  </span>
+                ) : (
+                  <span style={{ backgroundColor: 'rgba(225, 239, 250, 0.1)', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px' }}>
+                    {lang === 'ar' ? 'مستخدم' : 'Student'}
+                  </span>
+                )}
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {userProfile?.role === 'admin' && (
+                    <a 
+                      href="#debug" 
+                      onClick={(e) => { e.preventDefault(); onNavigate('debug'); setDrawerOpen(false); }} 
+                      style={{ color: '#15b47a', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
+                    >
+                      {lang === 'ar' ? 'التحكم' : 'Control'}
+                    </a>
+                  )}
+                  <a 
+                    href="#logout" 
+                    onClick={(e) => { e.preventDefault(); onLogout(); setDrawerOpen(false); }} 
+                    style={{ color: '#ff4d4d', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
+                  >
+                    {t.logout}
+                  </a>
+                </div>
+              </div>
+            </div>
           ) : (
             <a href="#auth" onClick={(e) => { e.preventDefault(); onNavigate('auth'); setDrawerOpen(false); }} class="drawer-link" style={{ color: '#15b47a' }}>{t.login}</a>
-          )}
-          {userProfile && userProfile.role === 'admin' && (
-            <a href="#debug" onClick={(e) => { e.preventDefault(); onNavigate('debug'); setDrawerOpen(false); }} class="drawer-link" style={{ color: '#15b47a', fontWeight: 'bold' }}>{t.admin}</a>
           )}
           <a href="#home" onClick={(e) => { e.preventDefault(); onNavigate('home', 'home'); setDrawerOpen(false); }} class="drawer-link">{t.home}</a>
           <a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('home', 'about'); setDrawerOpen(false); }} class="drawer-link">{t.about}</a>
           <a href="#research" onClick={(e) => { e.preventDefault(); onNavigate('home', 'research'); setDrawerOpen(false); }} class="drawer-link">{t.research}</a>
           <a href="#training" onClick={(e) => { e.preventDefault(); onNavigate('home', 'training'); setDrawerOpen(false); }} class="drawer-link">{t.training}</a>
+          <a href="#opportunities" onClick={(e) => { e.preventDefault(); onNavigate('opportunities'); setDrawerOpen(false); }} class="drawer-link">{t.opportunities}</a>
           <a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate('home', 'contact'); setDrawerOpen(false); }} class="drawer-link">{t.contact}</a>
         </nav>
       </div>

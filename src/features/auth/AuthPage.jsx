@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth';
 import { GlassCard } from '../shared/components/GlassCard';
 import { Button } from '../shared/components/Button';
 import { InteractiveParticles } from './InteractiveParticles';
+import { authService } from './services/authService';
 import gsap from 'gsap';
 
 export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
@@ -51,8 +52,26 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
         showAlert('success', lang === 'ar' ? 'تم إرسال رابط تأكيد الحساب إلى بريدك الإلكتروني!' : 'Confirmation link sent to your email!');
       } else {
         const data = await signIn(email, password);
-        showAlert('success', lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Logged in successfully!');
-        if (onAuthSuccess) onAuthSuccess(data.user);
+        
+        let isAdmin = false;
+        try {
+          const profile = await authService.getUserProfile(data.user.id);
+          if (profile && profile.role === 'admin') {
+            isAdmin = true;
+          }
+        } catch (profileErr) {
+          console.error('Failed to fetch user profile for admin check:', profileErr);
+        }
+
+        if (isAdmin) {
+          showAlert('success', lang === 'ar' ? 'تم تسجيل الدخول بنجاح بصفتك مسؤولاً!' : 'Logged in successfully as Admin!');
+        } else {
+          showAlert('success', lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Logged in successfully!');
+        }
+
+        setTimeout(() => {
+          if (onAuthSuccess) onAuthSuccess(data.user);
+        }, 1200);
       }
     } catch (err) {
       showAlert('error', err.message || (lang === 'ar' ? 'حدث خطأ ما' : 'An error occurred'));

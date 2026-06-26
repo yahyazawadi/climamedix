@@ -12,6 +12,7 @@ import { GlassCard } from './features/shared/components/GlassCard'
 import { AboutUsPage } from './features/about-us/AboutUsPage'
 import { DebugUIPage } from './features/debug-ui/DebugUIPage'
 import { AuthPage } from './features/auth/AuthPage'
+import { OpportunitiesPage } from './features/opportunities/components/OpportunitiesPage'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import doctorImg from './assets/bg_3.png'
@@ -35,6 +36,74 @@ import iconResearch from './assets/icon_research.svg'
 import iconTraining from './assets/icon_training.svg'
 import iconContact from './assets/icon_contact.svg'
 
+const DISCOVERY_ITEMS = [
+  {
+    id: 'disc-1',
+    category: 'course',
+    badge: { ar: 'مسار تدريبي', en: 'Training Course' },
+    title: { 
+      ar: 'زمالة VSCHEF المتخصصة للمناخ والصحة في المنطقة العربية', 
+      en: 'VSCHEF Fellowship for Climate & Health in the Arab Region' 
+    },
+    image: training1,
+    views: 1450,
+    likes: 382,
+    comments: 45
+  },
+  {
+    id: 'disc-2',
+    category: 'research',
+    badge: { ar: 'بحث علمي', en: 'Scientific Research' },
+    title: { 
+      ar: 'أثر تلوث الهواء على الأمراض التنفسية في المناطق الحضرية المزدحمة', 
+      en: 'Impact of urban air pollution on acute respiratory illnesses' 
+    },
+    image: research1,
+    views: 980,
+    likes: 215,
+    comments: 18
+  },
+  {
+    id: 'disc-3',
+    category: 'article',
+    badge: { ar: 'مقال طبي', en: 'Medical Article' },
+    title: { 
+      ar: 'أزمة المياه وتأثيرها المباشر على الصحة العامة في العراق', 
+      en: 'Water crisis and its direct impact on public health in Iraq' 
+    },
+    image: research2,
+    views: 654,
+    likes: 198,
+    comments: 29
+  },
+  {
+    id: 'disc-4',
+    category: 'post',
+    badge: { ar: 'منشور / نشاط', en: 'Activity Post' },
+    title: { 
+      ar: 'الاستجابة الطبية الطارئة للكوارث المناخية والبيئية المتسارعة', 
+      en: 'Emergency medical response to climate disasters' 
+    },
+    image: training2,
+    views: 520,
+    likes: 142,
+    comments: 15
+  },
+  {
+    id: 'disc-5',
+    category: 'course',
+    badge: { ar: 'مسار تدريبي', en: 'Training Course' },
+    title: { 
+      ar: 'مبادئ الصحة العامة البيئية وتطبيقاتها السريرية للمستشفيات', 
+      en: 'Principles of environmental public health and clinical applications' 
+    },
+    image: training3,
+    views: 1102,
+    likes: 294,
+    comments: 38
+  }
+];
+
 export function App() {
   return (
     <AuthProvider>
@@ -52,6 +121,27 @@ function AppContent() {
   const [openedModal, setOpenedModal] = useState(null); // 'join', 'policy'
   const [currentView, setCurrentView] = useState('home'); // 'home' or 'about-us'
   const { user, userProfile, signOut } = useAuth();
+
+  const [discoveryIndex, setDiscoveryIndex] = useState(0);
+  const [likedItems, setLikedItems] = useState({});
+  const itemsPerView = window.innerWidth < 600 ? 1 : window.innerWidth < 992 ? 2 : 3;
+
+  const handleNextDiscovery = () => {
+    setDiscoveryIndex((prev) => (prev + 1) % (DISCOVERY_ITEMS.length - itemsPerView + 1));
+  };
+
+  const handlePrevDiscovery = () => {
+    setDiscoveryIndex((prev) => 
+      prev === 0 ? DISCOVERY_ITEMS.length - itemsPerView : prev - 1
+    );
+  };
+
+  const handleLike = (id) => {
+    setLikedItems(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -86,6 +176,8 @@ function AppContent() {
       setCurrentView('debug');
     } else if (path === '/auth') {
       setCurrentView('auth');
+    } else if (path === '/opportunities') {
+      setCurrentView('opportunities');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -107,6 +199,8 @@ function AppContent() {
         setCurrentView('debug');
       } else if (p === '/auth') {
         setCurrentView('auth');
+      } else if (p === '/opportunities') {
+        setCurrentView('opportunities');
       } else {
         setCurrentView('home');
       }
@@ -200,6 +294,8 @@ function AppContent() {
             window.history.pushState({}, '', '/debug');
           } else if (view === 'auth') {
             window.history.pushState({}, '', '/auth');
+          } else if (view === 'opportunities') {
+            window.history.pushState({}, '', '/opportunities');
           } else if (sectionId) {
             window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
@@ -238,6 +334,66 @@ function AppContent() {
                 </p>
               </div>
 
+            </div>
+          </div>
+        </section>
+
+        {/* Dynamic Discovery Carousel Section */}
+        <section className="figma-discovery-section">
+          <div className="discovery-container">
+            <div className="discovery-header">
+              <h2 className="discovery-title">
+                {lang === 'ar' ? 'منصة الاكتشاف الموحدة' : 'Unified Discovery Showcase'}
+              </h2>
+              <p className="discovery-subtitle">
+                {lang === 'ar' 
+                  ? 'استكشف أحدث المقالات العلمية، الأبحاث الطبية، والمسارات التدريبية في مكان واحد' 
+                  : 'Explore the latest articles, medical research, and training courses in one place'}
+              </p>
+            </div>
+
+            <div className="discovery-carousel-outer">
+              <div 
+                className="discovery-carousel-inner"
+                style={{ 
+                  transform: `translateX(${lang === 'ar' ? (discoveryIndex * (100 / itemsPerView)) : (-discoveryIndex * (100 / itemsPerView))}%)` 
+                }}
+              >
+                {DISCOVERY_ITEMS.map((item) => (
+                  <div key={item.id} className="discovery-card">
+                    <div className="discovery-thumb-wrap">
+                      <span className={`discovery-badge ${item.category}`}>
+                        {item.badge[lang]}
+                      </span>
+                      <img src={item.image} className="discovery-thumb" alt={item.title[lang]} />
+                    </div>
+                    <div className="discovery-card-body">
+                      <h3 className="discovery-card-title">
+                        {item.title[lang]}
+                      </h3>
+                      <div className="discovery-metrics-row">
+                        <div className="discovery-metric-item">
+                          👁️ {item.views}
+                        </div>
+                        <div className="discovery-metric-item" onClick={() => handleLike(item.id)} style={{ cursor: 'pointer', transition: 'color 0.2s', color: likedItems[item.id] ? '#15b47a' : 'inherit' }}>
+                          ❤️ {item.likes + (likedItems[item.id] ? 1 : 0)}
+                        </div>
+                        <div className="discovery-metric-item">
+                          💬 {item.comments}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Navigation buttons */}
+              <button className="discovery-nav-btn prev" onClick={handlePrevDiscovery}>
+                {lang === 'ar' ? '←' : '→'}
+              </button>
+              <button className="discovery-nav-btn next" onClick={handleNextDiscovery}>
+                {lang === 'ar' ? '→' : '←'}
+              </button>
             </div>
           </div>
         </section>
@@ -472,6 +628,11 @@ function AppContent() {
         <DebugUIPage />
       ) : currentView === 'auth' ? (
         <AuthPage lang={lang} onAuthSuccess={() => { setCurrentView('home'); }} />
+      ) : currentView === 'opportunities' ? (
+        <OpportunitiesPage lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
       ) : (
         <AboutUsPage
           lang={lang}
@@ -504,6 +665,8 @@ function AppContent() {
             setCurrentView(view);
             if (view === 'about-us') {
               window.history.pushState({}, '', '/about-us');
+            } else if (view === 'opportunities') {
+              window.history.pushState({}, '', '/opportunities');
             } else if (sectionId) {
               window.history.pushState({}, '', '/' + sectionId);
               setTimeout(() => {

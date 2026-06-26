@@ -195,7 +195,7 @@ export function OpportunitiesPage({ lang }) {
                 e.currentTarget.style.boxShadow = '0 6px 20px rgba(21, 180, 122, 0.3)';
               }}
             >
-              <span style={{ fontSize: '16px' }}>➕</span>
+              <span style={{ fontSize: '16px' }}>+</span>
               <span>{lang === 'ar' ? 'إضافة فرصة جديدة' : 'Post New Opportunity'}</span>
             </button>
           )}
@@ -367,7 +367,7 @@ export function OpportunitiesPage({ lang }) {
                 marginBottom: '20px',
                 fontWeight: 'bold'
               }}>
-                ⚠️ {formError}
+                {formError}
               </div>
             )}
 
@@ -510,7 +510,7 @@ export function OpportunitiesPage({ lang }) {
               {/* RLS Permissions Controls (Dynamic Stimuli Dropdowns) */}
               <div style={{ background: 'rgba(21, 180, 122, 0.04)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(21, 180, 122, 0.15)' }}>
                 <h4 style={{ color: '#0b2849', fontSize: '14.5px', fontWeight: 'bold', margin: '0 0 12px 0' }}>
-                  🛡️ {lang === 'ar' ? 'مستويات صلاحيات الأمان والتحكم (RLS permissions & Stimuli)' : 'Security Levels & Stimuli Configurations'}
+                  {lang === 'ar' ? 'مستويات صلاحيات الأمان والتحكم (RLS permissions & Stimuli)' : 'Security Levels & Stimuli Configurations'}
                 </h4>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -531,7 +531,7 @@ export function OpportunitiesPage({ lang }) {
                       ))}
                     </select>
                     <small style={{ color: 'rgba(11, 40, 73, 0.55)', fontSize: '11px', display: 'block', marginTop: '4px' }}>
-                      {lang === 'ar' ? '💡 التحكم: يحدد هذا الخيار الفئة التي يسمح لها برؤية الإعلان الترويجي للفرصة في دليل الفرص.' : '💡 Stimulus: Restricts who is physically allowed to see the teaser block in the public opportunities grid.'}
+                      {lang === 'ar' ? 'التحكم: يحدد هذا الخيار الفئة التي يسمح لها برؤية الإعلان الترويجي للفرصة في دليل الفرص.' : 'Stimulus: Restricts who is physically allowed to see the teaser block in the public opportunities grid.'}
                     </small>
                   </div>
 
@@ -552,7 +552,7 @@ export function OpportunitiesPage({ lang }) {
                       ))}
                     </select>
                     <small style={{ color: 'rgba(11, 40, 73, 0.55)', fontSize: '11px', display: 'block', marginTop: '4px' }}>
-                      {lang === 'ar' ? '💡 التحكم: يحدد هذا الخيار الفئة التي يسمح لها بفك التشفير عن رابط التقديم الفعلي (المحمي بـ RLS) للتقديم على الفرصة.' : '💡 Stimulus: Controls column-masking policy on Supabase. Only users satisfying this role will receive the actual Apply Link.'}
+                      {lang === 'ar' ? 'التحكم: يحدد هذا الخيار الفئة التي يسمح لها بفك التشفير عن رابط التقديم الفعلي (المحمي بـ RLS) للتقديم على الفرصة.' : 'Stimulus: Controls column-masking policy on Supabase. Only users satisfying this role will receive the actual Apply Link.'}
                     </small>
                   </div>
                 </div>

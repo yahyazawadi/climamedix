@@ -6,31 +6,32 @@ export function useOpportunities() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let active = true;
-    async function load() {
-      try {
-        setLoading(true);
-        const data = await fetchOpportunities();
-        if (active) {
-          setOpportunities(data);
-          setError(null);
-        }
-      } catch (err) {
-        if (active) {
-          setError(err.message || 'Failed to fetch opportunities');
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
+  const load = async (active = true) => {
+    try {
+      setLoading(true);
+      const data = await fetchOpportunities();
+      if (active) {
+        setOpportunities(data);
+        setError(null);
+      }
+    } catch (err) {
+      if (active) {
+        setError(err.message || 'Failed to fetch opportunities');
+      }
+    } finally {
+      if (active) {
+        setLoading(false);
       }
     }
-    load();
+  };
+
+  useEffect(() => {
+    let active = true;
+    load(active);
     return () => {
       active = false;
     };
   }, []);
 
-  return { opportunities, loading, error };
+  return { opportunities, loading, error, refreshOpportunities: () => load(true) };
 }

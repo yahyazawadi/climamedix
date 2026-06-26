@@ -315,7 +315,6 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         </span>
                       )}
                     </div>
-
                     <div style={{ borderBottom: '1px solid rgba(225, 239, 250, 0.1)', marginBottom: '12px' }}></div>
 
                     {/* Permissions Collapsible Dropdown */}
@@ -369,17 +368,16 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                             <div 
                               key={perm}
                               style={{
-                                fontSize: '11px',
+                                fontSize: '12px',
                                 color: '#15b47a',
-                                background: 'rgba(21, 180, 122, 0.08)',
-                                padding: '3px 8px',
-                                borderRadius: '4px',
+                                background: 'rgba(21, 180, 122, 0.1)',
+                                padding: '6px 10px',
+                                borderRadius: '6px',
                                 fontFamily: 'monospace',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
                                 textAlign: 'left',
-                                direction: 'ltr'
+                                direction: 'ltr',
+                                lineHeight: '1.4',
+                                border: '1px solid rgba(21, 180, 122, 0.2)'
                               }}
                               title={perm}
                             >

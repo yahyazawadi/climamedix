@@ -165,7 +165,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 
 ### 8. 📅 Events
 *   [x] **Events Section:** Calendar View interface.
-*   [ ] **Event Detail Fields:** Title, Date, Description, and Registration Link.
+*   [x] **Event Detail Fields:** Title, Date, Description, and Registration Link.
 
 ### 9. 📰 News & Blog
 *   [ ] **News Publishing System:** Articles & Announcements.

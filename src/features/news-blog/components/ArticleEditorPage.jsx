@@ -55,6 +55,9 @@ export function ArticleEditorPage({ lang, onNavigate }) {
   });
   
   const [content, setContent] = useState('');
+  const [inputType, setInputType] = useState('editor'); // 'editor' | 'file'
+  const [attachedFile, setAttachedFile] = useState(null);
+  
   const [thumbnailFile, setThumbnailFile] = useState(null); 
   const [thumbnailPreview, setThumbnailPreview] = useState(null); 
   const [thumbnailDragOver, setThumbnailDragOver] = useState(false);
@@ -92,23 +95,7 @@ export function ArticleEditorPage({ lang, onNavigate }) {
   };
 
   const uploadAndInsertFile = async (file) => {
-    try {
-      setUploadingMedia(true);
-      const url = await uploadFileToR2(file, 'article_attachments');
-      
-      const quill = quillRef.current.getEditor();
-      const range = quill.getSelection(true);
-      
-      // Insert a link with the file name
-      quill.insertText(range.index, `📎 ${file.name}`, 'link', url);
-      quill.setSelection(range.index + file.name.length + 3);
-      quill.insertText(range.index + file.name.length + 3, '\n');
-    } catch (err) {
-      console.error("Failed to upload file:", err);
-      alert(isRtl ? "فشل رفع الملف." : "Failed to upload file.");
-    } finally {
-      setUploadingMedia(false);
-    }
+    setAttachedFile(file);
   };
 
   const imageHandler = useCallback(() => {
@@ -198,9 +185,37 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     }
 
     if (!form.title_ar) { setSaveError(isRtl ? 'العنوان العربي مطلوب' : 'Arabic title is required'); return; }
-    if (!content || content === '<p><br></p>') { setSaveError(isRtl ? 'محتوى المقال مطلوب' : 'Article content is required'); return; }
+    
+    let finalContent = content;
 
-    setSaving(true);
+    if (inputType === 'file') {
+      if (!attachedFile) {
+        setSaveError(isRtl ? 'يجب إرفاق ملف المستند' : 'You must attach a document file'); 
+        return;
+      }
+      setSaving(true);
+      try {
+        const fileUrl = await uploadFileToR2(attachedFile, 'article_attachments');
+        // Generate an HTML stub that acts as the article content
+        finalContent = `
+          <div class="aep-document-embed" style="text-align: center; padding: 40px; background: #f8fafc; border-radius: 12px; border: 2px dashed #cbd5e1; margin: 20px 0;">
+            <div style="font-size: 40px; margin-bottom: 10px;">📄</div>
+            <h3 style="color: #0b2849; margin-bottom: 15px; font-family: inherit;">${attachedFile.name}</h3>
+            <a href="${fileUrl}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #15b47a, #0c8774); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: inherit;">
+              ${isRtl ? 'تحميل / عرض المستند' : 'Download / View Document'}
+            </a>
+          </div>
+        `;
+      } catch (err) {
+        setSaveError(isRtl ? "فشل رفع المستند" : "Failed to upload document");
+        setSaving(false);
+        return;
+      }
+    } else {
+      if (!content || content === '<p><br></p>') { setSaveError(isRtl ? 'محتوى المقال مطلوب' : 'Article content is required'); return; }
+      setSaving(true);
+    }
+
     setSaveError('');
     try {
       let coverImageUrl = null;
@@ -211,8 +226,8 @@ export function ArticleEditorPage({ lang, onNavigate }) {
       const { supabase } = await import('../../../utils/supabaseClient');
       const payload = {
         ...form,
-        content_ar: content,
-        content_en: content,
+        content_ar: finalContent,
+        content_en: finalContent,
         cover_image: coverImageUrl,
         created_by: user?.id,
       };
@@ -280,31 +295,57 @@ export function ArticleEditorPage({ lang, onNavigate }) {
               value={form.title_en} onInput={e => setForm({ ...form, title_en: e.target.value })} />
           </div>
 
-          <div className="aep-section">
-            <label className="aep-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>
-                {isRtl ? 'محتوى المقال' : 'Article Content'}
-                {uploadingMedia && <span className="aep-uploading-text">{isRtl ? ' (جاري رفع ملف...)' : ' (Uploading media...)'}</span>}
-              </span>
+          <div className="aep-section" style={{ marginTop: '10px' }}>
+            
+            <div className="aep-type-toggle">
               <button 
                 type="button" 
-                className="aep-attach-btn" 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingMedia}
+                className={inputType === 'editor' ? 'active' : ''} 
+                onClick={() => setInputType('editor')}
               >
-                📎 {isRtl ? 'إرفاق ملف (PDF, Word...)' : 'Attach File'}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                {isRtl ? 'كتابة المقال يدوياً' : 'Write Article'}
               </button>
-            </label>
+              <button 
+                type="button" 
+                className={inputType === 'file' ? 'active' : ''} 
+                onClick={() => setInputType('file')}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                {isRtl ? 'رفع ملف (PDF, Word)' : 'Upload Document'}
+              </button>
+            </div>
             
-            <div className="aep-quill-wrap" dir={isRtl ? 'rtl' : 'ltr'}>
-              <ReactQuill 
-                ref={quillRef}
-                theme="snow" 
-                value={content} 
-                onChange={setContent} 
-                modules={modules}
-                placeholder={isRtl ? 'ابدأ الكتابة هنا...' : 'Start writing here...'}
-              />
+            <div className="aep-editor-wrap" dir={isRtl ? 'rtl' : 'ltr'}>
+              {inputType === 'editor' ? (
+                <ReactQuill 
+                  ref={quillRef}
+                  theme="snow" 
+                  value={content} 
+                  onChange={setContent} 
+                  modules={modules}
+                  placeholder={isRtl ? 'ابدأ الكتابة هنا...' : 'Start writing here...'}
+                />
+              ) : (
+                <div className="aep-file-upload-zone" onClick={() => fileInputRef.current?.click()}>
+                  {attachedFile ? (
+                    <div className="aep-file-selected">
+                      <div className="aep-file-icon">📄</div>
+                      <div className="aep-file-name">{attachedFile.name}</div>
+                      <div className="aep-file-size">{(attachedFile.size / 1024 / 1024).toFixed(2)} MB</div>
+                      <button className="aep-btn-secondary" style={{ marginTop: '15px' }} onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+                        {isRtl ? 'تغيير الملف' : 'Change File'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="aep-file-prompt">
+                      <div className="aep-file-icon" style={{ opacity: 0.5 }}>📤</div>
+                      <h3>{isRtl ? 'اضغط هنا لاختيار ملف' : 'Click here to select a file'}</h3>
+                      <p>{isRtl ? 'يدعم PDF, Word (DOCX), PowerPoint (PPTX)' : 'Supports PDF, Word (DOCX), PowerPoint (PPTX)'}</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

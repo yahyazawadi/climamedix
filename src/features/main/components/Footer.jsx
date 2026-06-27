@@ -33,7 +33,7 @@ export function Footer({ onJoinClick, onNavigate, lang }) {
                 <li><a href="#training" onClick={(e) => { e.preventDefault(); onNavigate('home', 'training'); }}>{t.trainingCourses}</a></li>
                 <li><a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('home', 'about'); }}>{t.about}</a></li>
                 <li><a href="#research" onClick={(e) => { e.preventDefault(); onNavigate('home', 'research'); }}>{t.latestResearch}</a></li>
-                <li><a href="#upcoming" onClick={(e) => { e.preventDefault(); onNavigate('home', 'upcoming'); }}>{lang === 'ar' ? 'المشاريع' : 'Projects'}</a></li>
+                <li><a href="/write-article" onClick={(e) => { e.preventDefault(); onNavigate('write-article'); }}>{lang === 'ar' ? 'كتابة مقال' : 'Write Article'}</a></li>
                 <li><a href="#upcoming" onClick={(e) => { e.preventDefault(); onNavigate('home', 'upcoming'); }}>{lang === 'ar' ? 'الأنشطة القادمة' : 'Upcoming Activities'}</a></li>
               </ul>
             </div>

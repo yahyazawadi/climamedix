@@ -3749,6 +3749,12 @@ export function DebugUIPage() {
           </div>
         )}
 
+
+        {/* ===== News Feed ===== */}
+        <div style={{ width: '100%', marginTop: '60px', direction: 'rtl' }}>
+          <NewsFeed articles={MOCK_ARTICLES} />
+        </div>
+
       </div>
     </main>
   );

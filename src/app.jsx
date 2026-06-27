@@ -15,6 +15,7 @@ import { AuthPage } from './features/auth/AuthPage'
 import { JoinUsPage } from './features/join-us/JoinUsPage'
 import { OpportunitiesPage } from './features/opportunities/components/OpportunitiesPage'
 import { EventsPage } from './features/events/EventsPage'
+import { ArticleEditorPage } from './features/news-blog/components/ArticleEditorPage'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import doctorImg from './assets/bg_3.png'
@@ -184,6 +185,8 @@ function AppContent() {
       setCurrentView('join-us');
     } else if (path === '/events') {
       setCurrentView('events');
+    } else if (path === '/write-article') {
+      setCurrentView('write-article');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -211,6 +214,8 @@ function AppContent() {
         setCurrentView('join-us');
       } else if (p === '/events') {
         setCurrentView('events');
+      } else if (p === '/write-article') {
+        setCurrentView('write-article');
       } else {
         setCurrentView('home');
       }
@@ -310,6 +315,8 @@ function AppContent() {
             window.history.pushState({}, '', '/join-us');
           } else if (view === 'events') {
             window.history.pushState({}, '', '/events');
+          } else if (view === 'write-article') {
+            window.history.pushState({}, '', '/write-article');
           } else if (sectionId) {
             window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
@@ -649,6 +656,11 @@ function AppContent() {
         }} />
       ) : currentView === 'join-us' ? (
         <JoinUsPage lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
+      ) : currentView === 'write-article' ? (
+        <ArticleEditorPage lang={lang} onNavigate={(view) => {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />

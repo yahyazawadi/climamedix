@@ -97,16 +97,16 @@
 .aep-file-size { font-size: 13px; color: #64748b; }
 
 /* ── Quill Editor Wrap ── */
-.aep-quill-wrap {
+.aep-editor-wrap {
   border: 1.5px solid #e2e8f0; border-radius: 12px;
   overflow: hidden; background: #e8ecf0; /* Grey background like google docs wrap */
   box-shadow: 0 2px 12px rgba(11,40,73,.06);
 }
 
-.aep-quill-wrap .quill { display: flex; flex-direction: column; }
+.aep-editor-wrap .quill { display: flex; flex-direction: column; }
 
 /* Toolbar overrides */
-.aep-quill-wrap .ql-toolbar.ql-snow {
+.aep-editor-wrap .ql-toolbar.ql-snow {
   background: #f8fafc;
   border: none;
   border-bottom: 1px solid #e2e8f0;
@@ -117,14 +117,14 @@
 }
 
 /* Editor overrides (The Google Doc Page) */
-.aep-quill-wrap .ql-container.ql-snow {
+.aep-editor-wrap .ql-container.ql-snow {
   border: none !important;
   background: #e8ecf0 !important; /* Force grey background around the page */
   padding: 40px 20px !important;
   min-height: 600px;
 }
 
-.aep-quill-wrap .ql-editor {
+.aep-editor-wrap .ql-editor {
   background: #ffffff !important;
   width: 100% !important;
   max-width: 800px !important;
@@ -140,18 +140,18 @@
   font-family: 'Georgia', 'Times New Roman', serif !important;
 }
 
-.aep-quill-wrap .ql-editor.ql-blank::before {
+.aep-editor-wrap .ql-editor.ql-blank::before {
   left: 80px !important; right: 80px !important; top: 80px !important;
   font-style: italic !important; color: #94a3b8 !important;
   font-family: 'Outfit', 'Tajawal', sans-serif !important;
 }
 
-.aep-quill-wrap .ql-editor h1 { font-size: 28px !important; font-weight: 700 !important; margin-bottom: 16px !important; }
-.aep-quill-wrap .ql-editor h2 { font-size: 22px !important; font-weight: 700 !important; margin-top: 24px !important; margin-bottom: 12px !important; }
-.aep-quill-wrap .ql-editor h3 { font-size: 18px !important; font-weight: 600 !important; margin-top: 20px !important; margin-bottom: 10px !important; }
-.aep-quill-wrap .ql-editor p { margin-bottom: 14px !important; }
-.aep-quill-wrap .ql-editor a { color: #15b47a !important; text-decoration: underline !important; }
-.aep-quill-wrap .ql-editor img { max-width: 100% !important; border-radius: 6px !important; margin: 12px 0 !important; }
+.aep-editor-wrap .ql-editor h1 { font-size: 28px !important; font-weight: 700 !important; margin-bottom: 16px !important; }
+.aep-editor-wrap .ql-editor h2 { font-size: 22px !important; font-weight: 700 !important; margin-top: 24px !important; margin-bottom: 12px !important; }
+.aep-editor-wrap .ql-editor h3 { font-size: 18px !important; font-weight: 600 !important; margin-top: 20px !important; margin-bottom: 10px !important; }
+.aep-editor-wrap .ql-editor p { margin-bottom: 14px !important; }
+.aep-editor-wrap .ql-editor a { color: #15b47a !important; text-decoration: underline !important; }
+.aep-editor-wrap .ql-editor img { max-width: 100% !important; border-radius: 6px !important; margin: 12px 0 !important; }
 
 .aep-uploading-text {
   color: #15b47a; font-size: 11px; font-weight: 600;
@@ -274,11 +274,11 @@
 @media (max-width: 900px) {
   .aep-layout { grid-template-columns: 1fr; }
   .aep-sidebar { order: -1; }
-  .aep-quill-wrap .ql-editor { padding: 32px 24px; }
-  .aep-quill-wrap .ql-container.ql-snow { padding: 16px; }
-  .aep-quill-wrap .ql-editor.ql-blank::before { left: 24px; right: 24px; top: 32px; }
+  .aep-editor-wrap .ql-editor { padding: 32px 24px; }
+  .aep-editor-wrap .ql-container.ql-snow { padding: 16px; }
+  .aep-editor-wrap .ql-editor.ql-blank::before { left: 24px; right: 24px; top: 32px; }
 }
 @media (max-width: 480px) {
-  .aep-quill-wrap .ql-editor { padding: 20px 16px; font-size: 14px; }
-  .aep-quill-wrap .ql-editor.ql-blank::before { left: 16px; right: 16px; top: 20px; }
+  .aep-editor-wrap .ql-editor { padding: 20px 16px; font-size: 14px; }
+  .aep-editor-wrap .ql-editor.ql-blank::before { left: 16px; right: 16px; top: 20px; }
 }

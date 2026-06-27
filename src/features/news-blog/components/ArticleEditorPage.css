@@ -82,15 +82,14 @@
 
 /* ── File Upload Zone ── */
 .aep-file-upload-zone {
-  min-height: 1056px; /* Match editor page height */
+  min-height: 600px; /* Match editor page height */
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   background: #ffffff !important; cursor: pointer; transition: background 0.2s;
-  padding: 80px 80px !important; text-align: center;
-  border-radius: 4px !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
-  max-width: 800px !important;
-  width: calc(100% - 40px) !important;
-  margin: 40px auto !important;
+  padding: 24px !important; text-align: center;
+  border-radius: 11px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
   box-sizing: border-box !important;
   border: none !important;
 }
@@ -110,8 +109,12 @@
 /* ── Quill Editor Wrap ── */
 .aep-editor-wrap {
   border: 1.5px solid #e2e8f0; border-radius: 12px;
-  overflow: hidden; background: #e8ecf0; /* Grey background like google docs wrap */
+  background: #ffffff; /* Clean white background */
   box-shadow: 0 2px 12px rgba(11,40,73,.06);
+  max-height: calc(100vh - 250px);
+  min-height: 500px;
+  overflow-y: scroll; /* Force scrollbar to prevent layout shift between tabs */
+  box-sizing: border-box; /* Ensure border doesn't add to 100% width */
 }
 
 .aep-editor-wrap .quill { display: flex; flex-direction: column; }
@@ -125,6 +128,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  position: sticky;
+  top: 0; /* Sticks to the top of the scrollable wrap! */
+  z-index: 100;
+  border-top-left-radius: 11px;
+  border-top-right-radius: 11px;
 }
 
 /* Fix dropdown arrow overlapping text in RTL/LTR ONLY for header */
@@ -140,32 +148,34 @@
   left: auto !important;
 }
 
-/* Editor overrides (The Google Doc Page) */
+/* Editor overrides */
 .aep-editor-wrap .ql-container.ql-snow {
   border: none !important;
-  background: #e8ecf0 !important; /* Force grey background around the page */
-  padding: 40px 20px !important;
+  background: #ffffff !important;
+  padding: 0 !important;
   min-height: 600px;
+  border-bottom-left-radius: 11px;
+  border-bottom-right-radius: 11px;
 }
 
 .aep-editor-wrap .ql-editor {
   background: #ffffff !important;
   width: 100% !important;
-  max-width: 800px !important;
-  min-height: 1056px !important; /* A4-ish */
-  margin: 0 auto !important;
-  padding: 80px 80px !important;
+  max-width: 100% !important;
+  min-height: 600px !important;
+  margin: 0 !important;
+  padding: 30px 24px !important;
   box-sizing: border-box !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
-  border-radius: 4px !important;
-  font-size: 15.5px !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  font-size: 16px !important;
   line-height: 1.8 !important;
   color: #1e293b !important;
-  font-family: 'Georgia', 'Times New Roman', serif !important;
+  font-family: 'Outfit', 'Tajawal', sans-serif !important;
 }
 
 .aep-editor-wrap .ql-editor.ql-blank::before {
-  left: 80px !important; right: 80px !important; top: 80px !important;
+  left: 40px !important; right: 40px !important; top: 30px !important;
   font-style: italic !important; color: #94a3b8 !important;
   font-family: 'Outfit', 'Tajawal', sans-serif !important;
 }
@@ -313,11 +323,10 @@
 @media (max-width: 900px) {
   .aep-layout { grid-template-columns: 1fr; }
   .aep-sidebar { order: -1; }
-  .aep-editor-wrap .ql-editor { padding: 32px 24px; }
-  .aep-editor-wrap .ql-container.ql-snow { padding: 16px; }
-  .aep-editor-wrap .ql-editor.ql-blank::before { left: 24px; right: 24px; top: 32px; }
+  .aep-editor-wrap .ql-editor { padding: 24px 20px !important; }
+  .aep-editor-wrap .ql-editor.ql-blank::before { left: 20px !important; right: 20px !important; top: 24px !important; }
 }
 @media (max-width: 480px) {
-  .aep-editor-wrap .ql-editor { padding: 20px 16px; font-size: 14px; }
-  .aep-editor-wrap .ql-editor.ql-blank::before { left: 16px; right: 16px; top: 20px; }
+  .aep-editor-wrap .ql-editor { padding: 16px 12px !important; font-size: 14.5px !important; }
+  .aep-editor-wrap .ql-editor.ql-blank::before { left: 12px !important; right: 12px !important; top: 16px !important; }
 }

@@ -349,6 +349,7 @@ export function ArticleEditorPage({ lang, onNavigate }) {
               </button>
             </div>
             
+            {/* Editor Area Wrap */}
             <div className="aep-editor-wrap" dir={isRtl ? 'rtl' : 'ltr'}>
               {inputType === 'editor' ? (
                 <ReactQuill 

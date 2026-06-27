@@ -280,7 +280,7 @@ function AppContent() {
   };
 
   return (
-    <div style={{ position: 'relative', overflow: 'hidden', minHeight: '100vh' }}>
+    <div style={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh' }}>
       {/* Background components */}
       {currentView === 'home' ? (
         <>

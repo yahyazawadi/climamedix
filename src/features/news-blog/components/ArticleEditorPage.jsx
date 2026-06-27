@@ -232,7 +232,9 @@ export function ArticleEditorPage({ lang, onNavigate }) {
         // Generate an HTML stub that acts as the article content
         finalContent = `
           <div class="aep-document-embed" style="text-align: center; padding: 40px; background: #f8fafc; border-radius: 12px; border: 2px dashed #cbd5e1; margin: 20px 0;">
-            <div style="font-size: 40px; margin-bottom: 10px;">📄</div>
+            <div style="margin-bottom: 15px; color: #64748b;">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
             <h3 style="color: #0b2849; margin-bottom: 15px; font-family: inherit;">${attachedFile.name}</h3>
             <a href="${fileUrl}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #15b47a, #0c8774); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: inherit;">
               ${isRtl ? 'تحميل / عرض المستند' : 'Download / View Document'}
@@ -364,7 +366,9 @@ export function ArticleEditorPage({ lang, onNavigate }) {
                 <div className="aep-file-upload-zone" onClick={() => fileInputRef.current?.click()}>
                   {attachedFile ? (
                     <div className="aep-file-selected">
-                      <div className="aep-file-icon">📄</div>
+                      <div className="aep-file-icon" style={{ color: '#64748b' }}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                      </div>
                       <div className="aep-file-name">{attachedFile.name}</div>
                       <div className="aep-file-size">{(attachedFile.size / 1024 / 1024).toFixed(2)} MB</div>
                       <button className="aep-btn-secondary" style={{ marginTop: '15px' }} onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
@@ -373,7 +377,9 @@ export function ArticleEditorPage({ lang, onNavigate }) {
                     </div>
                   ) : (
                     <div className="aep-file-prompt">
-                      <div className="aep-file-icon" style={{ opacity: 0.5 }}>📤</div>
+                      <div className="aep-file-icon" style={{ opacity: 0.5, color: '#15b47a' }}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                      </div>
                       <h3>{isRtl ? 'اضغط هنا لاختيار ملف' : 'Click here to select a file'}</h3>
                       <p>{isRtl ? 'يدعم PDF, Word (DOCX), PowerPoint (PPTX)' : 'Supports PDF, Word (DOCX), PowerPoint (PPTX)'}</p>
                     </div>

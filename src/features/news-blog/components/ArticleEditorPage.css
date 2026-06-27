@@ -116,6 +116,18 @@
   gap: 4px;
 }
 
+/* Fix dropdown arrow overlapping text in RTL/LTR */
+.aep-editor-wrap .ql-snow .ql-picker.ql-header {
+  width: 130px;
+}
+.aep-editor-wrap .ql-snow .ql-picker-label {
+  padding-right: 20px !important;
+  padding-left: 20px !important;
+}
+.aep-editor-wrap .ql-snow .ql-picker-label svg {
+  right: 4px !important; /* Keep it on the right side but with spacing */
+}
+
 /* Editor overrides (The Google Doc Page) */
 .aep-editor-wrap .ql-container.ql-snow {
   border: none !important;

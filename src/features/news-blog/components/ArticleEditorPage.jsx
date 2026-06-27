@@ -1,4 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from 'preact/hooks';
+import { useState, useRef, useCallback } from 'preact/hooks';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { uploadFileToR2 } from '../../../utils/s3Client';
 import './ArticleEditorPage.css';
@@ -8,32 +10,6 @@ const CATEGORIES = [
   { value: 'research',       ar: 'أبحاث',          en: 'Research'         },
   { value: 'opportunities',  ar: 'فرص',             en: 'Opportunities'    },
   { value: 'events',         ar: 'فعاليات',         en: 'Events'           },
-];
-
-const TOOLBAR_ACTIONS = [
-  { cmd: 'bold',          label: 'B',   title: 'Bold',         style: { fontWeight: 'bold' } },
-  { cmd: 'italic',        label: 'I',   title: 'Italic',       style: { fontStyle: 'italic' } },
-  { cmd: 'underline',     label: 'U',   title: 'Underline',    style: { textDecoration: 'underline' } },
-  { cmd: 'strikeThrough', label: 'S',   title: 'Strikethrough',style: { textDecoration: 'line-through' } },
-  { sep: true },
-  { cmd: 'formatBlock', arg: 'H1',     label: 'H1',  title: 'Heading 1' },
-  { cmd: 'formatBlock', arg: 'H2',     label: 'H2',  title: 'Heading 2' },
-  { cmd: 'formatBlock', arg: 'H3',     label: 'H3',  title: 'Heading 3' },
-  { cmd: 'formatBlock', arg: 'P',      label: '¶',   title: 'Paragraph' },
-  { sep: true },
-  { cmd: 'insertUnorderedList', label: '• List',  title: 'Bullet list' },
-  { cmd: 'insertOrderedList',   label: '1. List', title: 'Numbered list' },
-  { sep: true },
-  { cmd: 'justifyLeft',   label: '⬛ L', title: 'Align left'   },
-  { cmd: 'justifyCenter', label: '⬛ C', title: 'Align center' },
-  { cmd: 'justifyRight',  label: '⬛ R', title: 'Align right'  },
-  { sep: true },
-  { cmd: 'createLink',    label: 'Link', title: 'Insert link (Ctrl+K)', special: 'link' },
-  { cmd: 'insertImage',   label: 'Image',title: 'Insert image', special: 'image' },
-  { cmd: 'attachFile',    label: 'File', title: 'Attach file', special: 'file' },
-  { sep: true },
-  { cmd: 'undo',  label: '↩', title: 'Undo' },
-  { cmd: 'redo',  label: '↪', title: 'Redo' },
 ];
 
 const convertToWebP = (file) => {
@@ -54,7 +30,7 @@ const convertToWebP = (file) => {
         URL.revokeObjectURL(objectUrl);
         const webpFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", { type: "image/webp" });
         resolve(webpFile);
-      }, "image/webp", 0.85); // 85% quality
+      }, "image/webp", 0.85);
     };
     img.onerror = (e) => {
       URL.revokeObjectURL(objectUrl);
@@ -66,9 +42,8 @@ const convertToWebP = (file) => {
 
 export function ArticleEditorPage({ lang, onNavigate }) {
   const { user, userProfile, hasPermission } = useAuth();
-  const editorRef = useRef(null);
+  const quillRef = useRef(null);
   const thumbnailInputRef = useRef(null);
-  const imageInputRef = useRef(null);
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
@@ -79,7 +54,7 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     full_access_permission_key: 'view:free_content',
   });
   
-  // We'll keep local object URLs for thumbnail preview, but upload on save.
+  const [content, setContent] = useState('');
   const [thumbnailFile, setThumbnailFile] = useState(null); 
   const [thumbnailPreview, setThumbnailPreview] = useState(null); 
   const [thumbnailDragOver, setThumbnailDragOver] = useState(false);
@@ -88,7 +63,6 @@ export function ArticleEditorPage({ lang, onNavigate }) {
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [activeFormats, setActiveFormats] = useState({});
 
   const isRtl = lang === 'ar';
 
@@ -99,118 +73,16 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     (hasPermission && hasPermission('write:articles'))
   );
 
-  const updateActiveFormats = useCallback(() => {
-    const cmds = ['bold','italic','underline','strikeThrough','insertUnorderedList','insertOrderedList','justifyLeft','justifyCenter','justifyRight'];
-    const next = {};
-    cmds.forEach(cmd => { try { next[cmd] = document.queryCommandState(cmd); } catch(_) {} });
-    setActiveFormats(next);
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener('selectionchange', updateActiveFormats);
-    return () => document.removeEventListener('selectionchange', updateActiveFormats);
-  }, [updateActiveFormats]);
-
-  const insertLinkPrompt = () => {
-    let url = prompt('Enter URL:');
-    if (url) {
-      if (!/^https?:\/\//i.test(url)) {
-        url = 'https://' + url;
-      }
-      document.execCommand('createLink', false, url);
-    }
-  };
-
-  const execCmd = (cmd, arg, special) => {
-    if (special === 'link') {
-      insertLinkPrompt();
-      return;
-    }
-    if (special === 'image') {
-      imageInputRef.current?.click();
-      return;
-    }
-    if (special === 'file') {
-      fileInputRef.current?.click();
-      return;
-    }
-    document.execCommand(cmd, false, arg || null);
-    editorRef.current?.focus();
-    updateActiveFormats();
-  };
-
-  const handleEditorKeyDown = (e) => {
-    // Ctrl+K for links
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-      e.preventDefault();
-      insertLinkPrompt();
-    }
-    
-    // Auto-link on space or enter
-    if (e.key === ' ' || e.key === 'Enter') {
-      const selection = window.getSelection();
-      if (!selection.isCollapsed) return;
-      
-      const range = selection.getRangeAt(0);
-      const node = range.startContainer;
-      
-      // Only process text nodes that aren't already inside a link
-      if (node.nodeType === Node.TEXT_NODE && !node.parentNode.closest('a')) {
-        const text = node.textContent;
-        const cursorOffset = range.startOffset;
-        const textBeforeCursor = text.substring(0, cursorOffset);
-        
-        // Regex to find a URL right before the cursor
-        const urlRegex = /(?:^|\s)((?:https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}(?:\/\S*)?)$/i;
-        const match = textBeforeCursor.match(urlRegex);
-        
-        if (match) {
-          const urlText = match[1];
-          let href = urlText;
-          if (!/^https?:\/\//i.test(href)) {
-            href = 'https://' + href;
-          }
-          
-          const urlStartOffset = cursorOffset - urlText.length;
-          
-          // Create the link node
-          const a = document.createElement('a');
-          a.href = href;
-          a.textContent = urlText;
-          a.target = '_blank';
-          
-          // Replace the text with the link
-          const beforeLink = document.createTextNode(text.substring(0, urlStartOffset));
-          const afterLink = document.createTextNode(text.substring(cursorOffset));
-          
-          const parent = node.parentNode;
-          parent.insertBefore(beforeLink, node);
-          parent.insertBefore(a, node);
-          parent.insertBefore(afterLink, node);
-          parent.removeChild(node);
-          
-          // Restore cursor position
-          const newRange = document.createRange();
-          // if we typed space, we want the cursor after the space in the afterLink text node
-          // wait, the keydown happens BEFORE the space is inserted. 
-          // So we should just set cursor to the start of afterLink
-          newRange.setStart(afterLink, 0);
-          newRange.setEnd(afterLink, 0);
-          selection.removeAllRanges();
-          selection.addRange(newRange);
-        }
-      }
-    }
-    
-    updateActiveFormats();
-  };
-
   const uploadAndInsertImage = async (file) => {
     try {
       setUploadingMedia(true);
       const webpFile = await convertToWebP(file);
       const url = await uploadFileToR2(webpFile, 'article_images');
-      document.execCommand('insertImage', false, url);
+      
+      const quill = quillRef.current.getEditor();
+      const range = quill.getSelection(true);
+      quill.insertEmbed(range.index, 'image', url);
+      quill.setSelection(range.index + 1);
     } catch (err) {
       console.error("Failed to upload image:", err);
       alert(isRtl ? "فشل رفع الصورة." : "Failed to upload image.");
@@ -223,8 +95,14 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     try {
       setUploadingMedia(true);
       const url = await uploadFileToR2(file, 'article_attachments');
-      const html = `<br><a href="${url}" target="_blank" class="aep-attachment">📎 ${file.name}</a><br>`;
-      document.execCommand('insertHTML', false, html);
+      
+      const quill = quillRef.current.getEditor();
+      const range = quill.getSelection(true);
+      
+      // Insert a link with the file name
+      quill.insertText(range.index, `📎 ${file.name}`, 'link', url);
+      quill.setSelection(range.index + file.name.length + 3);
+      quill.insertText(range.index + file.name.length + 3, '\n');
     } catch (err) {
       console.error("Failed to upload file:", err);
       alert(isRtl ? "فشل رفع الملف." : "Failed to upload file.");
@@ -233,15 +111,33 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     }
   };
 
-  const handleEditorPaste = (e) => {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-    for (const item of items) {
-      if (item.type.startsWith('image/')) {
-        e.preventDefault();
-        const file = item.getAsFile();
+  const imageHandler = useCallback(() => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (file) {
         uploadAndInsertImage(file);
-        return;
+      }
+    };
+  }, []);
+
+  const modules = {
+    toolbar: {
+      container: [
+        [{ 'header': [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        [{ 'align': [] }],
+        ['link', 'image'],
+        ['clean']
+      ],
+      handlers: {
+        image: imageHandler
       }
     }
   };
@@ -277,7 +173,6 @@ export function ArticleEditorPage({ lang, onNavigate }) {
           const imgType = item.types.find(t => t.startsWith('image/'));
           if (imgType) {
             item.getType(imgType).then(blob => {
-               // convert blob to file
                const file = new File([blob], "pasted_image.png", {type: blob.type});
                applyThumbnailFile(file);
             });
@@ -302,9 +197,8 @@ export function ArticleEditorPage({ lang, onNavigate }) {
       return;
     }
 
-    const content = editorRef.current?.innerHTML || '';
     if (!form.title_ar) { setSaveError(isRtl ? 'العنوان العربي مطلوب' : 'Arabic title is required'); return; }
-    if (!content || content === '<br>') { setSaveError(isRtl ? 'محتوى المقال مطلوب' : 'Article content is required'); return; }
+    if (!content || content === '<p><br></p>') { setSaveError(isRtl ? 'محتوى المقال مطلوب' : 'Article content is required'); return; }
 
     setSaving(true);
     setSaveError('');
@@ -351,17 +245,6 @@ export function ArticleEditorPage({ lang, onNavigate }) {
 
   return (
     <div className="aep-root" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Hidden Inputs for Editor Toolbar */}
-      <input 
-        type="file" 
-        accept="image/*" 
-        style={{ display: 'none' }} 
-        ref={imageInputRef} 
-        onChange={(e) => {
-          if (e.target.files?.[0]) uploadAndInsertImage(e.target.files[0]);
-          e.target.value = null; // reset
-        }} 
-      />
       <input 
         type="file" 
         accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx" 
@@ -398,37 +281,30 @@ export function ArticleEditorPage({ lang, onNavigate }) {
           </div>
 
           <div className="aep-section">
-            <label className="aep-label">
-              {isRtl ? 'محتوى المقال' : 'Article Content'}
-              {uploadingMedia && <span className="aep-uploading-text">{isRtl ? ' (جاري رفع ملف...)' : ' (Uploading file...)'}</span>}
+            <label className="aep-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>
+                {isRtl ? 'محتوى المقال' : 'Article Content'}
+                {uploadingMedia && <span className="aep-uploading-text">{isRtl ? ' (جاري رفع ملف...)' : ' (Uploading media...)'}</span>}
+              </span>
+              <button 
+                type="button" 
+                className="aep-attach-btn" 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingMedia}
+              >
+                📎 {isRtl ? 'إرفاق ملف (PDF, Word...)' : 'Attach File'}
+              </button>
             </label>
-            <div className="aep-editor-wrap">
-              <div className="aep-toolbar" onMouseDown={e => e.preventDefault()}>
-                {TOOLBAR_ACTIONS.map((btn, i) =>
-                  btn.sep
-                    ? <div key={i} className="aep-tb-sep" />
-                    : <button
-                        key={i}
-                        className={`aep-tb-btn${activeFormats[btn.cmd] ? ' active' : ''}`}
-                        title={btn.title}
-                        style={btn.style}
-                        onClick={() => execCmd(btn.cmd, btn.arg, btn.special)}
-                      >{btn.label}</button>
-                )}
-              </div>
-              <div className="aep-doc-scroll">
-                <div
-                  ref={editorRef}
-                  className="aep-doc-page"
-                  contentEditable
-                  suppressContentEditableWarning
-                  dir={isRtl ? 'rtl' : 'ltr'}
-                  onPaste={handleEditorPaste}
-                  onKeyDown={handleEditorKeyDown}
-                  onMouseUp={updateActiveFormats}
-                  data-placeholder={isRtl ? 'ابدأ الكتابة هنا...' : 'Start writing here...'}
-                />
-              </div>
+            
+            <div className="aep-quill-wrap" dir={isRtl ? 'rtl' : 'ltr'}>
+              <ReactQuill 
+                ref={quillRef}
+                theme="snow" 
+                value={content} 
+                onChange={setContent} 
+                modules={modules}
+                placeholder={isRtl ? 'ابدأ الكتابة هنا...' : 'Start writing here...'}
+              />
             </div>
           </div>
         </div>

@@ -134,7 +134,9 @@
   border: none !important;
   background: #e8ecf0 !important; /* Force grey background around the page */
   padding: 40px 20px !important;
+  height: 75vh;
   min-height: 600px;
+  overflow-y: auto !important;
 }
 
 .aep-editor-wrap .ql-editor {

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'preact/hooks';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { uploadFileToR2 } from '../../../utils/s3Client';
 import './ArticleEditorPage.css';
 
 const CATEGORIES = [
@@ -27,17 +28,48 @@ const TOOLBAR_ACTIONS = [
   { cmd: 'justifyCenter', label: '⬛ C', title: 'Align center' },
   { cmd: 'justifyRight',  label: '⬛ R', title: 'Align right'  },
   { sep: true },
-  { cmd: 'createLink',    label: 'Link', title: 'Insert link', special: 'link' },
+  { cmd: 'createLink',    label: 'Link', title: 'Insert link (Ctrl+K)', special: 'link' },
   { cmd: 'insertImage',   label: 'Image',title: 'Insert image', special: 'image' },
+  { cmd: 'attachFile',    label: 'File', title: 'Attach file', special: 'file' },
   { sep: true },
   { cmd: 'undo',  label: '↩', title: 'Undo' },
   { cmd: 'redo',  label: '↪', title: 'Redo' },
 ];
 
+const convertToWebP = (file) => {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/') || file.type === 'image/webp') {
+      resolve(file); // Don't convert if it's already webp or not an image
+      return;
+    }
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(objectUrl);
+        const webpFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", { type: "image/webp" });
+        resolve(webpFile);
+      }, "image/webp", 0.85); // 85% quality
+    };
+    img.onerror = (e) => {
+      URL.revokeObjectURL(objectUrl);
+      reject(e);
+    };
+    img.src = objectUrl;
+  });
+};
+
 export function ArticleEditorPage({ lang, onNavigate }) {
   const { user, userProfile, hasPermission } = useAuth();
   const editorRef = useRef(null);
   const thumbnailInputRef = useRef(null);
+  const imageInputRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
     title_ar: '', title_en: '',
@@ -46,16 +78,20 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     teaser_permission_key: 'view:public_content',
     full_access_permission_key: 'view:free_content',
   });
-  const [thumbnail, setThumbnail] = useState(null); // base64 or URL
+  
+  // We'll keep local object URLs for thumbnail preview, but upload on save.
+  const [thumbnailFile, setThumbnailFile] = useState(null); 
+  const [thumbnailPreview, setThumbnailPreview] = useState(null); 
   const [thumbnailDragOver, setThumbnailDragOver] = useState(false);
+  
   const [saving, setSaving] = useState(false);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [activeFormats, setActiveFormats] = useState({});
 
   const isRtl = lang === 'ar';
 
-  // Permission check
   const canWrite = userProfile && (
     userProfile.role === 'admin' ||
     userProfile.role === 'superadmin' ||
@@ -63,7 +99,6 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     (hasPermission && hasPermission('write:articles'))
   );
 
-  // Update active format states on selection change
   const updateActiveFormats = useCallback(() => {
     const cmds = ['bold','italic','underline','strikeThrough','insertUnorderedList','insertOrderedList','justifyLeft','justifyCenter','justifyRight'];
     const next = {};
@@ -76,16 +111,27 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     return () => document.removeEventListener('selectionchange', updateActiveFormats);
   }, [updateActiveFormats]);
 
-  // Toolbar button handler
+  const insertLinkPrompt = () => {
+    let url = prompt('Enter URL:');
+    if (url) {
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+      document.execCommand('createLink', false, url);
+    }
+  };
+
   const execCmd = (cmd, arg, special) => {
     if (special === 'link') {
-      const url = prompt('Enter URL:');
-      if (url) document.execCommand('createLink', false, url);
+      insertLinkPrompt();
       return;
     }
     if (special === 'image') {
-      const url = prompt('Enter image URL (or paste an image into the editor directly):');
-      if (url) document.execCommand('insertImage', false, url);
+      imageInputRef.current?.click();
+      return;
+    }
+    if (special === 'file') {
+      fileInputRef.current?.click();
       return;
     }
     document.execCommand(cmd, false, arg || null);
@@ -93,7 +139,100 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     updateActiveFormats();
   };
 
-  // Handle paste in editor — allow pasting images
+  const handleEditorKeyDown = (e) => {
+    // Ctrl+K for links
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      insertLinkPrompt();
+    }
+    
+    // Auto-link on space or enter
+    if (e.key === ' ' || e.key === 'Enter') {
+      const selection = window.getSelection();
+      if (!selection.isCollapsed) return;
+      
+      const range = selection.getRangeAt(0);
+      const node = range.startContainer;
+      
+      // Only process text nodes that aren't already inside a link
+      if (node.nodeType === Node.TEXT_NODE && !node.parentNode.closest('a')) {
+        const text = node.textContent;
+        const cursorOffset = range.startOffset;
+        const textBeforeCursor = text.substring(0, cursorOffset);
+        
+        // Regex to find a URL right before the cursor
+        const urlRegex = /(?:^|\s)((?:https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}(?:\/\S*)?)$/i;
+        const match = textBeforeCursor.match(urlRegex);
+        
+        if (match) {
+          const urlText = match[1];
+          let href = urlText;
+          if (!/^https?:\/\//i.test(href)) {
+            href = 'https://' + href;
+          }
+          
+          const urlStartOffset = cursorOffset - urlText.length;
+          
+          // Create the link node
+          const a = document.createElement('a');
+          a.href = href;
+          a.textContent = urlText;
+          a.target = '_blank';
+          
+          // Replace the text with the link
+          const beforeLink = document.createTextNode(text.substring(0, urlStartOffset));
+          const afterLink = document.createTextNode(text.substring(cursorOffset));
+          
+          const parent = node.parentNode;
+          parent.insertBefore(beforeLink, node);
+          parent.insertBefore(a, node);
+          parent.insertBefore(afterLink, node);
+          parent.removeChild(node);
+          
+          // Restore cursor position
+          const newRange = document.createRange();
+          // if we typed space, we want the cursor after the space in the afterLink text node
+          // wait, the keydown happens BEFORE the space is inserted. 
+          // So we should just set cursor to the start of afterLink
+          newRange.setStart(afterLink, 0);
+          newRange.setEnd(afterLink, 0);
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        }
+      }
+    }
+    
+    updateActiveFormats();
+  };
+
+  const uploadAndInsertImage = async (file) => {
+    try {
+      setUploadingMedia(true);
+      const webpFile = await convertToWebP(file);
+      const url = await uploadFileToR2(webpFile, 'article_images');
+      document.execCommand('insertImage', false, url);
+    } catch (err) {
+      console.error("Failed to upload image:", err);
+      alert(isRtl ? "فشل رفع الصورة." : "Failed to upload image.");
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
+  const uploadAndInsertFile = async (file) => {
+    try {
+      setUploadingMedia(true);
+      const url = await uploadFileToR2(file, 'article_attachments');
+      const html = `<br><a href="${url}" target="_blank" class="aep-attachment">📎 ${file.name}</a><br>`;
+      document.execCommand('insertHTML', false, html);
+    } catch (err) {
+      console.error("Failed to upload file:", err);
+      alert(isRtl ? "فشل رفع الملف." : "Failed to upload file.");
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
   const handleEditorPaste = (e) => {
     const items = e.clipboardData?.items;
     if (!items) return;
@@ -101,22 +240,22 @@ export function ArticleEditorPage({ lang, onNavigate }) {
       if (item.type.startsWith('image/')) {
         e.preventDefault();
         const file = item.getAsFile();
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          document.execCommand('insertImage', false, ev.target.result);
-        };
-        reader.readAsDataURL(file);
+        uploadAndInsertImage(file);
         return;
       }
     }
   };
 
-  // Thumbnail helpers
-  const applyThumbnailFile = (file) => {
+  const applyThumbnailFile = async (file) => {
     if (!file || !file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setThumbnail(ev.target.result);
-    reader.readAsDataURL(file);
+    try {
+      const webpFile = await convertToWebP(file);
+      setThumbnailFile(webpFile);
+      const objectUrl = URL.createObjectURL(webpFile);
+      setThumbnailPreview(objectUrl);
+    } catch(err) {
+      console.error("Error converting thumbnail:", err);
+    }
   };
 
   const handleThumbnailPaste = useCallback((e) => {
@@ -131,14 +270,17 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     }
   }, []);
 
-  // Global paste listener for thumbnail zone when focused
   const handleThumbnailKeyDown = (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
       navigator.clipboard.read().then(items => {
         for (const item of items) {
           const imgType = item.types.find(t => t.startsWith('image/'));
           if (imgType) {
-            item.getType(imgType).then(blob => applyThumbnailFile(blob));
+            item.getType(imgType).then(blob => {
+               // convert blob to file
+               const file = new File([blob], "pasted_image.png", {type: blob.type});
+               applyThumbnailFile(file);
+            });
             return;
           }
         }
@@ -155,6 +297,11 @@ export function ArticleEditorPage({ lang, onNavigate }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (uploadingMedia) {
+      alert(isRtl ? 'جاري رفع الملفات، يرجى الانتظار.' : 'Media is still uploading, please wait.');
+      return;
+    }
+
     const content = editorRef.current?.innerHTML || '';
     if (!form.title_ar) { setSaveError(isRtl ? 'العنوان العربي مطلوب' : 'Arabic title is required'); return; }
     if (!content || content === '<br>') { setSaveError(isRtl ? 'محتوى المقال مطلوب' : 'Article content is required'); return; }
@@ -162,14 +309,20 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     setSaving(true);
     setSaveError('');
     try {
+      let coverImageUrl = null;
+      if (thumbnailFile) {
+         coverImageUrl = await uploadFileToR2(thumbnailFile, 'article_thumbnails');
+      }
+
       const { supabase } = await import('../../../utils/supabaseClient');
       const payload = {
         ...form,
         content_ar: content,
         content_en: content,
-        cover_image: thumbnail || null,
+        cover_image: coverImageUrl,
         created_by: user?.id,
       };
+      
       const { error } = await supabase.from('news_articles').insert([payload]);
       if (error) throw error;
       setSaveSuccess(true);
@@ -198,8 +351,28 @@ export function ArticleEditorPage({ lang, onNavigate }) {
 
   return (
     <div className="aep-root" dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* Hidden Inputs for Editor Toolbar */}
+      <input 
+        type="file" 
+        accept="image/*" 
+        style={{ display: 'none' }} 
+        ref={imageInputRef} 
+        onChange={(e) => {
+          if (e.target.files?.[0]) uploadAndInsertImage(e.target.files[0]);
+          e.target.value = null; // reset
+        }} 
+      />
+      <input 
+        type="file" 
+        accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx" 
+        style={{ display: 'none' }} 
+        ref={fileInputRef} 
+        onChange={(e) => {
+          if (e.target.files?.[0]) uploadAndInsertFile(e.target.files[0]);
+          e.target.value = null; // reset
+        }} 
+      />
 
-      {/* ── Banner ── */}
       <div className="aep-banner">
         <div className="aep-banner-inner">
           <button className="aep-back-btn" onClick={() => onNavigate?.('news-blog')}>
@@ -207,17 +380,12 @@ export function ArticleEditorPage({ lang, onNavigate }) {
             {isRtl ? 'رجوع' : 'Back'}
           </button>
           <h1>{isRtl ? 'كتابة مقال جديد' : 'Write New Article'}</h1>
-          <p>{isRtl ? 'أنشئ مقالاً غنياً بالمحتوى ودعمه بالصور والتنسيق الكامل' : 'Create a richly formatted article with full styling and image support'}</p>
+          <p>{isRtl ? 'أنشئ مقالاً غنياً بالمحتوى ودعمه بالصور والملفات' : 'Create a richly formatted article with images and files'}</p>
         </div>
       </div>
 
-      {/* ── Main Layout ── */}
       <div className="aep-layout">
-
-        {/* Left: Editor panel */}
         <div className="aep-editor-panel">
-
-          {/* Titles */}
           <div className="aep-section">
             <label className="aep-label">{isRtl ? 'العنوان بالعربية *' : 'Title (Arabic) *'}</label>
             <input className="aep-input aep-title-input" dir="rtl" placeholder="عنوان المقال بالعربية..."
@@ -229,11 +397,12 @@ export function ArticleEditorPage({ lang, onNavigate }) {
               value={form.title_en} onInput={e => setForm({ ...form, title_en: e.target.value })} />
           </div>
 
-          {/* Rich Text Editor */}
           <div className="aep-section">
-            <label className="aep-label">{isRtl ? 'محتوى المقال' : 'Article Content'}</label>
+            <label className="aep-label">
+              {isRtl ? 'محتوى المقال' : 'Article Content'}
+              {uploadingMedia && <span className="aep-uploading-text">{isRtl ? ' (جاري رفع ملف...)' : ' (Uploading file...)'}</span>}
+            </label>
             <div className="aep-editor-wrap">
-              {/* Toolbar */}
               <div className="aep-toolbar" onMouseDown={e => e.preventDefault()}>
                 {TOOLBAR_ACTIONS.map((btn, i) =>
                   btn.sep
@@ -247,7 +416,6 @@ export function ArticleEditorPage({ lang, onNavigate }) {
                       >{btn.label}</button>
                 )}
               </div>
-              {/* Page-like writing area */}
               <div className="aep-doc-scroll">
                 <div
                   ref={editorRef}
@@ -256,7 +424,7 @@ export function ArticleEditorPage({ lang, onNavigate }) {
                   suppressContentEditableWarning
                   dir={isRtl ? 'rtl' : 'ltr'}
                   onPaste={handleEditorPaste}
-                  onKeyUp={updateActiveFormats}
+                  onKeyDown={handleEditorKeyDown}
                   onMouseUp={updateActiveFormats}
                   data-placeholder={isRtl ? 'ابدأ الكتابة هنا...' : 'Start writing here...'}
                 />
@@ -265,14 +433,11 @@ export function ArticleEditorPage({ lang, onNavigate }) {
           </div>
         </div>
 
-        {/* Right: Metadata sidebar */}
         <div className="aep-sidebar">
-
-          {/* Thumbnail */}
           <div className="aep-sidebar-card">
             <h3 className="aep-sidebar-title">{isRtl ? 'صورة الغلاف' : 'Cover Thumbnail'}</h3>
             <div
-              className={`aep-thumb-zone${thumbnailDragOver ? ' drag-over' : ''}${thumbnail ? ' has-image' : ''}`}
+              className={`aep-thumb-zone${thumbnailDragOver ? ' drag-over' : ''}${thumbnailPreview ? ' has-image' : ''}`}
               tabIndex={0}
               onDragOver={e => { e.preventDefault(); setThumbnailDragOver(true); }}
               onDragLeave={() => setThumbnailDragOver(false)}
@@ -281,10 +446,10 @@ export function ArticleEditorPage({ lang, onNavigate }) {
               onKeyDown={handleThumbnailKeyDown}
               onClick={() => thumbnailInputRef.current?.click()}
             >
-              {thumbnail ? (
+              {thumbnailPreview ? (
                 <>
-                  <img src={thumbnail} alt="thumbnail" className="aep-thumb-preview" />
-                  <button className="aep-thumb-remove" onClick={e => { e.stopPropagation(); setThumbnail(null); }}>
+                  <img src={thumbnailPreview} alt="thumbnail" className="aep-thumb-preview" />
+                  <button className="aep-thumb-remove" onClick={e => { e.stopPropagation(); setThumbnailFile(null); setThumbnailPreview(null); }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 </>
@@ -300,31 +465,25 @@ export function ArticleEditorPage({ lang, onNavigate }) {
               onChange={e => applyThumbnailFile(e.target.files?.[0])} />
           </div>
 
-          {/* Metadata fields */}
           <div className="aep-sidebar-card">
             <h3 className="aep-sidebar-title">{isRtl ? 'بيانات المقال' : 'Article Details'}</h3>
-
             <label className="aep-label">{isRtl ? 'التصنيف' : 'Category'}</label>
             <select className="aep-select" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
               {CATEGORIES.map(c => <option key={c.value} value={c.value}>{isRtl ? c.ar : c.en}</option>)}
             </select>
-
             <label className="aep-label" style={{ marginTop: '14px' }}>{isRtl ? 'اسم الكاتب' : 'Author Name'}</label>
             <input className="aep-input" placeholder={isRtl ? 'اسم الكاتب...' : 'Author name...'}
               value={form.author_name} onInput={e => setForm({ ...form, author_name: e.target.value })} />
           </div>
 
-          {/* Permissions */}
           <div className="aep-sidebar-card">
             <h3 className="aep-sidebar-title">{isRtl ? 'صلاحيات الوصول' : 'Access Permissions'}</h3>
-
             <label className="aep-label">{isRtl ? 'من يرى الإعلان؟' : 'Who sees the teaser?'}</label>
             <select className="aep-select" value={form.teaser_permission_key} onChange={e => setForm({ ...form, teaser_permission_key: e.target.value })}>
               <option value="view:public_content">{isRtl ? 'الجميع (زوار + مسجلون)' : 'Everyone (guests + users)'}</option>
               <option value="view:free_content">{isRtl ? 'المسجلون فقط' : 'Registered users only'}</option>
               <option value="view:all_courses">{isRtl ? 'المشتركون فقط' : 'Subscribers only'}</option>
             </select>
-
             <label className="aep-label" style={{ marginTop: '14px' }}>{isRtl ? 'من يقرأ المقال كاملاً؟' : 'Who reads the full article?'}</label>
             <select className="aep-select" value={form.full_access_permission_key} onChange={e => setForm({ ...form, full_access_permission_key: e.target.value })}>
               <option value="view:public_content">{isRtl ? 'الجميع' : 'Everyone'}</option>
@@ -333,20 +492,14 @@ export function ArticleEditorPage({ lang, onNavigate }) {
             </select>
           </div>
 
-          {/* Save */}
           {saveError && <div className="aep-error">{saveError}</div>}
           {saveSuccess && <div className="aep-success">{isRtl ? 'تم نشر المقال بنجاح!' : 'Article published successfully!'}</div>}
 
-          <button className="aep-btn-publish" disabled={saving} onClick={handleSave}>
-            {saving ? (
-              <span className="aep-spinner" />
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            )}
+          <button className="aep-btn-publish" disabled={saving || uploadingMedia} onClick={handleSave}>
+            {(saving || uploadingMedia) ? <span className="aep-spinner" /> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>}
             {isRtl ? 'نشر المقال' : 'Publish Article'}
           </button>
-
-          <button className="aep-btn-secondary" disabled={saving} onClick={() => onNavigate?.('news-blog')}>
+          <button className="aep-btn-secondary" disabled={saving || uploadingMedia} onClick={() => onNavigate?.('news-blog')}>
             {isRtl ? 'إلغاء' : 'Cancel'}
           </button>
         </div>

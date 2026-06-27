@@ -131,6 +131,37 @@
   padding-inline-start: 16px; color: #64748b; margin: 16px 0;
 }
 
+/* Attachment link */
+.aep-attachment {
+  display: inline-block;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #0f172a;
+  text-decoration: none;
+  font-family: 'Outfit', 'Tajawal', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  margin: 8px 0;
+}
+.aep-attachment:hover {
+  background-color: #e2e8f0;
+}
+
+.aep-uploading-text {
+  color: #15b47a;
+  font-size: 11px;
+  font-weight: 600;
+  animation: aep-pulse 1.5s infinite;
+}
+@keyframes aep-pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
 /* ── Sidebar ── */
 .aep-sidebar { display: flex; flex-direction: column; gap: 16px; }
 

@@ -116,16 +116,17 @@
   gap: 4px;
 }
 
-/* Fix dropdown arrow overlapping text in RTL/LTR */
+/* Fix dropdown arrow overlapping text in RTL/LTR ONLY for header */
 .aep-editor-wrap .ql-snow .ql-picker.ql-header {
   width: 130px;
 }
-.aep-editor-wrap .ql-snow .ql-picker-label {
-  padding-right: 20px !important;
-  padding-left: 20px !important;
+.aep-editor-wrap .ql-snow .ql-picker.ql-header .ql-picker-label {
+  padding-right: 24px !important;
+  padding-left: 8px !important;
 }
-.aep-editor-wrap .ql-snow .ql-picker-label svg {
+.aep-editor-wrap .ql-snow .ql-picker.ql-header .ql-picker-label svg {
   right: 4px !important; /* Keep it on the right side but with spacing */
+  left: auto !important;
 }
 
 /* Editor overrides (The Google Doc Page) */

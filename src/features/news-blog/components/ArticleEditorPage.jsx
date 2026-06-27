@@ -69,6 +69,39 @@ export function ArticleEditorPage({ lang, onNavigate }) {
 
   const isRtl = lang === 'ar';
 
+  // Add tooltips to Quill toolbar
+  useEffect(() => {
+    if (inputType !== 'editor') return;
+    
+    const tooltips = {
+      '.ql-header[value="1"]': isRtl ? 'عنوان رئيسي 1' : 'Heading 1',
+      '.ql-header[value="2"]': isRtl ? 'عنوان فرعي 2' : 'Heading 2',
+      '.ql-header[value="3"]': isRtl ? 'عنوان أصغر 3' : 'Heading 3',
+      '.ql-header': isRtl ? 'فقرة عادية' : 'Normal Text',
+      '.ql-bold': isRtl ? 'عريض (Bold)' : 'Bold',
+      '.ql-italic': isRtl ? 'مائل (Italic)' : 'Italic',
+      '.ql-underline': isRtl ? 'تسطير (Underline)' : 'Underline',
+      '.ql-strike': isRtl ? 'يتوسطه خط (Strike)' : 'Strikethrough',
+      '.ql-list[value="ordered"]': isRtl ? 'قائمة رقمية' : 'Numbered List',
+      '.ql-list[value="bullet"]': isRtl ? 'قائمة نقطية' : 'Bullet List',
+      '.ql-align': isRtl ? 'محاذاة النص' : 'Text Alignment',
+      '.ql-link': isRtl ? 'إدراج رابط (Ctrl+K)' : 'Insert Link (Ctrl+K)',
+      '.ql-image': isRtl ? 'إدراج صورة' : 'Insert Image',
+      '.ql-clean': isRtl ? 'مسح التنسيق' : 'Clear Formatting',
+      '.ql-color': isRtl ? 'لون النص' : 'Text Color',
+      '.ql-background': isRtl ? 'لون الخلفية' : 'Background Color'
+    };
+
+    const timer = setTimeout(() => {
+      Object.entries(tooltips).forEach(([selector, title]) => {
+        const els = document.querySelectorAll(selector);
+        els.forEach(el => el.setAttribute('title', title));
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [inputType, isRtl]);
+
   const canWrite = userProfile && (
     userProfile.role === 'admin' ||
     userProfile.role === 'superadmin' ||

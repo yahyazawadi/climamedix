@@ -118,41 +118,40 @@
 
 /* Editor overrides (The Google Doc Page) */
 .aep-quill-wrap .ql-container.ql-snow {
-  border: none;
-  background: transparent; /* the wrap is grey */
-  padding: 32px 24px;
+  border: none !important;
+  background: #e8ecf0 !important; /* Force grey background around the page */
+  padding: 40px 20px !important;
   min-height: 600px;
 }
 
 .aep-quill-wrap .ql-editor {
-  background: #ffffff;
-  width: 100%;
-  max-width: 760px;
-  min-height: 1056px; /* A4-ish */
-  margin: 0 auto;
-  padding: 72px 80px;
-  box-sizing: border-box;
-  box-shadow: 0 1px 4px rgba(0,0,0,.12), 0 4px 20px rgba(0,0,0,.08);
-  border-radius: 2px;
-  font-size: 15px;
-  line-height: 1.8;
-  color: #1e293b;
-  outline: none;
-  font-family: 'Georgia', 'Times New Roman', serif;
+  background: #ffffff !important;
+  width: 100% !important;
+  max-width: 800px !important;
+  min-height: 1056px !important; /* A4-ish */
+  margin: 0 auto !important;
+  padding: 80px 80px !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+  border-radius: 4px !important;
+  font-size: 15.5px !important;
+  line-height: 1.8 !important;
+  color: #1e293b !important;
+  font-family: 'Georgia', 'Times New Roman', serif !important;
 }
 
 .aep-quill-wrap .ql-editor.ql-blank::before {
-  left: 80px; right: 80px; top: 72px;
-  font-style: italic; color: #94a3b8;
-  font-family: 'Outfit', 'Tajawal', sans-serif;
+  left: 80px !important; right: 80px !important; top: 80px !important;
+  font-style: italic !important; color: #94a3b8 !important;
+  font-family: 'Outfit', 'Tajawal', sans-serif !important;
 }
 
-.aep-quill-wrap .ql-editor h1 { font-size: 28px; font-weight: 700; margin-bottom: 16px; }
-.aep-quill-wrap .ql-editor h2 { font-size: 22px; font-weight: 700; margin-top: 24px; margin-bottom: 12px; }
-.aep-quill-wrap .ql-editor h3 { font-size: 18px; font-weight: 600; margin-top: 20px; margin-bottom: 10px; }
-.aep-quill-wrap .ql-editor p { margin-bottom: 14px; }
-.aep-quill-wrap .ql-editor a { color: #15b47a; text-decoration: underline; }
-.aep-quill-wrap .ql-editor img { max-width: 100%; border-radius: 6px; margin: 12px 0; }
+.aep-quill-wrap .ql-editor h1 { font-size: 28px !important; font-weight: 700 !important; margin-bottom: 16px !important; }
+.aep-quill-wrap .ql-editor h2 { font-size: 22px !important; font-weight: 700 !important; margin-top: 24px !important; margin-bottom: 12px !important; }
+.aep-quill-wrap .ql-editor h3 { font-size: 18px !important; font-weight: 600 !important; margin-top: 20px !important; margin-bottom: 10px !important; }
+.aep-quill-wrap .ql-editor p { margin-bottom: 14px !important; }
+.aep-quill-wrap .ql-editor a { color: #15b47a !important; text-decoration: underline !important; }
+.aep-quill-wrap .ql-editor img { max-width: 100% !important; border-radius: 6px !important; margin: 12px 0 !important; }
 
 .aep-uploading-text {
   color: #15b47a; font-size: 11px; font-weight: 600;

@@ -12,7 +12,6 @@ export function ArticleCard({ title, category, date, author, summary, image, onC
         flexDirection: 'column', 
         gap: '15px', 
         height: '100%', 
-        opacity: 0,
         cursor: 'pointer',
         transition: 'transform 0.2s ease, box-shadow 0.2s ease'
       }}

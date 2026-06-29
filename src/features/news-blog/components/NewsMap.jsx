@@ -45,6 +45,8 @@ export function NewsMap({ lang = 'ar' }) {
     }
   };
 
+  const [mapFullyReady, setMapFullyReady] = useState(false);
+
   useEffect(() => {
     fetchNodes();
   }, [user]); // Re-fetch when user session is ready
@@ -52,6 +54,11 @@ export function NewsMap({ lang = 'ar' }) {
   const handleMapLoad = useCallback((map) => {
     mapInstanceRef.current = map;
     setMapboxLoaded(true);
+    
+    // Wait until Mapbox has completely finished rendering everything
+    map.once('idle', () => {
+      setMapFullyReady(true);
+    });
   }, []);
 
   useEffect(() => {
@@ -89,7 +96,8 @@ export function NewsMap({ lang = 'ar' }) {
 
   // Update markers and circles when nodes change
   useEffect(() => {
-    if (!mapboxLoaded || !mapInstanceRef.current) return;
+    // ONLY render nodes after the map is completely idle and ready
+    if (!mapFullyReady || !mapInstanceRef.current) return;
     const map = mapInstanceRef.current;
 
     // Clear old markers
@@ -107,7 +115,6 @@ export function NewsMap({ lang = 'ar' }) {
       link: formData.link
     }] : nodes;
 
-    // Make sure we have the source before updating data
     const updateSource = () => {
       const geojsonData = {
         type: 'FeatureCollection',

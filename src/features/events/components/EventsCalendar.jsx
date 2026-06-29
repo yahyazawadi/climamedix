@@ -168,9 +168,9 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
             
             {/* Header Controls */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', direction: 'ltr' }}>
-              <button onClick={handlePrevMonth} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#004c6d', fontWeight: 'bold' }}>&lt;</button>
+              <button onClick={isArabic ? handleNextMonth : handlePrevMonth} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#004c6d', fontWeight: 'bold' }}>&lt;</button>
               <strong style={{ color: '#0b2849', fontSize: '16px' }}>{MONTHS[currentMonth]} {currentYear}</strong>
-              <button onClick={handleNextMonth} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#004c6d', fontWeight: 'bold' }}>&gt;</button>
+              <button onClick={isArabic ? handlePrevMonth : handleNextMonth} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#004c6d', fontWeight: 'bold' }}>&gt;</button>
             </div>
 
             {/* Days of Week Row */}
@@ -198,7 +198,7 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
                       fontWeight: cell.day ? 'bold' : 'normal',
                       cursor: cell.hasEvent ? 'pointer' : 'default',
                       background: !cell.day
-                        ? '#0b2849' 
+                        ? 'transparent' 
                         : isSelected 
                         ? '#004c6d' 
                         : cell.hasEvent 

@@ -6,6 +6,7 @@ import { translations } from '../../../i18n/translations';
 import { Button } from '../../shared/components/Button';
 import { GlassCard } from '../../shared/components/GlassCard';
 import './ProfilePage.css';
+import { DatePicker } from '../../shared/components/DatePicker';
 
 // Client-side image converter to WebP using HTML Canvas
 const convertToWebP = (file) => {
@@ -44,6 +45,17 @@ const convertToWebP = (file) => {
   });
 };
 
+// Module-level cache — the IP API is called at most once per browser session
+let _ipLocationCache = null;
+const getIpLocation = () => {
+  if (!_ipLocationCache) {
+    _ipLocationCache = fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .catch(() => null);
+  }
+  return _ipLocationCache;
+};
+
 export function ProfilePage({ lang, onNavigate }) {
   const { user, userProfile } = useAuth();
   const t = translations[lang] || translations.ar;
@@ -68,8 +80,23 @@ export function ProfilePage({ lang, onNavigate }) {
   
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [alert, setAlert] = useState(null);
   const fileInputRef = useRef(null);
+
+  const handleDetectLocation = () => {
+    setLocating(true);
+    getIpLocation()
+      .then(data => {
+        if (data && data.city && data.country_name) {
+          setFormData(prev => ({ ...prev, city: data.city, country: data.country_name }));
+        } else {
+          setAlert({ type: 'error', message: isArabic ? 'تعذّر تحديد الموقع تلقائياً' : 'Could not detect location automatically' });
+        }
+      })
+      .catch(() => setAlert({ type: 'error', message: isArabic ? 'فشل الاتصال بخدمة الموقع' : 'Location service unavailable' }))
+      .finally(() => setLocating(false));
+  };
 
   // Sync with loaded profile data
   useEffect(() => {
@@ -91,20 +118,17 @@ export function ProfilePage({ lang, onNavigate }) {
         avatar_url: userProfile.avatar_url || ''
       });
 
-      // Geolocation lookup if city/country is empty
+      // Geolocation lookup if city/country is empty — uses cached result, never re-fetches
       if (!userProfile.city || !userProfile.country) {
-        fetch('https://ipapi.co/json/')
-          .then(res => res.json())
-          .then(data => {
-            if (data && data.city && data.country_name) {
-              setFormData(prev => ({
-                ...prev,
-                city: prev.city || data.city,
-                country: prev.country || data.country_name
-              }));
-            }
-          })
-          .catch(err => console.warn('IP location fetch failed:', err));
+        getIpLocation().then(data => {
+          if (data && data.city && data.country_name) {
+            setFormData(prev => ({
+              ...prev,
+              city: prev.city || data.city,
+              country: prev.country || data.country_name
+            }));
+          }
+        });
       }
     }
   }, [userProfile]);
@@ -339,12 +363,11 @@ export function ProfilePage({ lang, onNavigate }) {
 
                     <div>
                       <label className="form-field-label">{t.birthdateLabel}</label>
-                      <input 
-                        type="date" 
-                        required 
-                        value={formData.birthdate} 
-                        onInput={(e) => setFormData({ ...formData, birthdate: e.target.value })}
-                        className="form-input-field" 
+                      <DatePicker
+                        value={formData.birthdate}
+                        onChange={(val) => setFormData({ ...formData, birthdate: val })}
+                        lang={lang}
+                        id="profileBirthdate"
                       />
                     </div>
                   </div>
@@ -368,6 +391,26 @@ export function ProfilePage({ lang, onNavigate }) {
                         onInput={(e) => setFormData({ ...formData, country: e.target.value })}
                         className="form-input-field" 
                       />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '2px' }}>
+                      <button
+                        type="button"
+                        onClick={handleDetectLocation}
+                        disabled={locating}
+                        className="detect-location-btn"
+                        title={isArabic ? 'تحديد الموقع تلقائياً' : 'Auto-detect location'}
+                      >
+                        {locating ? (
+                          <div className="loading-spinner-el" style={{ width: '16px', height: '16px', borderWidth: '2px' }} />
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                          </svg>
+                        )}
+                        <span>{locating ? (isArabic ? 'جاري التحديد...' : 'Detecting...') : (isArabic ? 'تحديد الموقع' : 'Detect')}</span>
+                      </button>
                     </div>
                   </div>
 

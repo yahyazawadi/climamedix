@@ -366,10 +366,12 @@ export function DebugUIPage() {
   const [mapPointsJson, setMapPointsJson] = useState(JSON.stringify({
     "excludedCountries": ["israel"],
     "points": [
-      { "id": "loc1", "name": "القدس", "lat": 31.7683, "lng": 35.2137, "status": "critical", "details": "العاصمة التاريخية والأثرية لفلسطين" },
-      { "id": "loc2", "name": "غزة", "lat": 31.5016, "lng": 34.4668, "status": "critical", "details": "شح مائي حاد وأضرار بيئية في البنية التحتية" },
-      { "id": "loc3", "name": "رام الله", "lat": 31.9029, "lng": 35.2062, "status": "warning", "details": "تراجع منسوب المياه الجوفية والزراعية" },
-      { "id": "loc4", "name": "حيفا", "lat": 32.7940, "lng": 34.9896, "status": "warning", "details": "تلوث الهواء الصناعي الساحلي" }
+      { "id": "loc1", "name": "القدس", "lat": 31.7683, "lng": 35.2137, "status": "critical", "country": "Palestine", "details": "العاصمة التاريخية والأثرية لفلسطين" },
+      { "id": "loc2", "name": "عمان", "lat": 31.9522, "lng": 35.9331, "status": "warning", "country": "Jordan", "details": "تأثيرات الجفاف والتغير الحراري" },
+      { "id": "loc3", "name": "الرياض", "lat": 24.7136, "lng": 46.6753, "status": "warning", "country": "Saudi Arabia", "details": "تصميم المستشفيات منخفضة الكربون" },
+      { "id": "loc4", "name": "القاهرة", "lat": 30.0444, "lng": 31.2357, "status": "critical", "country": "Egypt", "details": "أثر الملوثات الحضرية ونمذجة النواقل" },
+      { "id": "loc5", "name": "بيروت", "lat": 33.8938, "lng": 35.5018, "status": "warning", "country": "Lebanon", "details": "دراسة أثر الضغوط المناخية والكوارث" },
+      { "id": "loc6", "name": "البصرة", "lat": 30.5081, "lng": 47.7835, "status": "critical", "country": "Iraq", "details": "أثر شح المياه على تفشي النزلات المعوية" }
     ]
   }, null, 2));
 
@@ -543,6 +545,9 @@ export function DebugUIPage() {
 
           el.addEventListener('click', () => {
             setActiveMapPoint(pt);
+            if (pt.country) {
+              setSelectedCountryName(pt.country);
+            }
           });
 
           const marker = new window.mapboxgl.Marker({ element: el })

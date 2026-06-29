@@ -7,7 +7,8 @@ const MOCK_REPRESENTATIVES = [
   { id: 2, name: 'أ. د. خالد الجابر', role: 'سفير البرنامج - السعودية', country: 'Saudi Arabia', specialty: 'الصحة العامة البيئية', bio: 'أستاذ الصحة العامة بجامعة الملك سعود. يركز في أبحاثه على تصميم المستشفيات منخفضة الكربون.', email: 'k.jaber@climamedix.org' },
   { id: 3, name: 'د. يوسف صبري', role: 'ممثل الدولة - مصر', country: 'Egypt', specialty: 'طب الأطفال والملوثات المعلقة', bio: 'باحث ومستشار صحي مهتم بنمذجة انتشار النواقل الحشرية المتأثرة بالفيضانات الموسمية.', email: 'y.sabry@climamedix.org' },
   { id: 4, name: 'د. رانيا الحداد', role: 'ممثلة الدولة - لبنان', country: 'Lebanon', specialty: 'الصحة النفسية المناخية', bio: 'معالجة نفسية وعضو رابطة علم النفس البيئي، تبحث في القلق المناخي واضطرابات ما بعد الكوارث.', email: 'r.haddad@climamedix.org' },
-  { id: 5, name: 'د. علي حسين', role: 'ممثل الدولة - العراق', country: 'Iraq', specialty: 'الأمن المائي والوبائيات', bio: 'مدير وحدة رصد الأوبئة بالبصرة، يدرس أثر الجفاف المائي على انتشار النزلات المعوية الحادة.', email: 'a.hussein@climamedix.org' }
+  { id: 5, name: 'د. علي حسين', role: 'ممثل الدولة - العراق', country: 'Iraq', specialty: 'الأمن المائي والوبائيات', bio: 'مدير وحدة رصد الأوبئة بالبصرة، يدرس أثر الجفاف المائي على انتشار النزلات المعوية الحادة.', email: 'a.hussein@climamedix.org' },
+  { id: 6, name: 'د. خالد البرغوثي', role: 'ممثل الدولة - فلسطين', country: 'Palestine', specialty: 'الوبائيات وصحة البيئة', bio: 'أخصائي وبائيات، يركز على تدهور جودة المياه الجوفية وأثره الصحي العام.', email: 'k.barghouthi@climamedix.org' }
 ];
 
 export function NetworkDirectory({ selectedCountry }) {

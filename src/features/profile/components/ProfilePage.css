@@ -285,13 +285,51 @@
 }
 
 .style-location-grid {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: end;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 540px) {
   .style-location-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Detect Location Button */
+.detect-location-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(21, 180, 122, 0.35);
+  background: rgba(21, 180, 122, 0.06);
+  color: #15b47a;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  height: 46px;
+  box-sizing: border-box;
+}
+
+.detect-location-btn:hover:not(:disabled) {
+  background: rgba(21, 180, 122, 0.12);
+  border-color: #15b47a;
+  box-shadow: 0 0 0 4px rgba(21, 180, 122, 0.08);
+  transform: translateY(-1px);
+}
+
+.detect-location-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.detect-location-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .form-field-label {

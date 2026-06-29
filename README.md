@@ -168,7 +168,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [x] **Event Detail Fields:** Title, Date, Description, and Registration Link.
 
 ### 9. 📰 News & Blog
-*   [ ] **News Publishing System:** Articles & Announcements.
+*   [x] **News Publishing System (Article Editor):** Rich-text editor integrated with Quill, responsive layout, Cloudflare R2 file uploads (PDF/Docs), cover image handling, and dynamic SVG icons.
 *   [ ] **News Categories:** Climate Health, Research, Opportunities, and Events.
 
 ### 10. 📞 Contact Us
@@ -184,6 +184,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 
 ### 12. 👤 User Accounts
 *   [x] **Register/Login:** Supabase Auth Integration (Email sign-in/sign-up & Google OAuth) with beautiful Mitchell's best-candidate particle canvas background, layout swaps, and Outfit/Tajawal font custom settings.
+*   [ ] **User Profiles Section:** *(Next Priority)* Setting up profile management, displaying role capabilities, and managing account information.
 *   [ ] **LMS Interactions:** Enroll in courses, take quizzes, download certificates, and track progress.
 
 ### 13. ⚙️ Technical Requirements

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { supabase } from '../../../utils/supabaseClient';
 import { NewsFeed } from './NewsFeed';
+import { NewsMap } from './NewsMap';
 
 export function NewsPage({ lang, onNavigate }) {
   const [articles, setArticles] = useState([]);
@@ -109,6 +110,9 @@ export function NewsPage({ lang, onNavigate }) {
         width: '100%',
         boxSizing: 'border-box'
       }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto 40px auto' }}>
+          <NewsMap lang={lang} />
+        </div>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '50px', color: '#0b2849' }}>
             {lang === 'ar' ? 'جاري التحميل...' : 'Loading...'}

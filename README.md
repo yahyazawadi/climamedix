@@ -173,6 +173,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [x] **News Reader & Feed UI:** Beautiful reader page with properly aligned Quill text (RTL/LTR), glassmorphic design, and custom Share / Copy Link functionality.
 *   [x] **Live Engagement Tracking:** Securely tracks view counts (via RPC functions) and user likes (`article_reactions` table) linked strictly to their `user_id`.
 *   [x] **News Categories:** Fully functional frontend filtering for Climate Health, Research, Opportunities, and Events with automatic bilingual translation.
+*   [x] **Interactive News & Alert Map:** Admin-driven Mapbox integration (`NewsMap`) allowing authorized users to drop geospatial alert nodes with custom radii, priority icons (Danger/Warning/Info), bilingual descriptions, and URL links securely stored in Supabase with strict RLS permissions.
 
 ### 10. 📞 Contact Us
 *   [x] **Contact Details:** Form submission panel, email links, and social media handles.
@@ -242,11 +243,7 @@ graph TD
 ### 🟡 Phase 2: Dynamic Overlays & Network Details (Moderate)
 *These features require page routing/modals and structured relationships with database records.*
 
-4. **🎓 Program Detail Dynamic Modals**
-   * **Why next:** We already have the homepage cards for programs. We just need to load and overlay the full detail pages dynamically.
-   * **Scope:**
-     * Add modal popups for program cards (VSCHEF, Climate Health Academy, Research Program) displaying full cover images, objectives, duration, eligibility text, and application forms.
-5. **🤝 Community Network Directory**
+4. **🤝 Community Network Directory**
    * **Why next:** Expands the interactive Mapbox widget.
    * **Scope:**
      * Add a cards list or slider below the map to showcase participating fellows, ambassadors, and country representatives.
@@ -255,6 +252,9 @@ graph TD
 ### 🟠 Phase 3: Interactive Features & LMS UI (Intermediate)
 *First phase of the Learning Hub. Focuses on the frontend visual interfaces, user state, and enrollment flows.*
 
+5. **🎓 Program / Course Detail Modals**
+   * **Scope:**
+     * Add modal popups for program cards displaying full cover images, objectives, duration, eligibility text, and application forms as a precursor to the LMS.
 6. **📚 Learning Hub (LMS) View & Course Enrollment**
    * **Scope:**
      * Develop the user LMS dashboard displaying "My Courses," "Completed Courses," and "Quiz Results."

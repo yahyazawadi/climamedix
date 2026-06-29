@@ -19,6 +19,7 @@ import { ArticleEditorPage } from './features/news-blog/components/ArticleEditor
 import { NewsPage } from './features/news-blog/components/NewsPage'
 import { ArticleReaderPage } from './features/news-blog/components/ArticleReaderPage'
 import { HomeNewsWidget } from './features/news-blog/components/HomeNewsWidget'
+import { ArabWorldMap } from './features/main/components/ArabWorldMap'
 import { ProfilePage } from './features/profile/components/ProfilePage'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
@@ -580,6 +581,30 @@ function AppContent() {
             <Button variant="gradient" onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>
               {lang === 'ar' ? 'انضم لفريق البحث' : 'Join the Research Team'}
             </Button>
+          </div>
+        </section>
+
+        {/* Community Network Map Section */}
+        <section id="community" className="figma-training-section" style={{ background: '#f8fafc', position: 'relative', zIndex: 5 }}>
+          <div className="figma-section-container">
+            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+              <h2 className="figma-section-title-main" style={{ color: '#0b2849', marginBottom: '10px' }}>
+                {lang === 'ar' ? 'شبكة كلايما ميدكس الإقليمية' : 'ClimaMedix Regional Network'}
+              </h2>
+              <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '1.1rem', maxWidth: '700px', margin: '0 auto' }}>
+                {lang === 'ar' 
+                  ? 'تربط شبكتنا الخبراء والباحثين وسفراء الصحة البيئية في جميع أنحاء العالم العربي لتعزيز التعاون والابتكار الإقليمي.' 
+                  : 'Our network connects experts, researchers, and environmental health ambassadors across the Arab world to foster regional collaboration.'}
+              </p>
+            </div>
+            
+            <ArabWorldMap lang={lang} />
+            
+            <div style={{ textAlign: 'center', marginTop: '30px' }}>
+              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>
+                {lang === 'ar' ? 'استعرض دليل السفراء والأعضاء' : 'Browse Network Directory'}
+              </Button>
+            </div>
           </div>
         </section>
 

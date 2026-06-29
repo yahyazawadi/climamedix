@@ -53,6 +53,7 @@ export function NewsFeed({ articles = [], onReadArticle, lang = 'ar', hideFilter
           <div key={`${art.title}-${idx}`}>
             <ArticleCard
               {...art}
+              lang={lang}
               onClick={() => onReadArticle(art)}
             />
           </div>

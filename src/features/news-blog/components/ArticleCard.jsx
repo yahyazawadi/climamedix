@@ -1,7 +1,7 @@
 import { Button } from '../../shared/components/Button';
 import { GlassCard } from '../../shared/components/GlassCard';
 
-export function ArticleCard({ title, category, date, author, summary, image, onClick }) {
+export function ArticleCard({ title, category, date, author, summary, image, onClick, lang = 'ar' }) {
   return (
     <GlassCard 
       className="article-card" 
@@ -52,9 +52,9 @@ export function ArticleCard({ title, category, date, author, summary, image, onC
       </p>
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', borderTop: '1px solid rgba(11, 40, 73, 0.08)', paddingTop: '12px' }}>
-        <span style={{ fontSize: '11.5px', color: '#004c6d', fontWeight: '500' }}>بواسطة: {author}</span>
+        <span style={{ fontSize: '11.5px', color: '#004c6d', fontWeight: '500' }}>{lang === 'ar' ? 'بواسطة:' : 'By:'} {author}</span>
         <Button variant="text" onClick={onClick} style={{ padding: 0, fontSize: '12px', fontWeight: 'bold' }}>
-          اقرأ المزيد
+          {lang === 'ar' ? 'اقرأ المزيد' : 'Read More'}
         </Button>
       </div>
     </GlassCard>

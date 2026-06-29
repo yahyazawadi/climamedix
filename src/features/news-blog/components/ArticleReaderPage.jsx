@@ -8,6 +8,7 @@ export function ArticleReaderPage({ lang, onNavigate }) {
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     async function fetchArticle() {
@@ -97,6 +98,12 @@ export function ArticleReaderPage({ lang, onNavigate }) {
     }
   };
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div style={{ paddingTop: '100px', paddingBottom: '80px', minHeight: '100vh', position: 'relative', zIndex: 10 }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
@@ -154,38 +161,100 @@ export function ArticleReaderPage({ lang, onNavigate }) {
                 <span>{dateStr}</span>
               </div>
               
-              <button 
-                onClick={handleShare}
-                title={lang === 'ar' ? 'مشاركة' : 'Share'}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: '#4a6b8c',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '8px',
-                  borderRadius: '50%',
-                  transition: 'background-color 0.2s, color 0.2s',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor = 'rgba(11, 40, 73, 0.05)';
-                  e.currentTarget.style.color = '#0b2849';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#4a6b8c';
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="18" cy="5" r="3"></circle>
-                  <circle cx="6" cy="12" r="3"></circle>
-                  <circle cx="18" cy="19" r="3"></circle>
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                </svg>
-              </button>
+              <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>
+                {copied && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '-35px',
+                    right: lang === 'ar' ? '30px' : 'auto',
+                    left: lang === 'en' ? '30px' : 'auto',
+                    background: '#15b47a',
+                    color: 'white',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    pointerEvents: 'none',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 2px 8px rgba(21, 180, 122, 0.3)',
+                    zIndex: 20,
+                    animation: 'fadeIn 0.2s ease-in-out'
+                  }}>
+                    {lang === 'ar' ? 'تم النسخ!' : 'Copied!'}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '-4px',
+                      right: lang === 'ar' ? '16px' : 'auto',
+                      left: lang === 'en' ? '16px' : 'auto',
+                      width: '8px',
+                      height: '8px',
+                      background: '#15b47a',
+                      transform: 'rotate(45deg)'
+                    }} />
+                  </div>
+                )}
+                <button 
+                  onClick={handleCopy}
+                  title={lang === 'ar' ? 'نسخ الرابط' : 'Copy Link'}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#4a6b8c',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '8px',
+                    borderRadius: '50%',
+                    transition: 'background-color 0.2s, color 0.2s',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.backgroundColor = 'rgba(11, 40, 73, 0.05)';
+                    e.currentTarget.style.color = '#0b2849';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = '#4a6b8c';
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                  </svg>
+                </button>
+                <button 
+                  onClick={handleShare}
+                  title={lang === 'ar' ? 'مشاركة' : 'Share'}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#4a6b8c',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '8px',
+                    borderRadius: '50%',
+                    transition: 'background-color 0.2s, color 0.2s',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.backgroundColor = 'rgba(11, 40, 73, 0.05)';
+                    e.currentTarget.style.color = '#0b2849';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = '#4a6b8c';
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <div 

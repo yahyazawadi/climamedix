@@ -54,7 +54,7 @@ export function ArticleCard({ title, category, date, author, summary, image, onC
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', borderTop: '1px solid rgba(11, 40, 73, 0.08)', paddingTop: '12px' }}>
         <span style={{ fontSize: '11.5px', color: '#004c6d', fontWeight: '500' }}>بواسطة: {author}</span>
         <Button variant="text" onClick={onClick} style={{ padding: 0, fontSize: '12px', fontWeight: 'bold' }}>
-          اقرأ المزيد ←
+          اقرأ المزيد
         </Button>
       </div>
     </GlassCard>

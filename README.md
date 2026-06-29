@@ -28,8 +28,9 @@ To properly register and track healthcare practitioners and climate advocates, p
     *   **Text-Based Lessons:** Includes an interactive **Text-to-Speech (TTS)** voice option for accessibility and listening on the go.
     *   **Video Lessons:** Standard video streaming lessons.
 *   **Engagement Tracking:**
-    *   **Course Progress:** Track individual student lesson completions and progress percentages.
-    *   **Engagement Metrics:** Collect and display total **Views**, **Likes**, and **Comments** for courses, articles, and research publications.
+    *   [ ] **Course Progress:** Track individual student lesson completions and progress percentages.
+    *   [x] **Engagement Metrics (Articles):** Collect and display live **Views** and user **Likes** (Reactions) securely tracked in Supabase with RLS protections.
+    *   [ ] **Engagement Metrics (Courses/Research):** Collect and display views, likes, and comments for courses and research publications.
 
 ### 3. 🧪 Research Tracks
 1.  **Track 1: Community Health Educator (مسار التثقيف الصحي المجتمعي):** Primarily focused on course completion and community guidance.
@@ -169,7 +170,9 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 
 ### 9. 📰 News & Blog
 *   [x] **News Publishing System (Article Editor):** Rich-text editor integrated with Quill, responsive layout, Cloudflare R2 file uploads (PDF/Docs), cover image handling, and dynamic SVG icons.
-*   [ ] **News Categories:** Climate Health, Research, Opportunities, and Events.
+*   [x] **News Reader & Feed UI:** Beautiful reader page with properly aligned Quill text (RTL/LTR), glassmorphic design, and custom Share / Copy Link functionality.
+*   [x] **Live Engagement Tracking:** Securely tracks view counts (via RPC functions) and user likes (`article_reactions` table) linked strictly to their `user_id`.
+*   [x] **News Categories:** Fully functional frontend filtering for Climate Health, Research, Opportunities, and Events with automatic bilingual translation.
 
 ### 10. 📞 Contact Us
 *   [x] **Contact Details:** Form submission panel, email links, and social media handles.

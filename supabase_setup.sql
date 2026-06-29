@@ -768,9 +768,37 @@ CREATE TABLE IF NOT EXISTS public.news_articles (
     cover_image TEXT,
     author_name TEXT,
     created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL DEFAULT auth.uid(),
+    views_count INTEGER DEFAULT 0,
     teaser_permission_key TEXT DEFAULT 'view:public_content' REFERENCES public.permissions(perm_key) ON DELETE SET DEFAULT,
     full_access_permission_key TEXT DEFAULT 'view:free_content' REFERENCES public.permissions(perm_key) ON DELETE SET DEFAULT,
     published_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- RPC for incrementing views
+CREATE OR REPLACE FUNCTION public.increment_article_view(article_id UUID)
+RETURNS void AS $$
+BEGIN
+  UPDATE public.news_articles
+  SET views_count = COALESCE(views_count, 0) + 1
+  WHERE id = article_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Article Reactions (Likes/Hearts)
+CREATE TABLE IF NOT EXISTS public.article_reactions (
+    article_id UUID REFERENCES public.news_articles(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE DEFAULT auth.uid(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    PRIMARY KEY (article_id, user_id)
+);
+
+-- Article Comments
+CREATE TABLE IF NOT EXISTS public.article_comments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    article_id UUID REFERENCES public.news_articles(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE DEFAULT auth.uid(),
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 -- Certificates (restricted insert, only cert issuers or the matching student can insert)
@@ -998,12 +1026,25 @@ CREATE POLICY "Allow read news articles" ON public.news_articles FOR SELECT USIN
 CREATE POLICY "Insert Own Article" ON public.news_articles FOR INSERT WITH CHECK (
     public.has_permission(auth.uid(),'write:articles') AND (created_by IS NULL OR created_by = auth.uid())
 );
-CREATE POLICY "Update Own Article" ON public.news_articles FOR UPDATE USING (
-    auth.uid() = created_by OR public.has_permission(auth.uid(),'manage:any_article')
+CREATE POLICY "Allow update own article" ON public.news_articles FOR UPDATE USING (
+    auth.uid() = created_by OR public.has_permission(auth.uid(), 'admin:manage_users')
 );
-CREATE POLICY "Delete Own Article" ON public.news_articles FOR DELETE USING (
-    auth.uid() = created_by OR public.has_permission(auth.uid(),'manage:any_article')
+CREATE POLICY "Allow delete own article" ON public.news_articles FOR DELETE USING (
+    auth.uid() = created_by OR public.has_permission(auth.uid(), 'admin:manage_users')
 );
+
+-- article_reactions
+ALTER TABLE public.article_reactions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow read reactions" ON public.article_reactions FOR SELECT USING (true);
+CREATE POLICY "Allow insert own reaction" ON public.article_reactions FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Allow delete own reaction" ON public.article_reactions FOR DELETE USING (auth.uid() = user_id);
+
+-- article_comments
+ALTER TABLE public.article_comments ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow read comments" ON public.article_comments FOR SELECT USING (true);
+CREATE POLICY "Allow insert own comment" ON public.article_comments FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Allow update own comment" ON public.article_comments FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Allow delete own comment" ON public.article_comments FOR DELETE USING (auth.uid() = user_id OR public.has_permission(auth.uid(), 'admin:manage_users'));
 
 -- Opportunities (Fixed RLS R/W permissions)
 CREATE POLICY "Allow read opportunities" ON public.opportunities FOR SELECT USING (
@@ -1282,7 +1323,8 @@ WHERE public.has_permission(auth.uid(), teaser_permission_key)
 CREATE OR REPLACE VIEW public.news_articles_accessible AS
 SELECT 
     id, title_ar, title_en, category, cover_image, author_name, published_at,
-    teaser_permission_key, full_access_permission_key, created_by,
+    teaser_permission_key, full_access_permission_key, created_by, views_count,
+    (SELECT count(*) FROM public.article_reactions WHERE article_id = news_articles.id) AS likes_count,
     CASE 
         WHEN public.has_permission(auth.uid(), full_access_permission_key) OR created_by = auth.uid() 
         THEN content_ar 

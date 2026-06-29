@@ -44,7 +44,9 @@ export function NewsPage({ lang, onNavigate }) {
             author: article.author_name,
             date: new Date(article.published_at).toLocaleDateString(lang === 'en' ? 'en-US' : 'ar-SA', {
               year: 'numeric', month: 'long', day: 'numeric'
-            })
+            }),
+            views_count: article.views_count || 0,
+            likes_count: article.likes_count || 0
           };
         });
 

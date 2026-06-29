@@ -43,7 +43,26 @@ export function ArticleReaderPage({ lang, onNavigate }) {
               data.author_avatar = profileData.avatar_url;
             }
           }
-          setArticle(data);
+
+          let userLiked = false;
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: reaction } = await supabase
+              .from('article_reactions')
+              .select('user_id')
+              .eq('article_id', articleId)
+              .eq('user_id', user.id)
+              .single();
+            if (reaction) userLiked = true;
+          }
+
+          supabase.rpc('increment_article_view', { article_id: articleId }).then();
+
+          setArticle({ 
+            ...data, 
+            userLiked, 
+            views_count: (data.views_count || 0) + 1 
+          });
         }
       } catch (err) {
         console.error('Error fetching article:', err);
@@ -104,6 +123,30 @@ export function ArticleReaderPage({ lang, onNavigate }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleToggleLike = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert(lang === 'ar' ? 'يرجى تسجيل الدخول أولاً للإعجاب' : 'Please login first to like');
+      return;
+    }
+    
+    if (article.userLiked) {
+      await supabase.from('article_reactions').delete().eq('article_id', article.id).eq('user_id', user.id);
+      setArticle(prev => ({
+        ...prev,
+        userLiked: false,
+        likes_count: Math.max(0, (prev.likes_count || 0) - 1)
+      }));
+    } else {
+      await supabase.from('article_reactions').insert({ article_id: article.id, user_id: user.id });
+      setArticle(prev => ({
+        ...prev,
+        userLiked: true,
+        likes_count: (prev.likes_count || 0) + 1
+      }));
+    }
+  };
+
   return (
     <div style={{ paddingTop: '100px', paddingBottom: '80px', minHeight: '100vh', position: 'relative', zIndex: 10 }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
@@ -159,6 +202,24 @@ export function ArticleReaderPage({ lang, onNavigate }) {
                 </span>
                 <span>•</span>
                 <span>{dateStr}</span>
+                <span>•</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title={lang === 'ar' ? 'المشاهدات' : 'Views'}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  {article.views_count || 0}
+                </span>
+                <span 
+                  onClick={handleToggleLike}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: article.userLiked ? '#e63946' : 'inherit', transition: 'color 0.2s ease' }} 
+                  title={lang === 'ar' ? 'الإعجابات' : 'Likes'}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill={article.userLiked ? '#e63946' : 'none'} stroke={article.userLiked ? '#e63946' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'fill 0.2s ease, stroke 0.2s ease' }}>
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                  </svg>
+                  {article.likes_count || 0}
+                </span>
               </div>
               
               <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>

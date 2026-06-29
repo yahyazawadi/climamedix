@@ -49,10 +49,17 @@ export function ArticleEditorPage({ lang, onNavigate }) {
   const [form, setForm] = useState({
     title_ar: '', title_en: '',
     category: 'climate_health',
-    author_name: userProfile?.full_name || '',
+    author_name: '',
     teaser_permission_key: 'view:public_content',
     full_access_permission_key: 'view:free_content',
   });
+  
+  // Auto-fill author name when profile loads
+  useEffect(() => {
+    if (userProfile?.full_name && !form.author_name) {
+      setForm(prev => ({ ...prev, author_name: userProfile.full_name }));
+    }
+  }, [userProfile, form.author_name]);
   
   const [content, setContent] = useState('');
   const [inputType, setInputType] = useState('editor'); // 'editor' | 'file'
@@ -428,9 +435,18 @@ export function ArticleEditorPage({ lang, onNavigate }) {
             <select className="aep-select" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
               {CATEGORIES.map(c => <option key={c.value} value={c.value}>{isRtl ? c.ar : c.en}</option>)}
             </select>
-            <label className="aep-label" style={{ marginTop: '14px' }}>{isRtl ? 'اسم الكاتب' : 'Author Name'}</label>
-            <input className="aep-input" placeholder={isRtl ? 'اسم الكاتب...' : 'Author name...'}
-              value={form.author_name} onInput={e => setForm({ ...form, author_name: e.target.value })} />
+            <label className="aep-label" style={{ marginTop: '14px' }}>{isRtl ? 'بيانات الكاتب' : 'Author Details'}</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '6px' }}>
+              {userProfile?.avatar_url ? (
+                <img src={userProfile.avatar_url} alt="Author avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #e2e8f0' }} />
+              ) : (
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontWeight: 'bold', fontSize: '16px', border: '1.5px solid #e2e8f0' }}>
+                  {form.author_name ? form.author_name.charAt(0).toUpperCase() : '?'}
+                </div>
+              )}
+              <input className="aep-input" style={{ flex: 1 }} placeholder={isRtl ? 'اسم الكاتب...' : 'Author name...'}
+                value={form.author_name} onInput={e => setForm({ ...form, author_name: e.target.value })} />
+            </div>
           </div>
 
           <div className="aep-sidebar-card">

@@ -128,7 +128,34 @@ export const translations = {
     trackResearchDesc: 'انضم إلى فريق الباحثين وشارك في دراسات المناخ والصحة',
     trackEducator: 'مثقف صحي مجتمعي',
     trackEducatorDesc: 'كن جزءاً من برنامج التثقيف الصحي المجتمعي وساهم في نشر الوعي',
-    trackLabel: 'المسار'
+    trackLabel: 'المسار',
+
+    // Profile Page
+    profileTitle: 'الملف الشخصي',
+    profileSubtitle: 'عرض وإدارة معلومات حسابك الشخصي والمهني',
+    profileHeaderCard: 'معلومات الحساب',
+    personalSectionTitle: 'البيانات الشخصية',
+    professionalSectionTitle: 'البيانات المهنية (للمتخصصين)',
+    titleLabel: 'اللقب',
+    birthdateLabel: 'تاريخ الميلاد',
+    cityLabel: 'المدينة',
+    countryLabel: 'الدولة',
+    specialtyLabel: 'التخصص الفرعي',
+    orgLabel: 'الجامعة أو المؤسسة',
+    professionLabel: 'التخصص المهني',
+    activistLabel: 'ناشط في مجال المناخ والصحة؟',
+    activistFieldLabel: 'مجال النشاط',
+    researcherLabel: 'باحث علمي؟',
+    researcherFieldLabel: 'مجال البحث العلمي',
+    bioLabel: 'نبذة تعريفية',
+    saveProfileBtn: 'حفظ التغييرات',
+    savingProfileBtn: 'جاري الحفظ...',
+    profileUpdateSuccess: 'تم تحديث الملف الشخصي بنجاح!',
+    avatarUpdateSuccess: 'تم رفع وتحديث الصورة الشخصية بنجاح!',
+    learningHubTitle: 'منصتي التعليمية',
+    learningHubPlaceholder: 'لا توجد مساقات مسجلة حالياً. سجل في الدورات التدريبية المتاحة لتظهر هنا.',
+    pfpUploadBtn: 'تغيير الصورة',
+    pfpUploading: 'جاري الرفع...'
   },
   en: {
     // Header
@@ -259,6 +286,33 @@ export const translations = {
     trackResearchDesc: 'Join the research team and participate in climate & health studies',
     trackEducator: 'Community Health Educator',
     trackEducatorDesc: 'Be part of the community health education program and help spread awareness',
-    trackLabel: 'Track'
+    trackLabel: 'Track',
+
+    // Profile Page
+    profileTitle: 'My Profile',
+    profileSubtitle: 'View and manage your personal and professional profile details',
+    profileHeaderCard: 'Account Information',
+    personalSectionTitle: 'Personal Information',
+    professionalSectionTitle: 'Professional Details',
+    titleLabel: 'Title',
+    birthdateLabel: 'Birth Date',
+    cityLabel: 'City',
+    countryLabel: 'Country',
+    specialtyLabel: 'Specialty',
+    orgLabel: 'University or Organization',
+    professionLabel: 'Professional Specialty',
+    activistLabel: 'Are you a climate & health activist?',
+    activistFieldLabel: 'Field of Activism',
+    researcherLabel: 'Are you a scientific researcher?',
+    researcherFieldLabel: 'Field of Research',
+    bioLabel: 'Bio / Summary',
+    saveProfileBtn: 'Save Changes',
+    savingProfileBtn: 'Saving...',
+    profileUpdateSuccess: 'Profile updated successfully!',
+    avatarUpdateSuccess: 'Avatar updated successfully!',
+    learningHubTitle: 'My Learning Hub',
+    learningHubPlaceholder: 'No enrolled courses yet. Register for available training programs to display them here.',
+    pfpUploadBtn: 'Change Photo',
+    pfpUploading: 'Uploading...'
   }
 };

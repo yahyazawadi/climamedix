@@ -38,6 +38,82 @@ export function JoinUsPage({ lang, onNavigate }) {
   
   const [requests, setRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
+  const [processingId, setProcessingId] = useState(null);
+
+  const handleApproveRequest = async (item) => {
+    setProcessingId(item.id);
+    try {
+      // 1. Check if user profile exists
+      const { data: profile, error: findError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', item.email)
+        .maybeSingle();
+
+      if (findError) throw findError;
+      if (!profile) {
+        alert(isArabic 
+          ? 'لم يتم العثور على مستخدم مسجل بهذا البريد الإلكتروني. يجب على المستخدم إنشاء حساب أولاً.' 
+          : 'No registered user found with this email. The user must sign up first.'
+        );
+        return;
+      }
+
+      // 2. Update role & copy professional details to profiles table
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          role: item.track === 'research' ? 'researcher' : 'educator',
+          profession: item.profession,
+          university_or_org: item.university_org,
+          is_activist: item.is_activist,
+          field_of_activism: item.activist_field,
+          is_researcher: item.is_researcher,
+          field_of_research: item.researcher_field,
+          bio: item.bio
+        })
+        .eq('id', profile.id);
+
+      if (updateError) throw updateError;
+
+      // 3. Remove request from join_requests
+      const { error: deleteError } = await supabase
+        .from('join_requests')
+        .delete()
+        .eq('id', item.id);
+
+      if (deleteError) throw deleteError;
+
+      // 4. Update local state
+      setRequests(prev => prev.filter(r => r.id !== item.id));
+      alert(isArabic ? 'تمت الموافقة وترقية المستخدم بنجاح!' : 'User approved and promoted successfully!');
+    } catch (err) {
+      console.error(err);
+      alert(isArabic ? `حدث خطأ: ${err.message}` : `Error: ${err.message}`);
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleRejectRequest = async (item) => {
+    if (!confirm(isArabic ? 'هل أنت متأكد من حذف هذا الطلب؟' : 'Are you sure you want to delete this request?')) return;
+    setProcessingId(item.id);
+    try {
+      const { error } = await supabase
+        .from('join_requests')
+        .delete()
+        .eq('id', item.id);
+
+      if (error) throw error;
+
+      setRequests(prev => prev.filter(r => r.id !== item.id));
+    } catch (err) {
+      console.error(err);
+      alert(isArabic ? `حدث خطأ: ${err.message}` : `Error: ${err.message}`);
+    } finally {
+      setProcessingId(null);
+    }
+  };
 
   // Fetch requests if admin
   useEffect(() => {
@@ -274,6 +350,31 @@ export function JoinUsPage({ lang, onNavigate }) {
                           </a>
                         </div>
                       )}
+                      
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '15px', borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '12px', width: '100%' }}>
+                        <Button 
+                          variant="gradient" 
+                          disabled={processingId !== null}
+                          onClick={() => handleApproveRequest(item)}
+                          style={{ fontSize: '12px', padding: '6px 14px' }}
+                        >
+                          {processingId === item.id ? (isArabic ? 'جاري الترقية...' : 'Promoting...') : (isArabic ? 'قبول وترقية العضو' : 'Approve & Promote')}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          disabled={processingId !== null}
+                          onClick={() => handleRejectRequest(item)}
+                          style={{ 
+                            fontSize: '12px', 
+                            padding: '6px 14px', 
+                            color: '#ff4d4d', 
+                            borderColor: 'rgba(255,77,77,0.3)',
+                            background: 'transparent'
+                          }}
+                        >
+                          {isArabic ? 'حذف الطلب' : 'Delete Request'}
+                        </Button>
+                      </div>
                     </div>
                   </GlassCard>
                 ))}

@@ -16,6 +16,7 @@ import { JoinUsPage } from './features/join-us/JoinUsPage'
 import { OpportunitiesPage } from './features/opportunities/components/OpportunitiesPage'
 import { EventsPage } from './features/events/EventsPage'
 import { ArticleEditorPage } from './features/news-blog/components/ArticleEditorPage'
+import { ProfilePage } from './features/profile/components/ProfilePage'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import doctorImg from './assets/bg_3.png'
@@ -187,6 +188,8 @@ function AppContent() {
       setCurrentView('events');
     } else if (path === '/write-article') {
       setCurrentView('write-article');
+    } else if (path === '/profile') {
+      setCurrentView('profile');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -216,6 +219,8 @@ function AppContent() {
         setCurrentView('events');
       } else if (p === '/write-article') {
         setCurrentView('write-article');
+      } else if (p === '/profile') {
+        setCurrentView('profile');
       } else {
         setCurrentView('home');
       }
@@ -661,6 +666,11 @@ function AppContent() {
         }} />
       ) : currentView === 'write-article' ? (
         <ArticleEditorPage lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
+      ) : currentView === 'profile' ? (
+        <ProfilePage lang={lang} onNavigate={(view) => {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />

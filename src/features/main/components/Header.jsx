@@ -391,6 +391,42 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
 
                     {/* Action Buttons */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <a 
+                        href="#profile"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onNavigate('profile');
+                          setShowProfileDropdown(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          color: '#E1EFFA',
+                          textDecoration: 'none',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          background: 'rgba(225, 239, 250, 0.05)',
+                          border: '1px solid rgba(225, 239, 250, 0.1)',
+                          transition: 'all 0.2s',
+                          marginBottom: '4px'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'rgba(21, 180, 122, 0.15)';
+                          e.target.style.color = '#15b47a';
+                          e.target.style.borderColor = 'rgba(21, 180, 122, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'rgba(225, 239, 250, 0.05)';
+                          e.target.style.color = '#E1EFFA';
+                          e.target.style.borderColor = 'rgba(225, 239, 250, 0.1)';
+                        }}
+                      >
+                        {lang === 'ar' ? 'الملف الشخصي' : 'My Profile'}
+                      </a>
+
                       {(userProfile?.role === 'admin' || userProfile?.role === 'superadmin') && (
                         <a 
                           href="#debug"
@@ -644,15 +680,26 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                   </span>
                 )}
 
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <a 
+                    href="#profile" 
+                    onClick={(e) => { e.preventDefault(); onNavigate('profile'); setDrawerOpen(false); }} 
+                    style={{ color: '#15b47a', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
+                  >
+                    {lang === 'ar' ? 'ملفي' : 'Profile'}
+                  </a>
+                  <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
                   {userProfile?.role === 'admin' && (
-                    <a 
-                      href="#debug" 
-                      onClick={(e) => { e.preventDefault(); onNavigate('debug'); setDrawerOpen(false); }} 
-                      style={{ color: '#15b47a', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
-                    >
-                      {lang === 'ar' ? 'التحكم' : 'Control'}
-                    </a>
+                    <>
+                      <a 
+                        href="#debug" 
+                        onClick={(e) => { e.preventDefault(); onNavigate('debug'); setDrawerOpen(false); }} 
+                        style={{ color: '#15b47a', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
+                      >
+                        {lang === 'ar' ? 'التحكم' : 'Control'}
+                      </a>
+                      <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
+                    </>
                   )}
                   <a 
                     href="#logout" 

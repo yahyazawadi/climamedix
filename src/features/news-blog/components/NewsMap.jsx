@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { supabase } from '../../../utils/supabaseClient';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { Button } from '../../shared/components/Button';
+import { BaseMap } from '../../shared/components/BaseMap';
 
 export function NewsMap({ lang = 'ar' }) {
-  const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
   const [mapboxLoaded, setMapboxLoaded] = useState(false);
@@ -49,120 +49,13 @@ export function NewsMap({ lang = 'ar' }) {
     fetchNodes();
   }, []);
 
-  useEffect(() => {
-    let link = document.querySelector('link[href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css"]');
-    if (!link) {
-      link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
-      document.head.appendChild(link);
-    }
-
-    if (window.mapboxgl) {
-      setMapboxLoaded(true);
-    } else {
-      let script = document.querySelector('script[src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"]');
-      if (!script) {
-        script = document.createElement('script');
-        script.src = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
-        script.onload = () => setMapboxLoaded(true);
-        document.head.appendChild(script);
-      } else {
-        const checkM = setInterval(() => {
-          if (window.mapboxgl) {
-            setMapboxLoaded(true);
-            clearInterval(checkM);
-          }
-        }, 100);
-        mapInstanceRef.current = { _checkInterval: checkM };
-      }
-    }
-
-    return () => {
-      if (mapInstanceRef.current?._checkInterval) {
-        clearInterval(mapInstanceRef.current._checkInterval);
-      }
-      if (mapInstanceRef.current && mapInstanceRef.current.remove) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, []);
+  const handleMapLoad = (map) => {
+    mapInstanceRef.current = map;
+    setMapboxLoaded(true);
+  };
 
   useEffect(() => {
-    if (!mapboxLoaded || !mapContainerRef.current) return;
-
-    if (!mapInstanceRef.current) {
-      window.mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
-      
-      const map = new window.mapboxgl.Map({
-        container: mapContainerRef.current,
-        style: 'mapbox://styles/mapbox/light-v11',
-        center: [35.0, 31.0], // Center on Middle East
-        zoom: 4,
-        projection: 'mercator',
-        interactive: true,
-        attributionControl: false
-      });
-
-      mapInstanceRef.current = map;
-
-      // Make map style adjustments
-      map.on('style.load', () => {
-        // Theme modifications
-        const mapTheme = {
-          water_layer: "#014C6D",
-          land_layer: "#2FAD78",
-          text_labels: "#EEF6FC",
-          text_halo_shadows: "#08294A",
-          borders_and_roads: "#014C6D",
-          critical_markers: "#4dff82",
-          safe_markers: "#EEF6FC"
-        };
-
-        const mapStyle = map.getStyle();
-        if (mapStyle && mapStyle.layers) {
-          mapStyle.layers.forEach(layer => {
-            if (layer.id.includes('water')) {
-              if (layer.type === 'fill') {
-                map.setPaintProperty(layer.id, 'fill-color', mapTheme.water_layer);
-                map.setPaintProperty(layer.id, 'fill-opacity', 1);
-              } else if (layer.type === 'line') {
-                map.setPaintProperty(layer.id, 'line-color', mapTheme.water_layer);
-              }
-            } else {
-              if (layer.type === 'background') {
-                map.setPaintProperty(layer.id, 'background-color', mapTheme.land_layer);
-                map.setPaintProperty(layer.id, 'background-opacity', 1);
-              } else if (layer.type === 'fill') {
-                map.setPaintProperty(layer.id, 'fill-color', mapTheme.land_layer);
-                map.setPaintProperty(layer.id, 'fill-opacity', 1);
-              } else if (layer.type === 'symbol') {
-                if (layer.paint && layer.paint['text-color']) {
-                  map.setPaintProperty(layer.id, 'text-color', mapTheme.text_labels);
-                }
-                if (layer.paint && layer.paint['text-halo-color']) {
-                  map.setPaintProperty(layer.id, 'text-halo-color', mapTheme.text_halo_shadows);
-                  map.setPaintProperty(layer.id, 'text-halo-width', 1.5);
-                }
-                if (layer.layout && layer.layout['text-field']) {
-                  map.setLayoutProperty(layer.id, 'text-field', [
-                    'case',
-                    ['==', ['get', 'name_en'], 'Israel'], 'Palestine',
-                    ['==', ['get', 'name'], 'Israel'], 'Palestine',
-                    ['get', 'name_en']
-                  ]);
-                }
-              } else if (layer.type === 'line' && (layer.id.includes('road') || layer.id.includes('boundary') || layer.id.includes('admin'))) {
-                map.setPaintProperty(layer.id, 'line-color', mapTheme.borders_and_roads);
-                map.setPaintProperty(layer.id, 'line-width', 1.5);
-              }
-            }
-          });
-        }
-      });
-    }
-
+    if (!mapboxLoaded || !mapInstanceRef.current) return;
     const map = mapInstanceRef.current;
 
     // Set cursor based on mode
@@ -397,17 +290,7 @@ export function NewsMap({ lang = 'ar' }) {
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '500px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(11, 40, 73, 0.08)' }}>
-      <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }}></div>
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes mapRingPulse {
-          0% { transform: scale(1); opacity: 0.8; }
-          100% { transform: scale(3); opacity: 0; }
-        }
-        .mapboxgl-ctrl-logo { display: none !important; }
-        .mapboxgl-popup-content { border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-      `}} />
-
+    <BaseMap onMapLoad={handleMapLoad} center={[35.0, 31.0]} zoom={4}>
       {canEdit && (
         <div style={{ 
           position: 'absolute', top: '20px', left: '20px', zIndex: 10,
@@ -499,6 +382,6 @@ export function NewsMap({ lang = 'ar' }) {
           </div>
         </div>
       )}
-    </div>
+    </BaseMap>
   );
 }

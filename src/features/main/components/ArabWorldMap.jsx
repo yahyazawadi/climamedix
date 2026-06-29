@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import gsap from 'gsap';
+import { BaseMap } from '../../shared/components/BaseMap';
 
 const ARAB_CITIES = [
   { id: 'cairo', name: 'القاهرة', lat: 30.0444, lng: 31.2357 },
@@ -34,238 +35,106 @@ function getDistance(lat1, lon1, lat2, lon2) {
 }
 
 export function ArabWorldMap({ lang = 'ar' }) {
-  const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const [mapboxLoaded, setMapboxLoaded] = useState(false);
+
+  const handleMapLoad = (map) => {
+    mapInstanceRef.current = map;
+
+    // Create GeoJSON lines between close cities
+    const features = [];
+    const MAX_DISTANCE = 1500; // km
+
+    for (let i = 0; i < ARAB_CITIES.length; i++) {
+      for (let j = i + 1; j < ARAB_CITIES.length; j++) {
+        const cityA = ARAB_CITIES[i];
+        const cityB = ARAB_CITIES[j];
+        const dist = getDistance(cityA.lat, cityA.lng, cityB.lat, cityB.lng);
+        
+        if (dist < MAX_DISTANCE) {
+          features.push({
+            'type': 'Feature',
+            'geometry': {
+              'type': 'LineString',
+              'coordinates': [
+                [cityA.lng, cityA.lat],
+                [cityB.lng, cityB.lat]
+              ]
+            }
+          });
+        }
+      }
+    }
+
+    map.addSource('network-lines', {
+      'type': 'geojson',
+      'data': {
+        'type': 'FeatureCollection',
+        'features': features
+      }
+    });
+
+    map.addLayer({
+      'id': 'network-lines-layer',
+      'type': 'line',
+      'source': 'network-lines',
+      'layout': {
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      'paint': {
+        'line-color': '#4dff82',
+        'line-width': 1.5,
+        'line-opacity': 0.4,
+        'line-dasharray': [2, 2]
+      }
+    });
+
+    // Animate line dasharray to make them look like traveling data
+    let step = 0;
+    const animateDashArray = () => {
+      if (!mapInstanceRef.current) return;
+      step = (step + 1) % 4; // Length of dash array
+      try {
+        map.setPaintProperty('network-lines-layer', 'line-dasharray', [step, 4 - step]);
+      } catch (e) {}
+      requestAnimationFrame(animateDashArray);
+    };
+    animateDashArray();
+
+    // Add markers
+    ARAB_CITIES.forEach(city => {
+      const el = document.createElement('div');
+      el.className = 'arab-city-marker';
+      el.style.width = '12px';
+      el.style.height = '12px';
+      
+      el.style.backgroundColor = '#EEF6FC';
+      el.style.border = '2px solid #2FAD78';
+      el.style.boxShadow = '0 0 12px rgba(77, 255, 130, 0.8)';
+      el.style.borderRadius = '50%';
+      
+      // Add a pulsing ring
+      const ring = document.createElement('div');
+      ring.style.width = '100%';
+      ring.style.height = '100%';
+      ring.style.borderRadius = '50%';
+      ring.style.opacity = '0.6';
+      ring.style.animation = 'mapRingPulse 2s infinite';
+      ring.style.backgroundColor = '#4dff82';
+      
+      el.appendChild(ring);
+
+      new window.mapboxgl.Marker(el)
+        .setLngLat([city.lng, city.lat])
+        .addTo(map);
+    });
+  };
 
   useEffect(() => {
-    let link = document.querySelector('link[href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css"]');
-    if (!link) {
-      link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
-      document.head.appendChild(link);
-    }
-
-    if (window.mapboxgl) {
-      setMapboxLoaded(true);
-    } else {
-      let script = document.querySelector('script[src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"]');
-      if (!script) {
-        script = document.createElement('script');
-        script.src = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
-        script.onload = () => setMapboxLoaded(true);
-        document.head.appendChild(script);
-      } else {
-        const checkM = setInterval(() => {
-          if (window.mapboxgl) {
-            setMapboxLoaded(true);
-            clearInterval(checkM);
-          }
-        }, 100);
-        // Store interval to clear on unmount
-        mapInstanceRef.current = { _checkInterval: checkM };
-      }
-    }
-
     return () => {
-      if (mapInstanceRef.current?._checkInterval) {
-        clearInterval(mapInstanceRef.current._checkInterval);
-      }
-      if (mapInstanceRef.current && mapInstanceRef.current.remove) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
+      mapInstanceRef.current = null;
     };
   }, []);
 
-  useEffect(() => {
-    if (!mapboxLoaded || !mapContainerRef.current) return;
-    if (mapInstanceRef.current) return;
-
-    window.mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
-
-    const map = new window.mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [28.0, 26.0], // Center on Arab world
-      zoom: 3.2,
-      projection: 'mercator',
-      interactive: true,
-      attributionControl: false
-    });
-
-    mapInstanceRef.current = map;
-
-    map.on('load', () => {
-      // Create GeoJSON lines between close cities
-      const features = [];
-      const MAX_DISTANCE = 1500; // km
-
-      for (let i = 0; i < ARAB_CITIES.length; i++) {
-        for (let j = i + 1; j < ARAB_CITIES.length; j++) {
-          const cityA = ARAB_CITIES[i];
-          const cityB = ARAB_CITIES[j];
-          const dist = getDistance(cityA.lat, cityA.lng, cityB.lat, cityB.lng);
-          
-          if (dist < MAX_DISTANCE) {
-            features.push({
-              'type': 'Feature',
-              'geometry': {
-                'type': 'LineString',
-                'coordinates': [
-                  [cityA.lng, cityA.lat],
-                  [cityB.lng, cityB.lat]
-                ]
-              }
-            });
-          }
-        }
-      }
-
-      map.addSource('network-lines', {
-        'type': 'geojson',
-        'data': {
-          'type': 'FeatureCollection',
-          'features': features
-        }
-      });
-
-      map.addLayer({
-        'id': 'network-lines-layer',
-        'type': 'line',
-        'source': 'network-lines',
-        'layout': {
-          'line-join': 'round',
-          'line-cap': 'round'
-        },
-        'paint': {
-          'line-color': '#4dff82',
-          'line-width': 1.5,
-          'line-opacity': 0.4,
-          'line-dasharray': [2, 2]
-        }
-      });
-
-      // Animate line dasharray to make them look like traveling data
-      let step = 0;
-      const animateDashArray = () => {
-        if (!mapInstanceRef.current) return;
-        step = (step + 1) % 4; // Length of dash array
-        try {
-          map.setPaintProperty('network-lines-layer', 'line-dasharray', [step, 4 - step]);
-        } catch (e) {}
-        requestAnimationFrame(animateDashArray);
-      };
-      animateDashArray();
-
-      // Add markers
-      ARAB_CITIES.forEach(city => {
-        const el = document.createElement('div');
-        el.className = 'arab-city-marker';
-        el.style.width = '12px';
-        el.style.height = '12px';
-        
-        el.style.backgroundColor = '#EEF6FC';
-        el.style.border = '2px solid #2FAD78';
-        el.style.boxShadow = '0 0 12px rgba(77, 255, 130, 0.8)';
-        el.style.borderRadius = '50%';
-        
-        // Add a pulsing ring
-        const ring = document.createElement('div');
-        ring.style.width = '100%';
-        ring.style.height = '100%';
-        ring.style.borderRadius = '50%';
-        ring.style.opacity = '0.6';
-        ring.style.animation = 'mapRingPulse 2s infinite';
-        ring.style.backgroundColor = '#4dff82';
-        
-        el.appendChild(ring);
-
-        new window.mapboxgl.Marker(el)
-          .setLngLat([city.lng, city.lat])
-          .addTo(map);
-      });
-      
-      // Theme modifications
-      const mapTheme = {
-        water_layer: "#014C6D",
-        land_layer: "#2FAD78",
-        text_labels: "#EEF6FC",
-        text_halo_shadows: "#08294A",
-        borders_and_roads: "#014C6D",
-        critical_markers: "#4dff82",
-        safe_markers: "#EEF6FC"
-      };
-
-      const mapStyle = map.getStyle();
-      if (mapStyle && mapStyle.layers) {
-        mapStyle.layers.forEach(layer => {
-          if (layer.id.includes('water')) {
-            if (layer.type === 'fill') {
-              map.setPaintProperty(layer.id, 'fill-color', mapTheme.water_layer);
-              map.setPaintProperty(layer.id, 'fill-opacity', 1);
-            } else if (layer.type === 'line') {
-              map.setPaintProperty(layer.id, 'line-color', mapTheme.water_layer);
-            }
-          } else {
-            if (layer.type === 'background') {
-              map.setPaintProperty(layer.id, 'background-color', mapTheme.land_layer);
-              map.setPaintProperty(layer.id, 'background-opacity', 1);
-            } else if (layer.type === 'fill') {
-              map.setPaintProperty(layer.id, 'fill-color', mapTheme.land_layer);
-              map.setPaintProperty(layer.id, 'fill-opacity', 1);
-            } else if (layer.type === 'hillshade' || layer.type === 'raster') {
-              map.setLayoutProperty(layer.id, 'visibility', 'none');
-            } else if (layer.type === 'symbol') {
-              if (layer.paint && layer.paint['text-color']) {
-                map.setPaintProperty(layer.id, 'text-color', mapTheme.text_labels);
-              }
-              if (layer.paint && layer.paint['text-halo-color']) {
-                map.setPaintProperty(layer.id, 'text-halo-color', mapTheme.text_halo_shadows);
-                map.setPaintProperty(layer.id, 'text-halo-width', 1.5);
-              }
-              if (layer.layout && layer.layout['text-field']) {
-                const textField = layer.layout['text-field'];
-                if (Array.isArray(textField)) {
-                  // Advanced string manipulation for Mapbox text format
-                } else if (typeof textField === 'string') {
-                   // simple string mapping
-                }
-                
-                // Using Mapbox GL expression for find/replace
-                map.setLayoutProperty(layer.id, 'text-field', [
-                  'case',
-                  ['==', ['get', 'name_en'], 'Israel'],
-                  'Palestine',
-                  ['==', ['get', 'name'], 'Israel'],
-                  'Palestine',
-                  ['get', 'name_en']
-                ]);
-              }
-            } else if (layer.type === 'line' && (layer.id.includes('road') || layer.id.includes('boundary') || layer.id.includes('admin'))) {
-              map.setPaintProperty(layer.id, 'line-color', mapTheme.borders_and_roads);
-              map.setPaintProperty(layer.id, 'line-width', 1.5);
-            }
-          }
-        });
-      }
-    });
-  }, [mapboxLoaded]);
-
-  return (
-    <div style={{ position: 'relative', width: '100%', height: '500px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(11, 40, 73, 0.08)' }}>
-      <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }}></div>
-      
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes mapRingPulse {
-          0% { transform: scale(1); opacity: 0.8; }
-          100% { transform: scale(3); opacity: 0; }
-        }
-        .mapboxgl-ctrl-logo {
-          display: none !important;
-        }
-      `}} />
-    </div>
-  );
+  return <BaseMap onMapLoad={handleMapLoad} center={[28.0, 26.0]} zoom={3.2} />;
 }

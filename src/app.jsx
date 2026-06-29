@@ -16,6 +16,9 @@ import { JoinUsPage } from './features/join-us/JoinUsPage'
 import { OpportunitiesPage } from './features/opportunities/components/OpportunitiesPage'
 import { EventsPage } from './features/events/EventsPage'
 import { ArticleEditorPage } from './features/news-blog/components/ArticleEditorPage'
+import { NewsPage } from './features/news-blog/components/NewsPage'
+import { ArticleReaderPage } from './features/news-blog/components/ArticleReaderPage'
+import { HomeNewsWidget } from './features/news-blog/components/HomeNewsWidget'
 import { ProfilePage } from './features/profile/components/ProfilePage'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
@@ -190,6 +193,10 @@ function AppContent() {
       setCurrentView('write-article');
     } else if (path === '/profile') {
       setCurrentView('profile');
+    } else if (path === '/news-blog') {
+      setCurrentView('news-blog');
+    } else if (path === '/article') {
+      setCurrentView('article');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -221,6 +228,10 @@ function AppContent() {
         setCurrentView('write-article');
       } else if (p === '/profile') {
         setCurrentView('profile');
+      } else if (p === '/news-blog') {
+        setCurrentView('news-blog');
+      } else if (p === '/article') {
+        setCurrentView('article');
       } else {
         setCurrentView('home');
       }
@@ -322,6 +333,8 @@ function AppContent() {
             window.history.pushState({}, '', '/events');
           } else if (view === 'write-article') {
             window.history.pushState({}, '', '/write-article');
+          } else if (view === 'news-blog') {
+            window.history.pushState({}, '', '/news-blog');
           } else if (sectionId) {
             window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
@@ -363,6 +376,20 @@ function AppContent() {
             </div>
           </div>
         </section>
+
+        {/* Home News Widget inserted right after Hero */}
+        <HomeNewsWidget 
+          lang={lang} 
+          onNavigate={(view, articleId) => {
+            if (view === 'article') {
+              setCurrentView('article');
+              window.history.pushState({}, '', '/article?id=' + articleId);
+            } else {
+              setCurrentView(view);
+              window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+            }
+          }} 
+        />
 
         {/* Dynamic Discovery Carousel Section */}
         <section className="figma-discovery-section">
@@ -679,6 +706,21 @@ function AppContent() {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />
+      ) : currentView === 'news-blog' ? (
+        <NewsPage lang={lang} onNavigate={(view, articleId) => {
+          if (view === 'article') {
+            setCurrentView('article');
+            window.history.pushState({}, '', '/article?id=' + articleId);
+          } else {
+            setCurrentView(view);
+            window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+          }
+        }} />
+      ) : currentView === 'article' ? (
+        <ArticleReaderPage lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
       ) : (
         <AboutUsPage
           lang={lang}
@@ -717,6 +759,8 @@ function AppContent() {
               window.history.pushState({}, '', '/join-us');
             } else if (view === 'events') {
               window.history.pushState({}, '', '/events');
+            } else if (view === 'news-blog') {
+              window.history.pushState({}, '', '/news-blog');
             } else if (sectionId) {
               window.history.pushState({}, '', '/' + sectionId);
               setTimeout(() => {

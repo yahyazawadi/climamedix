@@ -3,7 +3,28 @@ import { GlassCard } from '../../shared/components/GlassCard';
 
 export function ArticleCard({ title, category, date, author, summary, image, onClick }) {
   return (
-    <GlassCard className="article-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px', height: '100%', opacity: 0 }}>
+    <GlassCard 
+      className="article-card" 
+      onClick={onClick}
+      style={{ 
+        padding: '20px', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '15px', 
+        height: '100%', 
+        opacity: 0,
+        cursor: 'pointer',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = '0 12px 24px rgba(11, 40, 73, 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'none'; // GlassCard default
+      }}
+    >
       {image && (
         <div style={{ width: '100%', height: '180px', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(11, 40, 73, 0.1)' }}>
           <img src={image} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

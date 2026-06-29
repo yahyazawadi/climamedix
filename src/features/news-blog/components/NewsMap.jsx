@@ -47,7 +47,7 @@ export function NewsMap({ lang = 'ar' }) {
 
   useEffect(() => {
     fetchNodes();
-  }, []);
+  }, [user]); // Re-fetch when user session is ready
 
   const handleMapLoad = useCallback((map) => {
     mapInstanceRef.current = map;
@@ -118,40 +118,46 @@ export function NewsMap({ lang = 'ar' }) {
         }))
       };
 
-      if (map.getSource('news-nodes')) {
-        map.getSource('news-nodes').setData(geojsonData);
-      } else {
-        map.addSource('news-nodes', { type: 'geojson', data: geojsonData });
-        
-        // Add circle layer for radius
-        map.addLayer({
-          id: 'news-nodes-radius',
-          type: 'circle',
-          source: 'news-nodes',
-          paint: {
-            // Rough approximation: scale radius visually
-            'circle-radius': [
-              'interpolate', ['linear'], ['zoom'],
-              2, ['/', ['get', 'radius_km'], 10],
-              6, ['*', ['get', 'radius_km'], 1],
-              10, ['*', ['get', 'radius_km'], 5]
-            ],
-            'circle-color': [
-              'match', ['get', 'icon_type'],
-              'danger', '#ff4d4d',
-              'warning', '#ffcc00',
-              '#EEF6FC' // default / info
-            ],
-            'circle-opacity': 0.3,
-            'circle-stroke-width': 1,
-            'circle-stroke-color': [
-              'match', ['get', 'icon_type'],
-              'danger', '#ff4d4d',
-              'warning', '#ffcc00',
-              '#EEF6FC'
-            ]
-          }
-        });
+      try {
+        if (map.getSource('news-nodes')) {
+          map.getSource('news-nodes').setData(geojsonData);
+        } else {
+          map.addSource('news-nodes', { type: 'geojson', data: geojsonData });
+          
+          // Add circle layer for radius
+          map.addLayer({
+            id: 'news-nodes-radius',
+            type: 'circle',
+            source: 'news-nodes',
+            paint: {
+              // Rough approximation: scale radius visually
+              'circle-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                2, ['/', ['get', 'radius_km'], 10],
+                6, ['*', ['get', 'radius_km'], 1],
+                10, ['*', ['get', 'radius_km'], 5]
+              ],
+              'circle-color': [
+                'match', ['get', 'icon_type'],
+                'danger', '#ff4d4d',
+                'warning', '#ffcc00',
+                '#EEF6FC' // default / info
+              ],
+              'circle-opacity': 0.3,
+              'circle-stroke-width': 1,
+              'circle-stroke-color': [
+                'match', ['get', 'icon_type'],
+                'danger', '#ff4d4d',
+                'warning', '#ffcc00',
+                '#EEF6FC'
+              ]
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Mapbox style not ready, retrying...', err);
+        setTimeout(updateSource, 200);
+        return;
       }
 
       // Add HTML markers for icons and popups

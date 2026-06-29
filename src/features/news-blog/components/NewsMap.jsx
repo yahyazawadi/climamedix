@@ -243,7 +243,7 @@ export function NewsMap({ lang = 'ar' }) {
     } else {
       map.once('style.load', updateSource);
     }
-  }, [nodes, mapboxLoaded, newCoords, formData, lang, canEdit]);
+  }, [nodes, mapboxLoaded, mapFullyReady, newCoords, formData, lang, canEdit]);
 
   const handleSaveNode = async () => {
     if (!newCoords) return;

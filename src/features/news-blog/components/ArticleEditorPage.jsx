@@ -243,9 +243,7 @@ export function ArticleEditorPage({ lang, onNavigate }) {
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
             </div>
             <h3 style="color: #0b2849; margin-bottom: 15px; font-family: inherit;">${attachedFile.name}</h3>
-            <a href="${fileUrl}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #15b47a, #0c8774); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: inherit;">
-              ${isRtl ? 'تحميل / عرض المستند' : 'Download / View Document'}
-            </a>
+            <a href="${fileUrl}" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #15b47a, #0c8774); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: inherit; text-align: center;">${isRtl ? 'تحميل / عرض المستند' : 'Download / View Document'}</a>
           </div>
         `;
       } catch (err) {

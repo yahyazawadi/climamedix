@@ -63,11 +63,16 @@ export function ArabWorldMap({ lang = 'ar' }) {
             clearInterval(checkM);
           }
         }, 100);
+        // Store interval to clear on unmount
+        mapInstanceRef.current = { _checkInterval: checkM };
       }
     }
 
     return () => {
-      if (mapInstanceRef.current) {
+      if (mapInstanceRef.current?._checkInterval) {
+        clearInterval(mapInstanceRef.current._checkInterval);
+      }
+      if (mapInstanceRef.current && mapInstanceRef.current.remove) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }

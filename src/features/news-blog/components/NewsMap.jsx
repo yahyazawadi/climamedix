@@ -74,11 +74,15 @@ export function NewsMap({ lang = 'ar' }) {
             clearInterval(checkM);
           }
         }, 100);
+        mapInstanceRef.current = { _checkInterval: checkM };
       }
     }
 
     return () => {
-      if (mapInstanceRef.current) {
+      if (mapInstanceRef.current?._checkInterval) {
+        clearInterval(mapInstanceRef.current._checkInterval);
+      }
+      if (mapInstanceRef.current && mapInstanceRef.current.remove) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }

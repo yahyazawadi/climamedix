@@ -27,10 +27,10 @@ function getDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // km
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
 
@@ -49,7 +49,7 @@ export function ArabWorldMap({ lang = 'ar' }) {
         const cityA = ARAB_CITIES[i];
         const cityB = ARAB_CITIES[j];
         const dist = getDistance(cityA.lat, cityA.lng, cityB.lat, cityB.lng);
-        
+
         if (dist < MAX_DISTANCE) {
           features.push({
             'type': 'Feature',
@@ -96,7 +96,7 @@ export function ArabWorldMap({ lang = 'ar' }) {
       step = (step + 1) % 4; // Length of dash array
       try {
         map.setPaintProperty('network-lines-layer', 'line-dasharray', [step, 4 - step]);
-      } catch (e) {}
+      } catch (e) { }
       requestAnimationFrame(animateDashArray);
     };
     animateDashArray();
@@ -107,12 +107,12 @@ export function ArabWorldMap({ lang = 'ar' }) {
       el.className = 'arab-city-marker';
       el.style.width = '12px';
       el.style.height = '12px';
-      
+
       el.style.backgroundColor = '#EEF6FC';
       el.style.border = '2px solid #2FAD78';
       el.style.boxShadow = '0 0 12px rgba(77, 255, 130, 0.8)';
       el.style.borderRadius = '50%';
-      
+
       // Add a pulsing ring
       const ring = document.createElement('div');
       ring.style.width = '100%';
@@ -121,7 +121,7 @@ export function ArabWorldMap({ lang = 'ar' }) {
       ring.style.opacity = '0.6';
       ring.style.animation = 'mapRingPulse 2s infinite';
       ring.style.backgroundColor = '#4dff82';
-      
+
       el.appendChild(ring);
 
       new window.mapboxgl.Marker(el)

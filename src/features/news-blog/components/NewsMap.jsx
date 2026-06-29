@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'preact/hooks';
+import { useState, useEffect, useRef, useCallback } from 'preact/hooks';
 import { supabase } from '../../../utils/supabaseClient';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { Button } from '../../shared/components/Button';
@@ -49,10 +49,10 @@ export function NewsMap({ lang = 'ar' }) {
     fetchNodes();
   }, []);
 
-  const handleMapLoad = (map) => {
+  const handleMapLoad = useCallback((map) => {
     mapInstanceRef.current = map;
     setMapboxLoaded(true);
-  };
+  }, []);
 
   useEffect(() => {
     if (!mapboxLoaded || !mapInstanceRef.current) return;

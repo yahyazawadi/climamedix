@@ -448,8 +448,8 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                           is_published: c.is_published !== false
                         });
                         setShowCourseModal(true);
-                      }}>✏️</button>
-                      <button onClick={() => deleteCourse(c.id)}>🗑️</button>
+                      }} style={{ fontSize: '12px' }}>{lang === 'ar' ? 'تعديل' : 'Edit'}</button>
+                      <button onClick={() => deleteCourse(c.id)} style={{ fontSize: '12px', color: '#ff4d4d' }}>{lang === 'ar' ? 'حذف' : 'Delete'}</button>
                     </div>
                   </div>
                 ))}
@@ -492,7 +492,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                             {lang === 'ar' ? mod.title_ar : (mod.title_en || mod.title_ar)}
                           </h4>
                           <div className="cb-module-actions">
-                            <button onClick={() => openLessonModalForNew(mod.id)} title="Add Lesson">➕ {lang === 'ar' ? 'درس' : 'Lesson'}</button>
+                            <button onClick={() => openLessonModalForNew(mod.id)} title="Add Lesson" style={{ fontSize: '11px' }}>+ {lang === 'ar' ? 'درس' : 'Lesson'}</button>
                             <button onClick={() => {
                               setEditingModule(mod);
                               setModuleForm({
@@ -501,8 +501,8 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                                 sequence_order: mod.sequence_order || 1
                               });
                               setShowModuleModal(true);
-                            }} title="Edit Module">✏️</button>
-                            <button onClick={() => deleteModule(mod.id)} title="Delete Module">🗑️</button>
+                            }} title="Edit Module" style={{ fontSize: '11px' }}>{lang === 'ar' ? 'تعديل' : 'Edit'}</button>
+                            <button onClick={() => deleteModule(mod.id)} title="Delete Module" style={{ fontSize: '11px', color: '#ff4d4d' }}>{lang === 'ar' ? 'حذف' : 'Delete'}</button>
                           </div>
                         </div>
 
@@ -511,8 +511,8 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                             <div key={les.id} className="cb-lesson-item" onClick={() => openLessonModalForEdit(les, mod.id)}>
                               <span>{lang === 'ar' ? les.title_ar : (les.title_en || les.title_ar)}</span>
                               <div className="cb-lesson-meta">
-                                {les.video_url && <span className="cb-badge video-badge">▶ Video</span>}
-                                <button onClick={(e) => { e.stopPropagation(); deleteLesson(les.id); }} className="cb-lesson-del">🗑️</button>
+                                {les.video_url && <span className="cb-badge video-badge">Video</span>}
+                                <button onClick={(e) => { e.stopPropagation(); deleteLesson(les.id); }} className="cb-lesson-del" style={{ color: '#ff4d4d' }}>{lang === 'ar' ? 'حذف' : 'Delete'}</button>
                               </div>
                             </div>
                           ))}
@@ -527,7 +527,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
               </div>
             ) : (
               <div className="cb-unselected-msg">
-                <span>👈 {lang === 'ar' ? 'اختر مساقاً من القائمة للبدء بتنظيم المحتوى' : 'Select a course from the list to start building its content'}</span>
+                <span>{lang === 'ar' ? 'اختر مساقاً من القائمة للبدء بتنظيم المحتوى' : 'Select a course from the list to start building its content'}</span>
               </div>
             )}
           </GlassCard>
@@ -656,7 +656,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                     {/* R2 Video Upload Field */}
                     <div className="cb-upload-box">
                       <label className="cb-upload-label">
-                        <span>📁 Upload Video to Cloudflare R2</span>
+                        <span>Upload Video to Cloudflare R2</span>
                         <input type="file" accept="video/*" onChange={handleVideoUpload} style={{ display: 'none' }} />
                       </label>
                       {uploadProgress !== null && (
@@ -692,7 +692,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
 
               {/* Right Column: Quiz Builder */}
               <div className="cb-lesson-modal-right">
-                <h5>📝 {lang === 'ar' ? 'منشئ الاختبار الخاص بالدرس' : 'Lesson Quiz Builder'}</h5>
+                <h5>{lang === 'ar' ? 'منشئ الاختبار الخاص بالدرس' : 'Lesson Quiz Builder'}</h5>
                 <hr style={{ border: 'none', borderTop: '1px solid rgba(11,40,73,0.08)', margin: '12px 0' }} />
 
                 {loadingQuiz ? (
@@ -723,7 +723,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                               ))}
                             </div>
                           </div>
-                          <button onClick={() => removeQuestion(q.id)} className="cb-q-del-btn">🗑️</button>
+                          <button onClick={() => removeQuestion(q.id)} className="cb-q-del-btn" style={{ color: '#ff4d4d' }}>{lang === 'ar' ? 'حذف' : 'Delete'}</button>
                         </div>
                       ))}
                       {(quiz.quiz_questions || []).length === 0 && (
@@ -735,7 +735,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
 
                     {/* Form to add a new question */}
                     <div className="cb-quiz-new-q-form">
-                      <h6>➕ {lang === 'ar' ? 'إضافة سؤال جديد' : 'Add Question'}</h6>
+                      <h6>{lang === 'ar' ? 'إضافة سؤال جديد' : 'Add Question'}</h6>
                       <div className="cb-form-group" style={{ marginBottom: '8px' }}>
                         <input type="text" placeholder="Question Text (AR)" value={newQuestionTextAr} onInput={e => setNewQuestionTextAr(e.target.value)} style={{ fontSize: '12.5px', padding: '8px' }} />
                       </div>

@@ -614,20 +614,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               <span class="figma-nav-text">{t.opportunities}</span>
             </a>
 
-            {/* 5. دورات تدريبية */}
-            <a 
-              href="#training" 
-              onClick={(e) => {
-                e.preventDefault();
-                onNavigate('home', 'training');
-              }}
-              class={`figma-nav-item ${activeSection === 'training' && currentView === 'home' ? 'active' : ''}`}
-            >
-              <img src={iconTraining} class="figma-nav-icon" alt="دورات تدريبية" />
-              <span class="figma-nav-text">{t.training}</span>
-            </a>
-
-            {/* Learning Hub (New Page) */}
+                    {/* Learning Hub (New Page) */}
             <a 
               href="#learning-hub" 
               onClick={(e) => {

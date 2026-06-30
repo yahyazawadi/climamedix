@@ -50,7 +50,9 @@ export function ArabWorldMap({ lang = 'ar' }) {
         const cityB = ARAB_CITIES[j];
         const dist = getDistance(cityA.lat, cityA.lng, cityB.lat, cityB.lng);
 
-        if (dist < MAX_DISTANCE) {
+        const isCairoTripoli = (cityA.id === 'cairo' && cityB.id === 'tripoli') || (cityA.id === 'tripoli' && cityB.id === 'cairo');
+
+        if (dist < MAX_DISTANCE || isCairoTripoli) {
           features.push({
             'type': 'Feature',
             'geometry': {

@@ -152,7 +152,7 @@ html[lang="en"] .figma-nav-text {
 }
 
 /* Specific icon size adjustments */
-a[href="#training"] .figma-nav-icon {
+a[href="#learning-hub"] .figma-nav-icon {
   height: 28px;
   /* reduced size */
 }

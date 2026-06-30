@@ -2,77 +2,183 @@ import { useState, useEffect } from 'preact/hooks';
 import { Button } from '../../shared/components/Button';
 import { GlassCard } from '../../shared/components/GlassCard';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { LMSDashboard } from './LMSDashboard';
+import { CourseDetailModal } from './CourseDetailModal';
+import { CertificateGenerator } from './CertificateGenerator';
+import {
+  fetchCourses,
+  fetchEnrollments,
+  enrollInCourse,
+  checkEnrollment,
+  fetchCompletedLessons,
+  issueCertificate,
+  fetchUserCertificates,
+} from '../services/lmsService';
 
 export function LearningHubPage({ lang, onNavigate }) {
-  const { user, userProfile } = useAuth();
-  
-  // Data for widgets
-  const milestones = [
-    { title: "الأساسيات البيئية", date: "الأسبوع 1-2", desc: "مقدمة في علوم الغلاف الجوي والتغير المناخي وتأثيرها الأولي على المجتمعات." },
-    { title: "الأمراض والنواقل", date: "الأسبوع 3-4", desc: "دراسة عميقة لتأثير الحرارة على انتشار النواقل الحشرية." },
-    { title: "الاستدامة الطبية", date: "الأسبوع 5-6", desc: "كيفية بناء وتجهيز مستشفيات خضراء صديقة للبيئة." },
-    { title: "المشروع النهائي", date: "الأسبوع 7-8", desc: "تقديم مسودة بحثية عملية." }
-  ];
-  const [selectedMilestone, setSelectedMilestone] = useState(0);
+  const { user, userProfile, hasPermission } = useAuth();
 
-  const courseLessons = [
-    { title: 'رصد الأوبئة وتأثير التغير الحراري', duration: '15 دقيقة' },
-    { title: 'الانبعاثات الطبية وإدارة المخلفات السائلة', duration: '22 دقيقة' },
-    { title: 'تغير المناخ ومعدلات انتشار الربو الشعبي', duration: '18 دقيقة' }
-  ];
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [currentLesson, setCurrentLesson] = useState(courseLessons[0].title);
+  // ─── State ───────────────────────────────────────────────────────────────
+  const [allCourses, setAllCourses] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState([]); // enriched with progress
+  const [completedCourses, setCompletedCourses] = useState([]);
+  const [userCerts, setUserCerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [enrollingId, setEnrollingId] = useState(null); // courseId currently being enrolled
 
-  const [quizStatus, setQuizStatus] = useState('idle');
+  const [selectedCourse, setSelectedCourse] = useState(null); // open CourseDetailModal
+  const [showCertFor, setShowCertFor] = useState(null); // course title string for cert generator
 
-  const curriculumModules = [
-    { id: 'm1', title: 'الوحدة الأولى: أساسيات المناخ والصحة', desc: 'مقدمة في مسببات التغير المناخي والغازات الدفيئة وعلاقتها المباشرة بتدهور جودة الهواء.' },
-    { id: 'm2', title: 'الوحدة الثانية: الأمراض المنقولة بالنواقل', desc: 'دراسة تفصيلية لكيفية تأثير التغيرات الحرارية على دورة حياة النواقل مثل البعوض.' },
-    { id: 'm3', title: 'الوحدة الثالثة: بناء المستشفيات الخضراء', desc: 'أساسيات التحول نحو مرافق رعاية صحية مستدامة.' }
-  ];
-  const [activeAccordion, setActiveAccordion] = useState(curriculumModules[0].id);
+  const [activeTab, setActiveTab] = useState('discover'); // 'discover' | 'my-courses'
 
-  // Permission Logic
-  // Unsigned -> Teaser, Unpaid -> Free courses, Subscriber+ -> All courses
-  const role = userProfile?.role;
-  const isPremiumUser = ['subscriber', 'researcher', 'educator', 'admin', 'superadmin'].includes(role);
-  const isFreeUser = role === 'user';
-  
-  const hasAccess = isPremiumUser || isFreeUser; // for now let's just assume this is a free course for demonstration
-
-  const handleMilestoneClick = (idx) => {
-    setSelectedMilestone(idx);
-  };
-
-  const handlePlayToggle = () => {
-    setIsVideoPlaying(!isVideoPlaying);
-  };
-
-  const handleLessonSelect = (lesson) => {
-    setCurrentLesson(lesson.title);
-    setIsVideoPlaying(true);
-  };
-
-  const handleQuizAnswer = (isCorrect) => {
-    setQuizStatus(isCorrect ? 'correct' : 'incorrect');
-  };
-
-  const handleAccordionClick = (id) => {
-    setActiveAccordion(activeAccordion === id ? null : id);
-  };
-
+  // ─── Load Data ───────────────────────────────────────────────────────────
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    if (user) loadData();
+  }, [user]);
 
-  // UI rendering based on permissions
+  async function loadData() {
+    setLoading(true);
+    try {
+      const [courses, enrollments, certs] = await Promise.all([
+        fetchCourses(),
+        fetchEnrollments(user.id),
+        fetchUserCertificates(user.id),
+      ]);
+
+      setAllCourses(courses || []);
+      setUserCerts(certs || []);
+
+      // Enrich each enrollment with progress data
+      const enriched = await Promise.all(
+        (enrollments || []).map(async (enr) => {
+          const course = enr.course;
+          if (!course) return null;
+
+          const completedSet = await fetchCompletedLessons(user.id, course.id);
+
+          // Count total lessons via the syllabus already fetched? 
+          // We use a simple count from the completed lessons approach.
+          // Total lessons will be fetched inside CourseDetailModal on open.
+          return {
+            id: course.id,
+            title: lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar),
+            category: course.category,
+            cover_image: course.cover_image,
+            duration: course.duration,
+            full_access_permission_key: course.full_access_permission_key,
+            teaser_permission_key: course.teaser_permission_key,
+            enrollmentId: enr.id,
+            enrolledAt: enr.enrolled_at,
+            completedLessonIds: completedSet,
+            progress: 0, // will be updated when syllabus is known
+            remainingLessons: '?',
+            _raw: course,
+          };
+        })
+      );
+
+      const validEnrolled = enriched.filter(Boolean);
+
+      // Split into completed (100%) vs active
+      // We mark as completed if the user has a certificate for that course
+      const certCourseTitles = new Set((certs || []).map(c => c.course));
+      const completed = validEnrolled.filter(c =>
+        certCourseTitles.has(lang === 'ar' ? c._raw.title_ar : (c._raw.title_en || c._raw.title_ar))
+      );
+      const active = validEnrolled.filter(c =>
+        !certCourseTitles.has(lang === 'ar' ? c._raw.title_ar : (c._raw.title_en || c._raw.title_ar))
+      );
+
+      setEnrolledCourses(active);
+      setCompletedCourses(completed.map(c => ({
+        ...c,
+        quizScore: null // could be fetched from quiz_attempts if needed
+      })));
+    } catch (err) {
+      console.error('LearningHub loadData error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ─── Enroll Handler ───────────────────────────────────────────────────────
+  async function handleEnroll(course) {
+    if (!user) { onNavigate('auth'); return; }
+    if (enrollingId) return;
+
+    // Check if already enrolled
+    const existing = await checkEnrollment(user.id, course.id);
+    if (existing) {
+      // Just open the course modal
+      handleSelectCourse({ ...course, title: lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar) });
+      return;
+    }
+
+    setEnrollingId(course.id);
+    try {
+      await enrollInCourse(user.id, course.id);
+      await loadData(); // refresh
+      setActiveTab('my-courses');
+    } catch (err) {
+      console.error('Enrollment error:', err);
+      alert(lang === 'ar' ? 'حدث خطأ أثناء التسجيل' : 'Error during enrollment');
+    } finally {
+      setEnrollingId(null);
+    }
+  }
+
+  // ─── Course Modal ─────────────────────────────────────────────────────────
+  function handleSelectCourse(course) {
+    setSelectedCourse(course._raw || course);
+  }
+
+  // Called by CourseDetailModal when a lesson is completed
+  function handleLessonCompleted(courseId, progressPct, remainingLessons) {
+    setEnrolledCourses(prev => prev.map(c =>
+      c.id === courseId ? { ...c, progress: progressPct, remainingLessons } : c
+    ));
+  }
+
+  // Called by CourseDetailModal when a course reaches 100%
+  async function handleCourseCompleted(course) {
+    try {
+      const courseTitle = lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar);
+      await issueCertificate({
+        userId: user.id,
+        courseId: course.id,
+        userName: userProfile?.full_name || user.email,
+        courseTitle,
+        userEmail: user.email,
+      });
+      await loadData();
+      setShowCertFor(courseTitle);
+    } catch (err) {
+      console.error('Certificate error:', err);
+    }
+  }
+
+  // ─── Access Logic ─────────────────────────────────────────────────────────
+  function getCourseAccess(course) {
+    if (!user) return 'locked';
+    if (hasPermission(course.full_access_permission_key)) return 'full';
+    if (hasPermission(course.teaser_permission_key)) return 'teaser';
+    return 'locked';
+  }
+
+  // ─── Not Logged In ────────────────────────────────────────────────────────
   if (!user) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', padding: '20px' }}>
-        <GlassCard style={{ padding: '40px', maxWidth: '600px', textAlign: 'center' }}>
-          <h2 style={{ color: '#0b2849', marginBottom: '20px' }}>{lang === 'ar' ? 'مرحباً بك في منصة التعلم' : 'Welcome to the Learning Hub'}</h2>
-          <p style={{ color: 'rgba(11, 40, 73, 0.7)', marginBottom: '30px' }}>
-            {lang === 'ar' ? 'يرجى تسجيل الدخول للوصول إلى المساقات التعليمية والاختبارات.' : 'Please log in to access training courses and quizzes.'}
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f0f4f8', padding: '20px' }}>
+        <GlassCard style={{ padding: '48px', maxWidth: '560px', textAlign: 'center' }}>
+          <div style={{ fontSize: '48px', marginBottom: '20px' }}>🎓</div>
+          <h2 style={{ color: '#0b2849', marginBottom: '16px', fontSize: '24px', fontWeight: 'bold' }}>
+            {lang === 'ar' ? 'مرحباً بك في المركز التعليمي' : 'Welcome to the Learning Hub'}
+          </h2>
+          <p style={{ color: 'rgba(11, 40, 73, 0.65)', marginBottom: '32px', lineHeight: '1.7' }}>
+            {lang === 'ar'
+              ? 'يرجى تسجيل الدخول للوصول إلى المساقات التعليمية والاختبارات والشهادات.'
+              : 'Please log in to access training courses, quizzes, and certificates.'}
           </p>
           <Button variant="gradient" onClick={() => onNavigate('auth')}>
             {lang === 'ar' ? 'تسجيل الدخول / إنشاء حساب' : 'Log In / Sign Up'}
@@ -82,214 +188,229 @@ export function LearningHubPage({ lang, onNavigate }) {
     );
   }
 
+  const enrolledCourseIds = new Set([
+    ...enrolledCourses.map(c => c.id),
+    ...completedCourses.map(c => c.id),
+  ]);
+
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div style={{ background: '#e0eff5', minHeight: '100vh', padding: '120px 20px 60px', direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        
-        {/* Header Section */}
-        <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-          <h1 style={{ color: '#0b2849', fontSize: '36px', fontWeight: 'bold', marginBottom: '15px' }}>
-            {lang === 'ar' ? 'المركز التعليمي (Learning Hub)' : 'Learning Hub'}
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc', direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+      
+      {/* 1. Header Banner */}
+      <div style={{
+        background: 'linear-gradient(90deg, #15b47a 0%, #12a978 5%, #0c8774 23%, #066d71 41%, #025a6e 60%, #004f6d 79%, #004c6d 100%)',
+        padding: '160px 20px 50px 20px',
+        color: '#ffffff',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '12px', color: '#ffffff' }}>
+            {lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}
           </h1>
-          <p style={{ color: '#004c6d', fontSize: '18px', maxWidth: '800px', margin: '0 auto' }}>
-            {lang === 'ar' ? 'تصفح المساقات التدريبية، شاهد المحاضرات، واختبر معلوماتك لتصل إلى شهادة الاعتماد.' : 'Browse training tracks, watch lectures, and test your knowledge to earn certification.'}
+          <p style={{ fontSize: '17px', maxWidth: '700px', margin: '0 auto', lineHeight: '1.7', color: 'rgba(255, 255, 255, 0.85)' }}>
+            {lang === 'ar'
+              ? 'تصفح المساقات التدريبية، شاهد المحاضرات، واختبر معلوماتك للحصول على شهادة الاعتماد.'
+              : 'Browse training courses, watch lectures, and test your knowledge to earn certification.'}
           </p>
-          {!isPremiumUser && (
-            <div style={{ background: 'rgba(255, 193, 7, 0.2)', color: '#b38600', padding: '10px 20px', borderRadius: '8px', marginTop: '20px', display: 'inline-block', fontWeight: 'bold' }}>
-              {lang === 'ar' ? 'تنبيه: صلاحياتك تتيح لك الوصول للمساقات المجانية فقط.' : 'Notice: Your permissions allow access to free courses only.'}
+          {!hasPermission('view:all_courses') && (
+            <div style={{ background: 'rgba(255, 193, 7, 0.15)', color: '#ffd54f', padding: '10px 20px', borderRadius: '10px', marginTop: '20px', display: 'inline-block', fontWeight: 'bold', fontSize: '14px', border: '1px solid rgba(255,193,7,0.3)' }}>
+              {lang === 'ar'
+                ? 'صلاحياتك تتيح لك الوصول للمساقات المجانية فقط. اشترك للوصول الكامل.'
+                : 'Your plan gives you access to free courses only. Upgrade for full access.'}
             </div>
           )}
         </div>
+      </div>
 
-        {/* Widgets Grid */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-          
-          {/* Row 1: Roadmap & Quiz */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '40px' }}>
-            
-            {/* Feature Card 1: Roadmap */}
-            <div className="imagination-card" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', border: '1px solid rgba(21, 180, 122, 0.3)', boxShadow: '0 15px 35px rgba(0, 76, 109, 0.05)' }}>
-              <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '8px', color: '#0b2849', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span className="glow-dot" style={{ width: '12px', height: '12px', background: '#15b47a', borderRadius: '50%', boxShadow: '0 0 10px #15b47a' }}></span> 
-                {lang === 'ar' ? 'خارطة طريق زمالة المناخ والصحة' : 'Climate & Health Fellowship Roadmap'}
-              </h3>
-              <p style={{ fontSize: '14px', color: 'rgba(11, 40, 73, 0.7)', marginBottom: '30px' }}>
-                {lang === 'ar' ? 'مسار تفاعلي معزز بحركات انتقال سلسة للدروس والوحدات' : 'Interactive track for lessons and modules'}
-              </p>
+      {/* 2. Main Content */}
+      <div style={{ flexGrow: 1, padding: '50px 20px 80px 20px', position: 'relative', zIndex: 2 }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
-              <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 10px', marginBottom: '30px' }}>
-                <div style={{ position: 'absolute', top: '50%', left: '10%', right: '10%', height: '2px', background: 'rgba(21, 180, 122, 0.3)', transform: 'translateY(-50%)', zIndex: 0 }}></div>
-                {milestones.map((m, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => handleMilestoneClick(idx)}
-                    style={{ 
-                      width: '40px', height: '40px', borderRadius: '50%', background: selectedMilestone === idx ? '#15b47a' : '#fff', color: selectedMilestone === idx ? '#fff' : '#004c6d', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', zIndex: 1, border: `2px solid ${selectedMilestone === idx ? '#15b47a' : '#004c6d'}`, cursor: 'pointer', transition: 'all 0.3s' 
-                    }}
-                  >
-                    {idx + 1}
-                  </div>
-                ))}
-              </div>
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '36px', background: 'rgba(255,255,255,0.5)', padding: '6px', borderRadius: '14px', width: 'fit-content', border: '1px solid rgba(11,40,73,0.1)' }}>
+          {[
+            { id: 'discover', label: lang === 'ar' ? 'استكشاف المساقات' : 'Discover Courses' },
+            { id: 'my-courses', label: lang === 'ar' ? `تعلمي (${enrolledCourses.length + completedCourses.length})` : `My Learning (${enrolledCourses.length + completedCourses.length})` },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                padding: '10px 22px',
+                borderRadius: '10px',
+                border: 'none',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                transition: 'all 0.2s',
+                background: activeTab === tab.id ? '#0b2849' : 'transparent',
+                color: activeTab === tab.id ? '#ffffff' : 'rgba(11,40,73,0.6)',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-              <div style={{ background: 'rgba(255,255,255,0.6)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(21, 180, 122, 0.15)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontWeight: 'bold', color: '#004c6d' }}>{milestones[selectedMilestone].title}</span>
-                  <span style={{ fontSize: '13px', background: 'rgba(21, 180, 122, 0.12)', color: '#15b47a', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold' }}>
-                    {milestones[selectedMilestone].date}
-                  </span>
-                </div>
-                <p style={{ fontSize: '15px', lineHeight: '1.6', margin: 0, color: 'rgba(11, 40, 73, 0.85)' }}>
-                  {milestones[selectedMilestone].desc}
-                </p>
-              </div>
-            </div>
+        {/* ── Tab: Discover ── */}
+        {activeTab === 'discover' && (
+          <div>
+            {loading ? (
+              <LoadingSkeleton />
+            ) : allCourses.length === 0 ? (
+              <EmptyState lang={lang} message={lang === 'ar' ? 'لا توجد مساقات متاحة حالياً.' : 'No courses available yet.'} />
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '28px' }}>
+                {allCourses.map(course => {
+                  const access = getCourseAccess(course);
+                  const isAlreadyEnrolled = enrolledCourseIds.has(course.id);
+                  const title = lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar);
+                  const desc = lang === 'ar' ? course.description_ar : (course.description_en || course.description_ar);
 
-            {/* Feature Card 5: Quiz Checkpoint */}
-            <div className="imagination-card" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', border: '1px solid rgba(21, 180, 122, 0.3)', boxShadow: '0 15px 35px rgba(0, 76, 109, 0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '8px', color: '#0b2849' }}>
-                  {lang === 'ar' ? 'منصة التعليم والتحقق السريع (Quiz Checkpoint)' : 'Quick Checkpoint Quiz'}
-                </h3>
-                <p style={{ fontSize: '14px', color: 'rgba(11, 40, 73, 0.7)', marginBottom: '20px' }}>
-                  {lang === 'ar' ? 'محاكاة لربط الدرس الطبي باختبار ذكي يتحقق من استيعاب المتدرب للدرس فورياً' : 'Simulated medical lesson quiz checkpoint'}
-                </p>
-              </div>
+                  return (
+                    <div
+                      key={course.id}
+                      style={{
+                        background: 'rgba(255,255,255,0.7)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '20px',
+                        border: `1px solid ${access === 'locked' ? 'rgba(11,40,73,0.1)' : 'rgba(21,180,122,0.25)'}`,
+                        boxShadow: '0 8px 24px rgba(0,76,109,0.06)',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        transition: 'transform 0.2s, box-shadow 0.2s',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,76,109,0.12)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,76,109,0.06)'; }}
+                    >
+                      {/* Cover Image */}
+                      <div style={{ position: 'relative', height: '180px', background: '#0b2849', overflow: 'hidden' }}>
+                        {course.cover_image
+                          ? <img src={course.cover_image} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #0b2849, #004c6d)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px' }}>🎓</div>
+                        }
+                        {access === 'locked' && (
+                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ color: '#fff', fontSize: '28px' }}>🔒</span>
+                          </div>
+                        )}
+                        <span style={{ position: 'absolute', top: '12px', right: lang === 'ar' ? '12px' : 'auto', left: lang === 'ar' ? 'auto' : '12px', background: 'rgba(0,0,0,0.55)', color: '#fff', fontSize: '11px', padding: '3px 10px', borderRadius: '20px', fontWeight: 'bold' }}>
+                          {course.category}
+                        </span>
+                      </div>
 
-              <div style={{ background: 'rgba(255, 255, 255, 0.7)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(11, 40, 73, 0.1)', marginBottom: '20px' }}>
-                <div style={{ fontSize: '14px', color: '#004c6d', fontWeight: 'bold', marginBottom: '15px', lineHeight: '1.5' }}>
-                  {lang === 'ar' ? 'سؤال الدورة: ما هو العامل المناخي الأسرع تأثيراً على زيادة انتشار ناقلات الملاريا؟' : 'Course Question: What is the fastest climate factor increasing malaria vectors?'}
-                </div>
+                      {/* Body */}
+                      <div style={{ padding: '20px', flexGrow: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <h3 style={{ color: '#0b2849', fontSize: '16px', fontWeight: 'bold', margin: 0, lineHeight: '1.4' }}>{title}</h3>
+                        {desc && <p style={{ color: 'rgba(11,40,73,0.65)', fontSize: '13px', lineHeight: '1.6', margin: 0 }}>{desc.slice(0, 120)}{desc.length > 120 ? '…' : ''}</p>}
+                        {course.duration && (
+                          <span style={{ fontSize: '12px', color: '#15b47a', fontWeight: 'bold' }}>
+                            ⏱ {course.duration}
+                          </span>
+                        )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <button onClick={() => handleQuizAnswer(false)} style={{ padding: '12px 15px', background: '#fff', border: '1px solid rgba(11,40,73,0.1)', borderRadius: '10px', textAlign: lang === 'ar' ? 'right' : 'left', cursor: 'pointer', color: '#0b2849', transition: 'all 0.2s' }}>
-                    {lang === 'ar' ? 'أ. ارتفاع مستويات الضوضاء في المدن' : 'A. High noise levels in cities'}
-                  </button>
-                  <button onClick={() => handleQuizAnswer(true)} style={{ padding: '12px 15px', background: '#fff', border: '1px solid rgba(11,40,73,0.1)', borderRadius: '10px', textAlign: lang === 'ar' ? 'right' : 'left', cursor: 'pointer', color: '#0b2849', transition: 'all 0.2s' }}>
-                    {lang === 'ar' ? 'ب. ارتفاع درجات الحرارة والرطوبة المصاحبة لتقلبات هطول المطر' : 'B. High temperature and humidity'}
-                  </button>
-                  <button onClick={() => handleQuizAnswer(false)} style={{ padding: '12px 15px', background: '#fff', border: '1px solid rgba(11,40,73,0.1)', borderRadius: '10px', textAlign: lang === 'ar' ? 'right' : 'left', cursor: 'pointer', color: '#0b2849', transition: 'all 0.2s' }}>
-                    {lang === 'ar' ? 'ج. زحف التربة والتصحر الجاف' : 'C. Soil erosion and dry desertification'}
-                  </button>
-                </div>
-              </div>
-
-              <div style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {quizStatus === 'idle' && (
-                  <span style={{ fontSize: '14px', color: 'rgba(11, 40, 73, 0.5)', fontStyle: 'italic' }}>
-                    {lang === 'ar' ? 'يرجى اختيار إجابة من الأعلى...' : 'Please select an answer...'}
-                  </span>
-                )}
-
-                {quizStatus === 'correct' && (
-                  <div style={{ background: 'rgba(21, 180, 122, 0.12)', border: '1px solid #15b47a', color: '#15b47a', padding: '12px 24px', borderRadius: '12px', fontWeight: 'bold', width: '100%', textAlign: 'center' }}>
-                    {lang === 'ar' ? 'تم التحقق بنجاح من إجابتك وتسجيل تقدمك.' : 'Answer verified successfully. Progress saved.'}
-                  </div>
-                )}
-
-                {quizStatus === 'incorrect' && (
-                  <div style={{ background: 'rgba(255, 77, 77, 0.1)', border: '1px solid #ff4d4d', color: '#ff4d4d', padding: '12px 24px', borderRadius: '12px', fontWeight: 'bold', width: '100%', textAlign: 'center' }}>
-                    {lang === 'ar' ? 'إجابة غير صحيحة. حاول مرة أخرى.' : 'Incorrect answer. Try again.'}
-                  </div>
-                )}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Feature Card 13: Video Player */}
-          <div className="imagination-card" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', border: '1px solid rgba(21, 180, 122, 0.3)', boxShadow: '0 15px 35px rgba(0, 76, 109, 0.05)' }}>
-            <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '10px', color: '#0b2849' }}>
-              {lang === 'ar' ? 'مشغل المساقات ونظام متابعة المحاضرات الطبية' : 'Course Player & Tracking System'}
-            </h3>
-            <p style={{ fontSize: '14px', color: 'rgba(11, 40, 73, 0.7)', marginBottom: '25px' }}>
-              {lang === 'ar' ? 'تصفح المحاضرات العلمية وتفاعل مع مشغل الفيديو والروابط التعليمية المصاحبة لكل درس' : 'Browse lectures and interact with the video player'}
-            </p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
-              {/* Simulated Video Player */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{ position: 'relative', background: '#000', borderRadius: '16px', overflow: 'hidden', aspectRatio: '16/9' }}>
-                  {/* Simulated video playback screen */}
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#ffffff', padding: '20px', background: 'linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 100%)' }}>
-                    <span style={{ fontSize: '14px', background: 'rgba(0,0,0,0.5)', padding: '6px 16px', borderRadius: '20px', marginBottom: '15px' }}>
-                      {isVideoPlaying ? (lang === 'ar' ? 'جاري العرض...' : 'Playing...') : (lang === 'ar' ? 'متوقف مؤقتاً' : 'Paused')}
-                    </span>
-                    <h4 style={{ fontSize: '20px', fontWeight: 'bold', textShadow: '0 2px 10px rgba(0,0,0,0.8)', textAlign: 'center' }}>
-                      {currentLesson}
-                    </h4>
-                  </div>
-
-                  {/* Timeline bar */}
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '6px', background: 'rgba(255,255,255,0.2)' }}>
-                    <div style={{ width: isVideoPlaying ? '45%' : '20%', height: '100%', background: '#15b47a', transition: 'width 0.5s ease' }}></div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Button variant="gradient" onClick={handlePlayToggle}>
-                    {isVideoPlaying ? (lang === 'ar' ? 'إيقاف مؤقت' : 'Pause') : (lang === 'ar' ? 'تشغيل الدرس' : 'Play Lesson')}
-                  </Button>
-                  <span style={{ fontSize: '13px', color: 'rgba(11, 40, 73, 0.6)', fontWeight: 'bold' }}>
-                    {lang === 'ar' ? 'مدة الدرس الكلية: 22 دقيقة' : 'Total Duration: 22 Mins'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Lessons Sidebar list */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ fontSize: '15px', fontWeight: 'bold', color: '#004c6d', marginBottom: '5px' }}>
-                  {lang === 'ar' ? 'محتويات وحدة المناخ والصحة (3 دروس)' : 'Climate & Health Module (3 Lessons)'}
-                </div>
-                {courseLessons.map((lesson, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleLessonSelect(lesson)}
-                    style={{
-                      padding: '16px', borderRadius: '12px', border: 'none', textAlign: lang === 'ar' ? 'right' : 'left', cursor: 'pointer', transition: 'all 0.2s',
-                      background: currentLesson === lesson.title ? '#004c6d' : 'rgba(255,255,255,0.6)',
-                      color: currentLesson === lesson.title ? '#fff' : '#0b2849'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '14px', fontWeight: currentLesson === lesson.title ? 'bold' : 'normal' }}>{idx + 1}. {lesson.title}</span>
-                      <span style={{ fontSize: '12px', opacity: 0.8 }}>{lesson.duration}</span>
+                        <div style={{ marginTop: 'auto', paddingTop: '14px' }}>
+                          {access === 'locked' ? (
+                            <Button variant="outline" style={{ width: '100%', borderColor: '#004c6d', color: '#004c6d', fontSize: '13px' }} onClick={() => onNavigate('join-us')}>
+                              {lang === 'ar' ? 'ترقية الحساب للوصول' : 'Upgrade for Access'}
+                            </Button>
+                          ) : isAlreadyEnrolled ? (
+                            <Button variant="gradient" style={{ width: '100%', fontSize: '13px' }} onClick={() => handleSelectCourse(course)}>
+                              {lang === 'ar' ? 'متابعة التعلم' : 'Continue Learning'}
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="gradient"
+                              style={{ width: '100%', fontSize: '13px' }}
+                              onClick={() => handleEnroll(course)}
+                              disabled={enrollingId === course.id}
+                            >
+                              {enrollingId === course.id
+                                ? (lang === 'ar' ? 'جاري التسجيل...' : 'Enrolling...')
+                                : (lang === 'ar' ? 'التسجيل في المساق' : 'Enroll Now')}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
-            </div>
+            )}
           </div>
+        )}
 
-          {/* Feature Card 24: Curriculum Accordion */}
-          <div className="imagination-card" style={{ background: 'rgba(255, 255, 255, 0.4)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', border: '1px solid rgba(21, 180, 122, 0.3)', boxShadow: '0 15px 35px rgba(0, 76, 109, 0.05)' }}>
-            <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '20px', color: '#0b2849' }}>
-              {lang === 'ar' ? 'المنهج الأكاديمي (Curriculum Accordion)' : 'Curriculum Modules'}
-            </h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              {curriculumModules.map((mod) => (
-                <div key={mod.id} style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(11, 40, 73, 0.1)', borderRadius: '12px', overflow: 'hidden' }}>
-                  <button
-                    onClick={() => handleAccordionClick(mod.id)}
-                    style={{ width: '100%', padding: '20px', background: 'none', border: 'none', textAlign: lang === 'ar' ? 'right' : 'left', fontWeight: 'bold', color: '#004c6d', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '15px' }}
-                  >
-                    <span>{mod.title}</span>
-                    <span style={{ fontSize: '18px', color: '#15b47a' }}>{activeAccordion === mod.id ? '−' : '+'}</span>
-                  </button>
-                  {activeAccordion === mod.id && (
-                    <div style={{ padding: '0 20px 20px', fontSize: '14px', color: 'rgba(11,40,73,0.8)', lineHeight: '1.6' }}>
-                      {mod.desc}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+        {/* ── Tab: My Courses ── */}
+        {activeTab === 'my-courses' && (
+          <div>
+            {loading ? (
+              <LoadingSkeleton />
+            ) : (enrolledCourses.length === 0 && completedCourses.length === 0) ? (
+              <EmptyState lang={lang} message={lang === 'ar' ? 'لم تسجل في أي مساق بعد. استكشف المساقات المتاحة!' : 'You haven\'t enrolled in any courses yet. Explore the available courses!'} />
+            ) : (
+              <LMSDashboard
+                lang={lang}
+                enrolledCourses={enrolledCourses}
+                completedCourses={completedCourses}
+                onSelectCourse={handleSelectCourse}
+                onGenerateCertificate={(courseTitle) => setShowCertFor(courseTitle)}
+              />
+            )}
           </div>
+        )}
 
         </div>
       </div>
+
+      {/* ── Course Detail Modal ── */}
+      {selectedCourse && (
+        <CourseDetailModal
+          lang={lang}
+          course={selectedCourse}
+          userId={user.id}
+          onClose={() => setSelectedCourse(null)}
+          onLessonCompleted={handleLessonCompleted}
+          onCourseCompleted={handleCourseCompleted}
+        />
+      )}
+
+      {/* ── Certificate Generator ── */}
+      {showCertFor && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '20px' }}>
+          <div style={{ background: '#fff', borderRadius: '24px', padding: '32px', maxWidth: '800px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+            <button onClick={() => setShowCertFor(null)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#0b2849' }}>✕</button>
+            <CertificateGenerator
+              name={userProfile?.full_name || user.email}
+              course={showCertFor}
+              email={user.email}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Helper Components ────────────────────────────────────────────────────────
+
+function LoadingSkeleton() {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '28px' }}>
+      {[1, 2, 3].map(i => (
+        <div key={i} style={{ height: '340px', borderRadius: '20px', background: 'linear-gradient(90deg, rgba(255,255,255,0.4) 25%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.4) 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite', border: '1px solid rgba(11,40,73,0.08)' }} />
+      ))}
+      <style>{`@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
+    </div>
+  );
+}
+
+function EmptyState({ lang, message }) {
+  return (
+    <div style={{ textAlign: 'center', padding: '80px 20px', background: 'rgba(255,255,255,0.5)', borderRadius: '24px', border: '1px dashed rgba(11,40,73,0.2)' }}>
+      <div style={{ fontSize: '48px', marginBottom: '16px' }}>📚</div>
+      <p style={{ color: 'rgba(11,40,73,0.55)', fontSize: '16px' }}>{message}</p>
     </div>
   );
 }

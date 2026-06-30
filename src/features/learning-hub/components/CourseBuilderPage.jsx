@@ -765,12 +765,14 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                       <div 
                         key={mod.id} 
                         className={`cb-module-section ${draggedModuleId === mod.id ? 'dragging' : ''}`}
-                        draggable={true}
-                        onDragStart={(e) => handleModuleDragStart(e, mod.id)}
                         onDragOver={(e) => handleModuleDragOver(e)}
                         onDrop={(e) => handleModuleDrop(e, mod.id)}
                       >
-                        <div className="cb-module-header">
+                        <div 
+                          className="cb-module-header"
+                          draggable={true}
+                          onDragStart={(e) => handleModuleDragStart(e, mod.id)}
+                        >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ cursor: 'grab', opacity: 0.5 }}>
                               <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>

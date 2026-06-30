@@ -203,6 +203,12 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(11, 40, 73, 0.06);
+  cursor: grab;
+  user-select: none;
+}
+
+.cb-module-header:active {
+  cursor: grabbing;
 }
 
 .cb-module-header h4 {

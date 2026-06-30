@@ -192,6 +192,8 @@
   border-radius: 14px;
   background: rgba(0, 76, 109, 0.02);
   overflow: hidden;
+  transition: all 0.2s ease;
+  user-select: none;
 }
 
 .cb-module-header {
@@ -248,15 +250,28 @@
   border-radius: 8px;
   background: #ffffff;
   border: 1px solid rgba(11, 40, 73, 0.04);
-  cursor: pointer;
+  cursor: grab;
   transition: all 0.15s ease;
   font-size: 13.5px;
   color: #0b2849;
+  user-select: none;
 }
 
 .cb-lesson-item:hover {
   border-color: rgba(21, 180, 122, 0.2);
   background: rgba(21, 180, 122, 0.02);
+}
+
+.cb-lesson-item:active {
+  cursor: grabbing;
+}
+
+.cb-lesson-item.dragging,
+.cb-module-section.dragging {
+  opacity: 0.5;
+  border: 2px dashed #15b47a !important;
+  background: rgba(21, 180, 122, 0.03) !important;
+  box-shadow: 0 4px 12px rgba(21, 180, 122, 0.1);
 }
 
 .cb-lesson-meta {

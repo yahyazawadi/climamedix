@@ -128,9 +128,10 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 ### 4. 📚 Learning Hub (LMS)
 *   [x] **Learning Management System (LMS) Features:**
     *   [x] Course Categories (Training Courses Carousel)
-    *   [x] Premium Custom Video Lessons Player (Equipped with central overlay controls, timeline scrubbing, fullscreen support, and professional SVGs)
-    *   [x] High-Tech Control Sliders (Interactive vertical volume and speed slider widgets appearing dynamically on hover)
+    *   [x] Premium Custom Video Lessons Player (Decoupled modular architecture with a sleek Neon Glowing central play button, timeline scrubbing, fullscreen support, and professional SVGs)
+    *   [x] High-Tech Control Sliders (Interactive volume and speed slider popups featuring click-toggle functionality, centered metrics with fixed widths to prevent UI shifting, and CSS-transformed inputs for optimal cross-browser styling)
     *   [x] Playback Speed Tuning (Precise speed range adjustment from 0.5x to 2.0x in 0.1 increments)
+    *   [x] Advanced Player Tools (Picture-in-Picture Miniplayer support, "Copy Frame" screenshot functionality with Cloudflare R2 CORS integration, and descriptive hover tooltips for all controls)
     *   [x] Course Builder Drag & Drop (Interactive lesson reordering within modules, across modules, and module-level reordering)
     *   [x] Lesson Duration Support (Integrated duration metadata in the database, course builder forms, and detail sidebar)
     *   [ ] PDF Resources
@@ -326,6 +327,15 @@ src/
     ├── admin/          # Admin CRUD panels for courses, users, and events
     └── auth/           # Login, registration, student profile tracking
 ```
+
+### 🛠️ Key Core Files Edited & Maintained
+To help navigate the growing repository, here are the most important files we have heavily edited and modularized recently:
+*   `src/features/learning-hub/components/CustomVideoPlayer.jsx` - The core standalone video player (handles PiP, Copy Frame, Speed/Volume logic).
+*   `src/features/learning-hub/components/CourseDetailModal.jsx` - The wrapper that fetches lesson data, quizzes, and passes URLs to the CustomVideoPlayer.
+*   `src/features/learning-hub/services/lmsService.js` - API bridge to Supabase for fetching courses, quizzes, and Cloudflare R2 URLs.
+*   `src/features/debug-ui/DebugUIPage.jsx` - The interactive playground where we test UI designs (like the Neon glowing play buttons) before deploying them.
+*   `src/features/learning-hub/components/CourseBuilderPage.jsx` - The drag-and-drop course creation interface.
+*   `src/features/main/components/ArabWorldMap.jsx` - The interactive Mapbox geographic component.
 
 ---
 

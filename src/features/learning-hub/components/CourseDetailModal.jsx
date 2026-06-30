@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { Button } from '../../shared/components/Button';
 import { QuizWidget } from './QuizWidget';
+import { CustomVideoPlayer } from './CustomVideoPlayer';
 import {
   fetchCourseSyllabus,
   fetchCompletedLessons,
@@ -22,17 +23,8 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
   const [videoLoading, setVideoLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Custom Video Player States
-  const videoRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
-  const [showControls, setShowControls] = useState(true);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [volume, setVolume] = useState(1);
-  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const [showSpeedSlider, setShowSpeedSlider] = useState(false);
+  // Video URL loaded for the active lesson
+
 
   if (!course) return null;
 
@@ -68,15 +60,8 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
     setQuizData(null);
     setQuizMode(false);
     setVideoUrl(null);
-    setIsPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
-    setPlaybackSpeed(1);
-    setShowSpeedSlider(false);
-    setShowVolumeSlider(false);
-    if (videoRef.current) {
-      videoRef.current.playbackRate = 1;
-    }
+    setVideoUrl(null);
+
 
     async function loadLessonData() {
       try {
@@ -169,68 +154,6 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
     }
   }
 
-  // Custom Video Player Control Functions
-  function togglePlay() {
-    if (!videoRef.current) return;
-    if (isPlaying) {
-      videoRef.current.pause();
-    } else {
-      videoRef.current.play();
-    }
-  }
-
-  function toggleMute() {
-    if (!videoRef.current) return;
-    if (isMuted) {
-      videoRef.current.muted = false;
-      setIsMuted(false);
-      videoRef.current.volume = volume || 1;
-    } else {
-      videoRef.current.muted = true;
-      setIsMuted(true);
-    }
-  }
-
-  function handleVolumeChange(newVal) {
-    setVolume(newVal);
-    if (videoRef.current) {
-      videoRef.current.volume = newVal;
-      const isCurrentlyMuted = newVal === 0;
-      videoRef.current.muted = isCurrentlyMuted;
-      setIsMuted(isCurrentlyMuted);
-    }
-  }
-
-  function toggleFullscreen() {
-    if (!videoRef.current) return;
-    if (videoRef.current.requestFullscreen) {
-      videoRef.current.requestFullscreen();
-    } else if (videoRef.current.webkitRequestFullscreen) {
-      videoRef.current.webkitRequestFullscreen();
-    }
-  }
-
-  function handleTimelineClick(e) {
-    if (!videoRef.current || !duration) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const width = rect.width;
-    const newTime = (clickX / width) * duration;
-    videoRef.current.currentTime = newTime;
-  }
-
-  function formatTime(seconds) {
-    if (isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  }
-
-  function changeSpeed(speed) {
-    if (!videoRef.current) return;
-    videoRef.current.playbackRate = speed;
-    setPlaybackSpeed(speed);
-  }
 
   const lessonTitle = activeLesson
     ? (lang === 'ar' ? activeLesson.title_ar : (activeLesson.title_en || activeLesson.title_ar))
@@ -391,306 +314,14 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                     {lessonTitle}
                   </h3>
 
-                  {/* Custom Video Player (Concept 13) */}
+                  {/* Custom Video Player Component */}
                   {activeLesson.video_url && (
-                    <div 
-                      onMouseEnter={() => setShowControls(true)}
-                      onMouseLeave={() => setShowControls(false)}
-                      style={{
-                        width: '100%',
-                        aspectRatio: '16/9',
-                        background: '#000000',
-                        borderRadius: '16px',
-                        marginBottom: '32px',
-                        overflow: 'hidden',
-                        position: 'relative',
-                        boxShadow: 'inset 0 0 40px rgba(0,0,0,0.8), 0 12px 30px rgba(11, 40, 73, 0.15)',
-                        border: '1px solid rgba(0, 76, 109, 0.12)'
-                      }}
-                    >
-                      {videoLoading ? (
-                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px', flexDirection: 'column', gap: '12px' }}>
-                          <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.15)', borderTop: '3px solid #15b47a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                          {lang === 'ar' ? 'جاري تحميل الفيديو...' : 'Loading video...'}
-                          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                        </div>
-                      ) : videoUrl ? (
-                        <>
-                          <video
-                            ref={videoRef}
-                            src={videoUrl}
-                            style={{ width: '100%', height: '100%', objectFit: 'contain', cursor: 'pointer' }}
-                            onClick={togglePlay}
-                            onPlay={() => setIsPlaying(true)}
-                            onPause={() => setIsPlaying(false)}
-                            onTimeUpdate={() => {
-                              if (videoRef.current) {
-                                setCurrentTime(videoRef.current.currentTime);
-                              }
-                            }}
-                            onLoadedMetadata={() => {
-                              if (videoRef.current) {
-                                setDuration(videoRef.current.duration);
-                              }
-                            }}
-                          />
-
-                          {/* Center Play/Pause Overlay Button */}
-                          {(!isPlaying || showControls) && (
-                            <div 
-                              onClick={togglePlay}
-                              style={{
-                                position: 'absolute',
-                                inset: 0,
-                                background: 'rgba(0, 0, 0, 0.35)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer',
-                                transition: 'opacity 0.25s ease'
-                              }}
-                            >
-                              <div style={{
-                                width: '70px',
-                                height: '70px',
-                                borderRadius: '50%',
-                                background: 'linear-gradient(135deg, #15b47a, #004c6d)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                boxShadow: '0 8px 25px rgba(21, 180, 122, 0.4)',
-                                transform: 'scale(1)',
-                                transition: 'transform 0.2s',
-                                color: '#ffffff'
-                              }}
-                              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-                              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-                              >
-                                {isPlaying ? (
-                                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                                ) : (
-                                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '4px' }}><path d="M8 5v14l11-7z"/></svg>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Top Overlay details */}
-                          {showControls && (
-                            <div style={{
-                              position: 'absolute',
-                              top: 0, left: 0, right: 0,
-                              background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
-                              padding: '20px 24px',
-                              color: '#fff',
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              pointerEvents: 'none'
-                            }}>
-                              <span style={{ fontSize: '15px', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                                {lessonTitle}
-                              </span>
-                            </div>
-                          )}
-
-                          {/* Bottom Controls Overlay */}
-                          {showControls && (
-                            <div style={{
-                              position: 'absolute',
-                              bottom: 0, left: 0, right: 0,
-                              background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)',
-                              padding: '24px 20px 14px 20px',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '12px'
-                            }}>
-                              
-                              {/* Timeline seekable slider bar */}
-                              <div 
-                                onClick={handleTimelineClick}
-                                style={{
-                                  width: '100%',
-                                  height: '6px',
-                                  background: 'rgba(255,255,255,0.3)',
-                                  borderRadius: '3px',
-                                  cursor: 'pointer',
-                                  position: 'relative'
-                                }}
-                              >
-                                <div 
-                                  style={{
-                                    width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
-                                    height: '100%',
-                                    background: '#15b47a',
-                                    borderRadius: '3px',
-                                    position: 'relative',
-                                    boxShadow: '0 0 8px #15b47a'
-                                  }}
-                                />
-                              </div>
-
-                              {/* Controls buttons row */}
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#fff', direction: 'ltr' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                  <button 
-                                    onClick={togglePlay}
-                                    style={{
-                                      background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center'
-                                    }}
-                                  >
-                                    {isPlaying ? (
-                                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                                    ) : (
-                                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                                    )}
-                                  </button>
-
-                                  {/* Time Indicator */}
-                                  <span style={{ fontSize: '13px', fontFamily: 'monospace' }}>
-                                    {formatTime(currentTime)} / {formatTime(duration)}
-                                  </span>
-                                </div>
-
-                                {/* Speed, Volume / Mute and Fullscreen buttons */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                  
-                                  {/* Custom Speed Selection Slider */}
-                                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                    {showSpeedSlider && (
-                                      <div style={{
-                                        position: 'absolute',
-                                        bottom: 'calc(100% + 10px)',
-                                        left: '50%',
-                                        transform: 'translateX(-50%)',
-                                        background: 'rgba(11, 40, 73, 0.95)',
-                                        backdropFilter: 'blur(10px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                                        borderRadius: '8px',
-                                        padding: '12px 8px',
-                                        zIndex: 10,
-                                        height: '120px',
-                                        minWidth: '46px',
-                                        boxSizing: 'border-box',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
-                                        gap: '8px'
-                                      }}>
-                                        <span style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
-                                          {playbackSpeed.toFixed(1)}x
-                                        </span>
-                                        <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                          <input 
-                                            type="range"
-                                            min="0.5"
-                                            max="2.0"
-                                            step="0.1"
-                                            value={playbackSpeed}
-                                            onInput={(e) => changeSpeed(parseFloat(e.target.value))}
-                                            className="custom-range-slider"
-                                          />
-                                        </div>
-                                      </div>
-                                    )}
-                                    <button
-                                      onClick={() => { setShowSpeedSlider(!showSpeedSlider); setShowVolumeSlider(false); }}
-                                      style={{
-                                        background: 'rgba(255, 255, 255, 0.12)',
-                                        border: '1px solid rgba(255, 255, 255, 0.25)',
-                                        color: '#ffffff',
-                                        borderRadius: '6px',
-                                        padding: '4px 8px',
-                                        fontSize: '12px',
-                                        cursor: 'pointer',
-                                        fontWeight: 'bold',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        minWidth: '40px',
-                                        outline: 'none',
-                                        lineHeight: '1'
-                                      }}
-                                    >
-                                      <span>{playbackSpeed.toFixed(1)}x</span>
-                                    </button>
-                                  </div>
-
-                                  {/* Custom Volume Selection Slider */}
-                                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                    {showVolumeSlider && (
-                                      <div style={{
-                                        position: 'absolute',
-                                        bottom: 'calc(100% + 10px)',
-                                        left: '50%',
-                                        transform: 'translateX(-50%)',
-                                        background: 'rgba(11, 40, 73, 0.95)',
-                                        backdropFilter: 'blur(10px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                                        borderRadius: '8px',
-                                        padding: '12px 8px',
-                                        zIndex: 10,
-                                        height: '120px',
-                                        minWidth: '46px',
-                                        boxSizing: 'border-box',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
-                                        gap: '8px'
-                                      }}>
-                                        <span style={{ fontSize: '10px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
-                                          {Math.round((isMuted ? 0 : volume) * 100)}%
-                                        </span>
-                                        <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                          <input 
-                                            type="range"
-                                            min="0"
-                                            max="1"
-                                            step="0.05"
-                                            value={isMuted ? 0 : volume}
-                                            onInput={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                                            className="custom-range-slider"
-                                          />
-                                        </div>
-                                      </div>
-                                    )}
-                                    <button 
-                                      onClick={() => { setShowVolumeSlider(!showVolumeSlider); setShowSpeedSlider(false); }}
-                                      style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                                    >
-                                      {isMuted || volume === 0 ? (
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-                                      ) : volume < 0.5 ? (
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                                      ) : (
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                                      )}
-                                    </button>
-                                  </div>
-
-                                  <button 
-                                    onClick={toggleFullscreen}
-                                    style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                                  >
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-                                  </button>
-                                </div>
-                              </div>
-
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexDirection: 'column', gap: '8px', opacity: 0.6 }}>
-                          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={{ marginBottom: '8px' }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                          <span style={{ fontSize: '13px' }}>{lang === 'ar' ? 'تعذر تحميل الفيديو' : 'Could not load video'}</span>
-                        </div>
-                      )}
-                    </div>
+                    <CustomVideoPlayer 
+                      videoUrl={videoUrl}
+                      videoLoading={videoLoading}
+                      lessonTitle={lessonTitle}
+                      lang={lang}
+                    />
                   )}
 
                   {/* Text Content */}

@@ -3,6 +3,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { uploadFileToR2 } from '../../../utils/s3Client';
+import { supabase } from '../../../utils/supabaseClient';
 import './ArticleEditorPage.css';
 
 const CATEGORIES = [
@@ -263,7 +264,6 @@ export function ArticleEditorPage({ lang, onNavigate }) {
          coverImageUrl = await uploadFileToR2(thumbnailFile, 'article_thumbnails');
       }
 
-      const { supabase } = await import('../../../utils/supabaseClient');
       const payload = {
         ...form,
         content_ar: finalContent,

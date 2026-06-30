@@ -3759,6 +3759,91 @@ export function DebugUIPage() {
         )}
 
 
+        {/* ===== Play Button Styles Showcase ===== */}
+        <div id="section-play-buttons-bottom" style={{ marginBottom: '60px', padding: '40px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(25px)', borderRadius: '24px', border: '1px solid rgba(255, 255, 255, 0.4)', boxShadow: '0 16px 40px rgba(0, 76, 109, 0.08)' }}>
+          <h2 style={{ color: '#0b2849', fontSize: '32px', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>
+            خيارات تصميم زر التشغيل (Play Button Styles)
+          </h2>
+          <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '16px', textAlign: 'center', marginBottom: '40px' }}>
+            مجموعة من التصاميم المقترحة لزر التشغيل في مشغل الفيديو
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '40px', background: '#0b2849', padding: '50px', borderRadius: '20px', direction: 'ltr' }}>
+            
+            {/* Style 1: Premium Teal Gradient */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+              <div style={{ color: '#fff', fontSize: '14px', fontFamily: 'monospace' }}>Style 1: Gradient Circle</div>
+              <button style={{
+                width: '60px', height: '60px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'linear-gradient(135deg, #15b47a, #004c6d)',
+                boxShadow: '0 10px 20px rgba(21, 180, 122, 0.3)',
+                color: '#ffffff',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.boxShadow = '0 15px 30px rgba(21, 180, 122, 0.5)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(21, 180, 122, 0.3)'; }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+              </button>
+            </div>
+
+            {/* Style 2: Glassmorphism Frosted */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+              <div style={{ color: '#fff', fontSize: '14px', fontFamily: 'monospace' }}>Style 2: Glassmorphic</div>
+              <button style={{
+                width: '60px', height: '60px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+                color: '#ffffff',
+                transition: 'background 0.2s ease, transform 0.2s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'; e.currentTarget.style.transform = 'scale(1)'; }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+              </button>
+            </div>
+
+            {/* Style 3: Neon Outline */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+              <div style={{ color: '#fff', fontSize: '14px', fontFamily: 'monospace' }}>Style 3: Neon Glowing</div>
+              <button style={{
+                width: '60px', height: '60px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'transparent',
+                border: '2px solid #15b47a',
+                boxShadow: '0 0 15px rgba(21, 180, 122, 0.4), inset 0 0 10px rgba(21, 180, 122, 0.2)',
+                color: '#15b47a',
+                transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+              </button>
+            </div>
+
+            {/* Style 4: Minimal Solid Flat */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+              <div style={{ color: '#fff', fontSize: '14px', fontFamily: 'monospace' }}>Style 4: Solid Modern</div>
+              <button style={{
+                width: '60px', height: '60px', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: '#ffffff',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                color: '#004c6d',
+                transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.15)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
         {/* ===== News Feed ===== */}
         <div style={{ width: '100%', marginTop: '60px', direction: 'rtl' }}>
           <NewsFeed articles={MOCK_ARTICLES} />

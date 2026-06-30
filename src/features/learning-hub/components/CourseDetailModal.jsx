@@ -13,7 +13,7 @@ import {
   getSecureVideoUrl,
 } from '../services/lmsService';
 
-export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLessonCompleted, onCourseCompleted }) {
+export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted }) {
   const [modules, setModules] = useState([]);
   const [activeLessonId, setActiveLessonId] = useState(null);
   const [completedSet, setCompletedSet] = useState(new Set());
@@ -276,19 +276,24 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
       }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 28px', borderBottom: '1px solid rgba(11,40,73,0.08)', background: '#ffffff', flexShrink: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '32px 32px 24px 32px', borderBottom: '1px solid rgba(11,40,73,0.08)', background: '#ffffff', flexShrink: 0 }}>
           <div>
-            <span style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold', display: 'block', marginBottom: '2px' }}>
-              {lang === 'ar' ? 'مساق نشط' : 'Active Course'}
+            <span style={{ fontSize: '11px', color: isLocked ? '#ffb300' : '#15b47a', fontWeight: 'bold', display: 'block', marginBottom: '2px' }}>
+              {isLocked 
+                ? (lang === 'ar' ? 'معاينة المساق' : 'Course Preview')
+                : (lang === 'ar' ? 'مساق نشط' : 'Active Course')
+              }
             </span>
             <h2 style={{ color: '#0b2849', fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
               {lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)}
             </h2>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ fontSize: '13px', color: '#15b47a', fontWeight: 'bold' }}>
-              {allLessons.length > 0 ? Math.round((completedSet.size / allLessons.length) * 100) : 0}% {lang === 'ar' ? 'مكتمل' : 'complete'}
-            </span>
+            {!isLocked && (
+              <span style={{ fontSize: '13px', color: '#15b47a', fontWeight: 'bold' }}>
+                {allLessons.length > 0 ? Math.round((completedSet.size / allLessons.length) * 100) : 0}% {lang === 'ar' ? 'مكتمل' : 'complete'}
+              </span>
+            )}
             
             <div style={{ position: 'relative' }}>
               <button 
@@ -300,19 +305,21 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                 style={{ background: 'rgba(11,40,73,0.06)', border: 'none', color: '#0b2849', cursor: 'pointer', width: '38px', height: '38px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
                 title={lang === 'ar' ? 'مشاركة الرابط' : 'Share Link'}
               >
-                {linkCopied ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15b47a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="18" cy="5" r="3"></circle>
-                    <circle cx="6" cy="12" r="3"></circle>
-                    <circle cx="18" cy="19" r="3"></circle>
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                  </svg>
-                )}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', transform: linkCopied ? 'rotate(360deg)' : 'rotate(0deg)', transition: 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+                  {linkCopied ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15b47a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="18" cy="5" r="3"></circle>
+                      <circle cx="6" cy="12" r="3"></circle>
+                      <circle cx="18" cy="19" r="3"></circle>
+                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                    </svg>
+                  )}
+                </div>
               </button>
               {linkCopied && (
                 <div style={{ position: 'absolute', top: '110%', left: '50%', transform: 'translateX(-50%)', background: '#0b2849', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', whiteSpace: 'nowrap', zIndex: 10 }}>
@@ -335,7 +342,8 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
           <div style={{ display: 'flex', flexGrow: 1, minHeight: 0, height: 'calc(100vh - 80px)' }}>
 
             {/* Sidebar: Module + Lesson List */}
-            <div style={{ width: '300px', borderInlineEnd: '1px solid rgba(11,40,73,0.08)', overflowY: 'auto', padding: '24px 20px', flexShrink: 0, background: '#f8fafc' }}>
+            {!isLocked && (
+              <div style={{ width: '300px', borderInlineEnd: '1px solid rgba(11,40,73,0.08)', overflowY: 'auto', padding: '24px 20px', flexShrink: 0, background: '#f8fafc' }}>
               {modules.map(mod => {
                 const isCollapsed = collapsedModules.has(mod.id);
                 return (
@@ -463,10 +471,47 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                 </p>
               )}
             </div>
+            )}
 
             {/* Main Content Panel */}
             <div style={{ flexGrow: 1, overflowY: 'auto', padding: '40px' }}>
-              {quizMode && quizData ? (
+              {isLocked ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+                  {course.cover_image ? (
+                    <img src={course.cover_image} alt={course.title_en || course.title_ar} style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '20px', marginBottom: '32px', boxShadow: '0 16px 40px rgba(0,76,109,0.15)' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '300px', background: 'linear-gradient(135deg, #0b2849, #004c6d)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px' }}>
+                      <svg width="84" height="84" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                      </svg>
+                    </div>
+                  )}
+                  <h2 style={{ fontSize: '32px', fontWeight: 'bold', color: '#0b2849', marginBottom: '16px' }}>
+                    {lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)}
+                  </h2>
+                  <p style={{ fontSize: '18px', color: 'rgba(11,40,73,0.7)', lineHeight: '1.8', marginBottom: '40px', maxWidth: '600px' }}>
+                    {lang === 'ar' ? course.description_ar : (course.description_en || course.description_ar)}
+                  </p>
+                  
+                  <div style={{ background: 'rgba(255, 193, 7, 0.1)', border: '1px solid rgba(255,193,7,0.3)', padding: '24px 40px', borderRadius: '16px', display: 'inline-block' }}>
+                    <div style={{ marginBottom: '16px', color: '#ffb300', display: 'flex', justifyContent: 'center' }}>
+                      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                    </div>
+                    <h3 style={{ fontSize: '20px', color: '#0b2849', marginBottom: '12px', fontWeight: 'bold' }}>
+                      {lang === 'ar' ? 'هذا المساق مغلق' : 'This Course is Locked'}
+                    </h3>
+                    <p style={{ color: 'rgba(11,40,73,0.6)', marginBottom: '24px' }}>
+                      {lang === 'ar' ? 'يرجى ترقية حسابك للحصول على صلاحية الوصول الكاملة.' : 'Please upgrade your account to get full access to this course.'}
+                    </p>
+                    <Button variant="gradient" onClick={onUpgrade}>
+                      {lang === 'ar' ? 'ترقية الحساب الآن' : 'Upgrade Account Now'}
+                    </Button>
+                  </div>
+                </div>
+              ) : quizMode && quizData ? (
                 <QuizWidget
                   lang={lang}
                   quizData={quizData}

@@ -101,17 +101,7 @@ export function LearningHubPage({ lang, onNavigate }) {
       const urlCourseId = params.get('course');
       if (urlCourseId) {
         const c = (courses || []).find(x => x.id === urlCourseId);
-        if (c) {
-          const isLocked = !hasPermission(c.full_access_permission_key) && !hasPermission(c.teaser_permission_key);
-          if (isLocked) {
-            const url = new URL(window.location);
-            url.searchParams.delete('course');
-            url.searchParams.delete('lesson');
-            window.history.replaceState({}, '', url);
-          } else {
-            setSelectedCourse(c);
-          }
-        }
+        if (c) setSelectedCourse(c);
       }
     } catch (err) {
       console.error('LearningHub loadData error:', err);
@@ -197,7 +187,11 @@ export function LearningHubPage({ lang, onNavigate }) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f0f4f8', padding: '20px' }}>
         <GlassCard style={{ padding: '48px', maxWidth: '560px', textAlign: 'center' }}>
-          <div style={{ fontSize: '48px', marginBottom: '20px' }}>🎓</div>
+          <div style={{ marginBottom: '20px', color: '#0b2849', display: 'flex', justifyContent: 'center' }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+          </div>
           <h2 style={{ color: '#0b2849', marginBottom: '16px', fontSize: '24px', fontWeight: 'bold' }}>
             {lang === 'ar' ? 'مرحباً بك في المركز التعليمي' : 'Welcome to the Learning Hub'}
           </h2>
@@ -297,10 +291,12 @@ export function LearningHubPage({ lang, onNavigate }) {
                   return (
                     <div
                       key={course.id}
+                      onClick={() => handleSelectCourse(course)}
                       style={{
                         background: 'rgba(255,255,255,0.7)',
                         backdropFilter: 'blur(20px)',
                         borderRadius: '20px',
+                        cursor: 'pointer',
                         border: `1px solid ${access === 'locked' ? 'rgba(11,40,73,0.1)' : 'rgba(21,180,122,0.25)'}`,
                         boxShadow: '0 8px 24px rgba(0,76,109,0.06)',
                         overflow: 'hidden',
@@ -315,11 +311,18 @@ export function LearningHubPage({ lang, onNavigate }) {
                       <div style={{ position: 'relative', height: '180px', background: '#0b2849', overflow: 'hidden' }}>
                         {course.cover_image
                           ? <img src={course.cover_image} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #0b2849, #004c6d)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px' }}>🎓</div>
+                          : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #0b2849, #004c6d)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+                                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                              </svg>
+                            </div>
                         }
                         {access === 'locked' && (
                           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <span style={{ color: '#fff', fontSize: '28px' }}>🔒</span>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
                           </div>
                         )}
                         <span style={{ position: 'absolute', top: '12px', right: lang === 'ar' ? '12px' : 'auto', left: lang === 'ar' ? 'auto' : '12px', background: 'rgba(0,0,0,0.55)', color: '#fff', fontSize: '11px', padding: '3px 10px', borderRadius: '20px', fontWeight: 'bold' }}>
@@ -332,25 +335,29 @@ export function LearningHubPage({ lang, onNavigate }) {
                         <h3 style={{ color: '#0b2849', fontSize: '16px', fontWeight: 'bold', margin: 0, lineHeight: '1.4' }}>{title}</h3>
                         {desc && <p style={{ color: 'rgba(11,40,73,0.65)', fontSize: '13px', lineHeight: '1.6', margin: 0 }}>{desc.slice(0, 120)}{desc.length > 120 ? '…' : ''}</p>}
                         {course.duration && (
-                          <span style={{ fontSize: '12px', color: '#15b47a', fontWeight: 'bold' }}>
-                            ⏱ {course.duration}
+                          <span style={{ fontSize: '12px', color: '#15b47a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10"></circle>
+                              <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            {course.duration}
                           </span>
                         )}
 
                         <div style={{ marginTop: 'auto', paddingTop: '14px' }}>
                           {access === 'locked' ? (
-                            <Button variant="outline" style={{ width: '100%', borderColor: '#004c6d', color: '#004c6d', fontSize: '13px' }} onClick={() => onNavigate('join-us')}>
+                            <Button variant="outline" style={{ width: '100%', borderColor: '#004c6d', color: '#004c6d', fontSize: '13px' }} onClick={(e) => { e.stopPropagation(); onNavigate('join-us'); }}>
                               {lang === 'ar' ? 'ترقية الحساب للوصول' : 'Upgrade for Access'}
                             </Button>
                           ) : isAlreadyEnrolled ? (
-                            <Button variant="gradient" style={{ width: '100%', fontSize: '13px' }} onClick={() => handleSelectCourse(course)}>
+                            <Button variant="gradient" style={{ width: '100%', fontSize: '13px' }} onClick={(e) => { e.stopPropagation(); handleSelectCourse(course); }}>
                               {lang === 'ar' ? 'متابعة التعلم' : 'Continue Learning'}
                             </Button>
                           ) : (
                             <Button
                               variant="gradient"
                               style={{ width: '100%', fontSize: '13px' }}
-                              onClick={() => handleEnroll(course)}
+                              onClick={(e) => { e.stopPropagation(); handleEnroll(course); }}
                               disabled={enrollingId === course.id}
                             >
                               {enrollingId === course.id
@@ -396,9 +403,11 @@ export function LearningHubPage({ lang, onNavigate }) {
           lang={lang}
           course={selectedCourse}
           userId={user.id}
+          isLocked={getCourseAccess(selectedCourse) === 'locked'}
           onClose={handleCloseCourseModal}
           onLessonCompleted={handleLessonCompleted}
           onCourseCompleted={handleCourseCompleted}
+          onUpgrade={() => onNavigate('join-us')}
         />
       )}
 

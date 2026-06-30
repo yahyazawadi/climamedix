@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo } from 'preact/hooks';
 import { supabase } from '../../../utils/supabaseClient';
 import { GlassCard } from '../../shared/components/GlassCard';
-import { useAuth } from '../../auth/hooks/useAuth';
-import { BarChart, Users, Globe, Briefcase, Activity, Shield, X, User } from 'lucide-preact';
+import { BarChart, Users, Globe, Briefcase, Activity, Shield, X, User, RefreshCw } from 'lucide-preact';
 import './UserStatsDashboard.css';
 
 const ROLE_COLORS = {
@@ -26,24 +25,24 @@ export function UserStatsDashboard({ lang = 'ar' }) {
   // Modal State
   const [selectedCategory, setSelectedCategory] = useState(null); // { type: 'role', value: 'admin', title: 'Admins' }
 
-  useEffect(() => {
+  const fetchProfiles = async () => {
     if (!canViewStats) return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setProfiles(data || []);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const fetchProfiles = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .order('created_at', { ascending: false });
-        if (error) throw error;
-        setProfiles(data || []);
-      } catch (err) {
-        console.error('Error fetching stats:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  useEffect(() => {
     fetchProfiles();
   }, [canViewStats]);
 
@@ -123,13 +122,25 @@ export function UserStatsDashboard({ lang = 'ar' }) {
   return (
     <div className={`user-stats-dashboard ${lang === 'ar' ? 'rtl' : 'ltr'}`}>
       <div className="usd-header">
-        <h1 className="usd-title">
-          <BarChart className="usd-title-icon" size={28} />
-          {lang === 'ar' ? 'إحصائيات النظام' : 'System Statistics'}
-        </h1>
-        <p className="usd-subtitle">
-          {lang === 'ar' ? 'نظرة شاملة على بيانات المستخدمين' : 'Comprehensive overview of user data'}
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <h1 className="usd-title">
+              <BarChart className="usd-title-icon" size={28} />
+              {lang === 'ar' ? 'إحصائيات النظام' : 'System Statistics'}
+            </h1>
+            <p className="usd-subtitle">
+              {lang === 'ar' ? 'نظرة شاملة على بيانات المستخدمين' : 'Comprehensive overview of user data'}
+            </p>
+          </div>
+          <button 
+            className="usd-refresh-btn" 
+            onClick={fetchProfiles} 
+            disabled={loading}
+          >
+            <RefreshCw size={16} className={loading ? 'spinning' : ''} />
+            {lang === 'ar' ? 'تحديث' : 'Refresh'}
+          </button>
+        </div>
       </div>
 
       {loading ? (

@@ -3,7 +3,7 @@ import { supabase } from '../../../utils/supabaseClient';
 import { GlassCard } from '../../shared/components/GlassCard';
 import { Button } from '../../shared/components/Button';
 import { useAuth, ROLE_PERMISSIONS } from '../../auth/hooks/useAuth';
-import { Search, Shield, User, ChevronDown, Check, X } from 'lucide-preact';
+import { Search, Shield, User, ChevronDown, Check, X, RefreshCw } from 'lucide-preact';
 import './UserManagementDashboard.css';
 
 const MASTER_OWNER_EMAIL = 'super.yahyaaa@gmail.com';
@@ -34,36 +34,35 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
 
   const ROLES = ['user', 'subscriber', 'researcher', 'educator', 'admin', 'superadmin'];
 
-  useEffect(() => {
+  const fetchData = async () => {
     if (!isSuperAdmin) return;
-    
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Fetch profiles
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('*')
-          .order('created_at', { ascending: false });
-          
-        if (profilesError) throw profilesError;
-        setProfiles(profilesData || []);
+    setLoading(true);
+    try {
+      // Fetch profiles
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (profilesError) throw profilesError;
+      setProfiles(profilesData || []);
 
-        // Fetch permissions mapping
-        const { data: permsData, error: permsError } = await supabase
-          .from('permissions')
-          .select('id, perm_key, description');
-          
-        if (permsError) throw permsError;
-        setAllPermissions(permsData || []);
+      // Fetch permissions mapping
+      const { data: permsData, error: permsError } = await supabase
+        .from('permissions')
+        .select('id, perm_key, description');
+        
+      if (permsError) throw permsError;
+      setAllPermissions(permsData || []);
 
-      } catch (err) {
-        console.error('Error fetching admin data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    } catch (err) {
+      console.error('Error fetching admin data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [isSuperAdmin]);
 
@@ -232,15 +231,23 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
   return (
     <div className={`user-management-dashboard ${lang === 'ar' ? 'rtl' : 'ltr'}`}>
       <div className="umd-header">
-        <h1 className="umd-title">
-          <Shield className="umd-title-icon" size={28} />
-          {lang === 'ar' ? 'إدارة المستخدمين والصلاحيات' : 'User & Access Management'}
-        </h1>
-        <p className="umd-subtitle">
-          {lang === 'ar' 
-            ? 'التحكم الكامل في أدوار المستخدمين وصلاحياتهم الفردية' 
-            : 'Full control over user roles and granular permissions'}
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <h1 className="umd-title">
+              <Shield className="umd-title-icon" size={28} />
+              {lang === 'ar' ? 'إدارة المستخدمين والصلاحيات' : 'User & Access Management'}
+            </h1>
+            <p className="umd-subtitle">
+              {lang === 'ar' 
+                ? 'التحكم الكامل في أدوار المستخدمين وصلاحياتهم الفردية' 
+                : 'Full control over user roles and granular permissions'}
+            </p>
+          </div>
+          <Button variant="outline" onClick={fetchData} disabled={loading} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <RefreshCw size={16} className={loading ? 'spinning' : ''} />
+            {lang === 'ar' ? 'تحديث' : 'Refresh'}
+          </Button>
+        </div>
       </div>
 
       <div className="umd-layout">

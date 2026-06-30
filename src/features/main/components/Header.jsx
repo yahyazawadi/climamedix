@@ -498,7 +498,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         </a>
                       )}
                       
-                      {(userProfile?.role === 'admin' || userProfile?.role === 'superadmin') && (
+                      {userProfile?.role === 'superadmin' && (
                         <a 
                           href="#admin-stats"
                           onClick={(e) => {
@@ -794,7 +794,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                       <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
                     </>
                   )}
-                  {(userProfile?.role === 'admin' || userProfile?.role === 'superadmin') && (
+                  {userProfile?.role === 'superadmin' && (
                     <>
                       <a 
                         href="#admin-stats" 

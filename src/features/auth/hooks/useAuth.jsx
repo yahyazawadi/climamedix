@@ -31,8 +31,7 @@ export const ROLE_PERMISSIONS = {
     'view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research',
     'write:articles', 'manage:any_course', 'manage:any_article', 'manage:any_publication',
     'approve:users', 'issue:certs', 'review:posts', 'write:opportunities', 'manage:any_opportunity',
-    'write:events', 'manage:any_event', 'write:courses', 'view:join_requests', 'edit:news_map',
-    'view:user_stats'
+    'write:events', 'manage:any_event', 'write:courses', 'view:join_requests', 'edit:news_map'
   ],
   superadmin: [
     'view:free_content', 'view:all_courses', 'view:all_articles', 'view:all_research',

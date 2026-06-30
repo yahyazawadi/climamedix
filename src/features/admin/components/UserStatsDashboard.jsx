@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'preact/hooks';
 import { supabase } from '../../../utils/supabaseClient';
 import { GlassCard } from '../../shared/components/GlassCard';
 import { useAuth } from '../../auth/hooks/useAuth';
-import { BarChart, Users, Globe, Briefcase, Activity } from 'lucide-preact';
+import { BarChart, Users, Globe, Briefcase, Activity, Shield } from 'lucide-preact';
 import './UserStatsDashboard.css';
 
 export function UserStatsDashboard({ lang = 'ar' }) {

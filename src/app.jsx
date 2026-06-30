@@ -22,6 +22,7 @@ import { HomeNewsWidget } from './features/news-blog/components/HomeNewsWidget'
 import { ArabWorldMap } from './features/main/components/ArabWorldMap'
 import { ProfilePage } from './features/profile/components/ProfilePage'
 import { LearningHubPage } from './features/learning-hub/components/LearningHubPage'
+import { UserManagementDashboard } from './features/admin/components/UserManagementDashboard'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import doctorImg from './assets/bg_3.png'
@@ -201,6 +202,8 @@ function AppContent() {
       setCurrentView('article');
     } else if (path === '/learning-hub' || path === '/courses') {
       setCurrentView('learning-hub');
+    } else if (path === '/admin/users') {
+      setCurrentView('admin-users');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -238,6 +241,8 @@ function AppContent() {
         setCurrentView('article');
       } else if (p === '/learning-hub' || p === '/courses') {
         setCurrentView('learning-hub');
+      } else if (p === '/admin/users') {
+        setCurrentView('admin-users');
       } else {
         setCurrentView('home');
       }
@@ -343,6 +348,8 @@ function AppContent() {
             window.history.pushState({}, '', '/news-blog');
           } else if (view === 'learning-hub') {
             window.history.pushState({}, '', '/learning-hub');
+          } else if (view === 'admin-users') {
+            window.history.pushState({}, '', '/admin/users');
           } else if (sectionId) {
             window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
@@ -755,6 +762,11 @@ function AppContent() {
         }} />
       ) : currentView === 'learning-hub' ? (
         <LearningHubPage lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
+      ) : currentView === 'admin-users' ? (
+        <UserManagementDashboard lang={lang} onNavigate={(view) => {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />

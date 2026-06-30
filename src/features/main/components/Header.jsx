@@ -463,6 +463,40 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                           {lang === 'ar' ? 'لوحة التحكم' : 'Control Panel'}
                         </a>
                       )}
+
+                      {userProfile?.role === 'superadmin' && (
+                        <a 
+                          href="#admin-users"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onNavigate('admin-users');
+                            setShowProfileDropdown(false);
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '10px 12px',
+                            borderRadius: '8px',
+                            color: '#15b47a',
+                            textDecoration: 'none',
+                            fontSize: '14px',
+                            fontWeight: 'bold',
+                            background: 'rgba(21, 180, 122, 0.05)',
+                            border: '1px solid rgba(21, 180, 122, 0.2)',
+                            transition: 'all 0.2s',
+                            marginTop: '4px'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = 'rgba(21, 180, 122, 0.15)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'rgba(21, 180, 122, 0.05)';
+                          }}
+                        >
+                          {lang === 'ar' ? 'إدارة المستخدمين' : 'User Management'}
+                        </a>
+                      )}
                       
                       <a 
                         href="#logout"
@@ -710,6 +744,18 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         style={{ color: '#15b47a', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
                       >
                         {lang === 'ar' ? 'التحكم' : 'Control'}
+                      </a>
+                      <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
+                    </>
+                  )}
+                  {userProfile?.role === 'superadmin' && (
+                    <>
+                      <a 
+                        href="#admin-users" 
+                        onClick={(e) => { e.preventDefault(); onNavigate('admin-users'); setDrawerOpen(false); }} 
+                        style={{ color: '#15b47a', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
+                      >
+                        {lang === 'ar' ? 'المستخدمين' : 'Users'}
                       </a>
                       <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
                     </>

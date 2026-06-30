@@ -24,6 +24,7 @@ import { ProfilePage } from './features/profile/components/ProfilePage'
 import { LearningHubPage } from './features/learning-hub/components/LearningHubPage'
 import { UserManagementDashboard } from './features/admin/components/UserManagementDashboard'
 import { UserStatsDashboard } from './features/admin/components/UserStatsDashboard'
+import { CourseBuilderPage } from './features/learning-hub/components/CourseBuilderPage'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import doctorImg from './assets/bg_3.png'
@@ -207,6 +208,8 @@ function AppContent() {
       setCurrentView('admin-users');
     } else if (path === '/admin/stats') {
       setCurrentView('admin-stats');
+    } else if (path === '/admin/courses') {
+      setCurrentView('admin-courses');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -248,6 +251,8 @@ function AppContent() {
         setCurrentView('admin-users');
       } else if (p === '/admin/stats') {
         setCurrentView('admin-stats');
+      } else if (p === '/admin/courses') {
+        setCurrentView('admin-courses');
       } else {
         setCurrentView('home');
       }
@@ -357,6 +362,8 @@ function AppContent() {
             window.history.pushState({}, '', '/admin/users');
           } else if (view === 'admin-stats') {
             window.history.pushState({}, '', '/admin/stats');
+          } else if (view === 'admin-courses') {
+            window.history.pushState({}, '', '/admin/courses');
           } else if (sectionId) {
             window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
@@ -779,6 +786,11 @@ function AppContent() {
         }} />
       ) : currentView === 'admin-stats' ? (
         <UserStatsDashboard lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
+      ) : currentView === 'admin-courses' ? (
+        <CourseBuilderPage lang={lang} onNavigate={(view) => {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />

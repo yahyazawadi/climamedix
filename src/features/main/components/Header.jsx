@@ -498,6 +498,40 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         </a>
                       )}
                       
+                      {(userProfile?.role === 'admin' || userProfile?.role === 'superadmin') && (
+                        <a 
+                          href="#admin-courses"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onNavigate('admin-courses');
+                            setShowProfileDropdown(false);
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '10px 12px',
+                            borderRadius: '8px',
+                            color: '#10b981',
+                            textDecoration: 'none',
+                            fontSize: '14px',
+                            fontWeight: 'bold',
+                            background: 'rgba(16, 185, 129, 0.05)',
+                            border: '1px solid rgba(16, 185, 129, 0.2)',
+                            transition: 'all 0.2s',
+                            marginTop: '4px'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = 'rgba(16, 185, 129, 0.15)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'rgba(16, 185, 129, 0.05)';
+                          }}
+                        >
+                          {lang === 'ar' ? 'منشئ المساقات' : 'Course Builder'}
+                        </a>
+                      )}
+                      
                       {userProfile?.role === 'superadmin' && (
                         <a 
                           href="#admin-stats"
@@ -789,6 +823,18 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         style={{ color: '#3b82f6', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
                       >
                         {lang === 'ar' ? 'إحصائيات' : 'Stats'}
+                      </a>
+                      <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
+                    </>
+                  )}
+                  {(userProfile?.role === 'admin' || userProfile?.role === 'superadmin') && (
+                    <>
+                      <a 
+                        href="#admin-courses" 
+                        onClick={(e) => { e.preventDefault(); onNavigate('admin-courses'); setDrawerOpen(false); }} 
+                        style={{ color: '#10b981', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
+                      >
+                        {lang === 'ar' ? 'منشئ المساقات' : 'Course Builder'}
                       </a>
                       <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
                     </>

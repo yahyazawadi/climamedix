@@ -19,6 +19,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showPermsList, setShowPermsList] = useState(false);
+  const [permSearchQuery, setPermSearchQuery] = useState('');
   const [logoClicks, setLogoClicks] = useState(0);
   const { verifyAndSetDevAdmin, disabledPermissions, togglePermission } = useAuth();
   
@@ -349,7 +350,26 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                             flexDirection: 'column',
                             gap: '6px'
                           }}>
-                            {ROLE_PERMISSIONS.superadmin.map(perm => {
+                            <input
+                              type="text"
+                              placeholder={lang === 'ar' ? 'بحث في الصلاحيات...' : 'Search permissions...'}
+                              value={permSearchQuery}
+                              onInput={(e) => setPermSearchQuery(e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                width: '100%',
+                                padding: '6px 10px',
+                                borderRadius: '6px',
+                                border: '1px solid rgba(225, 239, 250, 0.2)',
+                                background: 'rgba(5, 12, 26, 0.6)',
+                                color: '#ffffff',
+                                fontSize: '12px',
+                                outline: 'none',
+                                marginBottom: '4px',
+                                fontFamily: 'Tajawal, sans-serif'
+                              }}
+                            />
+                            {ROLE_PERMISSIONS.superadmin.filter(perm => perm.toLowerCase().includes(permSearchQuery.toLowerCase())).map(perm => {
                               const isDisabled = disabledPermissions?.includes(perm);
                               return (
                                 <div 
@@ -379,7 +399,15 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                                   }}
                                   title={perm}
                                 >
-                                  <span>{perm}</span>
+                                  <span>
+                                    {permSearchQuery ? (
+                                      perm.split(new RegExp(`(${permSearchQuery})`, 'gi')).map((part, i) => 
+                                        part.toLowerCase() === permSearchQuery.toLowerCase() ? 
+                                          <mark key={i} style={{ backgroundColor: '#ffffff', color: '#0b2849', borderRadius: '2px', padding: '0 2px', fontWeight: 'bold' }}>{part}</mark> 
+                                          : part
+                                      )
+                                    ) : perm}
+                                  </span>
                                   <span style={{ fontSize: '10px', opacity: 0.7 }}>
                                     {isDisabled ? (lang === 'ar' ? 'معطلة' : 'Disabled') : '✓'}
                                   </span>
@@ -480,20 +508,22 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                             justifyContent: 'center',
                             padding: '10px 12px',
                             borderRadius: '8px',
-                            color: '#15b47a',
+                            color: '#ffffff',
                             textDecoration: 'none',
                             fontSize: '14px',
                             fontWeight: 'bold',
-                            background: 'rgba(21, 180, 122, 0.05)',
-                            border: '1px solid rgba(21, 180, 122, 0.2)',
+                            background: 'rgba(225, 239, 250, 0.05)',
+                            border: '1px solid rgba(225, 239, 250, 0.1)',
                             transition: 'all 0.2s',
                             marginTop: '4px'
                           }}
                           onMouseEnter={(e) => {
                             e.target.style.background = 'rgba(21, 180, 122, 0.15)';
+                            e.target.style.borderColor = 'rgba(21, 180, 122, 0.3)';
                           }}
                           onMouseLeave={(e) => {
-                            e.target.style.background = 'rgba(21, 180, 122, 0.05)';
+                            e.target.style.background = 'rgba(225, 239, 250, 0.05)';
+                            e.target.style.borderColor = 'rgba(225, 239, 250, 0.1)';
                           }}
                         >
                           {lang === 'ar' ? 'إدارة المستخدمين' : 'User Management'}
@@ -514,20 +544,22 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                             justifyContent: 'center',
                             padding: '10px 12px',
                             borderRadius: '8px',
-                            color: '#10b981',
+                            color: '#ffffff',
                             textDecoration: 'none',
                             fontSize: '14px',
                             fontWeight: 'bold',
-                            background: 'rgba(16, 185, 129, 0.05)',
-                            border: '1px solid rgba(16, 185, 129, 0.2)',
+                            background: 'rgba(225, 239, 250, 0.05)',
+                            border: '1px solid rgba(225, 239, 250, 0.1)',
                             transition: 'all 0.2s',
                             marginTop: '4px'
                           }}
                           onMouseEnter={(e) => {
                             e.target.style.background = 'rgba(16, 185, 129, 0.15)';
+                            e.target.style.borderColor = 'rgba(16, 185, 129, 0.3)';
                           }}
                           onMouseLeave={(e) => {
-                            e.target.style.background = 'rgba(16, 185, 129, 0.05)';
+                            e.target.style.background = 'rgba(225, 239, 250, 0.05)';
+                            e.target.style.borderColor = 'rgba(225, 239, 250, 0.1)';
                           }}
                         >
                           {lang === 'ar' ? 'منشئ المساقات' : 'Course Builder'}
@@ -548,20 +580,22 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                             justifyContent: 'center',
                             padding: '10px 12px',
                             borderRadius: '8px',
-                            color: '#3b82f6',
+                            color: '#ffffff',
                             textDecoration: 'none',
                             fontSize: '14px',
                             fontWeight: 'bold',
-                            background: 'rgba(59, 130, 246, 0.05)',
-                            border: '1px solid rgba(59, 130, 246, 0.2)',
+                            background: 'rgba(225, 239, 250, 0.05)',
+                            border: '1px solid rgba(225, 239, 250, 0.1)',
                             transition: 'all 0.2s',
                             marginTop: '4px'
                           }}
                           onMouseEnter={(e) => {
                             e.target.style.background = 'rgba(59, 130, 246, 0.15)';
+                            e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
                           }}
                           onMouseLeave={(e) => {
-                            e.target.style.background = 'rgba(59, 130, 246, 0.05)';
+                            e.target.style.background = 'rgba(225, 239, 250, 0.05)';
+                            e.target.style.borderColor = 'rgba(225, 239, 250, 0.1)';
                           }}
                         >
                           {lang === 'ar' ? 'الإحصائيات' : 'Statistics'}
@@ -733,6 +767,18 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
       {/* Mobile Drawer */}
       <div class={`mobile-drawer ${drawerOpen ? 'open' : ''}`}>
         <nav class="drawer-nav">
+          <div style={{ padding: '0 24px 16px', borderBottom: '1px solid rgba(225, 239, 250, 0.07)' }}>
+            <div class="figma-search-container" style={{ width: '100%' }}>
+              <input 
+                type="text" 
+                placeholder={t.search}
+                value={searchQuery}
+                onInput={(e) => setSearchQuery(e.target.value)}
+                class="figma-search-input"
+              />
+              <img src={iconSearch} class="figma-search-icon" alt="بحث" />
+            </div>
+          </div>
           <a href="#lang" onClick={(e) => { e.preventDefault(); toggleLanguage(); setDrawerOpen(false); }} class="drawer-link" style={{ color: '#15b47a', fontWeight: 'bold' }}>
             {lang === 'ar' ? 'English (EN)' : 'العربية (AR)'}
           </a>

@@ -123,7 +123,7 @@ html[lang="en"] .figma-nav-text {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  color: #E1EFFA;
+  color: #ffffff;
   text-decoration: none;
   font-family: 'Tajawal', sans-serif;
   font-size: 18px;
@@ -358,7 +358,7 @@ a[href="#about"] .figma-nav-icon {
   font-family: 'Tajawal', sans-serif;
   font-size: 18px;
   font-weight: 600;
-  color: #c5dff0;
+  color: #ffffff;
   text-decoration: none;
   padding: 16px 24px;
   border-bottom: 1px solid rgba(225, 239, 250, 0.07);

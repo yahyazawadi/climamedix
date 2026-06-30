@@ -353,6 +353,10 @@ export function LearningHubPage({ lang, onNavigate }) {
                             <Button variant="gradient" style={{ width: '100%', fontSize: '13px' }} onClick={(e) => { e.stopPropagation(); handleSelectCourse(course); }}>
                               {lang === 'ar' ? 'متابعة التعلم' : 'Continue Learning'}
                             </Button>
+                          ) : access === 'teaser' ? (
+                            <Button variant="gradient" style={{ width: '100%', fontSize: '13px', background: 'linear-gradient(90deg, #0b2849, #004c6d)' }} onClick={(e) => { e.stopPropagation(); handleSelectCourse(course); }}>
+                              {lang === 'ar' ? 'تصفح المساق كزائر' : 'Browse as Guest'}
+                            </Button>
                           ) : (
                             <Button
                               variant="gradient"

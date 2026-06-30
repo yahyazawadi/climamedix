@@ -169,6 +169,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                 <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
                   <img 
                     src={userProfile?.avatar_url || iconProfile} 
+                    onError={(e) => { e.target.onerror = null; e.target.src = iconProfile; e.target.style.border = 'none'; e.target.style.borderRadius = '0'; e.target.style.width = '34px'; e.target.style.height = '34px'; e.target.style.objectFit = 'contain'; }}
                     class="figma-nav-icon" 
                     alt="الملف الشخصي" 
                     style={userProfile?.avatar_url ? { 
@@ -225,6 +226,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
                       <img 
                         src={userProfile?.avatar_url || iconProfile} 
+                        onError={(e) => { e.target.onerror = null; e.target.src = iconProfile; e.target.style.border = 'none'; e.target.style.borderRadius = '0'; e.target.style.width = '48px'; e.target.style.height = '48px'; e.target.style.objectFit = 'contain'; }}
                         style={userProfile?.avatar_url ? { 
                           width: '58px', 
                           height: '58px', 
@@ -748,6 +750,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                 <img 
                   src={userProfile?.avatar_url || iconProfile} 
+                  onError={(e) => { e.target.onerror = null; e.target.src = iconProfile; e.target.style.border = 'none'; e.target.style.borderRadius = '0'; e.target.style.width = '42px'; e.target.style.height = '42px'; e.target.style.objectFit = 'contain'; }}
                   style={userProfile?.avatar_url ? { 
                     width: '50px', 
                     height: '50px', 

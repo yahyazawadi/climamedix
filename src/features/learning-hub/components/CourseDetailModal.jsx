@@ -164,6 +164,17 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
         }
       } catch (err) {
         console.error('Mark complete error:', err);
+        if (err.code === '42501' || err.message?.includes('violates row-level security')) {
+          // Teaser user or no DB permission: keep it in memory
+          const newSet = new Set([...completedSet, activeLessonId]);
+          setCompletedSet(newSet);
+          
+          const completedCount = newSet.size;
+          const total = allLessons.length;
+          const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+          const remaining = total - completedCount;
+          if (onLessonCompleted) onLessonCompleted(course.id, pct, remaining);
+        }
       }
     }
   }
@@ -185,6 +196,15 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
       if (completedCount >= total && onCourseCompleted) onCourseCompleted(course);
     } catch (err) {
       console.error('Mark complete error:', err);
+      if (err.code === '42501' || err.message?.includes('violates row-level security')) {
+        const newSet = new Set([...completedSet, activeLessonId]);
+        setCompletedSet(newSet);
+        const completedCount = newSet.size;
+        const total = allLessons.length;
+        const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+        const remaining = total - completedCount;
+        if (onLessonCompleted) onLessonCompleted(course.id, pct, remaining);
+      }
     }
   }
 

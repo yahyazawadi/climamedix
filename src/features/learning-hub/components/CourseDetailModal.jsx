@@ -476,7 +476,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
             {/* Main Content Panel */}
             <div style={{ flexGrow: 1, overflowY: 'auto', padding: '40px' }}>
               {isLocked ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
                   {course.cover_image ? (
                     <img src={course.cover_image} alt={course.title_en || course.title_ar} style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '20px', marginBottom: '32px', boxShadow: '0 16px 40px rgba(0,76,109,0.15)' }} />
                   ) : (

@@ -183,12 +183,13 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
       if (draftCustomPerms.length > 0) {
         const inserts = draftCustomPerms.map(permKey => {
           const perm = allPermissions.find(p => p.perm_key === permKey);
+          if (!perm) return null;
           return {
             user_id: selectedUser.id,
             permission_id: perm.id,
             is_granted: true
           };
-        }).filter(i => i.permission_id);
+        }).filter(Boolean);
 
         if (inserts.length > 0) {
           const { error: insError } = await supabase

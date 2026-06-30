@@ -242,12 +242,43 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
   const isCurrentCompleted = completedSet.has(activeLessonId);
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0,
-      background: '#ffffff',
-      zIndex: 1000,
-      direction: lang === 'ar' ? 'rtl' : 'ltr',
-      textAlign: lang === 'ar' ? 'right' : 'left',
+    <>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        .custom-range-slider {
+          -webkit-appearance: none;
+          width: 80px;
+          height: 4px;
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
+          outline: none;
+          transform: rotate(-90deg);
+          transform-origin: center;
+          margin: 38px -38px;
+        }
+        .custom-range-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: #15b47a;
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 0 10px rgba(0,0,0,0.5);
+          transition: transform 0.15s ease;
+        }
+        .custom-range-slider::-webkit-slider-thumb:hover {
+          transform: scale(1.3);
+        }
+        `
+      }} />
+      <div style={{
+        position: 'fixed', inset: 0,
+        background: '#ffffff',
+        zIndex: 1000,
+        direction: lang === 'ar' ? 'rtl' : 'ltr',
+        textAlign: lang === 'ar' ? 'right' : 'left',
       display: 'flex', flexDirection: 'column',
       width: '100vw', height: '100vh',
       overflow: 'hidden'
@@ -525,25 +556,22 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                   
                                   {/* Custom Speed Selection Slider */}
-                                  <div 
-                                    onMouseEnter={() => setShowSpeedSlider(true)}
-                                    onMouseLeave={() => setShowSpeedSlider(false)}
-                                    style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
-                                  >
+                                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                                     {showSpeedSlider && (
                                       <div style={{
                                         position: 'absolute',
-                                        bottom: '100%',
+                                        bottom: 'calc(100% + 10px)',
                                         left: '50%',
                                         transform: 'translateX(-50%)',
-                                        marginBottom: '10px',
                                         background: 'rgba(11, 40, 73, 0.95)',
                                         backdropFilter: 'blur(10px)',
                                         border: '1px solid rgba(255, 255, 255, 0.15)',
                                         borderRadius: '8px',
                                         padding: '12px 8px',
                                         zIndex: 10,
-                                        height: '130px',
+                                        height: '120px',
+                                        minWidth: '46px',
+                                        boxSizing: 'border-box',
                                         display: 'flex',
                                         flexDirection: 'column',
                                         alignItems: 'center',
@@ -551,29 +579,24 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                                         boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
                                         gap: '8px'
                                       }}>
-                                        <span style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                        <span style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
                                           {playbackSpeed.toFixed(1)}x
                                         </span>
-                                        <input 
-                                          type="range"
-                                          min="0.5"
-                                          max="2.0"
-                                          step="0.1"
-                                          value={playbackSpeed}
-                                          onInput={(e) => changeSpeed(parseFloat(e.target.value))}
-                                          style={{
-                                            writingMode: 'bt-lr',
-                                            WebkitAppearance: 'slider-vertical',
-                                            width: '6px',
-                                            height: '80px',
-                                            background: 'rgba(255,255,255,0.2)',
-                                            outline: 'none',
-                                            cursor: 'pointer'
-                                          }}
-                                        />
+                                        <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                          <input 
+                                            type="range"
+                                            min="0.5"
+                                            max="2.0"
+                                            step="0.1"
+                                            value={playbackSpeed}
+                                            onInput={(e) => changeSpeed(parseFloat(e.target.value))}
+                                            className="custom-range-slider"
+                                          />
+                                        </div>
                                       </div>
                                     )}
                                     <button
+                                      onClick={() => { setShowSpeedSlider(!showSpeedSlider); setShowVolumeSlider(false); }}
                                       style={{
                                         background: 'rgba(255, 255, 255, 0.12)',
                                         border: '1px solid rgba(255, 255, 255, 0.25)',
@@ -585,66 +608,58 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                                         fontWeight: 'bold',
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '4px',
+                                        justifyContent: 'center',
+                                        minWidth: '40px',
                                         outline: 'none',
                                         lineHeight: '1'
                                       }}
                                     >
-                                      <span>Speed ({playbackSpeed.toFixed(1)}x)</span>
+                                      <span>{playbackSpeed.toFixed(1)}x</span>
                                     </button>
                                   </div>
 
                                   {/* Custom Volume Selection Slider */}
-                                  <div 
-                                    onMouseEnter={() => setShowVolumeSlider(true)}
-                                    onMouseLeave={() => setShowVolumeSlider(false)}
-                                    style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
-                                  >
+                                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                                     {showVolumeSlider && (
                                       <div style={{
                                         position: 'absolute',
-                                        bottom: '100%',
+                                        bottom: 'calc(100% + 10px)',
                                         left: '50%',
                                         transform: 'translateX(-50%)',
-                                        marginBottom: '10px',
                                         background: 'rgba(11, 40, 73, 0.95)',
                                         backdropFilter: 'blur(10px)',
                                         border: '1px solid rgba(255, 255, 255, 0.15)',
                                         borderRadius: '8px',
                                         padding: '12px 8px',
                                         zIndex: 10,
-                                        height: '110px',
+                                        height: '120px',
+                                        minWidth: '46px',
+                                        boxSizing: 'border-box',
                                         display: 'flex',
                                         flexDirection: 'column',
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
                                         boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
-                                        gap: '6px'
+                                        gap: '8px'
                                       }}>
-                                        <span style={{ fontSize: '10px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                        <span style={{ fontSize: '10px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
                                           {Math.round((isMuted ? 0 : volume) * 100)}%
                                         </span>
-                                        <input 
-                                          type="range"
-                                          min="0"
-                                          max="1"
-                                          step="0.05"
-                                          value={isMuted ? 0 : volume}
-                                          onInput={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                                          style={{
-                                            writingMode: 'bt-lr',
-                                            WebkitAppearance: 'slider-vertical',
-                                            width: '6px',
-                                            height: '70px',
-                                            background: 'rgba(255,255,255,0.2)',
-                                            outline: 'none',
-                                            cursor: 'pointer'
-                                          }}
-                                        />
+                                        <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                          <input 
+                                            type="range"
+                                            min="0"
+                                            max="1"
+                                            step="0.05"
+                                            value={isMuted ? 0 : volume}
+                                            onInput={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                                            className="custom-range-slider"
+                                          />
+                                        </div>
                                       </div>
                                     )}
                                     <button 
-                                      onClick={toggleMute}
+                                      onClick={() => { setShowVolumeSlider(!showVolumeSlider); setShowSpeedSlider(false); }}
                                       style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                                     >
                                       {isMuted || volume === 0 ? (
@@ -713,6 +728,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

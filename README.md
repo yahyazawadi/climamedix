@@ -182,9 +182,9 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [ ] **Admin Dashboards:**
     *   [ ] Create/Edit/Delete Courses
     *   [ ] Upload Videos & Resources
-    *   [ ] Manage Users & Certificates
+    *   [x] Manage Users & Certificates (Completed: Role & Permission Assignment)
     *   [ ] Publish Opportunities, Events, and News
-    *   [ ] View Analytics
+    *   [x] View Analytics (Completed: User Stats Dashboard with Interactive Charts)
 
 ### 12. 👤 User Accounts
 *   [x] **Register/Login:** Supabase Auth Integration (Email sign-in/sign-up & Google OAuth) with beautiful Mitchell's best-candidate particle canvas background, layout swaps, and Outfit/Tajawal font custom settings.
@@ -282,9 +282,9 @@ graph TD
 
 10. **🛡️ Admin Panel & CRUD Dashboards**
     * **Scope:**
-      * Add role-based security ensuring only verified admins can access `/admin`.
-      * Create database CRUD interfaces to publish courses, upload videos/resources, publish opportunities/events, and manage certificate approvals.
-      * Incorporate simple analytics charts (total active students, completions, sign-ups).
+      * [x] Add role-based security ensuring only verified admins can access `/admin`.
+      * [ ] Create database CRUD interfaces to publish courses, upload videos/resources, publish opportunities/events, and manage certificate approvals.
+      * [x] Incorporate simple analytics charts (total active students, completions, sign-ups).
 
 ---
 ## 🛠️ Technology Stack

@@ -474,7 +474,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                   onClose={() => setQuizMode(false)}
                 />
               ) : activeLesson ? (
-                <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '880px', margin: '0 auto' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '1000px', margin: '0 auto' }}>
                   <h3 style={{ color: '#0b2849', fontSize: '22px', fontWeight: 'bold', marginBottom: '24px', lineHeight: '1.4' }}>
                     {lessonTitle}
                   </h3>

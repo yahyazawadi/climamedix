@@ -126,12 +126,16 @@ This plan tracks the implementation progress of ClimaMedix against the official 
     *   [x] Examples integrated: VSCHEF Fellowship, Climate Health Academy, Research Program
 
 ### 4. 📚 Learning Hub (LMS)
-*   [ ] **Learning Management System (LMS) Features:** *(Note: The current Learning Hub UI uses placeholder components for demonstration)*
+*   [x] **Learning Management System (LMS) Features:**
     *   [x] Course Categories (Training Courses Carousel)
-    *   [x] Video Lessons (Placeholder UI)
+    *   [x] Premium Custom Video Lessons Player (Equipped with central overlay controls, timeline scrubbing, fullscreen support, and professional SVGs)
+    *   [x] High-Tech Control Sliders (Interactive vertical volume and speed slider widgets appearing dynamically on hover)
+    *   [x] Playback Speed Tuning (Precise speed range adjustment from 0.5x to 2.0x in 0.1 increments)
+    *   [x] Course Builder Drag & Drop (Interactive lesson reordering within modules, across modules, and module-level reordering)
+    *   [x] Lesson Duration Support (Integrated duration metadata in the database, course builder forms, and detail sidebar)
     *   [ ] PDF Resources
-    *   [x] Quizzes (Placeholder UI)
-    *   [x] Progress Tracking (Placeholder UI)
+    *   [x] Quizzes (Fully functional quiz builder and student answer validation)
+    *   [x] Progress Tracking & Completed Lesson Badges
     *   [ ] Certificates
 *   [ ] **User Dashboard:**
     *   [ ] My Courses

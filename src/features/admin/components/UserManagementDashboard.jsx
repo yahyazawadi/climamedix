@@ -7,7 +7,7 @@ import { Search, Shield, User, ChevronDown, Check, X } from 'lucide-preact';
 import './UserManagementDashboard.css';
 
 export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
-  const { hasPermission } = useAuth();
+  const { hasPermission, user } = useAuth();
   const isSuperAdmin = hasPermission('manage:system');
 
   const [profiles, setProfiles] = useState([]);
@@ -293,13 +293,19 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
                           </span>
                         </td>
                         <td>
-                          <Button 
-                            variant={selectedUser?.id === profile.id ? 'primary' : 'outline'}
-                            onClick={() => handleManageClick(profile)}
-                            className="umd-manage-btn"
-                          >
-                            {lang === 'ar' ? 'إدارة الوصول' : 'Manage Access'}
-                          </Button>
+                          {profile.role === 'superadmin' ? (
+                            <span style={{ fontSize: '12px', color: 'rgba(11,40,73,0.5)', fontWeight: 'bold' }}>
+                              {lang === 'ar' ? 'محمي بالنظام' : 'System Protected'}
+                            </span>
+                          ) : (
+                            <Button 
+                              variant={selectedUser?.id === profile.id ? 'primary' : 'outline'}
+                              onClick={() => handleManageClick(profile)}
+                              className="umd-manage-btn"
+                            >
+                              {lang === 'ar' ? 'إدارة الوصول' : 'Manage Access'}
+                            </Button>
+                          )}
                         </td>
                       </tr>
                     ))

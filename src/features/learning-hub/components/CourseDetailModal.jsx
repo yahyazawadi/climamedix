@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
 import { Button } from '../../shared/components/Button';
 import { QuizWidget } from './QuizWidget';
 import {
@@ -21,6 +21,14 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
   const [videoUrl, setVideoUrl] = useState(null);
   const [videoLoading, setVideoLoading] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Custom Video Player States
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [showControls, setShowControls] = useState(true);
 
   if (!course) return null;
 
@@ -56,6 +64,9 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
     setQuizData(null);
     setQuizMode(false);
     setVideoUrl(null);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
 
     async function loadLessonData() {
       try {
@@ -146,6 +157,47 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
     } catch (err) {
       console.error('Mark complete error:', err);
     }
+  }
+
+  // Custom Video Player Control Functions
+  function togglePlay() {
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.play();
+    }
+  }
+
+  function toggleMute() {
+    if (!videoRef.current) return;
+    videoRef.current.muted = !videoRef.current.muted;
+    setIsMuted(videoRef.current.muted);
+  }
+
+  function toggleFullscreen() {
+    if (!videoRef.current) return;
+    if (videoRef.current.requestFullscreen) {
+      videoRef.current.requestFullscreen();
+    } else if (videoRef.current.webkitRequestFullscreen) {
+      videoRef.current.webkitRequestFullscreen();
+    }
+  }
+
+  function handleTimelineClick(e) {
+    if (!videoRef.current || !duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const newTime = (clickX / width) * duration;
+    videoRef.current.currentTime = newTime;
+  }
+
+  function formatTime(seconds) {
+    if (isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   }
 
   const lessonTitle = activeLesson
@@ -258,21 +310,184 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                     {lessonTitle}
                   </h3>
 
-                  {/* Video Player */}
+                  {/* Custom Video Player (Concept 13) */}
                   {activeLesson.video_url && (
-                    <div style={{ width: '100%', aspectRatio: '16/9', background: '#050c1a', borderRadius: '16px', marginBottom: '32px', overflow: 'hidden', position: 'relative', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div 
+                      onMouseEnter={() => setShowControls(true)}
+                      onMouseLeave={() => setShowControls(false)}
+                      style={{
+                        width: '100%',
+                        aspectRatio: '16/9',
+                        background: '#000000',
+                        borderRadius: '16px',
+                        marginBottom: '32px',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        boxShadow: 'inset 0 0 40px rgba(0,0,0,0.8), 0 12px 30px rgba(11, 40, 73, 0.15)',
+                        border: '1px solid rgba(0, 76, 109, 0.12)'
+                      }}
+                    >
                       {videoLoading ? (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px', flexDirection: 'column', gap: '12px' }}>
                           <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.15)', borderTop: '3px solid #15b47a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                          {lang === 'ar' ? 'جاري تحميل الفيديو الآمن...' : 'Loading secure video...'}
+                          {lang === 'ar' ? 'جاري تحميل الفيديو...' : 'Loading video...'}
                           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                         </div>
                       ) : videoUrl ? (
-                        <video
-                          src={videoUrl}
-                          controls
-                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                        />
+                        <>
+                          <video
+                            ref={videoRef}
+                            src={videoUrl}
+                            style={{ width: '100%', height: '100%', objectFit: 'contain', cursor: 'pointer' }}
+                            onClick={togglePlay}
+                            onPlay={() => setIsPlaying(true)}
+                            onPause={() => setIsPlaying(false)}
+                            onTimeUpdate={() => {
+                              if (videoRef.current) {
+                                setCurrentTime(videoRef.current.currentTime);
+                              }
+                            }}
+                            onLoadedMetadata={() => {
+                              if (videoRef.current) {
+                                setDuration(videoRef.current.duration);
+                              }
+                            }}
+                          />
+
+                          {/* Center Play/Pause Overlay Button */}
+                          {(!isPlaying || showControls) && (
+                            <div 
+                              onClick={togglePlay}
+                              style={{
+                                position: 'absolute',
+                                inset: 0,
+                                background: 'rgba(0, 0, 0, 0.35)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'opacity 0.25s ease'
+                              }}
+                            >
+                              <div style={{
+                                width: '70px',
+                                height: '70px',
+                                borderRadius: '50%',
+                                background: 'linear-gradient(135deg, #15b47a, #004c6d)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 8px 25px rgba(21, 180, 122, 0.4)',
+                                transform: 'scale(1)',
+                                transition: 'transform 0.2s',
+                                color: '#ffffff',
+                                fontSize: '28px',
+                                paddingLeft: !isPlaying ? '6px' : '0px' // Visually center the play icon
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                              >
+                                {isPlaying ? '⏸' : '▶'}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Top Overlay details */}
+                          {showControls && (
+                            <div style={{
+                              position: 'absolute',
+                              top: 0, left: 0, right: 0,
+                              background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
+                              padding: '20px 24px',
+                              color: '#fff',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              pointerEvents: 'none'
+                            }}>
+                              <span style={{ fontSize: '15px', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                                {lessonTitle}
+                              </span>
+                              <span style={{ fontSize: '12px', background: 'rgba(21, 180, 122, 0.25)', color: '#15b47a', padding: '3px 10px', borderRadius: '20px', fontWeight: 'bold', border: '1px solid rgba(21, 180, 122, 0.4)' }}>
+                                {lang === 'ar' ? 'بث فيديو آمن' : 'Secure Video Stream'}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Bottom Controls Overlay */}
+                          {showControls && (
+                            <div style={{
+                              position: 'absolute',
+                              bottom: 0, left: 0, right: 0,
+                              background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)',
+                              padding: '24px 20px 14px 20px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '12px'
+                            }}>
+                              
+                              {/* Timeline seekable slider bar */}
+                              <div 
+                                onClick={handleTimelineClick}
+                                style={{
+                                  width: '100%',
+                                  height: '6px',
+                                  background: 'rgba(255,255,255,0.3)',
+                                  borderRadius: '3px',
+                                  cursor: 'pointer',
+                                  position: 'relative'
+                                }}
+                              >
+                                <div 
+                                  style={{
+                                    width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
+                                    height: '100%',
+                                    background: '#15b47a',
+                                    borderRadius: '3px',
+                                    position: 'relative',
+                                    boxShadow: '0 0 8px #15b47a'
+                                  }}
+                                />
+                              </div>
+
+                              {/* Controls buttons row */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#fff', direction: 'ltr' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                  <button 
+                                    onClick={togglePlay}
+                                    style={{
+                                      background: 'none', border: 'none', color: '#fff', fontSize: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center'
+                                    }}
+                                  >
+                                    {isPlaying ? '⏸' : '▶'}
+                                  </button>
+
+                                  {/* Time Indicator */}
+                                  <span style={{ fontSize: '13px', fontFamily: 'monospace' }}>
+                                    {formatTime(currentTime)} / {formatTime(duration)}
+                                  </span>
+                                </div>
+
+                                {/* Volume / Mute and Fullscreen buttons */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                  <button 
+                                    onClick={toggleMute}
+                                    style={{ background: 'none', border: 'none', color: '#fff', fontSize: '18px', cursor: 'pointer' }}
+                                  >
+                                    {isMuted ? '🔇' : '🔊'}
+                                  </button>
+                                  <button 
+                                    onClick={toggleFullscreen}
+                                    style={{ background: 'none', border: 'none', color: '#fff', fontSize: '18px', cursor: 'pointer' }}
+                                  >
+                                    ⛶
+                                  </button>
+                                </div>
+                              </div>
+
+                            </div>
+                          )}
+                        </>
                       ) : (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexDirection: 'column', gap: '8px', opacity: 0.6 }}>
                           <span style={{ fontSize: '32px' }}>⚠️</span>

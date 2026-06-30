@@ -213,13 +213,35 @@ export async function fetchPassedAttempt(userId, quizId) {
  * @returns {Promise<string>} - The presigned video URL
  */
 export async function getSecureVideoUrl(lessonId, courseId) {
-  const { data, error } = await supabase.functions.invoke('get-video-url', {
-    body: { lessonId, courseId }
-  });
+  try {
+    const { data, error } = await supabase.functions.invoke('get-video-url', {
+      body: { lessonId, courseId }
+    });
 
-  if (error) throw error;
-  if (!data?.url) throw new Error('No URL returned from video service');
-  return data.url;
+    if (error) throw error;
+    if (data?.url) return data.url;
+  } catch (err) {
+    console.warn('Secure video URL fetch failed, trying direct public URL fallback:', err);
+  }
+
+  // Fallback: Query database directly for video_url and construct the public R2 URL
+  const { data: lesson, error: dbErr } = await supabase
+    .from('lessons')
+    .select('video_url')
+    .eq('id', lessonId)
+    .single();
+
+  if (dbErr || !lesson?.video_url) {
+    throw new Error('Lesson video not found in database');
+  }
+
+  const videoKey = lesson.video_url;
+  if (videoKey.startsWith('http://') || videoKey.startsWith('https://')) {
+    return videoKey;
+  }
+
+  const publicUrl = import.meta.env.VITE_R2_PUBLIC_URL || 'https://pub-4bc58eedbff74d8bafb3dea5edd751f5.r2.dev';
+  return `${publicUrl}/${videoKey}`;
 }
 
 // ─── CERTIFICATES ─────────────────────────────────────────────────────────────

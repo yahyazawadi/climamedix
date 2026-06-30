@@ -90,7 +90,6 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
     }
 
     try {
-      localStorage.setItem('oauth_in_progress', 'true');
       await signInWithOAuth(provider);
     } catch (err) {
       showAlert('error', err.message || (lang === 'ar' ? 'خطأ في الاتصال بمزود الخدمة' : 'Connection error'));

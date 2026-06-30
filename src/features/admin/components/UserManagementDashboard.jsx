@@ -7,7 +7,7 @@ import { Search, Shield, User, ChevronDown, Check, X, RefreshCw } from 'lucide-p
 import './UserManagementDashboard.css';
 
 export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
-  const { hasPermission, user } = useAuth();
+  const { hasPermission, user, loading: authLoading } = useAuth();
   const isSuperAdmin = hasPermission('manage:system');
 
   const [profiles, setProfiles] = useState([]);
@@ -211,6 +211,14 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
       setSaving(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="admin-unauthorized">
+        <div style={{ fontSize: '14px', opacity: 0.6 }}>{lang === 'ar' ? 'جاري التحقق من الصلاحيات...' : 'Verifying permissions...'}</div>
+      </div>
+    );
+  }
 
   if (!isSuperAdmin) {
     return (

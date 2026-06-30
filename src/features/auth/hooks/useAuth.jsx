@@ -103,26 +103,26 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let active = true;
+    // Lock to prevent initializeAuth and onAuthStateChange from racing to fetch the profile simultaneously
+    let initDone = false;
 
-    // 1. Check current session on load
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!active) return;
-        
+
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         setAccessToken(session?.access_token ?? null);
-        
+
         if (currentUser) {
           await fetchProfileAndSetOnline(currentUser.id);
         }
       } catch (err) {
-        if (active) {
-          setError(err.message || 'Error initializing auth');
-        }
+        if (active) setError(err.message || 'Error initializing auth');
       } finally {
         if (active) {
+          initDone = true;
           setLoading(false);
         }
       }
@@ -130,33 +130,45 @@ export function AuthProvider({ children }) {
 
     initializeAuth();
 
-    // 2. Listen for auth changes
+    // 2. Listen for auth changes — but ONLY act after initializeAuth has completed
+    // to avoid the race condition where both run concurrently on OAuth redirect
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!active) return;
-      
-      if (event === 'SIGNED_IN' && localStorage.getItem('oauth_in_progress') === 'true') {
-        localStorage.removeItem('oauth_in_progress');
-        // Automate the refresh workaround to ensure perfect state sync and header attachment
-        window.location.reload();
-        return;
-      }
-      
+
       const currentUser = session?.user ?? null;
-      const prevUser = user;
-      
       setUser(currentUser);
       setAccessToken(session?.access_token ?? null);
-      
+
       if (currentUser) {
-        await fetchProfileAndSetOnline(currentUser.id);
+        // Wait for initializeAuth to finish before doing anything.
+        // On normal login/OAuth, initDone will be false here; we wait.
+        const waitForInit = () => new Promise(resolve => {
+          if (initDone) return resolve();
+          const interval = setInterval(() => {
+            if (initDone || !active) {
+              clearInterval(interval);
+              resolve();
+            }
+          }, 50);
+        });
+
+        await waitForInit();
+        if (!active) return;
+
+        // Re-fetch profile on SIGNED_IN (handles OAuth return where profile may
+        // not have been found in the first getSession call), and on TOKEN_REFRESHED.
+        // INITIAL_SESSION is skipped because initializeAuth already handled it.
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          await fetchProfileAndSetOnline(currentUser.id);
+        }
       } else {
         setUserProfile(null);
-        // If there was a user logged in, mark them offline
-        if (prevUser) {
-          try {
-            await authService.updateOnlineStatus(prevUser.id, false);
-          } catch (err) {
-            console.error('Failed to set previous user offline:', err);
+        if (event === 'SIGNED_OUT') {
+          const prevUserId = user?.id;
+          if (prevUserId) {
+            authService.updateOnlineStatus(prevUserId, false).catch(err =>
+              console.error('Failed to set user offline on sign out:', err)
+            );
           }
         }
       }

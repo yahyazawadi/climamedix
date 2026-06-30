@@ -93,11 +93,42 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
     { textAr: '', textEn: '', isCorrect: false }
   ]);
 
+  const [permissions, setPermissions] = useState([]);
+
   useEffect(() => {
     if (canManage) {
       loadCourses();
+      loadPermissions();
     }
   }, [canManage]);
+
+  async function loadPermissions() {
+    try {
+      const { data, error } = await supabase
+        .from('permissions')
+        .select('perm_key')
+        .order('perm_key', { ascending: true });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setPermissions(data.map(p => p.perm_key));
+      } else {
+        setPermissions([
+          'view:all_courses',
+          'view:free_content',
+          'view:public_content',
+          'apply:specialized_roles'
+        ]);
+      }
+    } catch (err) {
+      console.error(err);
+      setPermissions([
+        'view:all_courses',
+        'view:free_content',
+        'view:public_content',
+        'apply:specialized_roles'
+      ]);
+    }
+  }
 
   async function loadCourses() {
     setLoadingCourses(true);
@@ -580,11 +611,27 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
               <div className="cb-form-row">
                 <div className="cb-form-group">
                   <label>Full Access Permission Key</label>
-                  <input type="text" value={courseForm.full_access_permission_key} onInput={e => setCourseForm({...courseForm, full_access_permission_key: e.target.value})} />
+                  <select 
+                    value={courseForm.full_access_permission_key} 
+                    onChange={e => setCourseForm({...courseForm, full_access_permission_key: e.target.value})}
+                  >
+                    <option value="">Select Permission</option>
+                    {permissions.map(perm => (
+                      <option key={perm} value={perm}>{perm}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="cb-form-group">
                   <label>Teaser Permission Key</label>
-                  <input type="text" value={courseForm.teaser_permission_key} onInput={e => setCourseForm({...courseForm, teaser_permission_key: e.target.value})} />
+                  <select 
+                    value={courseForm.teaser_permission_key} 
+                    onChange={e => setCourseForm({...courseForm, teaser_permission_key: e.target.value})}
+                  >
+                    <option value="">Select Permission</option>
+                    {permissions.map(perm => (
+                      <option key={perm} value={perm}>{perm}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 

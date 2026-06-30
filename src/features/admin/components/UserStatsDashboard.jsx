@@ -2,8 +2,19 @@ import { useState, useEffect, useMemo } from 'preact/hooks';
 import { supabase } from '../../../utils/supabaseClient';
 import { GlassCard } from '../../shared/components/GlassCard';
 import { useAuth } from '../../auth/hooks/useAuth';
-import { BarChart, Users, Globe, Briefcase, Activity, Shield } from 'lucide-preact';
+import { BarChart, Users, Globe, Briefcase, Activity, Shield, X, User } from 'lucide-preact';
 import './UserStatsDashboard.css';
+
+const ROLE_COLORS = {
+  superadmin: '#ef4444',
+  admin: '#8b5cf6',
+  educator: '#3b82f6',
+  researcher: '#10b981',
+  subscriber: '#f59e0b',
+  user: '#64748b'
+};
+
+const BRAND_COLORS = ['#15b47a', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#10b981', '#f43f5e', '#6366f1', '#14b8a6'];
 
 export function UserStatsDashboard({ lang = 'ar' }) {
   const { hasPermission } = useAuth();
@@ -11,6 +22,9 @@ export function UserStatsDashboard({ lang = 'ar' }) {
 
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Modal State
+  const [selectedCategory, setSelectedCategory] = useState(null); // { type: 'role', value: 'admin', title: 'Admins' }
 
   useEffect(() => {
     if (!canViewStats) return;
@@ -20,7 +34,8 @@ export function UserStatsDashboard({ lang = 'ar' }) {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('*');
+          .select('*')
+          .order('created_at', { ascending: false });
         if (error) throw error;
         setProfiles(data || []);
       } catch (err) {
@@ -36,11 +51,8 @@ export function UserStatsDashboard({ lang = 'ar' }) {
     const total = profiles.length;
     const online = profiles.filter(p => p.online).length;
     
-    // Roles breakdown
     const roles = {};
-    // Countries breakdown
     const countries = {};
-    // Professions breakdown
     const professions = {};
 
     const now = new Date();
@@ -48,25 +60,57 @@ export function UserStatsDashboard({ lang = 'ar' }) {
     let newSignups = 0;
 
     profiles.forEach(p => {
-      // Role
       roles[p.role] = (roles[p.role] || 0) + 1;
       
-      // Country
       const country = p.country || (lang === 'ar' ? 'غير محدد' : 'Unknown');
       countries[country] = (countries[country] || 0) + 1;
       
-      // Profession
       const prof = p.profession || (lang === 'ar' ? 'غير محدد' : 'Unknown');
       professions[prof] = (professions[prof] || 0) + 1;
       
-      // New signups
       if (new Date(p.created_at) >= thirtyDaysAgo) {
         newSignups++;
       }
     });
 
-    return { total, online, roles, countries, professions, newSignups };
+    // Sort arrays for rendering
+    const rolesArr = Object.entries(roles).sort((a, b) => b[1] - a[1]);
+    const countriesArr = Object.entries(countries).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const profsArr = Object.entries(professions).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    // Calculate conic gradient for Donut Chart
+    let currentDegree = 0;
+    const donutSlices = rolesArr.map(([role, count]) => {
+      const percentage = (count / total) * 100;
+      const start = currentDegree;
+      const end = currentDegree + percentage;
+      currentDegree = end;
+      return `${ROLE_COLORS[role] || '#ccc'} ${start}% ${end}%`;
+    });
+    const donutGradient = `conic-gradient(${donutSlices.join(', ')})`;
+
+    return { total, online, rolesArr, countriesArr, profsArr, newSignups, donutGradient };
   }, [profiles, lang]);
+
+  const handleCategoryClick = (type, value, title) => {
+    setSelectedCategory({ type, value, title });
+  };
+
+  const modalUsers = useMemo(() => {
+    if (!selectedCategory) return [];
+    return profiles.filter(p => {
+      if (selectedCategory.type === 'role') return p.role === selectedCategory.value;
+      if (selectedCategory.type === 'country') {
+        const c = p.country || (lang === 'ar' ? 'غير محدد' : 'Unknown');
+        return c === selectedCategory.value;
+      }
+      if (selectedCategory.type === 'profession') {
+        const pr = p.profession || (lang === 'ar' ? 'غير محدد' : 'Unknown');
+        return pr === selectedCategory.value;
+      }
+      return false;
+    });
+  }, [selectedCategory, profiles, lang]);
 
   if (!canViewStats) {
     return (
@@ -102,7 +146,7 @@ export function UserStatsDashboard({ lang = 'ar' }) {
               </div>
             </GlassCard>
 
-            <GlassCard className="usd-kpi-card">
+            <GlassCard className="usd-kpi-card" onClick={() => handleCategoryClick('online', true, lang==='ar'?'المتصلون الآن':'Online Users')}>
               <Activity size={24} className="usd-kpi-icon text-success" />
               <div className="usd-kpi-info">
                 <h3>{lang === 'ar' ? 'متصلون الآن' : 'Online Now'}</h3>
@@ -120,54 +164,132 @@ export function UserStatsDashboard({ lang = 'ar' }) {
           </div>
 
           <div className="usd-charts-grid">
-            {/* Roles Breakdown */}
+            {/* Roles Breakdown - Donut Chart */}
             <GlassCard className="usd-chart-card">
               <h3 className="usd-chart-title">
                 <Shield size={18} />
                 {lang === 'ar' ? 'توزيع الأدوار' : 'Roles Distribution'}
               </h3>
-              <div className="usd-list">
-                {Object.entries(stats.roles).sort((a,b) => b[1] - a[1]).map(([role, count]) => (
-                  <div key={role} className="usd-list-item">
-                    <span className={`umd-role-badge role-${role}`}>{role}</span>
-                    <span className="usd-list-count">{count}</span>
+              
+              <div className="usd-donut-container">
+                <div className="usd-donut-chart" style={{ background: stats.donutGradient }}>
+                  <div className="usd-donut-hole">
+                    <span>{stats.total}</span>
+                    <small>{lang === 'ar' ? 'مستخدم' : 'Users'}</small>
                   </div>
-                ))}
+                </div>
+                
+                <div className="usd-donut-legend">
+                  {stats.rolesArr.map(([role, count]) => (
+                    <div 
+                      key={role} 
+                      className="usd-legend-item interactive"
+                      onClick={() => handleCategoryClick('role', role, `${lang === 'ar' ? 'أصحاب دور' : 'Users with role'}: ${role}`)}
+                    >
+                      <span className="usd-legend-color" style={{ backgroundColor: ROLE_COLORS[role] || '#ccc' }}></span>
+                      <span className="usd-legend-label">{role}</span>
+                      <span className="usd-legend-count">{count}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </GlassCard>
 
-            {/* Countries Breakdown */}
+            {/* Countries Breakdown - Horizontal Bars */}
             <GlassCard className="usd-chart-card">
               <h3 className="usd-chart-title">
                 <Globe size={18} />
                 {lang === 'ar' ? 'التوزيع الجغرافي' : 'Geographic Distribution'}
               </h3>
-              <div className="usd-list">
-                {Object.entries(stats.countries).sort((a,b) => b[1] - a[1]).slice(0, 10).map(([country, count]) => (
-                  <div key={country} className="usd-list-item">
-                    <span className="usd-list-label">{country}</span>
-                    <span className="usd-list-count">{count}</span>
-                  </div>
-                ))}
+              <div className="usd-bar-list">
+                {stats.countriesArr.map(([country, count], idx) => {
+                  const percentage = Math.round((count / stats.total) * 100);
+                  const color = BRAND_COLORS[idx % BRAND_COLORS.length];
+                  return (
+                    <div 
+                      key={country} 
+                      className="usd-bar-item interactive"
+                      onClick={() => handleCategoryClick('country', country, `${lang === 'ar' ? 'مستخدمين من' : 'Users from'}: ${country}`)}
+                    >
+                      <div className="usd-bar-info">
+                        <span className="usd-bar-label">{country}</span>
+                        <span className="usd-bar-count">{count} ({percentage}%)</span>
+                      </div>
+                      <div className="usd-bar-track">
+                        <div className="usd-bar-fill" style={{ width: `${percentage}%`, backgroundColor: color }}></div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </GlassCard>
 
-            {/* Professions Breakdown */}
+            {/* Professions Breakdown - Horizontal Bars */}
             <GlassCard className="usd-chart-card">
               <h3 className="usd-chart-title">
                 <Briefcase size={18} />
                 {lang === 'ar' ? 'المهن' : 'Professions'}
               </h3>
-              <div className="usd-list">
-                {Object.entries(stats.professions).sort((a,b) => b[1] - a[1]).slice(0, 10).map(([prof, count]) => (
-                  <div key={prof} className="usd-list-item">
-                    <span className="usd-list-label">{prof}</span>
-                    <span className="usd-list-count">{count}</span>
-                  </div>
-                ))}
+              <div className="usd-bar-list">
+                {stats.profsArr.map(([prof, count], idx) => {
+                  const percentage = Math.round((count / stats.total) * 100);
+                  const color = BRAND_COLORS[(idx + 4) % BRAND_COLORS.length];
+                  return (
+                    <div 
+                      key={prof} 
+                      className="usd-bar-item interactive"
+                      onClick={() => handleCategoryClick('profession', prof, `${lang === 'ar' ? 'مهنة' : 'Profession'}: ${prof}`)}
+                    >
+                      <div className="usd-bar-info">
+                        <span className="usd-bar-label">{prof}</span>
+                        <span className="usd-bar-count">{count} ({percentage}%)</span>
+                      </div>
+                      <div className="usd-bar-track">
+                        <div className="usd-bar-fill" style={{ width: `${percentage}%`, backgroundColor: color }}></div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </GlassCard>
           </div>
+        </div>
+      )}
+
+      {/* Users List Modal */}
+      {selectedCategory && (
+        <div className="usd-modal-overlay" onClick={() => setSelectedCategory(null)}>
+          <GlassCard className="usd-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="usd-modal-header">
+              <h3>{selectedCategory.title} <span>({modalUsers.length})</span></h3>
+              <button className="usd-modal-close" onClick={() => setSelectedCategory(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="usd-modal-list">
+              {modalUsers.length === 0 ? (
+                <div className="usd-modal-empty">{lang === 'ar' ? 'لا يوجد مستخدمين' : 'No users found'}</div>
+              ) : (
+                modalUsers.map(u => (
+                  <div key={u.id} className="usd-modal-user">
+                    {u.avatar_url ? (
+                      <img src={u.avatar_url} alt="avatar" className="usd-modal-avatar" />
+                    ) : (
+                      <div className="usd-modal-avatar-placeholder"><User size={16} /></div>
+                    )}
+                    <div className="usd-modal-user-info">
+                      <div className="usd-modal-user-name">{u.full_name || (lang === 'ar' ? 'بدون اسم' : 'Unnamed')}</div>
+                      <div className="usd-modal-user-email">{u.email}</div>
+                    </div>
+                    {selectedCategory.type !== 'role' && (
+                      <span className={`umd-role-badge role-${u.role}`}>{u.role}</span>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </GlassCard>
         </div>
       )}
     </div>

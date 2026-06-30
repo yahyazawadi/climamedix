@@ -266,6 +266,10 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
     const draggedLesson = sourceModule.lessons.find(l => l.id === draggedLessonId);
     if (!draggedLesson) return;
 
+    const rect = e.currentTarget.getBoundingClientRect();
+    const relativeY = e.clientY - rect.top;
+    const isAfter = relativeY > (rect.height / 2);
+
     let updatedModules = JSON.parse(JSON.stringify(modules));
 
     const srcModIdx = updatedModules.findIndex(m => m.id === draggedLessonSourceModId);
@@ -274,7 +278,9 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
     const targetModIdx = updatedModules.findIndex(m => m.id === targetModuleId);
     const targetLessonIdx = updatedModules[targetModIdx].lessons.findIndex(l => l.id === targetLessonId);
 
-    updatedModules[targetModIdx].lessons.splice(targetLessonIdx, 0, {
+    const insertIdx = isAfter ? targetLessonIdx + 1 : targetLessonIdx;
+
+    updatedModules[targetModIdx].lessons.splice(insertIdx, 0, {
       ...draggedLesson,
       module_id: targetModuleId
     });
@@ -400,11 +406,17 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
     const draggedModule = modules.find(m => m.id === draggedModuleId);
     if (!draggedModule) return;
 
+    const rect = e.currentTarget.getBoundingClientRect();
+    const relativeY = e.clientY - rect.top;
+    const isAfter = relativeY > (rect.height / 2);
+
     let updatedModules = JSON.parse(JSON.stringify(modules));
     updatedModules = updatedModules.filter(m => m.id !== draggedModuleId);
 
     const targetIdx = updatedModules.findIndex(m => m.id === targetModuleId);
-    updatedModules.splice(targetIdx, 0, draggedModule);
+    const insertIdx = isAfter ? targetIdx + 1 : targetIdx;
+
+    updatedModules.splice(insertIdx, 0, draggedModule);
 
     const updatePromises = [];
 

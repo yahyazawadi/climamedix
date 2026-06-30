@@ -160,28 +160,28 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
   return (
     <div style={{
       position: 'fixed', inset: 0,
-      background: 'rgba(5, 12, 26, 0.65)',
-      backdropFilter: 'blur(16px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      zIndex: 1000, padding: '20px'
+      background: '#ffffff',
+      zIndex: 1000,
+      direction: lang === 'ar' ? 'rtl' : 'ltr',
+      textAlign: lang === 'ar' ? 'right' : 'left',
+      display: 'flex', flexDirection: 'column',
+      width: '100vw', height: '100vh',
+      overflow: 'hidden'
     }}>
       <div style={{
-        background: '#ffffff', borderRadius: '28px',
-        border: '1px solid rgba(11,40,73,0.12)',
-        maxWidth: '960px', width: '100%', maxHeight: '92vh', overflowY: 'auto',
-        boxShadow: '0 24px 60px rgba(0,0,0,0.3)',
-        position: 'relative', direction: lang === 'ar' ? 'rtl' : 'ltr',
-        textAlign: lang === 'ar' ? 'right' : 'left',
-        display: 'flex', flexDirection: 'column'
+        background: '#ffffff',
+        width: '100%', height: '100%',
+        display: 'flex', flexDirection: 'column',
+        overflow: 'hidden'
       }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '22px 28px', borderBottom: '1px solid rgba(11,40,73,0.08)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 28px', borderBottom: '1px solid rgba(11,40,73,0.08)', background: '#ffffff', flexShrink: 0 }}>
           <div>
-            <span style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
+            <span style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold', display: 'block', marginBottom: '2px' }}>
               {lang === 'ar' ? 'مساق نشط' : 'Active Course'}
             </span>
-            <h2 style={{ color: '#0b2849', fontSize: '19px', fontWeight: 'bold', margin: 0 }}>
+            <h2 style={{ color: '#0b2849', fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
               {lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)}
             </h2>
           </div>
@@ -196,14 +196,14 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
         </div>
 
         {loading ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: 'rgba(11,40,73,0.5)' }}>
+          <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(11,40,73,0.5)' }}>
             {lang === 'ar' ? 'جاري تحميل المنهج...' : 'Loading syllabus...'}
           </div>
         ) : (
-          <div style={{ display: 'flex', flexGrow: 1, minHeight: 0, height: '65vh', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', flexGrow: 1, minHeight: 0, height: 'calc(100vh - 80px)' }}>
 
             {/* Sidebar: Module + Lesson List */}
-            <div style={{ width: '260px', borderInlineEnd: '1px solid rgba(11,40,73,0.08)', overflowY: 'auto', padding: '16px', flexShrink: 0, background: 'rgba(0,76,109,0.02)' }}>
+            <div style={{ width: '300px', borderInlineEnd: '1px solid rgba(11,40,73,0.08)', overflowY: 'auto', padding: '24px 20px', flexShrink: 0, background: '#f8fafc' }}>
               {modules.map(mod => (
                 <div key={mod.id} style={{ marginBottom: '20px' }}>
                   <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#004c6d', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '0 4px' }}>
@@ -244,7 +244,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
             </div>
 
             {/* Main Content Panel */}
-            <div style={{ flexGrow: 1, flexBasis: '400px', overflowY: 'auto', padding: '28px' }}>
+            <div style={{ flexGrow: 1, overflowY: 'auto', padding: '40px' }}>
               {quizMode && quizData ? (
                 <QuizWidget
                   lang={lang}
@@ -253,14 +253,14 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                   onClose={() => setQuizMode(false)}
                 />
               ) : activeLesson ? (
-                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  <h3 style={{ color: '#0b2849', fontSize: '20px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.4' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '880px', margin: '0 auto' }}>
+                  <h3 style={{ color: '#0b2849', fontSize: '22px', fontWeight: 'bold', marginBottom: '24px', lineHeight: '1.4' }}>
                     {lessonTitle}
                   </h3>
 
                   {/* Video Player */}
                   {activeLesson.video_url && (
-                    <div style={{ width: '100%', aspectRatio: '16/9', background: '#050c1a', borderRadius: '16px', marginBottom: '24px', overflow: 'hidden', position: 'relative', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ width: '100%', aspectRatio: '16/9', background: '#050c1a', borderRadius: '16px', marginBottom: '32px', overflow: 'hidden', position: 'relative', border: '1px solid rgba(255,255,255,0.08)' }}>
                       {videoLoading ? (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px', flexDirection: 'column', gap: '12px' }}>
                           <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.15)', borderTop: '3px solid #15b47a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -272,9 +272,6 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                           src={videoUrl}
                           controls
                           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                          onEnded={() => {
-                            // Auto-mark lesson as read when video finishes (quiz will lock the progress)
-                          }}
                         />
                       ) : (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexDirection: 'column', gap: '8px', opacity: 0.6 }}>
@@ -287,15 +284,16 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
 
                   {/* Text Content */}
                   {lessonContent && (
-                    <div style={{ color: 'rgba(11,40,73,0.8)', fontSize: '15px', lineHeight: '1.9', marginBottom: '28px', whiteSpace: 'pre-wrap', flexGrow: 1 }}>
-                      {lessonContent}
-                    </div>
+                    <div 
+                      style={{ color: 'rgba(11,40,73,0.8)', fontSize: '16px', lineHeight: '1.9', marginBottom: '32px', flexGrow: 1 }}
+                      dangerouslySetInnerHTML={{ __html: lessonContent }}
+                    />
                   )}
 
                   {/* Action Bar */}
-                  <div style={{ borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                  <div style={{ borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto' }}>
                     {isCurrentCompleted ? (
-                      <span style={{ color: '#15b47a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                      <span style={{ color: '#15b47a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14.5px' }}>
                         ✓ {lang === 'ar' ? 'تم إتمام هذا الدرس بنجاح!' : 'Lesson completed!'}
                       </span>
                     ) : quizData ? (

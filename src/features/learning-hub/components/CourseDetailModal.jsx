@@ -6,6 +6,7 @@ import {
   fetchCourseSyllabus,
   fetchCompletedLessons,
   markLessonComplete,
+  unmarkLessonComplete,
   fetchQuiz,
   submitQuizAttempt,
   fetchPassedAttempt,
@@ -19,6 +20,10 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
   const [quizData, setQuizData] = useState(null);
   const [quizMode, setQuizMode] = useState(false);
   const [quizPassed, setQuizPassed] = useState(false);
+  const [collapsedModules, setCollapsedModules] = useState(new Set());
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  // Use the new getSecureVideoUrl workflow
   const [videoUrl, setVideoUrl] = useState(null);
   const [videoLoading, setVideoLoading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -31,20 +36,40 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
   const allLessons = modules.flatMap(m => m.lessons || []);
   const activeLesson = allLessons.find(l => l.id === activeLessonId) || allLessons[0];
 
+  // ─── Body Scroll Lock ─────────────────────────────────────────────────────
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   // ─── Load Syllabus + Progress ─────────────────────────────────────────────
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
-        const [syllabus, completed] = await Promise.all([
+        const [syllabus, { completedSet }] = await Promise.all([
           fetchCourseSyllabus(course.id),
           fetchCompletedLessons(userId, course.id),
         ]);
         setModules(syllabus || []);
-        setCompletedSet(completed);
+        setCompletedSet(completedSet);
 
-        const first = (syllabus?.[0]?.lessons || [])[0];
-        if (first) setActiveLessonId(first.id);
+        const params = new URLSearchParams(window.location.search);
+        const urlLessonId = params.get('lesson');
+
+        let targetLessonId = null;
+        if (urlLessonId) {
+          const exists = (syllabus || []).some(m => m.lessons?.some(l => l.id === urlLessonId));
+          if (exists) targetLessonId = urlLessonId;
+        }
+        
+        if (!targetLessonId) {
+          targetLessonId = (syllabus?.[0]?.lessons || [])[0]?.id;
+        }
+
+        if (targetLessonId) setActiveLessonId(targetLessonId);
       } catch (err) {
         console.error('CourseDetailModal load error:', err);
       } finally {
@@ -53,6 +78,15 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
     }
     load();
   }, [course.id, userId]);
+
+  // ─── URL Syncing ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!activeLessonId) return;
+    const url = new URL(window.location);
+    url.searchParams.set('course', course.id);
+    url.searchParams.set('lesson', activeLessonId);
+    window.history.replaceState({}, '', url);
+  }, [course.id, activeLessonId]);
 
   // ─── Load Quiz + Video when lesson changes ────────────────────────────────
   useEffect(() => {
@@ -154,6 +188,25 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
     }
   }
 
+  async function handleUnmarkComplete() {
+    if (!completedSet.has(activeLessonId)) return;
+    try {
+      await unmarkLessonComplete(userId, activeLessonId);
+      const newSet = new Set(completedSet);
+      newSet.delete(activeLessonId);
+      setCompletedSet(newSet);
+
+      const completedCount = newSet.size;
+      const total = allLessons.length;
+      const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+      const remaining = total - completedCount;
+
+      if (onLessonCompleted) onLessonCompleted(course.id, pct, remaining);
+    } catch (err) {
+      console.error('Unmark complete error:', err);
+    }
+  }
+
 
   const lessonTitle = activeLesson
     ? (lang === 'ar' ? activeLesson.title_ar : (activeLesson.title_en || activeLesson.title_ar))
@@ -163,6 +216,15 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
     : '';
 
   const isCurrentCompleted = completedSet.has(activeLessonId);
+
+  function toggleModuleCollapse(modId) {
+    setCollapsedModules(prev => {
+      const next = new Set(prev);
+      if (next.has(modId)) next.delete(modId);
+      else next.add(modId);
+      return next;
+    });
+  }
 
   return (
     <>
@@ -227,6 +289,38 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
             <span style={{ fontSize: '13px', color: '#15b47a', fontWeight: 'bold' }}>
               {allLessons.length > 0 ? Math.round((completedSet.size / allLessons.length) * 100) : 0}% {lang === 'ar' ? 'مكتمل' : 'complete'}
             </span>
+            
+            <div style={{ position: 'relative' }}>
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 2000);
+                }} 
+                style={{ background: 'rgba(11,40,73,0.06)', border: 'none', color: '#0b2849', cursor: 'pointer', width: '38px', height: '38px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
+                title={lang === 'ar' ? 'مشاركة الرابط' : 'Share Link'}
+              >
+                {linkCopied ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15b47a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                  </svg>
+                )}
+              </button>
+              {linkCopied && (
+                <div style={{ position: 'absolute', top: '110%', left: '50%', transform: 'translateX(-50%)', background: '#0b2849', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', whiteSpace: 'nowrap', zIndex: 10 }}>
+                  {lang === 'ar' ? 'تم النسخ!' : 'Copied!'}
+                </div>
+              )}
+            </div>
+
             <button onClick={onClose} style={{ background: 'rgba(11,40,73,0.06)', border: 'none', fontSize: '20px', color: '#0b2849', cursor: 'pointer', width: '38px', height: '38px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               ✕
             </button>
@@ -242,45 +336,114 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
 
             {/* Sidebar: Module + Lesson List */}
             <div style={{ width: '300px', borderInlineEnd: '1px solid rgba(11,40,73,0.08)', overflowY: 'auto', padding: '24px 20px', flexShrink: 0, background: '#f8fafc' }}>
-              {modules.map(mod => (
-                <div key={mod.id} style={{ marginBottom: '20px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#004c6d', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '0 4px' }}>
-                    {lang === 'ar' ? mod.title_ar : (mod.title_en || mod.title_ar)}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {(mod.lessons || []).map((les) => {
+              {modules.map(mod => {
+                const isCollapsed = collapsedModules.has(mod.id);
+                return (
+                  <div key={mod.id} style={{ marginBottom: '20px' }}>
+                    <button 
+                      onClick={() => toggleModuleCollapse(mod.id)}
+                      style={{ 
+                        width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        background: 'none', border: 'none', cursor: 'pointer', padding: '4px', 
+                        textAlign: lang === 'ar' ? 'right' : 'left', marginBottom: '4px'
+                      }}
+                    >
+                      <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#004c6d', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {lang === 'ar' ? mod.title_ar : (mod.title_en || mod.title_ar)}
+                      </span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#004c6d" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isCollapsed ? (lang === 'ar' ? 'rotate(90deg)' : 'rotate(-90deg)') : 'rotate(0deg)', transition: 'transform 0.2s', opacity: 0.6 }}>
+                        <polyline points="6 9 12 15 18 9"/>
+                      </svg>
+                    </button>
+                    
+                    {!isCollapsed && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', position: 'relative', marginTop: '8px' }}>
+                        
+                        {(mod.lessons || []).map((les, index) => {
                       const isActive = activeLessonId === les.id;
                       const isDone = completedSet.has(les.id);
                       const title = lang === 'ar' ? les.title_ar : (les.title_en || les.title_ar);
                       return (
-                        <div
-                          key={les.id}
-                          onClick={() => { setActiveLessonId(les.id); setQuizMode(false); }}
-                          style={{
-                            padding: '12px 14px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px',
-                            background: isActive ? '#004c6d' : 'transparent',
-                            color: isActive ? '#fff' : '#0b2849',
-                            border: '1px solid rgba(11,40,73,0.07)',
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            fontWeight: isActive ? 'bold' : 'normal', transition: 'all 0.15s',
-                            gap: '12px'
-                          }}
-                        >
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', flexGrow: 1 }}>
-                            <span>{title}</span>
-                            {les.duration && (
-                              <span style={{ fontSize: '11px', opacity: isActive ? 0.8 : 0.5, fontWeight: 'normal' }}>
-                                {les.duration}
-                              </span>
+                        <div key={les.id} style={{ display: 'flex', position: 'relative', zIndex: 2 }}>
+                          
+                          {/* Timeline Progress Node Container */}
+                          <div style={{ 
+                            width: '30px', 
+                            display: 'flex', 
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                            position: 'relative'
+                          }}>
+                            {/* Top Line (from previous lesson) */}
+                            {index !== 0 && (
+                              <div style={{
+                                position: 'absolute',
+                                top: '-4px', // Reach into half of the 8px gap
+                                height: 'calc(50% + 4px)',
+                                width: '2px',
+                                background: completedSet.has(mod.lessons[index - 1].id) ? '#15b47a' : 'rgba(11, 40, 73, 0.08)',
+                                zIndex: 1
+                              }} />
                             )}
+
+                            {/* Bottom Line (to next lesson) */}
+                            {index !== mod.lessons.length - 1 && (
+                              <div style={{
+                                position: 'absolute',
+                                top: '50%',
+                                height: 'calc(50% + 4px)',
+                                width: '2px',
+                                background: isDone ? '#15b47a' : 'rgba(11, 40, 73, 0.08)',
+                                zIndex: 1
+                              }} />
+                            )}
+
+                            {/* The Dot */}
+                            <div style={{
+                              width: '14px', height: '14px', borderRadius: '50%',
+                              background: isDone ? '#15b47a' : (isActive ? '#004c6d' : '#ffffff'),
+                              border: `2px solid ${isDone ? '#15b47a' : (isActive ? '#004c6d' : 'rgba(11, 40, 73, 0.2)')}`,
+                              boxShadow: isActive ? '0 0 0 4px rgba(0, 76, 109, 0.15)' : (isDone ? '0 0 0 4px rgba(21, 180, 122, 0.15)' : 'none'),
+                              transition: 'all 0.2s ease',
+                              position: 'absolute',
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              zIndex: 3,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              {isDone && (
+                                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                                  <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                              )}
+                            </div>
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                            {isDone && (
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isActive ? '#fff' : '#15b47a'} stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="20 6 9 17 4 12"/>
-                              </svg>
-                            )}
-                            {les.video_url && !isDone && (
+
+                          {/* The Card */}
+                          <div
+                            onClick={() => { setActiveLessonId(les.id); setQuizMode(false); }}
+                            style={{
+                              flexGrow: 1,
+                              padding: '12px 14px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px',
+                              background: isActive ? '#004c6d' : 'transparent',
+                              color: isActive ? '#fff' : '#0b2849',
+                              border: '1px solid rgba(11,40,73,0.07)',
+                              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                              fontWeight: isActive ? 'bold' : 'normal', transition: 'all 0.15s',
+                              gap: '12px'
+                            }}
+                          >
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', flexGrow: 1 }}>
+                              <span>{title}</span>
+                              {les.duration && (
+                                <span style={{ fontSize: '11px', opacity: isActive ? 0.8 : 0.5, fontWeight: 'normal' }}>
+                                  {les.duration}
+                                </span>
+                              )}
+                            </div>
+                            {les.video_url && (
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ opacity: 0.6 }}>
                                 <path d="M8 5v14l11-7z"/>
                               </svg>
@@ -290,9 +453,11 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                       );
                     })}
                   </div>
-                </div>
-              ))}
-              {modules.length === 0 && (
+                )}
+              </div>
+            );
+          })}
+          {modules.length === 0 && (
                 <p style={{ fontSize: '13px', color: 'rgba(11,40,73,0.4)', textAlign: 'center', padding: '20px 0' }}>
                   {lang === 'ar' ? 'لا توجد وحدات بعد.' : 'No modules yet.'}
                 </p>
@@ -335,10 +500,20 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                   {/* Action Bar */}
                   <div style={{ borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto' }}>
                     {isCurrentCompleted ? (
-                      <span style={{ color: '#15b47a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14.5px' }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style={{ display: 'inline-block' }}><polyline points="20 6 9 17 4 12"/></svg>
+                      <button 
+                        onClick={handleUnmarkComplete}
+                        title={lang === 'ar' ? 'اضغط للتراجع (غير مكتمل)' : 'Click to unmark as incomplete'}
+                        style={{ 
+                          background: 'none', border: 'none', cursor: 'pointer', padding: '8px 0',
+                          color: '#15b47a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14.5px',
+                          transition: 'opacity 0.2s ease'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block' }}><polyline points="20 6 9 17 4 12"/></svg>
                         {lang === 'ar' ? 'تم إتمام هذا الدرس بنجاح!' : 'Lesson completed!'}
-                      </span>
+                      </button>
                     ) : quizData ? (
                       <Button variant="gradient" onClick={() => setQuizMode(true)} style={{ padding: '12px 28px', fontSize: '13.5px' }}>
                         {lang === 'ar' ? 'خوض اختبار الدرس لقفل التقدم' : 'Take Lesson Quiz'}

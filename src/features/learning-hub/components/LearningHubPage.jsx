@@ -55,11 +55,11 @@ export function LearningHubPage({ lang, onNavigate }) {
           const course = enr.course;
           if (!course) return null;
 
-          const completedSet = await fetchCompletedLessons(user.id, course.id);
+          const { completedSet, totalLessons } = await fetchCompletedLessons(user.id, course.id);
+          const completedCount = completedSet.size;
+          const progress = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+          const remainingLessons = totalLessons - completedCount;
 
-          // Count total lessons via the syllabus already fetched? 
-          // We use a simple count from the completed lessons approach.
-          // Total lessons will be fetched inside CourseDetailModal on open.
           return {
             id: course.id,
             title: lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar),
@@ -71,8 +71,8 @@ export function LearningHubPage({ lang, onNavigate }) {
             enrollmentId: enr.id,
             enrolledAt: enr.enrolled_at,
             completedLessonIds: completedSet,
-            progress: 0, // will be updated when syllabus is known
-            remainingLessons: '?',
+            progress: progress,
+            remainingLessons: remainingLessons,
             _raw: course,
           };
         })
@@ -95,6 +95,24 @@ export function LearningHubPage({ lang, onNavigate }) {
         ...c,
         quizScore: null // could be fetched from quiz_attempts if needed
       })));
+
+      // Check URL for course auto-open
+      const params = new URLSearchParams(window.location.search);
+      const urlCourseId = params.get('course');
+      if (urlCourseId) {
+        const c = (courses || []).find(x => x.id === urlCourseId);
+        if (c) {
+          const isLocked = !hasPermission(c.full_access_permission_key) && !hasPermission(c.teaser_permission_key);
+          if (isLocked) {
+            const url = new URL(window.location);
+            url.searchParams.delete('course');
+            url.searchParams.delete('lesson');
+            window.history.replaceState({}, '', url);
+          } else {
+            setSelectedCourse(c);
+          }
+        }
+      }
     } catch (err) {
       console.error('LearningHub loadData error:', err);
     } finally {
@@ -131,6 +149,14 @@ export function LearningHubPage({ lang, onNavigate }) {
   // ─── Course Modal ─────────────────────────────────────────────────────────
   function handleSelectCourse(course) {
     setSelectedCourse(course._raw || course);
+  }
+
+  function handleCloseCourseModal() {
+    setSelectedCourse(null);
+    const url = new URL(window.location);
+    url.searchParams.delete('course');
+    url.searchParams.delete('lesson');
+    window.history.replaceState({}, '', url);
   }
 
   // Called by CourseDetailModal when a lesson is completed
@@ -370,7 +396,7 @@ export function LearningHubPage({ lang, onNavigate }) {
           lang={lang}
           course={selectedCourse}
           userId={user.id}
-          onClose={() => setSelectedCourse(null)}
+          onClose={handleCloseCourseModal}
           onLessonCompleted={handleLessonCompleted}
           onCourseCompleted={handleCourseCompleted}
         />

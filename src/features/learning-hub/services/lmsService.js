@@ -106,7 +106,9 @@ export async function fetchCompletedLessons(userId, courseId) {
   if (modError) throw modError;
 
   const allLessonIds = modules.flatMap(m => (m.lessons || []).map(l => l.id));
-  if (allLessonIds.length === 0) return new Set();
+  const totalLessons = allLessonIds.length;
+  
+  if (totalLessons === 0) return { completedSet: new Set(), totalLessons: 0 };
 
   const { data, error } = await supabase
     .from('lesson_completions')
@@ -115,7 +117,7 @@ export async function fetchCompletedLessons(userId, courseId) {
     .in('lesson_id', allLessonIds);
 
   if (error) throw error;
-  return new Set(data.map(r => r.lesson_id));
+  return { completedSet: new Set(data.map(r => r.lesson_id)), totalLessons };
 }
 
 /**
@@ -126,6 +128,19 @@ export async function markLessonComplete(userId, lessonId) {
   const { error } = await supabase
     .from('lesson_completions')
     .upsert({ user_id: userId, lesson_id: lessonId }, { onConflict: 'user_id,lesson_id' });
+
+  if (error) throw error;
+}
+
+/**
+ * Remove completion status for a lesson for the current user.
+ */
+export async function unmarkLessonComplete(userId, lessonId) {
+  const { error } = await supabase
+    .from('lesson_completions')
+    .delete()
+    .eq('user_id', userId)
+    .eq('lesson_id', lessonId);
 
   if (error) throw error;
 }

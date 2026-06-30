@@ -129,19 +129,22 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [x] **Learning Management System (LMS) Features:**
     *   [x] Course Categories (Training Courses Carousel)
     *   [x] Premium Custom Video Lessons Player (Decoupled modular architecture with a sleek Neon Glowing central play button, timeline scrubbing, fullscreen support, and professional SVGs)
-    *   [x] High-Tech Control Sliders (Interactive volume and speed slider popups featuring click-toggle functionality, centered metrics with fixed widths to prevent UI shifting, and CSS-transformed inputs for optimal cross-browser styling)
+    *   [x] High-Tech Control Sliders (Interactive volume and speed slider popups featuring click-toggle functionality, centered metrics with fixed widths to prevent UI shifting)
     *   [x] Playback Speed Tuning (Precise speed range adjustment from 0.5x to 2.0x in 0.1 increments)
-    *   [x] Advanced Player Tools (Picture-in-Picture Miniplayer support, "Copy Frame" screenshot functionality with Cloudflare R2 CORS integration, and descriptive hover tooltips for all controls)
+    *   [x] Advanced Player Tools (Picture-in-Picture Miniplayer support, "Copy Frame" screenshot functionality with Cloudflare R2 CORS integration, hover tooltips)
     *   [x] Course Builder Drag & Drop (Interactive lesson reordering within modules, across modules, and module-level reordering)
     *   [x] Lesson Duration Support (Integrated duration metadata in the database, course builder forms, and detail sidebar)
+    *   [x] Collapsible Modules (Coursera-like sidebar module folding with animated chevron indicators)
     *   [ ] PDF Resources
     *   [x] Quizzes (Fully functional quiz builder and student answer validation)
-    *   [x] Progress Tracking & Completed Lesson Badges
+    *   [x] Progress Tracking & Completed Lesson Badges (Dynamic vertical stepper timeline connecting completed lessons with brand colors)
+    *   [x] Toggle Lesson Status (Interactive completion badges that allow unmarking lessons to dynamically reset progress)
     *   [ ] Certificates
-*   [ ] **User Dashboard:**
-    *   [ ] My Courses
-    *   [ ] Completed Courses
-    *   [ ] Certificates
+*   [x] **User Dashboard:**
+    *   [x] My Courses (Active and Completed courses split, fetching DB-calculated individual progress and remaining lesson counts)
+    *   [x] Overall Analytics (Dynamic "Total Progress Percentage" mathematically averaging exact progress across all enrolled courses)
+    *   [x] Completed Courses (Rendering fetched completed courses)
+    *   [ ] Certificates (UI built, auto-generation pending)
     *   [ ] Quiz Results
 
 ### 5. 🧪 Research Center
@@ -336,6 +339,8 @@ To help navigate the growing repository, here are the most important files we ha
 *   `src/features/debug-ui/DebugUIPage.jsx` - The interactive playground where we test UI designs (like the Neon glowing play buttons) before deploying them.
 *   `src/features/learning-hub/components/CourseBuilderPage.jsx` - The drag-and-drop course creation interface.
 *   `src/features/main/components/ArabWorldMap.jsx` - The interactive Mapbox geographic component.
+*   `src/features/learning-hub/components/LearningHubPage.jsx` - Main user dashboard fetching course enrollments, total progress analytics, and active/completed courses from DB.
+*   `src/features/learning-hub/components/LMSDashboard.jsx` - The component rendering the exact dashboard UI with mathematically averaged progress stats.
 
 ---
 

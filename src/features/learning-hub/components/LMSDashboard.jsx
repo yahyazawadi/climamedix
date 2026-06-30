@@ -16,6 +16,10 @@ export function LMSDashboard({ enrolledCourses = [], completedCourses = [], onSe
     return () => ctx.revert();
   }, [enrolledCourses.length, completedCourses.length]);
 
+  const totalCourses = enrolledCourses.length + completedCourses.length;
+  const sumProgress = enrolledCourses.reduce((sum, c) => sum + (c.progress || 0), 0) + (completedCourses.length * 100);
+  const averageProgress = totalCourses > 0 ? Math.round(sumProgress / totalCourses) : 0;
+
   return (
     <div ref={containerRef} className="lms-dashboard-component" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', direction: 'rtl', textAlign: 'right' }}>
       
@@ -34,7 +38,7 @@ export function LMSDashboard({ enrolledCourses = [], completedCourses = [], onSe
         <GlassCard className="lms-card-anim" style={{ padding: '20px', border: '1px solid rgba(11,40,73,0.15)' }}>
           <span style={{ fontSize: '13px', color: 'rgba(11,40,73,0.5)' }}>نسبة التقدم الإجمالية</span>
           <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#15b47a', marginTop: '5px' }}>
-            {enrolledCourses.length > 0 ? Math.round((completedCourses.length / enrolledCourses.length) * 100) : 0}%
+            {averageProgress}%
           </div>
         </GlassCard>
       </div>

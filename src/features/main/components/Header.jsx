@@ -559,6 +559,19 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               <span class="figma-nav-text">{t.training}</span>
             </a>
 
+            {/* Learning Hub (New Page) */}
+            <a 
+              href="#learning-hub" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('learning-hub');
+              }}
+              class={`figma-nav-item ${currentView === 'learning-hub' ? 'active' : ''}`}
+            >
+              <img src={iconTraining} class="figma-nav-icon" alt="المركز التعليمي" />
+              <span class="figma-nav-text">{lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}</span>
+            </a>
+
             {/* 4. أبحاث */}
             <a 
               href="#research" 
@@ -718,6 +731,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
           <a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('home', 'about'); setDrawerOpen(false); }} class="drawer-link">{t.about}</a>
           <a href="#research" onClick={(e) => { e.preventDefault(); onNavigate('home', 'research'); setDrawerOpen(false); }} class="drawer-link">{t.research}</a>
           <a href="#training" onClick={(e) => { e.preventDefault(); onNavigate('home', 'training'); setDrawerOpen(false); }} class="drawer-link">{t.training}</a>
+          <a href="#learning-hub" onClick={(e) => { e.preventDefault(); onNavigate('learning-hub'); setDrawerOpen(false); }} class="drawer-link">{lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}</a>
           <a href="#opportunities" onClick={(e) => { e.preventDefault(); onNavigate('opportunities'); setDrawerOpen(false); }} class="drawer-link">{t.opportunities}</a>
           <a href="#join-us" onClick={(e) => { e.preventDefault(); onNavigate('join-us'); setDrawerOpen(false); }} class="drawer-link">{t.joinUs}</a>
           <a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate('home', 'contact'); setDrawerOpen(false); }} class="drawer-link">{t.contact}</a>

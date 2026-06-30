@@ -126,12 +126,12 @@ This plan tracks the implementation progress of ClimaMedix against the official 
     *   [x] Examples integrated: VSCHEF Fellowship, Climate Health Academy, Research Program
 
 ### 4. 📚 Learning Hub (LMS)
-*   [ ] **Learning Management System (LMS) Features:**
+*   [ ] **Learning Management System (LMS) Features:** *(Note: The current Learning Hub UI uses placeholder components for demonstration)*
     *   [x] Course Categories (Training Courses Carousel)
-    *   [ ] Video Lessons
+    *   [x] Video Lessons (Placeholder UI)
     *   [ ] PDF Resources
-    *   [ ] Quizzes
-    *   [ ] Progress Tracking
+    *   [x] Quizzes (Placeholder UI)
+    *   [x] Progress Tracking (Placeholder UI)
     *   [ ] Certificates
 *   [ ] **User Dashboard:**
     *   [ ] My Courses
@@ -188,7 +188,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 
 ### 12. 👤 User Accounts
 *   [x] **Register/Login:** Supabase Auth Integration (Email sign-in/sign-up & Google OAuth) with beautiful Mitchell's best-candidate particle canvas background, layout swaps, and Outfit/Tajawal font custom settings.
-*   [ ] **User Profiles Section:** *(Next Priority)* Setting up profile management, displaying role capabilities, and managing account information.
+*   [x] **User Profiles Section:** Setting up profile management, displaying role capabilities, and managing account information.
 *   [ ] **LMS Interactions:** Enroll in courses, take quizzes, download certificates, and track progress.
 
 ### 13. ⚙️ Technical Requirements
@@ -243,11 +243,11 @@ graph TD
 ### 🟡 Phase 2: Dynamic Overlays & Network Details (Moderate)
 *These features require page routing/modals and structured relationships with database records.*
 
-4. **🤝 Community Network Directory**
-   * **Why next:** Expands the interactive Mapbox widget.
-   * **Scope:**
-     * Add a cards list or slider below the map to showcase participating fellows, ambassadors, and country representatives.
-     * Filter network profiles by country when a region on the map is clicked.
+4. ~~**🤝 Community Network Directory**~~ *(Marked as unnecessary)*
+   * ~~**Why next:** Expands the interactive Mapbox widget.~~
+   * ~~**Scope:**~~
+     * ~~Add a cards list or slider below the map to showcase participating fellows, ambassadors, and country representatives.~~
+     * ~~Filter network profiles by country when a region on the map is clicked.~~
 
 ### 🟠 Phase 3: Interactive Features & LMS UI (Intermediate)
 *First phase of the Learning Hub. Focuses on the frontend visual interfaces, user state, and enrollment flows.*

@@ -21,6 +21,7 @@ import { ArticleReaderPage } from './features/news-blog/components/ArticleReader
 import { HomeNewsWidget } from './features/news-blog/components/HomeNewsWidget'
 import { ArabWorldMap } from './features/main/components/ArabWorldMap'
 import { ProfilePage } from './features/profile/components/ProfilePage'
+import { LearningHubPage } from './features/learning-hub/components/LearningHubPage'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import doctorImg from './assets/bg_3.png'
@@ -198,6 +199,8 @@ function AppContent() {
       setCurrentView('news-blog');
     } else if (path === '/article') {
       setCurrentView('article');
+    } else if (path === '/learning-hub' || path === '/courses') {
+      setCurrentView('learning-hub');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -233,6 +236,8 @@ function AppContent() {
         setCurrentView('news-blog');
       } else if (p === '/article') {
         setCurrentView('article');
+      } else if (p === '/learning-hub' || p === '/courses') {
+        setCurrentView('learning-hub');
       } else {
         setCurrentView('home');
       }
@@ -336,6 +341,8 @@ function AppContent() {
             window.history.pushState({}, '', '/write-article');
           } else if (view === 'news-blog') {
             window.history.pushState({}, '', '/news-blog');
+          } else if (view === 'learning-hub') {
+            window.history.pushState({}, '', '/learning-hub');
           } else if (sectionId) {
             window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
@@ -743,6 +750,11 @@ function AppContent() {
         }} />
       ) : currentView === 'article' ? (
         <ArticleReaderPage lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
+      ) : currentView === 'learning-hub' ? (
+        <LearningHubPage lang={lang} onNavigate={(view) => {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />

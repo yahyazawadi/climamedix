@@ -26,6 +26,34 @@ import {
 } from '../services/adminLmsService';
 import './CourseBuilderPage.css';
 
+const convertToWebP = (file) => {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/') || file.type === 'image/webp') {
+      resolve(file); // Don't convert if it's already webp or not an image
+      return;
+    }
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(objectUrl);
+        const webpFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", { type: "image/webp" });
+        resolve(webpFile);
+      }, "image/webp", 0.85);
+    };
+    img.onerror = (e) => {
+      URL.revokeObjectURL(objectUrl);
+      reject(e);
+    };
+    img.src = objectUrl;
+  });
+};
+
 export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
   const { hasPermission } = useAuth();
   const canManage = hasPermission('manage:any_course');
@@ -320,7 +348,8 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
     if (!file) return;
     setUploadingCover(true);
     try {
-      const publicUrl = await uploadFileToR2(file, 'course_covers');
+      const webpFile = await convertToWebP(file);
+      const publicUrl = await uploadFileToR2(webpFile, 'course_covers');
       if (publicUrl) {
         setCourseForm(prev => ({ ...prev, cover_image: publicUrl }));
       }

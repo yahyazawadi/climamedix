@@ -30,6 +30,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
 
   if (!course) return null;
 
@@ -69,6 +70,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
     setCurrentTime(0);
     setDuration(0);
     setPlaybackSpeed(1);
+    setShowSpeedMenu(false);
     if (videoRef.current) {
       videoRef.current.playbackRate = 1;
     }
@@ -282,17 +284,35 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                           key={les.id}
                           onClick={() => { setActiveLessonId(les.id); setQuizMode(false); }}
                           style={{
-                            padding: '10px 12px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px',
+                            padding: '12px 14px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px',
                             background: isActive ? '#004c6d' : 'transparent',
                             color: isActive ? '#fff' : '#0b2849',
                             border: '1px solid rgba(11,40,73,0.07)',
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             fontWeight: isActive ? 'bold' : 'normal', transition: 'all 0.15s',
+                            gap: '12px'
                           }}
                         >
-                          <span>{title}</span>
-                          {isDone && <span style={{ color: isActive ? '#fff' : '#15b47a', fontWeight: 'bold', fontSize: '12px' }}>✓</span>}
-                          {les.video_url && !isDone && <span style={{ fontSize: '10px', opacity: 0.6 }}>▶</span>}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', flexGrow: 1 }}>
+                            <span>{title}</span>
+                            {les.duration && (
+                              <span style={{ fontSize: '11px', opacity: isActive ? 0.8 : 0.5, fontWeight: 'normal' }}>
+                                {les.duration}
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                            {isDone && (
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isActive ? '#fff' : '#15b47a'} stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                              </svg>
+                            )}
+                            {les.video_url && !isDone && (
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ opacity: 0.6 }}>
+                                <path d="M8 5v14l11-7z"/>
+                              </svg>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -391,14 +411,16 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                                 boxShadow: '0 8px 25px rgba(21, 180, 122, 0.4)',
                                 transform: 'scale(1)',
                                 transition: 'transform 0.2s',
-                                color: '#ffffff',
-                                fontSize: '28px',
-                                paddingLeft: !isPlaying ? '6px' : '0px' // Visually center the play icon
+                                color: '#ffffff'
                               }}
                               onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
                               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                               >
-                                {isPlaying ? '⏸' : '▶'}
+                                {isPlaying ? (
+                                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                                ) : (
+                                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '4px' }}><path d="M8 5v14l11-7z"/></svg>
+                                )}
                               </div>
                             </div>
                           )}
@@ -464,10 +486,14 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                                   <button 
                                     onClick={togglePlay}
                                     style={{
-                                      background: 'none', border: 'none', color: '#fff', fontSize: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center'
+                                      background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center'
                                     }}
                                   >
-                                    {isPlaying ? '⏸' : '▶'}
+                                    {isPlaying ? (
+                                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                                    ) : (
+                                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                    )}
                                   </button>
 
                                   {/* Time Indicator */}
@@ -478,39 +504,95 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
 
                                 {/* Speed, Volume / Mute and Fullscreen buttons */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                  <select
-                                    value={playbackSpeed}
-                                    onChange={(e) => changeSpeed(parseFloat(e.target.value))}
-                                    style={{
-                                      background: 'rgba(255, 255, 255, 0.12)',
-                                      border: '1px solid rgba(255, 255, 255, 0.25)',
-                                      color: '#ffffff',
-                                      borderRadius: '6px',
-                                      padding: '2px 8px',
-                                      fontSize: '12px',
-                                      cursor: 'pointer',
-                                      outline: 'none',
-                                      fontFamily: 'inherit'
-                                    }}
-                                  >
-                                    <option value="0.5" style={{ background: '#0b2849', color: '#fff' }}>0.5x</option>
-                                    <option value="1" style={{ background: '#0b2849', color: '#fff' }}>1.0x</option>
-                                    <option value="1.25" style={{ background: '#0b2849', color: '#fff' }}>1.25x</option>
-                                    <option value="1.5" style={{ background: '#0b2849', color: '#fff' }}>1.5x</option>
-                                    <option value="2" style={{ background: '#0b2849', color: '#fff' }}>2.0x</option>
-                                  </select>
+                                  
+                                  {/* Custom Speed Selection Menu */}
+                                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                    <button
+                                      onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+                                      style={{
+                                        background: 'rgba(255, 255, 255, 0.12)',
+                                        border: '1px solid rgba(255, 255, 255, 0.25)',
+                                        color: '#ffffff',
+                                        borderRadius: '6px',
+                                        padding: '4px 8px',
+                                        fontSize: '12px',
+                                        cursor: 'pointer',
+                                        fontWeight: 'bold',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        outline: 'none',
+                                        transition: 'background 0.2s',
+                                        lineHeight: '1'
+                                      }}
+                                    >
+                                      <span>{playbackSpeed}x</span>
+                                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style={{ transform: showSpeedMenu ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                                        <polyline points="6 9 12 15 18 9"/>
+                                      </svg>
+                                    </button>
+                                    
+                                    {showSpeedMenu && (
+                                      <div style={{
+                                        position: 'absolute',
+                                        bottom: '100%',
+                                        right: 0,
+                                        marginBottom: '10px',
+                                        background: 'rgba(11, 40, 73, 0.95)',
+                                        backdropFilter: 'blur(10px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                                        borderRadius: '8px',
+                                        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
+                                        padding: '6px 0',
+                                        minWidth: '80px',
+                                        zIndex: 10,
+                                        display: 'flex',
+                                        flexDirection: 'column'
+                                      }}>
+                                        {[0.5, 1.0, 1.25, 1.5, 2.0].map(speed => (
+                                          <button
+                                            key={speed}
+                                            onClick={() => {
+                                              changeSpeed(speed);
+                                              setShowSpeedMenu(false);
+                                            }}
+                                            style={{
+                                              background: playbackSpeed === speed ? 'rgba(21, 180, 122, 0.25)' : 'transparent',
+                                              border: 'none',
+                                              color: playbackSpeed === speed ? '#15b47a' : '#ffffff',
+                                              padding: '6px 12px',
+                                              fontSize: '12px',
+                                              textAlign: 'center',
+                                              cursor: 'pointer',
+                                              fontWeight: playbackSpeed === speed ? 'bold' : 'normal',
+                                              width: '100%',
+                                              transition: 'background 0.2s'
+                                            }}
+                                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                                            onMouseLeave={e => e.currentTarget.style.background = playbackSpeed === speed ? 'rgba(21, 180, 122, 0.25)' : 'transparent'}
+                                          >
+                                            {speed}x
+                                          </button>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
 
                                   <button 
                                     onClick={toggleMute}
-                                    style={{ background: 'none', border: 'none', color: '#fff', fontSize: '18px', cursor: 'pointer' }}
+                                    style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                                   >
-                                    {isMuted ? '🔇' : '🔊'}
+                                    {isMuted ? (
+                                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                                    ) : (
+                                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                                    )}
                                   </button>
                                   <button 
                                     onClick={toggleFullscreen}
-                                    style={{ background: 'none', border: 'none', color: '#fff', fontSize: '18px', cursor: 'pointer' }}
+                                    style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                                   >
-                                    ⛶
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
                                   </button>
                                 </div>
                               </div>
@@ -520,7 +602,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                         </>
                       ) : (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexDirection: 'column', gap: '8px', opacity: 0.6 }}>
-                          <span style={{ fontSize: '32px' }}>⚠️</span>
+                          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={{ marginBottom: '8px' }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                           <span style={{ fontSize: '13px' }}>{lang === 'ar' ? 'تعذر تحميل الفيديو' : 'Could not load video'}</span>
                         </div>
                       )}
@@ -539,7 +621,8 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                   <div style={{ borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto' }}>
                     {isCurrentCompleted ? (
                       <span style={{ color: '#15b47a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14.5px' }}>
-                        ✓ {lang === 'ar' ? 'تم إتمام هذا الدرس بنجاح!' : 'Lesson completed!'}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style={{ display: 'inline-block' }}><polyline points="20 6 9 17 4 12"/></svg>
+                        {lang === 'ar' ? 'تم إتمام هذا الدرس بنجاح!' : 'Lesson completed!'}
                       </span>
                     ) : quizData ? (
                       <Button variant="gradient" onClick={() => setQuizMode(true)} style={{ padding: '12px 28px', fontSize: '13.5px' }}>

@@ -102,6 +102,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
     content_ar: '',
     content_en: '',
     video_url: '',
+    duration: '',
     sequence_order: 1
   });
 
@@ -290,6 +291,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       content_ar: '',
       content_en: '',
       video_url: '',
+      duration: '',
       sequence_order: (modules.find(m => m.id === modId)?.lessons?.length || 0) + 1
     });
     setQuiz(null);
@@ -305,6 +307,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       content_ar: lesson.content_ar || '',
       content_en: lesson.content_en || '',
       video_url: lesson.video_url || '',
+      duration: lesson.duration || '',
       sequence_order: lesson.sequence_order || 1
     });
     setShowLessonModal(true);
@@ -833,6 +836,11 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                   <div className="cb-form-group">
                     <label>Lesson Content (EN)</label>
                     <textarea rows={6} value={lessonForm.content_en} onInput={e => setLessonForm({...lessonForm, content_en: e.target.value})} />
+                  </div>
+
+                  <div className="cb-form-group">
+                    <label>Duration / Time to Complete (e.g. 15 mins)</label>
+                    <input type="text" value={lessonForm.duration} onInput={e => setLessonForm({...lessonForm, duration: e.target.value})} placeholder="e.g. 15 mins" />
                   </div>
 
                   <div className="cb-form-group">

@@ -1,5 +1,5 @@
 import { createContext } from 'preact';
-import { useState, useEffect, useContext } from 'preact/hooks';
+import { useState, useEffect, useContext, useRef } from 'preact/hooks';
 import { supabase } from '../../../utils/supabaseClient';
 import { authService } from '../services/authService';
 
@@ -79,105 +79,81 @@ export function AuthProvider({ children }) {
     return true;
   };
 
-  // Helper to fetch profile and update online status
-  const fetchProfileAndSetOnline = async (userId, retries = 4) => {
+  // Helper to fetch profile and update online status – robust retry with exponential backoff
+  const fetchProfileAndSetOnline = async (userId, retries = 12) => {
     for (let i = 0; i < retries; i++) {
       try {
         const profile = await authService.getUserProfile(userId);
         setUserProfile(profile);
-        
-        // Update status to online: true in the database
         await authService.updateOnlineStatus(userId, true);
-        return; // Success!
+        return; // success
       } catch (err) {
         console.warn(`Attempt ${i + 1} fetching profile failed. Retrying...`, err.message);
         if (i === retries - 1) {
           console.error('Final attempt failed to fetch profile or set online status:', err);
         } else {
-          // Wait 1 second before retrying (gives the DB trigger time to create the profile row)
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          const delay = 500 * Math.pow(2, i); // exponential backoff: 500ms, 1s, 2s, 4s, ...
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
   };
 
-  useEffect(() => {
-    let active = true;
-    // Lock to prevent initializeAuth and onAuthStateChange from racing to fetch the profile simultaneously
-    let initDone = false;
+  // 👑 Robust single‑source‑of‑truth auth flow – init first, then subscribe
+  const authSubRef = useRef(null);
 
-    const initializeAuth = async () => {
+  useEffect(() => {
+    // 1️⃣ Initialise current session (runs once)
+    const init = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!active) return;
-
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         setAccessToken(session?.access_token ?? null);
-
         if (currentUser) {
           await fetchProfileAndSetOnline(currentUser.id);
         }
       } catch (err) {
-        if (active) setError(err.message || 'Error initializing auth');
+        setError(err.message || 'Error initializing auth');
       } finally {
-        if (active) {
-          initDone = true;
-          setLoading(false);
-        }
+        setLoading(false); // UI ready for first render
       }
     };
 
-    initializeAuth();
+    const startListener = () => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          const currentUser = session?.user ?? null;
+          setUser(currentUser);
+          setAccessToken(session?.access_token ?? null);
 
-    // 2. Listen for auth changes — but ONLY act after initializeAuth has completed
-    // to avoid the race condition where both run concurrently on OAuth redirect
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!active) return;
-
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      setAccessToken(session?.access_token ?? null);
-
-      if (currentUser) {
-        // Wait for initializeAuth to finish before doing anything.
-        // On normal login/OAuth, initDone will be false here; we wait.
-        const waitForInit = () => new Promise(resolve => {
-          if (initDone) return resolve();
-          const interval = setInterval(() => {
-            if (initDone || !active) {
-              clearInterval(interval);
-              resolve();
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            if (currentUser) {
+              await fetchProfileAndSetOnline(currentUser.id);
             }
-          }, 50);
-        });
-
-        await waitForInit();
-        if (!active) return;
-
-        // Re-fetch profile on SIGNED_IN (handles OAuth return where profile may
-        // not have been found in the first getSession call), and on TOKEN_REFRESHED.
-        // INITIAL_SESSION is skipped because initializeAuth already handled it.
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          await fetchProfileAndSetOnline(currentUser.id);
-        }
-      } else {
-        setUserProfile(null);
-        if (event === 'SIGNED_OUT') {
-          const prevUserId = user?.id;
-          if (prevUserId) {
-            authService.updateOnlineStatus(prevUserId, false).catch(err =>
-              console.error('Failed to set user offline on sign out:', err)
-            );
+          } else if (event === 'SIGNED_OUT') {
+            const prevUserId = user?.id;
+            setUserProfile(null);
+            if (prevUserId) {
+              authService.updateOnlineStatus(prevUserId, false).catch(err =>
+                console.error('Failed to set user offline on sign out:', err)
+              );
+            }
           }
+          setLoading(false);
         }
-      }
-      setLoading(false);
-    });
+      );
+      authSubRef.current = subscription;
+    };
 
+    // Run init, then only after it resolves start the listener
+    init().then(startListener);
+
+    // Cleanup on unmount
     return () => {
-      active = false;
-      subscription.unsubscribe();
+      if (authSubRef.current) {
+        authSubRef.current.unsubscribe();
+      }
     };
   }, []);
 
@@ -267,15 +243,17 @@ export function AuthProvider({ children }) {
 
   const signOut = async () => {
     setError(null);
-    try {
-      setDevAdminMode(false);
-      await authService.signOut(user?.id);
-      setUser(null);
-      setUserProfile(null);
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
+    setDevAdminMode(false);
+    setUser(null);
+    setUserProfile(null);
+    setLoading(true);
+    
+    // Fire-and-forget backend signOut
+    authService.signOut(user?.id).catch(e => 
+      console.error('signOut cleanup error:', e)
+    );
+    
+    setLoading(false);
   };
 
   const value = {
@@ -289,6 +267,7 @@ export function AuthProvider({ children }) {
       email: 'dev@climamedix.local'
     } : null),
     loading,
+    authLoading: loading,
     error,
     signIn,
     signUp,

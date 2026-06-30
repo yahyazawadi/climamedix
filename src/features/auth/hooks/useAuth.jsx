@@ -80,15 +80,24 @@ export function AuthProvider({ children }) {
   };
 
   // Helper to fetch profile and update online status
-  const fetchProfileAndSetOnline = async (userId) => {
-    try {
-      const profile = await authService.getUserProfile(userId);
-      setUserProfile(profile);
-      
-      // Update status to online: true in the database
-      await authService.updateOnlineStatus(userId, true);
-    } catch (err) {
-      console.error('Error fetching profile or setting online status:', err);
+  const fetchProfileAndSetOnline = async (userId, retries = 4) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const profile = await authService.getUserProfile(userId);
+        setUserProfile(profile);
+        
+        // Update status to online: true in the database
+        await authService.updateOnlineStatus(userId, true);
+        return; // Success!
+      } catch (err) {
+        console.warn(`Attempt ${i + 1} fetching profile failed. Retrying...`, err.message);
+        if (i === retries - 1) {
+          console.error('Final attempt failed to fetch profile or set online status:', err);
+        } else {
+          // Wait 1 second before retrying (gives the DB trigger time to create the profile row)
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
     }
   };
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'preact/hooks';
+import { useAuth } from '../../auth/hooks/useAuth';
 import { supabase } from '../../../utils/supabaseClient';
 import { GlassCard } from '../../shared/components/GlassCard';
 import { BarChart, Users, Globe, Briefcase, Activity, Shield, X, User, RefreshCw } from 'lucide-preact';

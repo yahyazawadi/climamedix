@@ -79,8 +79,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
     cover_image: '',
     duration: '',
     full_access_permission_key: 'view:all_courses',
-    teaser_permission_key: 'view:free_content',
-    is_published: true
+    teaser_permission_key: 'view:free_content'
   });
 
   // Modal / Form state for Module
@@ -486,8 +485,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                   cover_image: '',
                   duration: '',
                   full_access_permission_key: 'view:all_courses',
-                  teaser_permission_key: 'view:free_content',
-                  is_published: true
+                  teaser_permission_key: 'view:free_content'
                 });
                 setShowCourseModal(true);
               }} style={{ fontSize: '12.5px', padding: '6px 14px' }}>
@@ -523,8 +521,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                           cover_image: c.cover_image || '',
                           duration: c.duration || '',
                           full_access_permission_key: c.full_access_permission_key || 'view:all_courses',
-                          teaser_permission_key: c.teaser_permission_key || 'view:free_content',
-                          is_published: c.is_published !== false
+                          teaser_permission_key: c.teaser_permission_key || 'view:free_content'
                         });
                         setShowCourseModal(true);
                       }} style={{ fontSize: '12px' }}>{lang === 'ar' ? 'تعديل' : 'Edit'}</button>

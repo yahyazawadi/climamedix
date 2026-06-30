@@ -23,6 +23,7 @@ import { ArabWorldMap } from './features/main/components/ArabWorldMap'
 import { ProfilePage } from './features/profile/components/ProfilePage'
 import { LearningHubPage } from './features/learning-hub/components/LearningHubPage'
 import { UserManagementDashboard } from './features/admin/components/UserManagementDashboard'
+import { UserStatsDashboard } from './features/admin/components/UserStatsDashboard'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import doctorImg from './assets/bg_3.png'
@@ -204,6 +205,8 @@ function AppContent() {
       setCurrentView('learning-hub');
     } else if (path === '/admin/users') {
       setCurrentView('admin-users');
+    } else if (path === '/admin/stats') {
+      setCurrentView('admin-stats');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -243,6 +246,8 @@ function AppContent() {
         setCurrentView('learning-hub');
       } else if (p === '/admin/users') {
         setCurrentView('admin-users');
+      } else if (p === '/admin/stats') {
+        setCurrentView('admin-stats');
       } else {
         setCurrentView('home');
       }
@@ -350,6 +355,8 @@ function AppContent() {
             window.history.pushState({}, '', '/learning-hub');
           } else if (view === 'admin-users') {
             window.history.pushState({}, '', '/admin/users');
+          } else if (view === 'admin-stats') {
+            window.history.pushState({}, '', '/admin/stats');
           } else if (sectionId) {
             window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
@@ -767,6 +774,11 @@ function AppContent() {
         }} />
       ) : currentView === 'admin-users' ? (
         <UserManagementDashboard lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
+      ) : currentView === 'admin-stats' ? (
+        <UserStatsDashboard lang={lang} onNavigate={(view) => {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />

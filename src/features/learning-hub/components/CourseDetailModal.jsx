@@ -30,7 +30,9 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [showSpeedSlider, setShowSpeedSlider] = useState(false);
 
   if (!course) return null;
 
@@ -70,7 +72,8 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
     setCurrentTime(0);
     setDuration(0);
     setPlaybackSpeed(1);
-    setShowSpeedMenu(false);
+    setShowSpeedSlider(false);
+    setShowVolumeSlider(false);
     if (videoRef.current) {
       videoRef.current.playbackRate = 1;
     }
@@ -178,8 +181,24 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
 
   function toggleMute() {
     if (!videoRef.current) return;
-    videoRef.current.muted = !videoRef.current.muted;
-    setIsMuted(videoRef.current.muted);
+    if (isMuted) {
+      videoRef.current.muted = false;
+      setIsMuted(false);
+      videoRef.current.volume = volume || 1;
+    } else {
+      videoRef.current.muted = true;
+      setIsMuted(true);
+    }
+  }
+
+  function handleVolumeChange(newVal) {
+    setVolume(newVal);
+    if (videoRef.current) {
+      videoRef.current.volume = newVal;
+      const isCurrentlyMuted = newVal === 0;
+      videoRef.current.muted = isCurrentlyMuted;
+      setIsMuted(isCurrentlyMuted);
+    }
   }
 
   function toggleFullscreen() {
@@ -505,10 +524,56 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                                 {/* Speed, Volume / Mute and Fullscreen buttons */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                   
-                                  {/* Custom Speed Selection Menu */}
-                                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                  {/* Custom Speed Selection Slider */}
+                                  <div 
+                                    onMouseEnter={() => setShowSpeedSlider(true)}
+                                    onMouseLeave={() => setShowSpeedSlider(false)}
+                                    style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
+                                  >
+                                    {showSpeedSlider && (
+                                      <div style={{
+                                        position: 'absolute',
+                                        bottom: '100%',
+                                        left: '50%',
+                                        transform: 'translateX(-50%)',
+                                        marginBottom: '10px',
+                                        background: 'rgba(11, 40, 73, 0.95)',
+                                        backdropFilter: 'blur(10px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                                        borderRadius: '8px',
+                                        padding: '12px 8px',
+                                        zIndex: 10,
+                                        height: '130px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
+                                        gap: '8px'
+                                      }}>
+                                        <span style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                          {playbackSpeed.toFixed(1)}x
+                                        </span>
+                                        <input 
+                                          type="range"
+                                          min="0.5"
+                                          max="2.0"
+                                          step="0.1"
+                                          value={playbackSpeed}
+                                          onInput={(e) => changeSpeed(parseFloat(e.target.value))}
+                                          style={{
+                                            writingMode: 'bt-lr',
+                                            WebkitAppearance: 'slider-vertical',
+                                            width: '6px',
+                                            height: '80px',
+                                            background: 'rgba(255,255,255,0.2)',
+                                            outline: 'none',
+                                            cursor: 'pointer'
+                                          }}
+                                        />
+                                      </div>
+                                    )}
                                     <button
-                                      onClick={() => setShowSpeedMenu(!showSpeedMenu)}
                                       style={{
                                         background: 'rgba(255, 255, 255, 0.12)',
                                         border: '1px solid rgba(255, 255, 255, 0.25)',
@@ -522,72 +587,76 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                                         alignItems: 'center',
                                         gap: '4px',
                                         outline: 'none',
-                                        transition: 'background 0.2s',
                                         lineHeight: '1'
                                       }}
                                     >
-                                      <span>{playbackSpeed}x</span>
-                                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style={{ transform: showSpeedMenu ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
-                                        <polyline points="6 9 12 15 18 9"/>
-                                      </svg>
+                                      <span>Speed ({playbackSpeed.toFixed(1)}x)</span>
                                     </button>
-                                    
-                                    {showSpeedMenu && (
+                                  </div>
+
+                                  {/* Custom Volume Selection Slider */}
+                                  <div 
+                                    onMouseEnter={() => setShowVolumeSlider(true)}
+                                    onMouseLeave={() => setShowVolumeSlider(false)}
+                                    style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
+                                  >
+                                    {showVolumeSlider && (
                                       <div style={{
                                         position: 'absolute',
                                         bottom: '100%',
-                                        right: 0,
+                                        left: '50%',
+                                        transform: 'translateX(-50%)',
                                         marginBottom: '10px',
                                         background: 'rgba(11, 40, 73, 0.95)',
                                         backdropFilter: 'blur(10px)',
                                         border: '1px solid rgba(255, 255, 255, 0.15)',
                                         borderRadius: '8px',
-                                        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
-                                        padding: '6px 0',
-                                        minWidth: '80px',
+                                        padding: '12px 8px',
                                         zIndex: 10,
+                                        height: '110px',
                                         display: 'flex',
-                                        flexDirection: 'column'
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
+                                        gap: '6px'
                                       }}>
-                                        {[0.5, 1.0, 1.25, 1.5, 2.0].map(speed => (
-                                          <button
-                                            key={speed}
-                                            onClick={() => {
-                                              changeSpeed(speed);
-                                              setShowSpeedMenu(false);
-                                            }}
-                                            style={{
-                                              background: playbackSpeed === speed ? 'rgba(21, 180, 122, 0.25)' : 'transparent',
-                                              border: 'none',
-                                              color: playbackSpeed === speed ? '#15b47a' : '#ffffff',
-                                              padding: '6px 12px',
-                                              fontSize: '12px',
-                                              textAlign: 'center',
-                                              cursor: 'pointer',
-                                              fontWeight: playbackSpeed === speed ? 'bold' : 'normal',
-                                              width: '100%',
-                                              transition: 'background 0.2s'
-                                            }}
-                                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                                            onMouseLeave={e => e.currentTarget.style.background = playbackSpeed === speed ? 'rgba(21, 180, 122, 0.25)' : 'transparent'}
-                                          >
-                                            {speed}x
-                                          </button>
-                                        ))}
+                                        <span style={{ fontSize: '10px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                          {Math.round((isMuted ? 0 : volume) * 100)}%
+                                        </span>
+                                        <input 
+                                          type="range"
+                                          min="0"
+                                          max="1"
+                                          step="0.05"
+                                          value={isMuted ? 0 : volume}
+                                          onInput={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                                          style={{
+                                            writingMode: 'bt-lr',
+                                            WebkitAppearance: 'slider-vertical',
+                                            width: '6px',
+                                            height: '70px',
+                                            background: 'rgba(255,255,255,0.2)',
+                                            outline: 'none',
+                                            cursor: 'pointer'
+                                          }}
+                                        />
                                       </div>
                                     )}
+                                    <button 
+                                      onClick={toggleMute}
+                                      style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                                    >
+                                      {isMuted || volume === 0 ? (
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                                      ) : volume < 0.5 ? (
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                                      ) : (
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                                      )}
+                                    </button>
                                   </div>
 
-                                  <button 
-                                    onClick={toggleMute}
-                                    style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                                  >
-                                    {isMuted ? (
-                                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-                                    ) : (
-                                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                                    )}
-                                  </button>
                                   <button 
                                     onClick={toggleFullscreen}
                                     style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}

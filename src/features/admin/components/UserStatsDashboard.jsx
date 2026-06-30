@@ -100,6 +100,7 @@ export function UserStatsDashboard({ lang = 'ar' }) {
     if (!selectedCategory) return [];
     return profiles.filter(p => {
       if (selectedCategory.type === 'role') return p.role === selectedCategory.value;
+      if (selectedCategory.type === 'online') return p.online === selectedCategory.value;
       if (selectedCategory.type === 'country') {
         const c = p.country || (lang === 'ar' ? 'غير محدد' : 'Unknown');
         return c === selectedCategory.value;

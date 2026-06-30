@@ -6,8 +6,6 @@ import { useAuth, ROLE_PERMISSIONS } from '../../auth/hooks/useAuth';
 import { Search, Shield, User, ChevronDown, Check, X, RefreshCw } from 'lucide-preact';
 import './UserManagementDashboard.css';
 
-const MASTER_OWNER_EMAIL = 'super.yahyaaa@gmail.com';
-
 export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
   const { hasPermission, user } = useAuth();
   const isSuperAdmin = hasPermission('manage:system');
@@ -326,7 +324,7 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
                           </span>
                         </td>
                         <td>
-                          {profile.role === 'superadmin' && user?.email !== MASTER_OWNER_EMAIL ? (
+                          {profile.role === 'superadmin' ? (
                             <span style={{ fontSize: '12px', color: 'rgba(11,40,73,0.5)', fontWeight: 'bold' }}>
                               {lang === 'ar' ? 'محمي بالنظام' : 'System Protected'}
                             </span>

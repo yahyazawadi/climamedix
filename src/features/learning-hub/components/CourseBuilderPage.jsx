@@ -219,6 +219,22 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
     }
   }
 
+  function handleEditCourse(course) {
+    setEditingCourse(course);
+    setCourseForm({
+      title_ar: course.title_ar,
+      title_en: course.title_en || '',
+      description_ar: course.description_ar || '',
+      description_en: course.description_en || '',
+      category: course.category || 'Climate & Health',
+      cover_image: course.cover_image || '',
+      duration: course.duration || '',
+      full_access_permission_key: course.full_access_permission_key || 'view:all_courses',
+      teaser_permission_key: course.teaser_permission_key || 'view:free_content'
+    });
+    setShowCourseModal(true);
+  }
+
   // ─── Module Save/Edit ───
   async function saveModule(e) {
     e.preventDefault();
@@ -509,24 +525,6 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                       <strong>{lang === 'ar' ? c.title_ar : (c.title_en || c.title_ar)}</strong>
                       <span>{c.category} • {c.duration || '?'}</span>
                     </div>
-                    <div className="cb-item-actions" onClick={e => e.stopPropagation()}>
-                      <button onClick={() => {
-                        setEditingCourse(c);
-                        setCourseForm({
-                          title_ar: c.title_ar,
-                          title_en: c.title_en || '',
-                          description_ar: c.description_ar || '',
-                          description_en: c.description_en || '',
-                          category: c.category || 'Climate & Health',
-                          cover_image: c.cover_image || '',
-                          duration: c.duration || '',
-                          full_access_permission_key: c.full_access_permission_key || 'view:all_courses',
-                          teaser_permission_key: c.teaser_permission_key || 'view:free_content'
-                        });
-                        setShowCourseModal(true);
-                      }} style={{ fontSize: '12px' }}>{lang === 'ar' ? 'تعديل' : 'Edit'}</button>
-                      <button onClick={() => deleteCourse(c.id)} style={{ fontSize: '12px', color: '#ff4d4d' }}>{lang === 'ar' ? 'حذف' : 'Delete'}</button>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -542,17 +540,24 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                     <span className="cb-badge">{selectedCourse.category}</span>
                     <h3 style={{ marginTop: '4px' }}>{lang === 'ar' ? selectedCourse.title_ar : (selectedCourse.title_en || selectedCourse.title_ar)}</h3>
                   </div>
-                  <Button variant="outline" onClick={() => {
-                    setEditingModule(null);
-                    setModuleForm({
-                      title_ar: '',
-                      title_en: '',
-                      sequence_order: modules.length + 1
-                    });
-                    setShowModuleModal(true);
-                  }} style={{ fontSize: '12px', padding: '6px 14px' }}>
-                    + {lang === 'ar' ? 'وحدة جديدة' : 'Add Module'}
-                  </Button>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <CourseSettingsMenu 
+                      lang={lang} 
+                      onEdit={() => handleEditCourse(selectedCourse)} 
+                      onDelete={() => deleteCourse(selectedCourse.id)} 
+                    />
+                    <Button variant="outline" onClick={() => {
+                      setEditingModule(null);
+                      setModuleForm({
+                        title_ar: '',
+                        title_en: '',
+                        sequence_order: modules.length + 1
+                      });
+                      setShowModuleModal(true);
+                    }} style={{ fontSize: '12px', padding: '6px 14px' }}>
+                      + {lang === 'ar' ? 'وحدة جديدة' : 'Add Module'}
+                    </Button>
+                  </div>
                 </div>
 
                 {loadingModules ? (
@@ -896,6 +901,94 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
               </div>
             </div>
           </GlassCard>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CourseSettingsMenu({ lang, onEdit, onDelete }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClose = () => setIsOpen(false);
+    window.addEventListener('click', handleClose);
+    return () => window.removeEventListener('click', handleClose);
+  }, [isOpen]);
+
+  return (
+    <div className="cb-settings-menu" style={{ position: 'relative', display: 'inline-block' }} onClick={e => e.stopPropagation()}>
+      <Button 
+        variant="outline" 
+        onClick={() => setIsOpen(!isOpen)} 
+        style={{ padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        {lang === 'ar' ? 'خيارات' : 'Options'}
+      </Button>
+      {isOpen && (
+        <div 
+          className="cb-settings-dropdown" 
+          style={{ 
+            position: 'absolute', 
+            right: lang === 'ar' ? 'auto' : 0, 
+            left: lang === 'ar' ? 0 : 'auto', 
+            top: 'calc(100% + 5px)', 
+            background: '#ffffff', 
+            border: '1px solid rgba(11, 40, 73, 0.1)', 
+            borderRadius: '12px', 
+            boxShadow: '0 10px 25px rgba(0,0,0,0.1)', 
+            zIndex: 10, 
+            minWidth: '150px', 
+            padding: '6px' 
+          }}
+        >
+          <button 
+            type="button"
+            onClick={() => { setIsOpen(false); onEdit(); }} 
+            style={{ 
+              display: 'block', 
+              width: '100%', 
+              padding: '10px 12px', 
+              textAlign: lang === 'ar' ? 'right' : 'left', 
+              background: 'none', 
+              border: 'none', 
+              cursor: 'pointer', 
+              fontSize: '13px', 
+              color: '#0b2849', 
+              borderRadius: '8px', 
+              transition: 'background 0.2s' 
+            }}
+            onMouseEnter={e => e.target.style.background = 'rgba(11, 40, 73, 0.05)'}
+            onMouseLeave={e => e.target.style.background = 'none'}
+          >
+            {lang === 'ar' ? 'تعديل المساق' : 'Edit Course'}
+          </button>
+          <button 
+            type="button"
+            onClick={() => { setIsOpen(false); onDelete(); }} 
+            style={{ 
+              display: 'block', 
+              width: '100%', 
+              padding: '10px 12px', 
+              textAlign: lang === 'ar' ? 'right' : 'left', 
+              background: 'none', 
+              border: 'none', 
+              cursor: 'pointer', 
+              fontSize: '13px', 
+              color: '#ff4d4d', 
+              borderRadius: '8px', 
+              transition: 'background 0.2s' 
+            }}
+            onMouseEnter={e => e.target.style.background = 'rgba(255, 77, 77, 0.05)'}
+            onMouseLeave={e => e.target.style.background = 'none'}
+          >
+            {lang === 'ar' ? 'حذف المساق' : 'Delete Course'}
+          </button>
         </div>
       )}
     </div>

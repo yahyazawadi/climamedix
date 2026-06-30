@@ -183,7 +183,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
     *   [ ] Create/Edit/Delete Courses
     *   [ ] Upload Videos & Resources
     *   [x] Manage Users & Certificates (Completed: Role & Permission Assignment)
-    *   [ ] Publish Opportunities, Events, and News
+    *   [x] Publish Opportunities, Events, and News (Completed via in-page authorized modals)
     *   [x] View Analytics (Completed: User Stats Dashboard with Interactive Charts)
 
 ### 12. 👤 User Accounts
@@ -283,7 +283,8 @@ graph TD
 10. **🛡️ Admin Panel & CRUD Dashboards**
     * **Scope:**
       * [x] Add role-based security ensuring only verified admins can access `/admin`.
-      * [ ] Create database CRUD interfaces to publish courses, upload videos/resources, publish opportunities/events, and manage certificate approvals.
+      * [x] Create database CRUD interfaces to publish opportunities and events (Completed via frontend authenticated panels).
+      * [ ] Create database CRUD interfaces to publish courses, upload videos/resources, and manage certificate approvals.
       * [x] Incorporate simple analytics charts (total active students, completions, sign-ups).
 
 ---

@@ -359,3 +359,7 @@ To finalize the production setup and keep the architecture clean and simple, ple
 ### 5. 📧 Email Notifications & Alerts
 * **Current status:** We have mock push notification triggers.
 * **Question for Org:** Do you want email notifications sent automatically when a user receives a certificate or registers for an event? If yes, do you have an SMTP email provider (like SendGrid, Mailgun, or Resend) ready?
+
+### 6. 🟢 Realtime "Online" User Tracking
+* **Current status:** The Admin Stats Dashboard has an "Online Now" card, but it currently reads `0` because the database schema does not track session activity.
+* **Recommendation:** Instead of costly WebSocket connections, we recommend adding a `last_active_at` (Timestamp) column to the `profiles` table. The frontend routing layer can update this timestamp on navigation, and the stats dashboard can count any user as "online" if their timestamp was updated within the last 5 minutes.

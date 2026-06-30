@@ -29,6 +29,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
 
   if (!course) return null;
 
@@ -67,6 +68,10 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
     setIsPlaying(false);
     setCurrentTime(0);
     setDuration(0);
+    setPlaybackSpeed(1);
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 1;
+    }
 
     async function loadLessonData() {
       try {
@@ -198,6 +203,12 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  }
+
+  function changeSpeed(speed) {
+    if (!videoRef.current) return;
+    videoRef.current.playbackRate = speed;
+    setPlaybackSpeed(speed);
   }
 
   const lessonTitle = activeLesson
@@ -408,9 +419,6 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                               <span style={{ fontSize: '15px', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
                                 {lessonTitle}
                               </span>
-                              <span style={{ fontSize: '12px', background: 'rgba(21, 180, 122, 0.25)', color: '#15b47a', padding: '3px 10px', borderRadius: '20px', fontWeight: 'bold', border: '1px solid rgba(21, 180, 122, 0.4)' }}>
-                                {lang === 'ar' ? 'بث فيديو آمن' : 'Secure Video Stream'}
-                              </span>
                             </div>
                           )}
 
@@ -468,8 +476,30 @@ export function CourseDetailModal({ lang = 'ar', course, userId, onClose, onLess
                                   </span>
                                 </div>
 
-                                {/* Volume / Mute and Fullscreen buttons */}
+                                {/* Speed, Volume / Mute and Fullscreen buttons */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                  <select
+                                    value={playbackSpeed}
+                                    onChange={(e) => changeSpeed(parseFloat(e.target.value))}
+                                    style={{
+                                      background: 'rgba(255, 255, 255, 0.12)',
+                                      border: '1px solid rgba(255, 255, 255, 0.25)',
+                                      color: '#ffffff',
+                                      borderRadius: '6px',
+                                      padding: '2px 8px',
+                                      fontSize: '12px',
+                                      cursor: 'pointer',
+                                      outline: 'none',
+                                      fontFamily: 'inherit'
+                                    }}
+                                  >
+                                    <option value="0.5" style={{ background: '#0b2849', color: '#fff' }}>0.5x</option>
+                                    <option value="1" style={{ background: '#0b2849', color: '#fff' }}>1.0x</option>
+                                    <option value="1.25" style={{ background: '#0b2849', color: '#fff' }}>1.25x</option>
+                                    <option value="1.5" style={{ background: '#0b2849', color: '#fff' }}>1.5x</option>
+                                    <option value="2" style={{ background: '#0b2849', color: '#fff' }}>2.0x</option>
+                                  </select>
+
                                   <button 
                                     onClick={toggleMute}
                                     style={{ background: 'none', border: 'none', color: '#fff', fontSize: '18px', cursor: 'pointer' }}

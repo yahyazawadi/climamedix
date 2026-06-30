@@ -6,6 +6,8 @@ import { useAuth, ROLE_PERMISSIONS } from '../../auth/hooks/useAuth';
 import { Search, Shield, User, ChevronDown, Check, X } from 'lucide-preact';
 import './UserManagementDashboard.css';
 
+const MASTER_OWNER_EMAIL = 'super.yahyaaa@gmail.com';
+
 export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
   const { hasPermission, user } = useAuth();
   const isSuperAdmin = hasPermission('manage:system');
@@ -133,6 +135,30 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
   };
 
   const handleSaveAccess = async () => {
+    if (draftRole === 'superadmin' && selectedUser.role !== 'superadmin') {
+      const emailConfirm = window.prompt(
+        lang === 'ar' 
+          ? `لترقية هذا المستخدم إلى "مسؤول خارق"، يرجى كتابة بريده الإلكتروني للتأكيد:\n${selectedUser.email}`
+          : `To promote this user to Superadmin, please type their email to confirm:\n${selectedUser.email}`
+      );
+      if (emailConfirm !== selectedUser.email) {
+        alert(lang === 'ar' ? 'البريد الإلكتروني غير متطابق. تم الإلغاء.' : 'Email does not match. Cancelled.');
+        return;
+      }
+    }
+
+    if (selectedUser.role === 'superadmin' && draftRole !== 'superadmin') {
+      const emailConfirm = window.prompt(
+        lang === 'ar' 
+          ? `لتجريد هذا المستخدم من صلاحية "مسؤول خارق"، يرجى كتابة بريده الإلكتروني للتأكيد:\n${selectedUser.email}`
+          : `To demote this Superadmin, please type their email to confirm:\n${selectedUser.email}`
+      );
+      if (emailConfirm !== selectedUser.email) {
+        alert(lang === 'ar' ? 'البريد الإلكتروني غير متطابق. تم الإلغاء.' : 'Email does not match. Cancelled.');
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       // 1. Update Profile Role
@@ -293,7 +319,7 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
                           </span>
                         </td>
                         <td>
-                          {profile.role === 'superadmin' ? (
+                          {profile.role === 'superadmin' && user?.email !== MASTER_OWNER_EMAIL ? (
                             <span style={{ fontSize: '12px', color: 'rgba(11,40,73,0.5)', fontWeight: 'bold' }}>
                               {lang === 'ar' ? 'محمي بالنظام' : 'System Protected'}
                             </span>

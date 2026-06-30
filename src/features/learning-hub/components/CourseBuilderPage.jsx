@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { supabase } from '../../../utils/supabaseClient';
+import { uploadFileToR2 } from '../../../utils/s3Client';
 import { GlassCard } from '../../shared/components/GlassCard';
 import { Button } from '../../shared/components/Button';
 import { useAuth } from '../../auth/hooks/useAuth';
@@ -79,6 +80,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
   // R2 Video Upload State
   const [uploadProgress, setUploadProgress] = useState(null);
   const [uploadError, setUploadError] = useState('');
+  const [uploadingCover, setUploadingCover] = useState(false);
 
   // Quiz Builder State (attached to active editing lesson or loaded on demand)
   const [quiz, setQuiz] = useState(null);
@@ -310,6 +312,23 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       console.error(err);
       setUploadError('Failed to upload video to Cloudflare R2.');
       setUploadProgress(null);
+    }
+  }
+
+  async function handleCoverUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCover(true);
+    try {
+      const publicUrl = await uploadFileToR2(file, 'course_covers');
+      if (publicUrl) {
+        setCourseForm(prev => ({ ...prev, cover_image: publicUrl }));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upload cover image.');
+    } finally {
+      setUploadingCover(false);
     }
   }
 
@@ -605,7 +624,18 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
 
               <div className="cb-form-group">
                 <label>Cover Image URL</label>
-                <input type="text" value={courseForm.cover_image} onInput={e => setCourseForm({...courseForm, cover_image: e.target.value})} />
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <input 
+                    type="text" 
+                    value={courseForm.cover_image} 
+                    onInput={e => setCourseForm({...courseForm, cover_image: e.target.value})} 
+                    style={{ flexGrow: 1 }}
+                  />
+                  <label className="cb-badge" style={{ cursor: 'pointer', padding: '10px 14px', borderRadius: '10px', background: '#004c6d', color: '#ffffff', border: 'none', fontWeight: 'bold', display: 'inline-block', margin: 0 }}>
+                    {uploadingCover ? 'Uploading...' : 'Upload Image'}
+                    <input type="file" accept="image/*" onChange={handleCoverUpload} style={{ display: 'none' }} />
+                  </label>
+                </div>
               </div>
 
               <div className="cb-form-row">

@@ -134,6 +134,13 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!active) return;
       
+      if (event === 'SIGNED_IN' && localStorage.getItem('oauth_in_progress') === 'true') {
+        localStorage.removeItem('oauth_in_progress');
+        // Automate the refresh workaround to ensure perfect state sync and header attachment
+        window.location.reload();
+        return;
+      }
+      
       const currentUser = session?.user ?? null;
       const prevUser = user;
       

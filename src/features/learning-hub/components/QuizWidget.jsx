@@ -1,9 +1,10 @@
-import { useState } from 'preact/hooks';
+import { useState, useRef } from 'preact/hooks';
 import { Button } from '../../shared/components/Button';
 
 export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionIds, setSelectedOptionIds] = useState({});
+  const selectionsRef = useRef({});
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
   const [passed, setPassed] = useState(false);
@@ -19,9 +20,12 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
   const handleSelectOption = (optionId) => {
     setSelectedOptionIds(prev => {
       const cur = prev[currentQuestion.id] || [];
-      return cur.includes(optionId)
-        ? { ...prev, [currentQuestion.id]: cur.filter(id => id !== optionId) }
-        : { ...prev, [currentQuestion.id]: [...cur, optionId] };
+      const next = cur.includes(optionId)
+        ? cur.filter(id => id !== optionId)
+        : [...cur, optionId];
+      const updated = { ...prev, [currentQuestion.id]: next };
+      selectionsRef.current = updated; // always keep ref in sync
+      return updated;
     });
   };
 
@@ -29,15 +33,17 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(p => p + 1);
     } else {
+      // Use ref for guaranteed latest selections (avoids stale closure)
+      const latestSelections = selectionsRef.current;
       let totalPoints = 0, earnedPoints = 0;
       const results = questions.map(q => {
         const pts = q.points ?? 1;
         totalPoints += pts;
-        const selectedIds = selectedOptionIds[q.id] || [];
+        const selectedIds = latestSelections[q.id] || [];
         const correctIds = (q.quiz_options || []).filter(o => o.is_correct).map(o => o.id);
         const isCorrect = selectedIds.length === correctIds.length && selectedIds.every(id => correctIds.includes(id));
         if (isCorrect) earnedPoints += pts;
-        return { question: q, selectedIds, isCorrect };
+        return { question: q, selectedIds: [...selectedIds], isCorrect };
       });
 
       const finalScore = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
@@ -53,6 +59,7 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
   const handleRetry = () => {
     setCurrentIndex(0);
     setSelectedOptionIds({});
+    selectionsRef.current = {};
     setShowResults(false);
     setScore(0);
     setPassed(false);

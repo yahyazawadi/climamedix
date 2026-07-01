@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { Button } from '../../shared/components/Button';
-import { QuizWidget } from './QuizWidget';
-import { RichTextRenderer } from '../../shared/components/RichTextRenderer';
+import { Button } from '../../../shared/components/Button';
+import { QuizWidget } from '../quizzes/QuizWidget';
+import { RichTextRenderer } from '../../../shared/components/RichTextRenderer';
 import {
   fetchCourseSyllabus,
   fetchCompletedLessons,
@@ -10,7 +10,7 @@ import {
   fetchQuiz,
   submitQuizAttempt,
   fetchPassedAttempt
-} from '../services/lmsService';
+} from '../../services/lmsService';
 
 export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted }) {
   const [modules, setModules] = useState([]);

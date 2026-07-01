@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'preact/hooks';
-import { Button } from '../../shared/components/Button';
-import { GlassCard } from '../../shared/components/GlassCard';
+import { Button } from '../../../shared/components/Button';
+import { GlassCard } from '../../../shared/components/GlassCard';
 
 export function CertificateGenerator({ recipientName = 'د. مريم العتيبي', courseTitle = 'زمالة طب الكوارث المناخية والبيئية', onClose }) {
   const canvasRef = useRef(null);

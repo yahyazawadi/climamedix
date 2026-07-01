@@ -117,7 +117,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
     *   [x] Partners
 
 ### 3. 🎓 Programs (Dynamic Management)
-*   [ ] **Dynamic program detail pages** managed through the admin panel.
+*   [x] **Dynamic program detail pages** managed through the admin panel (Unified with LMS Courses).
 *   [x] **Standard Program Details Card/Layout:**
     *   [x] Title & Description
     *   [x] Cover Image

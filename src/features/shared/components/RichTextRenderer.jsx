@@ -1,5 +1,5 @@
 import { createElement } from 'preact';
-import { CustomVideoPlayer } from '../../learning-hub/components/CustomVideoPlayer';
+import { CustomVideoPlayer } from '../../learning-hub/components/player/CustomVideoPlayer';
 import { CustomAudioPlayer } from './CustomAudioPlayer';
 
 export function RichTextRenderer({ html, lang = 'ar' }) {

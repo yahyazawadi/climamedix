@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'preact/hooks';
-import { supabase } from '../../../utils/supabaseClient';
-import { uploadFileToR2 } from '../../../utils/s3Client';
-import { GlassCard } from '../../shared/components/GlassCard';
-import { Button } from '../../shared/components/Button';
-import { useAuth } from '../../auth/hooks/useAuth';
+import { supabase } from '../../../../utils/supabaseClient';
+import { uploadFileToR2 } from '../../../../utils/s3Client';
+import { GlassCard } from '../../../shared/components/GlassCard';
+import { Button } from '../../../shared/components/Button';
+import { useAuth } from '../../../auth/hooks/useAuth';
 import { 
   adminFetchAllCourses, 
   adminCreateCourse, 
@@ -22,10 +22,10 @@ import {
   adminCreateOption,
   adminDeleteQuiz,
   adminDeleteQuestion
-} from '../services/adminLmsService';
+} from '../../services/adminLmsService';
 import './CourseBuilderPage.css';
-import { useLmsDragDrop } from '../hooks/useLmsDragDrop';
-import { RichTextEditor } from '../../shared/components/RichTextEditor';
+import { useLmsDragDrop } from '../../hooks/useLmsDragDrop';
+import { RichTextEditor } from '../../../shared/components/RichTextEditor';
 
 const convertToWebP = (file) => {
   return new Promise((resolve, reject) => {

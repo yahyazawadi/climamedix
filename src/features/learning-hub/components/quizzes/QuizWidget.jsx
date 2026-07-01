@@ -1,5 +1,5 @@
 import { useState, useRef } from 'preact/hooks';
-import { Button } from '../../shared/components/Button';
+import { Button } from '../../../shared/components/Button';
 
 export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar', reviewMode = false, pastScore = null }) {
   const passingScore = quizData?.passing_score ?? 80;

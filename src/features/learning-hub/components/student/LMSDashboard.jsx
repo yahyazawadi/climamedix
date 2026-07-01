@@ -1,7 +1,7 @@
 import { useState, useLayoutEffect, useRef } from 'preact/hooks';
 import gsap from 'gsap';
-import { GlassCard } from '../../shared/components/GlassCard';
-import { Button } from '../../shared/components/Button';
+import { GlassCard } from '../../../shared/components/GlassCard';
+import { Button } from '../../../shared/components/Button';
 
 export function LMSDashboard({ enrolledCourses = [], completedCourses = [], onSelectCourse, onGenerateCertificate }) {
   const containerRef = useRef(null);

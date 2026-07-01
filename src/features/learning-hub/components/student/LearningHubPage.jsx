@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'preact/hooks';
-import { Button } from '../../shared/components/Button';
-import { GlassCard } from '../../shared/components/GlassCard';
-import { useAuth } from '../../auth/hooks/useAuth';
+import { Button } from '../../../shared/components/Button';
+import { GlassCard } from '../../../shared/components/GlassCard';
+import { useAuth } from '../../../auth/hooks/useAuth';
 import { LMSDashboard } from './LMSDashboard';
 import { CourseDetailModal } from './CourseDetailModal';
-import { CertificateGenerator } from './CertificateGenerator';
+import { CertificateGenerator } from '../certificates/CertificateGenerator';
 import {
   fetchCourses,
   fetchEnrollments,
@@ -13,7 +13,7 @@ import {
   fetchCompletedLessons,
   issueCertificate,
   fetchUserCertificates,
-} from '../services/lmsService';
+} from '../../services/lmsService';
 
 export function LearningHubPage({ lang, onNavigate }) {
   const { user, userProfile, hasPermission } = useAuth();

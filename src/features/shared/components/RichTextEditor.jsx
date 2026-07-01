@@ -120,25 +120,18 @@ export function RichTextEditor({
 
   const uploadAndInsertImage = async (file) => {
     try {
-      setIsUploading(true);
       setUploadStatus('compressing');
-      onUploadingMedia?.(true);
       const webpFile = await convertToWebP(file);
       setUploadStatus('uploading');
       const url = await uploadFileToR2(webpFile, imageBucketFolder, (pct) => setUploadProgress(pct));
       
       const quill = quillRef.current.getEditor();
-      const range = quill.getSelection(true);
+      const range = quill.getSelection(true) || { index: quill.getLength() };
       quill.insertEmbed(range.index, 'image', url);
       quill.setSelection(range.index + 1);
     } catch (err) {
       console.error("Failed to upload image:", err);
       alert(isRtl ? "فشل رفع الصورة." : "Failed to upload image.");
-    } finally {
-      setIsUploading(false);
-      setUploadStatus('');
-      setUploadProgress(0);
-      onUploadingMedia?.(false);
     }
   };
 
@@ -146,12 +139,21 @@ export function RichTextEditor({
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('accept', 'image/*');
+    input.setAttribute('multiple', 'true');
     input.click();
 
     input.onchange = async () => {
-      const file = input.files[0];
-      if (file) {
-        uploadAndInsertImage(file);
+      if (input.files && input.files.length > 0) {
+        setIsUploading(true);
+        onUploadingMedia?.(true);
+        for (let i = 0; i < input.files.length; i++) {
+          await uploadAndInsertImage(input.files[i]);
+          setUploadProgress(0);
+        }
+        setIsUploading(false);
+        setUploadStatus('');
+        setUploadProgress(0);
+        onUploadingMedia?.(false);
       }
     };
   }, []);
@@ -160,29 +162,32 @@ export function RichTextEditor({
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('accept', 'video/*');
+    input.setAttribute('multiple', 'true');
     input.click();
 
     input.onchange = async () => {
-      const file = input.files[0];
-      if (file) {
-        try {
-          setIsUploading(true);
-          setUploadStatus('uploading');
-          onUploadingMedia?.(true);
-          const url = await uploadFileToR2(file, 'videos', (pct) => setUploadProgress(pct));
-          const quill = quillRef.current.getEditor();
-          const range = quill.getSelection(true);
-          quill.insertEmbed(range.index, 'video', url);
-          quill.setSelection(range.index + 1);
-        } catch (err) {
-          console.error("Failed to upload video:", err);
-          alert(isRtl ? "فشل رفع الفيديو." : "Failed to upload video.");
-        } finally {
-          setIsUploading(false);
-          setUploadStatus('');
+      if (input.files && input.files.length > 0) {
+        setIsUploading(true);
+        onUploadingMedia?.(true);
+        for (let i = 0; i < input.files.length; i++) {
+          const file = input.files[i];
+          try {
+            setUploadStatus('uploading');
+            const url = await uploadFileToR2(file, 'videos', (pct) => setUploadProgress(pct));
+            const quill = quillRef.current.getEditor();
+            const range = quill.getSelection(true) || { index: quill.getLength() };
+            quill.insertEmbed(range.index, 'video', url);
+            quill.setSelection(range.index + 1);
+          } catch (err) {
+            console.error("Failed to upload video:", err);
+            alert(isRtl ? "فشل رفع الفيديو." : "Failed to upload video.");
+          }
           setUploadProgress(0);
-          onUploadingMedia?.(false);
         }
+        setIsUploading(false);
+        setUploadStatus('');
+        setUploadProgress(0);
+        onUploadingMedia?.(false);
       }
     };
   }, []);
@@ -191,33 +196,36 @@ export function RichTextEditor({
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('accept', 'image/*,video/*');
+    input.setAttribute('multiple', 'true');
     input.click();
 
     input.onchange = async () => {
-      const file = input.files[0];
-      if (file) {
-        if (file.type.startsWith('image/')) {
-          uploadAndInsertImage(file);
-        } else if (file.type.startsWith('video/')) {
-          try {
-            setIsUploading(true);
-            setUploadStatus('uploading');
-            onUploadingMedia?.(true);
-            const url = await uploadFileToR2(file, 'videos', (pct) => setUploadProgress(pct));
-            const quill = quillRef.current.getEditor();
-            const range = quill.getSelection(true);
-            quill.insertEmbed(range.index, 'video', url);
-            quill.setSelection(range.index + 1);
-          } catch (err) {
-            console.error("Failed to upload video:", err);
-            alert(isRtl ? "فشل رفع الفيديو." : "Failed to upload video.");
-          } finally {
-            setIsUploading(false);
-            setUploadStatus('');
-            setUploadProgress(0);
-            onUploadingMedia?.(false);
+      if (input.files && input.files.length > 0) {
+        setIsUploading(true);
+        onUploadingMedia?.(true);
+        for (let i = 0; i < input.files.length; i++) {
+          const file = input.files[i];
+          if (file.type.startsWith('image/')) {
+            await uploadAndInsertImage(file);
+          } else if (file.type.startsWith('video/')) {
+            try {
+              setUploadStatus('uploading');
+              const url = await uploadFileToR2(file, 'videos', (pct) => setUploadProgress(pct));
+              const quill = quillRef.current.getEditor();
+              const range = quill.getSelection(true) || { index: quill.getLength() };
+              quill.insertEmbed(range.index, 'video', url);
+              quill.setSelection(range.index + 1);
+            } catch (err) {
+              console.error("Failed to upload video:", err);
+              alert(isRtl ? "فشل رفع الفيديو." : "Failed to upload video.");
+            }
           }
+          setUploadProgress(0);
         }
+        setIsUploading(false);
+        setUploadStatus('');
+        setUploadProgress(0);
+        onUploadingMedia?.(false);
       }
     };
   }, []);
@@ -226,29 +234,32 @@ export function RichTextEditor({
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('accept', 'audio/*');
+    input.setAttribute('multiple', 'true');
     input.click();
 
     input.onchange = async () => {
-      const file = input.files[0];
-      if (file) {
-        try {
-          setIsUploading(true);
-          setUploadStatus('uploading');
-          onUploadingMedia?.(true);
-          const url = await uploadFileToR2(file, 'course_audio', (pct) => setUploadProgress(pct));
-          const quill = quillRef.current.getEditor();
-          const range = quill.getSelection(true);
-          quill.insertEmbed(range.index, 'audio', url);
-          quill.setSelection(range.index + 1);
-        } catch (err) {
-          console.error("Failed to upload audio:", err);
-          alert(isRtl ? "فشل رفع الملف الصوتي." : "Failed to upload audio.");
-        } finally {
-          setIsUploading(false);
-          setUploadStatus('');
+      if (input.files && input.files.length > 0) {
+        setIsUploading(true);
+        onUploadingMedia?.(true);
+        for (let i = 0; i < input.files.length; i++) {
+          const file = input.files[i];
+          try {
+            setUploadStatus('uploading');
+            const url = await uploadFileToR2(file, 'course_audio', (pct) => setUploadProgress(pct));
+            const quill = quillRef.current.getEditor();
+            const range = quill.getSelection(true) || { index: quill.getLength() };
+            quill.insertEmbed(range.index, 'audio', url);
+            quill.setSelection(range.index + 1);
+          } catch (err) {
+            console.error("Failed to upload audio:", err);
+            alert(isRtl ? "فشل رفع الملف الصوتي." : "Failed to upload audio.");
+          }
           setUploadProgress(0);
-          onUploadingMedia?.(false);
         }
+        setIsUploading(false);
+        setUploadStatus('');
+        setUploadProgress(0);
+        onUploadingMedia?.(false);
       }
     };
   }, []);

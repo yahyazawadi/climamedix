@@ -1,20 +1,28 @@
 import { useState, useRef } from 'preact/hooks';
 import { Button } from '../../shared/components/Button';
 
-export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
+export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar', reviewMode = false, pastScore = null }) {
+  const passingScore = quizData?.passing_score ?? 80;
+  const questions = quizData?.quiz_questions || [];
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionIds, setSelectedOptionIds] = useState({});
   const selectionsRef = useRef({});
-  const [showResults, setShowResults] = useState(false);
-  const [score, setScore] = useState(0);
-  const [passed, setPassed] = useState(false);
-  const [questionResults, setQuestionResults] = useState([]); // [{question, selectedIds, isCorrect}]
 
-  if (!quizData || !quizData.quiz_questions || quizData.quiz_questions.length === 0) return null;
+  // Initialize review mode state if requested
+  const initialQuestionResults = reviewMode ? questions.map(q => {
+    const correctOptIds = (q.quiz_options || []).filter(opt => opt.is_correct).map(o => o.id);
+    return { question: q, selectedIds: correctOptIds, isCorrect: true };
+  }) : [];
 
-  const questions = quizData.quiz_questions;
+  const [showResults, setShowResults] = useState(reviewMode);
+  const [score, setScore] = useState(reviewMode && pastScore !== null ? pastScore : 0);
+  const [passed, setPassed] = useState(reviewMode ? (pastScore >= passingScore) : false);
+  const [questionResults, setQuestionResults] = useState(initialQuestionResults);
+
+  if (!quizData || questions.length === 0) return null;
+
   const currentQuestion = questions[currentIndex];
-  const passingScore = quizData.passing_score ?? 80;
   const isRTL = lang === 'ar';
 
   const handleSelectOption = (optionId) => {
@@ -178,13 +186,15 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
                 ? (isRTL ? 'تهانينا، لقد اجتزت الاختبار!' : 'Congratulations, you passed!')
                 : (isRTL ? 'لم تتجاوز درجة الاجتياز بعد' : "You haven't reached the passing score yet")}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', fontSize: '13px', opacity: 0.75 }}>
-              <span>{isRTL ? `${correctCount} إجابة صحيحة` : `${correctCount} correct`}</span>
-              <span>·</span>
-              <span>{isRTL ? `${questions.length - correctCount} إجابة خاطئة` : `${questions.length - correctCount} wrong`}</span>
-              <span>·</span>
-              <span>{isRTL ? `الحد الأدنى: ${passingScore}%` : `Pass: ${passingScore}%`}</span>
-            </div>
+            {!reviewMode && (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', fontSize: '13px', opacity: 0.75 }}>
+                <span>{isRTL ? `${correctCount} إجابة صحيحة` : `${correctCount} correct`}</span>
+                <span>·</span>
+                <span>{isRTL ? `${questions.length - correctCount} إجابة خاطئة` : `${questions.length - correctCount} wrong`}</span>
+                <span>·</span>
+                <span>{isRTL ? `الحد الأدنى: ${passingScore}%` : `Pass: ${passingScore}%`}</span>
+              </div>
+            )}
           </div>
 
           {/* Question review — all questions */}
@@ -253,19 +263,21 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
           </div>
 
           {/* Action buttons */}
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', paddingBottom: '8px' }}>
-            {!passed && (
-              <Button variant="gradient" onClick={handleRetry} style={{ padding: '12px 28px', fontSize: '13.5px', borderRadius: '10px' }}>
-                {isRTL ? '↺ إعادة المحاولة' : '↺ Try Again'}
-              </Button>
-            )}
-            <button onClick={onClose} style={{
-              padding: '12px 28px', fontSize: '13.5px', borderRadius: '10px', cursor: 'pointer',
-              background: 'transparent', border: '1.5px solid rgba(11,40,73,0.2)', color: '#0b2849', fontWeight: '600'
-            }}>
-              {isRTL ? 'إغلاق' : 'Close'}
-            </button>
-          </div>
+          {!reviewMode && (
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', paddingBottom: '8px' }}>
+              {!passed && (
+                <Button variant="gradient" onClick={handleRetry} style={{ padding: '12px 28px', fontSize: '13.5px', borderRadius: '10px' }}>
+                  {isRTL ? '↺ إعادة المحاولة' : '↺ Try Again'}
+                </Button>
+              )}
+              <button onClick={onClose} style={{
+                padding: '12px 28px', fontSize: '13.5px', borderRadius: '10px', cursor: 'pointer',
+                background: 'transparent', border: '1.5px solid rgba(11,40,73,0.2)', color: '#0b2849', fontWeight: '600'
+              }}>
+                {isRTL ? 'إغلاق' : 'Close'}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

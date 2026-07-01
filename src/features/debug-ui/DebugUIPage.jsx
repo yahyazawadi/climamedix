@@ -20,6 +20,7 @@ import { CourseDetailModal } from '../learning-hub/components/CourseDetailModal'
 import { CertificateGenerator } from '../learning-hub/components/CertificateGenerator';
 import { AdminCRUD } from '../admin/components/AdminCRUD';
 import { AnalyticsDashboard } from '../admin/components/AnalyticsDashboard';
+import { CustomAudioPlayer } from '../shared/components/CustomAudioPlayer';
 
 const MOCK_EVENTS = [
   { id: 1, title: 'ورشة عمل: تقييم الأثر البيئي للمستشفيات', date: '2026-07-05', time: '10:00 ص', type: 'ورشة عمل', desc: 'تدريب عملي على أدوات قياس استهلاك الطاقة وإدارة النفايات الطبية.', link: '#' },
@@ -3839,6 +3840,142 @@ export function DebugUIPage() {
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
               </button>
+            </div>
+
+          </div>
+        </div>
+        {/* ===== Audio Players Showcase ===== */}
+        <div style={{ width: '100%', marginTop: '60px', padding: '40px', background: '#071829', borderRadius: '24px', position: 'relative', overflow: 'hidden' }}>
+          <h2 style={{ color: '#fff', textAlign: 'center', marginBottom: '40px', fontFamily: 'monospace' }}>Audio Player Designs (Neon Button Base)</h2>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'center' }}>
+            
+            {/* Style 1: Horizontal Pill */}
+            <div style={{ width: '100%', maxWidth: '600px' }}>
+              <div style={{ color: '#15b47a', fontSize: '14px', fontFamily: 'monospace', marginBottom: '10px' }}>Style 1: Sleek Horizontal Pill</div>
+              <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(21, 180, 122, 0.2)', borderRadius: '50px', padding: '10px 30px 10px 10px', gap: '20px', backdropFilter: 'blur(10px)' }}>
+                {/* Neon Button */}
+                <button style={{
+                  flexShrink: 0, width: '60px', height: '60px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'transparent', border: '2px solid #15b47a',
+                  boxShadow: '0 0 15px rgba(21, 180, 122, 0.4), inset 0 0 10px rgba(21, 180, 122, 0.2)',
+                  color: '#15b47a', transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                
+                <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontSize: '14px' }}>
+                    <strong style={{ letterSpacing: '1px' }}>Audio_Track_01.mp3</strong>
+                    <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>01:24 / 04:30</span>
+                  </div>
+                  <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ width: '30%', height: '100%', background: '#15b47a', boxShadow: '0 0 10px #15b47a' }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Style 2: Glassmorphic Card */}
+            <div style={{ width: '100%', maxWidth: '400px' }}>
+              <div style={{ color: '#15b47a', fontSize: '14px', fontFamily: 'monospace', marginBottom: '10px' }}>Style 2: Glassmorphic Stack</div>
+              <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '20px', padding: '30px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+                <div style={{ width: '80px', height: '80px', background: 'linear-gradient(135deg, #15b47a, #004c6d)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 20px rgba(21, 180, 122, 0.3)' }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <h4 style={{ color: '#fff', margin: '0 0 5px 0', fontSize: '18px' }}>Podcast Episode 12</h4>
+                  <p style={{ color: '#15b47a', margin: 0, fontSize: '13px' }}>Climate & Health</p>
+                </div>
+                
+                <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px' }}>1:12</span>
+                  <div style={{ flexGrow: 1, height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', position: 'relative' }}>
+                    <div style={{ width: '45%', height: '100%', background: '#15b47a', borderRadius: '3px' }} />
+                    <div style={{ width: '12px', height: '12px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '-3px', left: '45%', transform: 'translateX(-50%)', boxShadow: '0 0 10px rgba(21,180,122,0.8)' }} />
+                  </div>
+                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px' }}>3:45</span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+                  
+                  {/* Neon Button */}
+                  <button style={{
+                    width: '60px', height: '60px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'transparent', border: '2px solid #15b47a',
+                    boxShadow: '0 0 15px rgba(21, 180, 122, 0.4), inset 0 0 10px rgba(21, 180, 122, 0.2)',
+                    color: '#15b47a', transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                  </button>
+
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Style 3: Circular Ring */}
+            <div style={{ width: '100%', maxWidth: '200px' }}>
+              <div style={{ color: '#15b47a', fontSize: '14px', fontFamily: 'monospace', marginBottom: '10px', textAlign: 'center' }}>Style 3: Circular Ring</div>
+              <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="120" height="120" style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)' }}>
+                  <circle cx="60" cy="60" r="56" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
+                  <circle cx="60" cy="60" r="56" fill="none" stroke="#15b47a" strokeWidth="4" strokeDasharray="351.85" strokeDashoffset="140" style={{ filter: 'drop-shadow(0 0 4px #15b47a)', transition: 'stroke-dashoffset 0.3s ease' }} />
+                </svg>
+                
+                {/* Neon Button */}
+                <button style={{
+                  width: '60px', height: '60px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'transparent', border: '2px solid #15b47a',
+                  boxShadow: '0 0 15px rgba(21, 180, 122, 0.4), inset 0 0 10px rgba(21, 180, 122, 0.2)',
+                  color: '#15b47a', transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease', position: 'relative', zIndex: 2
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Style 4: Minimal Line */}
+            <div style={{ width: '100%', maxWidth: '600px' }}>
+              <div style={{ color: '#15b47a', fontSize: '14px', fontFamily: 'monospace', marginBottom: '10px' }}>Style 4: Functional Minimal Line (Actual Audio!)</div>
+              <CustomAudioPlayer src="/test-audio.m4a" title="Vance Joy - Riptide" />
+            </div>
+
+            {/* Style 5: Floating Action Player */}
+            <div style={{ width: '100%', maxWidth: '300px' }}>
+              <div style={{ color: '#15b47a', fontSize: '14px', fontFamily: 'monospace', marginBottom: '10px' }}>Style 5: Floating Action Panel</div>
+              <div style={{ background: 'linear-gradient(180deg, #0b2849, #071829)', borderRadius: '30px', padding: '10px', display: 'flex', alignItems: 'center', gap: '15px', border: '1px solid rgba(21,180,122,0.3)', boxShadow: '0 15px 35px rgba(0,0,0,0.4)' }}>
+                {/* Neon Button */}
+                <button style={{
+                  flexShrink: 0, width: '60px', height: '60px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'transparent', border: '2px solid #15b47a',
+                  boxShadow: '0 0 15px rgba(21, 180, 122, 0.4), inset 0 0 10px rgba(21, 180, 122, 0.2)',
+                  color: '#15b47a', transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                
+                <div style={{ flexGrow: 1, paddingRight: '15px' }}>
+                  <div style={{ color: '#fff', fontSize: '15px', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Voice Note</div>
+                  <div style={{ color: '#15b47a', fontSize: '12px' }}>Playing...</div>
+                </div>
+                
+                <div style={{ position: 'relative', width: '30px', height: '30px', marginRight: '10px' }}>
+                  <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%' }}>
+                    <path style={{ fill: 'none', stroke: 'rgba(255,255,255,0.1)', strokeWidth: 3 }} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path style={{ fill: 'none', stroke: '#15b47a', strokeWidth: 3, strokeDasharray: '60, 100' }} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
           </div>

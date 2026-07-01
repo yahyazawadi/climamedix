@@ -214,7 +214,10 @@ export async function uploadVideoToR2(file, onProgress) {
         if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));
       };
       xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) resolve(key);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const publicUrl = import.meta.env.VITE_R2_PUBLIC_URL;
+          resolve(publicUrl ? `${publicUrl}/${key}` : url);
+        }
         else reject(new Error(`Upload failed: ${xhr.status} ${xhr.responseText}`));
       };
       xhr.onerror = () => reject(new Error('Network error during upload'));

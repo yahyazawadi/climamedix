@@ -2,7 +2,6 @@ import { useRef, useCallback, useEffect } from 'preact/hooks';
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { uploadFileToR2 } from '../../../utils/s3Client';
-import { uploadVideoToR2 } from '../../learning-hub/services/adminLmsService';
 
 // Custom Video Blot
 const BlockEmbed = Quill.import('blots/block/embed');
@@ -159,7 +158,7 @@ export function RichTextEditor({
       if (file) {
         try {
           onUploadingMedia?.(true);
-          const url = await uploadVideoToR2(file);
+          const url = await uploadFileToR2(file, 'videos');
           const quill = quillRef.current.getEditor();
           const range = quill.getSelection(true);
           quill.insertEmbed(range.index, 'video', url);
@@ -188,7 +187,7 @@ export function RichTextEditor({
         } else if (file.type.startsWith('video/')) {
           try {
             onUploadingMedia?.(true);
-            const url = await uploadVideoToR2(file);
+            const url = await uploadFileToR2(file, 'videos');
             const quill = quillRef.current.getEditor();
             const range = quill.getSelection(true);
             quill.insertEmbed(range.index, 'video', url);

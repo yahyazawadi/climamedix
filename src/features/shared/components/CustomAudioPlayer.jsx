@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import './CustomAudioPlayer.css';
 
 export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
   const [peaks, setPeaks] = useState([]);

@@ -473,6 +473,39 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
     }
   }
 
+  async function prefillTestQuestions() {
+    if (!quiz) return;
+    try {
+      // 1. True/False
+      const q1 = await adminCreateQuestion({ quiz_id: quiz.id, question_text_ar: 'سؤال صح وخطأ', question_text_en: 'True / False Question', points: 10, sequence_order: 1 });
+      await adminCreateOption({ question_id: q1.id, option_text_ar: 'صح', option_text_en: 'True', is_correct: true });
+      await adminCreateOption({ question_id: q1.id, option_text_ar: 'خطأ', option_text_en: 'False', is_correct: false });
+
+      // 2. 2 True out of 4
+      const q2 = await adminCreateQuestion({ quiz_id: quiz.id, question_text_ar: 'اختر إجابتين صحيحتين', question_text_en: '2 Correct Options', points: 10, sequence_order: 2 });
+      await adminCreateOption({ question_id: q2.id, option_text_ar: 'صحيح ١', option_text_en: 'Correct 1', is_correct: true });
+      await adminCreateOption({ question_id: q2.id, option_text_ar: 'خاطئ ١', option_text_en: 'Wrong 1', is_correct: false });
+      await adminCreateOption({ question_id: q2.id, option_text_ar: 'صحيح ٢', option_text_en: 'Correct 2', is_correct: true });
+      await adminCreateOption({ question_id: q2.id, option_text_ar: 'خاطئ ٢', option_text_en: 'Wrong 2', is_correct: false });
+
+      // 3. 1 True out of 7
+      const q3 = await adminCreateQuestion({ quiz_id: quiz.id, question_text_ar: 'خيار واحد صحيح من ٧', question_text_en: '1 Correct out of 7', points: 10, sequence_order: 3 });
+      await adminCreateOption({ question_id: q3.id, option_text_ar: 'خاطئ', option_text_en: 'Wrong', is_correct: false });
+      await adminCreateOption({ question_id: q3.id, option_text_ar: 'خاطئ', option_text_en: 'Wrong', is_correct: false });
+      await adminCreateOption({ question_id: q3.id, option_text_ar: 'خاطئ', option_text_en: 'Wrong', is_correct: false });
+      await adminCreateOption({ question_id: q3.id, option_text_ar: 'خاطئ', option_text_en: 'Wrong', is_correct: false });
+      await adminCreateOption({ question_id: q3.id, option_text_ar: 'صحيح', option_text_en: 'Correct', is_correct: true });
+      await adminCreateOption({ question_id: q3.id, option_text_ar: 'خاطئ', option_text_en: 'Wrong', is_correct: false });
+      await adminCreateOption({ question_id: q3.id, option_text_ar: 'خاطئ', option_text_en: 'Wrong', is_correct: false });
+
+      // Reload quiz
+      loadLessonQuiz(editingLesson.id);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to prefill: ' + err.message);
+    }
+  }
+
   async function removeQuestion(questionId) {
     if (!confirm('Remove this question?')) return;
     try {
@@ -1017,6 +1050,15 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                       <Button onClick={addQuestionToQuiz} variant="gradient" style={{ fontSize: '12px', padding: '8px 16px', marginTop: '12px', width: '100%' }}>
                         {lang === 'ar' ? 'إضافة السؤال للاختبار' : 'Add Question'}
                       </Button>
+                      
+                      {/* DEV PREFILL BUTTON */}
+                      <button 
+                        type="button" 
+                        onClick={prefillTestQuestions} 
+                        style={{ display: 'block', width: '100%', padding: '6px', marginTop: '8px', background: '#f0f0f0', border: '1px dashed #ccc', borderRadius: '4px', fontSize: '11px', color: '#555', cursor: 'pointer' }}
+                      >
+                        ⚡ Prefill Demo Questions (Testing)
+                      </button>
                     </div>
                   </div>
                 )}

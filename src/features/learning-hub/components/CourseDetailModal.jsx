@@ -142,11 +142,6 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
         const remaining = total - completedCount;
 
         if (onLessonCompleted) onLessonCompleted(course.id, pct, remaining);
-
-        // If all lessons done, trigger certificate
-        if (completedCount >= total && onCourseCompleted) {
-          onCourseCompleted(course);
-        }
       } catch (err) {
         console.error('Mark complete error:', err);
         if (err.code === '42501' || err.message?.includes('violates row-level security')) {
@@ -178,7 +173,6 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
       const remaining = total - completedCount;
 
       if (onLessonCompleted) onLessonCompleted(course.id, pct, remaining);
-      if (completedCount >= total && onCourseCompleted) onCourseCompleted(course);
     } catch (err) {
       console.error('Mark complete error:', err);
       if (err.code === '42501' || err.message?.includes('violates row-level security')) {

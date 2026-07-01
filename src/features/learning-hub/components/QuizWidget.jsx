@@ -13,7 +13,7 @@ import { GlassCard } from '../../shared/components/GlassCard';
  */
 export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedOptionIds, setSelectedOptionIds] = useState({}); // questionId -> optionId
+  const [selectedOptionIds, setSelectedOptionIds] = useState({}); // questionId -> [optionId1, optionId2]
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
   const [passed, setPassed] = useState(false);
@@ -25,7 +25,14 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
   const passingScore = quizData.passing_score ?? 80;
 
   const handleSelectOption = (optionId) => {
-    setSelectedOptionIds(prev => ({ ...prev, [currentQuestion.id]: optionId }));
+    setSelectedOptionIds(prev => {
+      const currentSelected = prev[currentQuestion.id] || [];
+      if (currentSelected.includes(optionId)) {
+        return { ...prev, [currentQuestion.id]: currentSelected.filter(id => id !== optionId) };
+      } else {
+        return { ...prev, [currentQuestion.id]: [...currentSelected, optionId] };
+      }
+    });
   };
 
   const handleNext = () => {
@@ -39,9 +46,15 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
       questions.forEach(q => {
         const pts = q.points ?? 1;
         totalPoints += pts;
-        const selectedId = selectedOptionIds[q.id];
-        const selectedOption = (q.quiz_options || []).find(o => o.id === selectedId);
-        if (selectedOption?.is_correct) {
+        const selectedIds = selectedOptionIds[q.id] || [];
+        const correctOptions = (q.quiz_options || []).filter(o => o.is_correct).map(o => o.id);
+        
+        // Exact match of arrays (regardless of order)
+        const isExactlyCorrect = 
+          selectedIds.length === correctOptions.length && 
+          selectedIds.every(id => correctOptions.includes(id));
+
+        if (isExactlyCorrect) {
           earnedPoints += pts;
         }
       });
@@ -109,12 +122,15 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
             {(currentQuestion.quiz_options || []).map((opt) => {
               const optText = lang === 'ar' ? opt.option_text_ar : (opt.option_text_en || opt.option_text_ar);
-              const isSelected = selectedOptionIds[currentQuestion.id] === opt.id;
+              const isSelected = (selectedOptionIds[currentQuestion.id] || []).includes(opt.id);
               return (
                 <div
                   key={opt.id}
                   onClick={() => handleSelectOption(opt.id)}
                   style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
                     background: isSelected ? 'rgba(0,76,109,0.08)' : 'rgba(255,255,255,0.6)',
                     border: isSelected ? '2.5px solid #004c6d' : '1px solid rgba(11,40,73,0.13)',
                     borderRadius: '12px', padding: '15px 18px', cursor: 'pointer',
@@ -123,6 +139,9 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
                     transition: 'all 0.15s',
                   }}
                 >
+                  <div style={{ width: '18px', height: '18px', borderRadius: '4px', border: isSelected ? 'none' : '1.5px solid rgba(11,40,73,0.3)', background: isSelected ? '#004c6d' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {isSelected && <span style={{ color: 'white', fontSize: '12px' }}>✓</span>}
+                  </div>
                   {optText}
                 </div>
               );
@@ -134,7 +153,7 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
             <button onClick={handleBack} disabled={currentIndex === 0} style={{ background: 'none', border: 'none', color: currentIndex === 0 ? 'rgba(11,40,73,0.25)' : '#004c6d', cursor: currentIndex === 0 ? 'default' : 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
               {lang === 'ar' ? 'السابق' : 'Back'}
             </button>
-            <Button onClick={handleNext} disabled={!selectedOptionIds[currentQuestion.id]} variant="gradient" style={{ padding: '9px 26px', fontSize: '13.5px' }}>
+            <Button onClick={handleNext} disabled={!(selectedOptionIds[currentQuestion.id] && selectedOptionIds[currentQuestion.id].length > 0)} variant="gradient" style={{ padding: '9px 26px', fontSize: '13.5px' }}>
               {currentIndex === questions.length - 1
                 ? (lang === 'ar' ? 'إنهاء الاختبار' : 'Finish Quiz')
                 : (lang === 'ar' ? 'التالي' : 'Next')}

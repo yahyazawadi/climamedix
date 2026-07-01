@@ -213,10 +213,13 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
                       const optText = isRTL ? opt.option_text_ar : (opt.option_text_en || opt.option_text_ar);
                       const isCorrectOpt = opt.is_correct;
 
-                      // Only highlight correct answer if the user got this question right
+                      const wasSelected = result.selectedIds.includes(opt.id);
+
+                      // For correct questions: highlight what they selected (green)
+                      // For wrong questions: show everything plain (no hints)
                       let bg = 'transparent', border = 'rgba(11,40,73,0.08)', color = '#344054', icon = null, fw = '400';
 
-                      if (result.isCorrect && isCorrectOpt) {
+                      if (result.isCorrect && wasSelected) {
                         bg = 'rgba(21,180,122,0.08)'; border = '#15b47a'; color = '#0b5e38'; fw = '600';
                         icon = <span style={{ color: '#15b47a', fontWeight: 'bold', marginInlineStart: 'auto' }}>✓</span>;
                       }

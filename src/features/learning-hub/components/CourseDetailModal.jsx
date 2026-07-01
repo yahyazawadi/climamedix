@@ -19,6 +19,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
   const [quizData, setQuizData] = useState(null);
   const [quizMode, setQuizMode] = useState(false);
   const [quizPassed, setQuizPassed] = useState(false);
+  const [lastQuizScore, setLastQuizScore] = useState(null);
   const [collapsedModules, setCollapsedModules] = useState(new Set());
   const [linkCopied, setLinkCopied] = useState(false);
 
@@ -110,6 +111,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
 
   // ─── Quiz Completion ──────────────────────────────────────────────────────
   async function handleQuizFinished(score, passed, quizId) {
+    setLastQuizScore(score);
     // Persist the attempt
     try {
       await submitQuizAttempt(userId, quizId, score, passed);
@@ -495,20 +497,37 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                   {/* Action Bar */}
                   <div style={{ borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto' }}>
                     {isCurrentCompleted ? (
-                      <button 
-                        onClick={handleUnmarkComplete}
-                        title={lang === 'ar' ? 'اضغط للتراجع (غير مكتمل)' : 'Click to unmark as incomplete'}
-                        style={{ 
-                          background: 'none', border: 'none', cursor: 'pointer', padding: '8px 0',
-                          color: '#15b47a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14.5px',
-                          transition: 'opacity 0.2s ease'
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
-                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block' }}><polyline points="20 6 9 17 4 12"/></svg>
-                        {lang === 'ar' ? 'تم إتمام هذا الدرس بنجاح!' : 'Lesson completed!'}
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        {lastQuizScore !== null && (
+                          <div style={{
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            background: lastQuizScore >= (quizData?.passing_score ?? 80) ? 'rgba(21,180,122,0.1)' : 'rgba(255,77,77,0.1)',
+                            border: `1px solid ${lastQuizScore >= (quizData?.passing_score ?? 80) ? '#15b47a' : '#ff4d4d'}`,
+                            borderRadius: '10px', padding: '8px 16px'
+                          }}>
+                            <span style={{ fontSize: '20px', fontWeight: 'bold', color: lastQuizScore >= (quizData?.passing_score ?? 80) ? '#15b47a' : '#ff4d4d' }}>
+                              {lastQuizScore}%
+                            </span>
+                            <span style={{ fontSize: '12px', color: 'rgba(11,40,73,0.6)' }}>
+                              {lang === 'ar' ? 'درجتك' : 'Your Score'}
+                            </span>
+                          </div>
+                        )}
+                        <button 
+                          onClick={handleUnmarkComplete}
+                          title={lang === 'ar' ? 'اضغط للتراجع (غير مكتمل)' : 'Click to unmark as incomplete'}
+                          style={{ 
+                            background: 'none', border: 'none', cursor: 'pointer', padding: '8px 0',
+                            color: '#15b47a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14.5px',
+                            transition: 'opacity 0.2s ease'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block' }}><polyline points="20 6 9 17 4 12"/></svg>
+                          {lang === 'ar' ? 'تم إتمام هذا الدرس بنجاح!' : 'Lesson completed!'}
+                        </button>
+                      </div>
                     ) : quizData ? (
                       <Button variant="gradient" onClick={() => setQuizMode(true)} style={{ padding: '12px 28px', fontSize: '13.5px' }}>
                         {lang === 'ar' ? 'خوض اختبار الدرس لقفل التقدم' : 'Take Lesson Quiz'}

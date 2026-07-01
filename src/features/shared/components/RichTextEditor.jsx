@@ -97,6 +97,8 @@ export function RichTextEditor({
       '.ql-list[value="bullet"]': isRtl ? 'قائمة نقطية' : 'Bullet List',
       '.ql-align': isRtl ? 'محاذاة النص' : 'Text Alignment',
       '.ql-link': isRtl ? 'إدراج رابط (Ctrl+K)' : 'Insert Link (Ctrl+K)',
+      '.ql-image': isRtl ? 'إدراج صورة' : 'Insert Image',
+      '.ql-video': isRtl ? 'إدراج فيديو' : 'Insert Video',
       '.ql-media': isRtl ? 'إدراج وسائط (صورة/فيديو)' : 'Insert Media',
       '.ql-audio': isRtl ? 'إدراج ملف صوتي' : 'Insert Audio',
       '.ql-clean': isRtl ? 'مسح التنسيق' : 'Clear Formatting',
@@ -131,6 +133,46 @@ export function RichTextEditor({
       onUploadingMedia?.(false);
     }
   };
+
+  const imageHandler = useCallback(() => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (file) {
+        uploadAndInsertImage(file);
+      }
+    };
+  }, []);
+
+  const videoHandler = useCallback(() => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'video/*');
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (file) {
+        try {
+          onUploadingMedia?.(true);
+          const url = await uploadVideoToR2(file);
+          const quill = quillRef.current.getEditor();
+          const range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'video', url);
+          quill.setSelection(range.index + 1);
+        } catch (err) {
+          console.error("Failed to upload video:", err);
+          alert(isRtl ? "فشل رفع الفيديو." : "Failed to upload video.");
+        } finally {
+          onUploadingMedia?.(false);
+        }
+      }
+    };
+  }, []);
 
   const mediaHandler = useCallback(() => {
     const input = document.createElement('input');
@@ -196,10 +238,12 @@ export function RichTextEditor({
         [{ 'color': [] }, { 'background': [] }],
         [{ 'list': 'ordered'}, { 'list': 'bullet' }],
         [{ 'align': [] }],
-        ['link', 'media', 'audio'],
+        ['link', 'image', 'video', 'audio', 'media'],
         ['clean']
       ],
       handlers: {
+        image: imageHandler,
+        video: videoHandler,
         media: mediaHandler,
         audio: audioHandler
       }

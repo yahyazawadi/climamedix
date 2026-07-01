@@ -163,7 +163,6 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
             borderRadius: '20px', padding: '36px 28px', textAlign: 'center', color: '#fff',
             boxShadow: '0 8px 32px rgba(11,40,73,0.18)'
           }}>
-            <div style={{ fontSize: '48px', marginBottom: '12px' }}>{passed ? '🎉' : '📝'}</div>
             <div style={{ fontSize: '52px', fontWeight: '800', letterSpacing: '-2px', marginBottom: '4px' }}>
               {score}<span style={{ fontSize: '28px', fontWeight: '600', opacity: 0.8 }}>%</span>
             </div>
@@ -202,13 +201,6 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
                     background: result.isCorrect ? 'rgba(21,180,122,0.06)' : 'rgba(255,77,77,0.05)',
                     borderBottom: `1px solid ${result.isCorrect ? 'rgba(21,180,122,0.15)' : 'rgba(255,77,77,0.12)'}`
                   }}>
-                    <div style={{
-                      width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
-                      background: result.isCorrect ? '#15b47a' : '#ff4d4d',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px'
-                    }}>
-                      {result.isCorrect ? '✓' : '✕'}
-                    </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '11px', fontWeight: '700', color: result.isCorrect ? '#15b47a' : '#ff4d4d', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         {isRTL
@@ -260,7 +252,7 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
                     })}
                     {!result.isCorrect && (
                       <div style={{ fontSize: '12px', color: 'rgba(11,40,73,0.4)', marginTop: '4px', fontStyle: 'italic' }}>
-                        {isRTL ? '💡 راجع هذا السؤال مجدداً عند إعادة الاختبار' : '💡 Review this question when you retry'}
+                        {isRTL ? 'راجع هذا السؤال مجدداً عند إعادة الاختبار' : 'Review this question when you retry'}
                       </div>
                     )}
                   </div>

@@ -786,7 +786,6 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       {showLessonModal && (
         <div className="cb-modal-overlay">
           <GlassCard className="cb-modal-card cb-large-modal">
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid rgba(11,40,73,0.1)', paddingBottom: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid rgba(11,40,73,0.1)', paddingBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                 <h4 style={{ margin: 0 }}>{editingLesson ? (lang === 'ar' ? 'تعديل الدرس ومحتوياته' : 'Edit Lesson & Content') : (lang === 'ar' ? 'درس جديد' : 'New Lesson')}</h4>

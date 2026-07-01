@@ -2,7 +2,7 @@ import { useState, useEffect } from 'preact/hooks'
 import logo from '../../../assets/logo.svg'
 import { useAuth, ROLE_PERMISSIONS } from '../../auth/hooks/useAuth'
 import iconHome from '../../../assets/icon_home.svg'
-import iconContact from '../../../assets/icon_contact.svg'
+import iconNews from '../../../assets/icon_news.svg'
 import iconTraining from '../../../assets/icon_training.svg'
 import iconResearch from '../../../assets/icon_research.svg'
 import iconAbout from '../../../assets/icon_about.svg'
@@ -645,19 +645,18 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               </a>
             )}
 
-            {/* 6. اتصل بنا */}
+            {/* 6. الأخبار */}
             <a 
-              href="#contact" 
+              href="#news-blog" 
               onClick={(e) => {
                 e.preventDefault();
-                onNavigate('home', 'contact');
+                onNavigate('news-blog');
               }}
-              class={`figma-nav-item ${activeSection === 'contact' && currentView === 'home' ? 'active' : ''}`}
+              class={`figma-nav-item ${currentView === 'news-blog' || activeSection === 'news-blog' ? 'active' : ''}`}
             >
-              <img src={iconContact} class="figma-nav-icon" alt="اتصل بنا" />
-              <span class="figma-nav-text">{t.contact}</span>
+              <img src={iconNews} class="figma-nav-icon" alt="الأخبار" />
+              <span class="figma-nav-text">{t.newsBlog}</span>
             </a>
-
             {/* Join Us */}
             <a 
               href="#join-us" 

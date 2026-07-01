@@ -12,6 +12,7 @@ export const translations = {
     admin: 'لوحة التحكم',
     search: 'البحث...',
     language: 'اللغة',
+    newsBlog: 'الأخبار والمقالات',
     opportunitiesTitle: 'فرص التطوير والتمويل',
     opportunitiesSubtitle: 'استكشف الزمالات، المنح، المؤتمرات، والفرص التدريبية المتاحة لبناء قدراتك في مجال العمل المناخي والصحي',
 
@@ -170,6 +171,7 @@ export const translations = {
     admin: 'Admin Dashboard',
     search: 'Search...',
     language: 'Language',
+    newsBlog: 'News & Blog',
     opportunitiesTitle: 'Development & Funding Opportunities',
     opportunitiesSubtitle: 'Explore fellowships, scholarships, conferences, and training opportunities available to build your capacity in climate and health action',
 

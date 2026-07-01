@@ -138,7 +138,7 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar', rev
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       transition: 'all 0.15s'
                     }}>
-                      {isSel && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                      {isSel && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
                     </div>
                     <span style={{ fontSize: '14.5px', color: isSel ? '#0b2849' : '#344054', fontWeight: isSel ? '600' : '400' }}>
                       {optText}
@@ -150,17 +150,23 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar', rev
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <button onClick={() => setCurrentIndex(p => p - 1)} disabled={currentIndex === 0}
-                style={{ background: 'none', border: '1.5px solid rgba(11,40,73,0.15)', color: currentIndex === 0 ? 'rgba(11,40,73,0.2)' : '#0b2849', cursor: currentIndex === 0 ? 'default' : 'pointer', borderRadius: '8px', padding: '9px 20px', fontSize: '13px', fontWeight: '600', transition: 'all 0.15s' }}>
-                {isRTL ? '→ السابق' : '← Back'}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: '1.5px solid rgba(11,40,73,0.15)', color: currentIndex === 0 ? 'rgba(11,40,73,0.2)' : '#0b2849', cursor: currentIndex === 0 ? 'default' : 'pointer', borderRadius: '8px', padding: '9px 20px', fontSize: '13px', fontWeight: '600', transition: 'all 0.15s' }}>
+                {isRTL ? (
+                  <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg> السابق</>
+                ) : (
+                  <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg> Back</>
+                )}
               </button>
               <Button
                 onClick={handleNext}
                 disabled={!(selectedOptionIds[currentQuestion.id]?.length > 0)}
                 variant="gradient"
-                style={{ padding: '10px 28px', fontSize: '13.5px', borderRadius: '10px' }}>
-                {currentIndex === questions.length - 1
-                  ? (isRTL ? 'إنهاء الاختبار ✓' : 'Finish ✓')
-                  : (isRTL ? 'التالي ←' : 'Next →')}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 28px', fontSize: '13.5px', borderRadius: '10px' }}>
+                {currentIndex === questions.length - 1 ? (
+                  isRTL ? <>إنهاء الاختبار <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg></> : <>Finish <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg></>
+                ) : (
+                  isRTL ? <>التالي <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg></> : <>Next <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg></>
+                )}
               </Button>
             </div>
           </div>
@@ -184,7 +190,7 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar', rev
             <div style={{ fontSize: '16px', fontWeight: '600', opacity: 0.9, marginBottom: '16px' }}>
               {passed
                 ? (isRTL ? 'تهانينا، لقد اجتزت الاختبار!' : 'Congratulations, you passed!')
-                : (isRTL ? 'لم تتجاوز درجة الاجتياز بعد' : "You haven't reached the passing score yet")}
+                : (isRTL ? 'لم تتخطى درجة الاجتياز بعد' : "You haven't reached the passing score yet")}
             </div>
             {!reviewMode && (
               <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', fontSize: '13px', opacity: 0.75 }}>
@@ -264,8 +270,9 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar', rev
           {!reviewMode && (
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', paddingBottom: '8px' }}>
               {!passed && (
-                <Button variant="gradient" onClick={handleRetry} style={{ padding: '12px 28px', fontSize: '13.5px', borderRadius: '10px' }}>
-                  {isRTL ? '↺ إعادة المحاولة' : '↺ Try Again'}
+                <Button variant="gradient" onClick={handleRetry} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '12px 28px', fontSize: '13.5px', borderRadius: '10px' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-10.3l3.25 2.73" /></svg>
+                  {isRTL ? 'إعادة المحاولة' : 'Try Again'}
                 </Button>
               )}
               <button onClick={onClose} style={{

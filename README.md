@@ -163,6 +163,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
             *   When completing a quiz or opening a previously passed quiz, a full interactive review screen is displayed inline (no more generic hero cards).
             *   **Strict Highlighting Rules:** Only correct answers that the user *actually selected* are highlighted in green with a ✓.
             *   **No Spoilers/Hints:** Incorrectly selected answers, and correct answers that the user *missed*, are kept entirely plain (no red highlighting, no hints). This forces the student to figure out the right answer on their own during retries.
+        *   **Polished UI:** Refined SVG navigation icons and responsive layout for quiz interactions.
     *   [x] Progress Tracking & Completed Lesson Badges (Dynamic vertical stepper timeline connecting completed lessons with brand colors)
     *   [x] Toggle Lesson Status (Interactive completion badges that allow unmarking lessons to dynamically reset progress)
     *   [ ] Certificates

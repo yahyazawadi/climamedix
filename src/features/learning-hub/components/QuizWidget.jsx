@@ -237,12 +237,8 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar', rev
                         // Selected and correct → green
                         bg = 'rgba(21,180,122,0.08)'; border = '#15b47a'; color = '#0b5e38'; fw = '600';
                         icon = <span style={{ color: '#15b47a', fontWeight: 'bold', marginInlineStart: 'auto' }}>✓</span>;
-                      } else if (wasSelected && !isCorrectOpt) {
-                        // Selected but wrong → red
-                        bg = 'rgba(255,77,77,0.06)'; border = '#ff4d4d'; color = '#7a1a1a'; fw = '600';
-                        icon = <span style={{ color: '#ff4d4d', fontWeight: 'bold', marginInlineStart: 'auto' }}>✕</span>;
                       }
-                      // Not selected → plain (no hints)
+                      // Not selected, or selected but wrong → plain (no hints)
 
                       return (
                         <div key={opt.id} style={{

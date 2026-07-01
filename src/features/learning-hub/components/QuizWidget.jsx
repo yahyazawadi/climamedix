@@ -1,79 +1,53 @@
 import { useState } from 'preact/hooks';
 import { Button } from '../../shared/components/Button';
-import { GlassCard } from '../../shared/components/GlassCard';
 
-/**
- * QuizWidget — works with real Supabase quiz data.
- * 
- * @prop {object} quizData - Full quiz object from lmsService.fetchQuiz():
- *   { id, title_ar, title_en, passing_score, quiz_questions: [{ id, question_text_ar, question_text_en, points, quiz_options: [{ id, option_text_ar, option_text_en, is_correct }] }] }
- * @prop {function} onQuizFinished(score: number, passed: boolean, quizId: string)
- * @prop {function} onClose
- * @prop {string} lang - 'ar' | 'en'
- */
 export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedOptionIds, setSelectedOptionIds] = useState({}); // questionId -> [optionId1, optionId2]
+  const [selectedOptionIds, setSelectedOptionIds] = useState({});
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
   const [passed, setPassed] = useState(false);
+  const [questionResults, setQuestionResults] = useState([]); // [{question, selectedIds, isCorrect}]
 
   if (!quizData || !quizData.quiz_questions || quizData.quiz_questions.length === 0) return null;
 
   const questions = quizData.quiz_questions;
   const currentQuestion = questions[currentIndex];
   const passingScore = quizData.passing_score ?? 80;
+  const isRTL = lang === 'ar';
 
   const handleSelectOption = (optionId) => {
     setSelectedOptionIds(prev => {
-      const currentSelected = prev[currentQuestion.id] || [];
-      if (currentSelected.includes(optionId)) {
-        return { ...prev, [currentQuestion.id]: currentSelected.filter(id => id !== optionId) };
-      } else {
-        return { ...prev, [currentQuestion.id]: [...currentSelected, optionId] };
-      }
+      const cur = prev[currentQuestion.id] || [];
+      return cur.includes(optionId)
+        ? { ...prev, [currentQuestion.id]: cur.filter(id => id !== optionId) }
+        : { ...prev, [currentQuestion.id]: [...cur, optionId] };
     });
   };
 
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
-      setCurrentIndex(prev => prev + 1);
+      setCurrentIndex(p => p + 1);
     } else {
-      // Calculate score
-      let totalPoints = 0;
-      let earnedPoints = 0;
-
-      questions.forEach(q => {
+      let totalPoints = 0, earnedPoints = 0;
+      const results = questions.map(q => {
         const pts = q.points ?? 1;
         totalPoints += pts;
         const selectedIds = selectedOptionIds[q.id] || [];
-        const correctOptions = (q.quiz_options || []).filter(o => o.is_correct).map(o => o.id);
-        
-        // Exact match of arrays (regardless of order)
-        const isExactlyCorrect = 
-          selectedIds.length === correctOptions.length && 
-          selectedIds.every(id => correctOptions.includes(id));
-
-        if (isExactlyCorrect) {
-          earnedPoints += pts;
-        }
+        const correctIds = (q.quiz_options || []).filter(o => o.is_correct).map(o => o.id);
+        const isCorrect = selectedIds.length === correctIds.length && selectedIds.every(id => correctIds.includes(id));
+        if (isCorrect) earnedPoints += pts;
+        return { question: q, selectedIds, isCorrect };
       });
 
       const finalScore = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
       const didPass = finalScore >= passingScore;
-
       setScore(finalScore);
       setPassed(didPass);
+      setQuestionResults(results);
       setShowResults(true);
-
-      if (onQuizFinished) {
-        onQuizFinished(finalScore, didPass, quizData.id);
-      }
+      if (onQuizFinished) onQuizFinished(finalScore, didPass, quizData.id);
     }
-  };
-
-  const handleBack = () => {
-    if (currentIndex > 0) setCurrentIndex(prev => prev - 1);
   };
 
   const handleRetry = () => {
@@ -82,118 +56,235 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
     setShowResults(false);
     setScore(0);
     setPassed(false);
+    setQuestionResults([]);
   };
 
-  const quizTitle = lang === 'ar' ? quizData.title_ar : (quizData.title_en || quizData.title_ar);
-  const questionText = lang === 'ar'
+  const quizTitle = isRTL ? quizData.title_ar : (quizData.title_en || quizData.title_ar);
+  const questionText = isRTL
     ? currentQuestion.question_text_ar
     : (currentQuestion.question_text_en || currentQuestion.question_text_ar);
+  const progressPct = ((currentIndex + 1) / questions.length) * 100;
+
+  const correctCount = questionResults.filter(r => r.isCorrect).length;
 
   return (
-    <GlassCard style={{ padding: '30px', maxWidth: '620px', width: '100%', margin: '0 auto', direction: lang === 'ar' ? 'rtl' : 'ltr', textAlign: lang === 'ar' ? 'right' : 'left' }}>
-
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(11,40,73,0.1)', paddingBottom: '14px', marginBottom: '22px' }}>
-        <h4 style={{ color: '#0b2849', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>
-          {quizTitle || (lang === 'ar' ? 'اختبار تقييم الدرس' : 'Lesson Quiz')}
-        </h4>
-        {onClose && (
-          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#ff4d4d', lineHeight: 1 }}>✕</button>
-        )}
-      </div>
-
+    <div style={{
+      width: '100%', maxWidth: '680px', margin: '0 auto',
+      direction: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left',
+      fontFamily: "'Inter', sans-serif"
+    }}>
       {!showResults ? (
-        <div>
-          {/* Progress */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'rgba(11,40,73,0.5)', marginBottom: '8px' }}>
-            <span>{lang === 'ar' ? `السؤال ${currentIndex + 1} من ${questions.length}` : `Question ${currentIndex + 1} of ${questions.length}`}</span>
-            <span>{lang === 'ar' ? `درجة الاجتياز: ${passingScore}%` : `Passing score: ${passingScore}%`}</span>
-          </div>
-          <div style={{ width: '100%', height: '4px', background: 'rgba(11,40,73,0.08)', borderRadius: '2px', marginBottom: '24px', overflow: 'hidden' }}>
-            <div style={{ width: `${((currentIndex + 1) / questions.length) * 100}%`, height: '100%', background: '#004c6d', borderRadius: '2px', transition: 'width 0.25s' }} />
+        /* ─── QUESTION VIEW ─────────────────────────────────────── */
+        <div style={{ background: '#ffffff', borderRadius: '20px', boxShadow: '0 4px 32px rgba(11,40,73,0.10)', overflow: 'hidden' }}>
+
+          {/* Top bar */}
+          <div style={{ background: 'linear-gradient(135deg, #0b2849 0%, #004c6d 100%)', padding: '20px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginBottom: '2px', fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                {quizTitle || (isRTL ? 'اختبار' : 'Quiz')}
+              </div>
+              <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)' }}>
+                {isRTL ? `السؤال ${currentIndex + 1} من ${questions.length}` : `Question ${currentIndex + 1} of ${questions.length}`}
+              </div>
+            </div>
+            {onClose && (
+              <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+            )}
           </div>
 
-          {/* Question */}
-          <h3 style={{ color: '#0b2849', fontSize: '17px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.5' }}>
-            {questionText}
-          </h3>
+          {/* Progress bar */}
+          <div style={{ height: '4px', background: 'rgba(11,40,73,0.08)' }}>
+            <div style={{ width: `${progressPct}%`, height: '100%', background: 'linear-gradient(90deg, #15b47a, #004c6d)', transition: 'width 0.35s ease' }} />
+          </div>
 
-          {/* Options */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
-            {(currentQuestion.quiz_options || []).map((opt) => {
-              const optText = lang === 'ar' ? opt.option_text_ar : (opt.option_text_en || opt.option_text_ar);
-              const isSelected = (selectedOptionIds[currentQuestion.id] || []).includes(opt.id);
-              return (
-                <div
-                  key={opt.id}
-                  onClick={() => handleSelectOption(opt.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    background: isSelected ? 'rgba(0,76,109,0.08)' : 'rgba(255,255,255,0.6)',
-                    border: isSelected ? '2.5px solid #004c6d' : '1px solid rgba(11,40,73,0.13)',
-                    borderRadius: '12px', padding: '15px 18px', cursor: 'pointer',
-                    fontSize: '14px', color: '#0b2849',
-                    fontWeight: isSelected ? 'bold' : 'normal',
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  <div style={{ width: '18px', height: '18px', borderRadius: '4px', border: isSelected ? 'none' : '1.5px solid rgba(11,40,73,0.3)', background: isSelected ? '#004c6d' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {isSelected && <span style={{ color: 'white', fontSize: '12px' }}>✓</span>}
+          {/* Question body */}
+          <div style={{ padding: '32px 28px' }}>
+            <h3 style={{ color: '#0b2849', fontSize: '18px', fontWeight: '700', marginBottom: '24px', lineHeight: '1.6', margin: '0 0 28px 0' }}>
+              {questionText}
+            </h3>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px' }}>
+              {(currentQuestion.quiz_options || []).map((opt) => {
+                const optText = isRTL ? opt.option_text_ar : (opt.option_text_en || opt.option_text_ar);
+                const isSel = (selectedOptionIds[currentQuestion.id] || []).includes(opt.id);
+                return (
+                  <div key={opt.id} onClick={() => handleSelectOption(opt.id)} style={{
+                    display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer',
+                    padding: '14px 18px', borderRadius: '12px',
+                    background: isSel ? 'rgba(0,76,109,0.07)' : '#f8fafc',
+                    border: `2px solid ${isSel ? '#004c6d' : 'rgba(11,40,73,0.1)'}`,
+                    transition: 'all 0.15s ease',
+                    userSelect: 'none',
+                  }}>
+                    <div style={{
+                      width: '20px', height: '20px', borderRadius: '5px', flexShrink: 0,
+                      border: `2px solid ${isSel ? '#004c6d' : 'rgba(11,40,73,0.25)'}`,
+                      background: isSel ? '#004c6d' : 'transparent',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      transition: 'all 0.15s'
+                    }}>
+                      {isSel && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                    </div>
+                    <span style={{ fontSize: '14.5px', color: isSel ? '#0b2849' : '#344054', fontWeight: isSel ? '600' : '400' }}>
+                      {optText}
+                    </span>
                   </div>
-                  {optText}
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button onClick={() => setCurrentIndex(p => p - 1)} disabled={currentIndex === 0}
+                style={{ background: 'none', border: '1.5px solid rgba(11,40,73,0.15)', color: currentIndex === 0 ? 'rgba(11,40,73,0.2)' : '#0b2849', cursor: currentIndex === 0 ? 'default' : 'pointer', borderRadius: '8px', padding: '9px 20px', fontSize: '13px', fontWeight: '600', transition: 'all 0.15s' }}>
+                {isRTL ? '→ السابق' : '← Back'}
+              </button>
+              <Button
+                onClick={handleNext}
+                disabled={!(selectedOptionIds[currentQuestion.id]?.length > 0)}
+                variant="gradient"
+                style={{ padding: '10px 28px', fontSize: '13.5px', borderRadius: '10px' }}>
+                {currentIndex === questions.length - 1
+                  ? (isRTL ? 'إنهاء الاختبار ✓' : 'Finish ✓')
+                  : (isRTL ? 'التالي ←' : 'Next →')}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+      ) : (
+        /* ─── RESULTS VIEW ──────────────────────────────────────── */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+          {/* Score hero card */}
+          <div style={{
+            background: passed
+              ? 'linear-gradient(135deg, #0b2849 0%, #005f3c 100%)'
+              : 'linear-gradient(135deg, #0b2849 0%, #6b1a1a 100%)',
+            borderRadius: '20px', padding: '36px 28px', textAlign: 'center', color: '#fff',
+            boxShadow: '0 8px 32px rgba(11,40,73,0.18)'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '12px' }}>{passed ? '🎉' : '📝'}</div>
+            <div style={{ fontSize: '52px', fontWeight: '800', letterSpacing: '-2px', marginBottom: '4px' }}>
+              {score}<span style={{ fontSize: '28px', fontWeight: '600', opacity: 0.8 }}>%</span>
+            </div>
+            <div style={{ fontSize: '16px', fontWeight: '600', opacity: 0.9, marginBottom: '16px' }}>
+              {passed
+                ? (isRTL ? 'تهانينا، لقد اجتزت الاختبار!' : 'Congratulations, you passed!')
+                : (isRTL ? 'لم تتجاوز درجة الاجتياز بعد' : "You haven't reached the passing score yet")}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', fontSize: '13px', opacity: 0.75 }}>
+              <span>{isRTL ? `${correctCount} إجابة صحيحة` : `${correctCount} correct`}</span>
+              <span>·</span>
+              <span>{isRTL ? `${questions.length - correctCount} إجابة خاطئة` : `${questions.length - correctCount} wrong`}</span>
+              <span>·</span>
+              <span>{isRTL ? `الحد الأدنى: ${passingScore}%` : `Pass: ${passingScore}%`}</span>
+            </div>
+          </div>
+
+          {/* Question review */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {questionResults.map((result, i) => {
+              const q = result.question;
+              const qText = isRTL ? q.question_text_ar : (q.question_text_en || q.question_text_ar);
+              const correctIds = (q.quiz_options || []).filter(o => o.is_correct).map(o => o.id);
+
+              return (
+                <div key={q.id} style={{
+                  background: '#fff', borderRadius: '16px',
+                  border: `1.5px solid ${result.isCorrect ? 'rgba(21,180,122,0.3)' : 'rgba(255,77,77,0.2)'}`,
+                  overflow: 'hidden',
+                  boxShadow: '0 2px 12px rgba(11,40,73,0.06)'
+                }}>
+                  {/* Q header */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: '14px 18px',
+                    background: result.isCorrect ? 'rgba(21,180,122,0.06)' : 'rgba(255,77,77,0.05)',
+                    borderBottom: `1px solid ${result.isCorrect ? 'rgba(21,180,122,0.15)' : 'rgba(255,77,77,0.12)'}`
+                  }}>
+                    <div style={{
+                      width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
+                      background: result.isCorrect ? '#15b47a' : '#ff4d4d',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px'
+                    }}>
+                      {result.isCorrect ? '✓' : '✕'}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '11px', fontWeight: '700', color: result.isCorrect ? '#15b47a' : '#ff4d4d', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {isRTL
+                          ? (result.isCorrect ? `سؤال ${i + 1} — إجابة صحيحة` : `سؤال ${i + 1} — إجابة خاطئة`)
+                          : (result.isCorrect ? `Q${i + 1} — Correct` : `Q${i + 1} — Wrong`)}
+                      </div>
+                      <div style={{ fontSize: '14px', color: '#0b2849', fontWeight: '600', marginTop: '2px' }}>{qText}</div>
+                    </div>
+                  </div>
+
+                  {/* Options review */}
+                  <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {(q.quiz_options || []).map(opt => {
+                      const optText = isRTL ? opt.option_text_ar : (opt.option_text_en || opt.option_text_ar);
+                      const wasSelected = result.selectedIds.includes(opt.id);
+                      const isCorrectOpt = opt.is_correct;
+
+                      let bg = 'transparent', border = 'rgba(11,40,73,0.08)', color = '#344054', icon = null;
+
+                      if (result.isCorrect) {
+                        // Show correct: green for correct options, muted for rest
+                        if (isCorrectOpt) {
+                          bg = 'rgba(21,180,122,0.08)'; border = '#15b47a'; color = '#0b5e38';
+                          icon = <span style={{ color: '#15b47a', fontWeight: 'bold', marginInlineStart: 'auto' }}>✓</span>;
+                        }
+                      } else {
+                        // Show wrong: red for their wrong selection, no reveal of correct
+                        if (wasSelected && !isCorrectOpt) {
+                          bg = 'rgba(255,77,77,0.07)'; border = '#ff4d4d'; color = '#7a1a1a';
+                          icon = <span style={{ color: '#ff4d4d', fontWeight: 'bold', marginInlineStart: 'auto' }}>✕</span>;
+                        } else if (wasSelected && isCorrectOpt) {
+                          // They picked a correct one but missed others — show as neutral selected
+                          bg = 'rgba(0,76,109,0.06)'; border = '#004c6d'; color = '#0b2849';
+                          icon = <span style={{ color: '#004c6d', fontWeight: 'bold', marginInlineStart: 'auto' }}>✓</span>;
+                        }
+                      }
+
+                      return (
+                        <div key={opt.id} style={{
+                          display: 'flex', alignItems: 'center', gap: '10px',
+                          padding: '10px 14px', borderRadius: '8px',
+                          background: bg, border: `1.5px solid ${border}`,
+                          fontSize: '13.5px', color, fontWeight: wasSelected ? '600' : '400'
+                        }}>
+                          <span style={{ flex: 1 }}>{optText}</span>
+                          {icon}
+                        </div>
+                      );
+                    })}
+                    {!result.isCorrect && (
+                      <div style={{ fontSize: '12px', color: 'rgba(11,40,73,0.4)', marginTop: '4px', fontStyle: 'italic' }}>
+                        {isRTL ? '💡 راجع هذا السؤال مجدداً عند إعادة الاختبار' : '💡 Review this question when you retry'}
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Nav */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <button onClick={handleBack} disabled={currentIndex === 0} style={{ background: 'none', border: 'none', color: currentIndex === 0 ? 'rgba(11,40,73,0.25)' : '#004c6d', cursor: currentIndex === 0 ? 'default' : 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
-              {lang === 'ar' ? 'السابق' : 'Back'}
-            </button>
-            <Button onClick={handleNext} disabled={!(selectedOptionIds[currentQuestion.id] && selectedOptionIds[currentQuestion.id].length > 0)} variant="gradient" style={{ padding: '9px 26px', fontSize: '13.5px' }}>
-              {currentIndex === questions.length - 1
-                ? (lang === 'ar' ? 'إنهاء الاختبار' : 'Finish Quiz')
-                : (lang === 'ar' ? 'التالي' : 'Next')}
-            </Button>
-          </div>
-        </div>
-      ) : (
-        /* Results */
-        <div style={{ textAlign: 'center', padding: '20px 0' }}>
-          <div style={{ fontSize: '52px', marginBottom: '16px' }}>{passed ? '🎉' : '⚠️'}</div>
-          <h3 style={{ color: '#0b2849', fontSize: '20px', fontWeight: 'bold', marginBottom: '10px' }}>
-            {passed
-              ? (lang === 'ar' ? 'تهانينا! لقد اجتزت الاختبار' : 'Congratulations! You passed!')
-              : (lang === 'ar' ? 'لم تتجاوز الحد الأدنى للاجتياز' : 'You did not reach the passing score')}
-          </h3>
-          <p style={{ color: 'rgba(11,40,73,0.6)', fontSize: '14px', margin: '0 0 8px 0' }}>
-            {lang === 'ar' ? 'درجتك:' : 'Your score:'}{' '}
-            <strong style={{ color: passed ? '#15b47a' : '#ff4d4d', fontSize: '22px' }}>{score}%</strong>
-          </p>
-          <p style={{ color: 'rgba(11,40,73,0.45)', fontSize: '13px', marginBottom: '28px' }}>
-            {lang === 'ar' ? `الحد الأدنى للاجتياز: ${passingScore}%` : `Passing score: ${passingScore}%`}
-          </p>
-          {passed && (
-            <p style={{ fontSize: '13px', color: '#15b47a', marginBottom: '24px', fontWeight: 'bold' }}>
-              {lang === 'ar' ? '✓ تم تسجيل إتمام هذا الدرس وتحديث تقدمك التعليمي.' : '✓ Lesson completion has been recorded.'}
-            </p>
-          )}
-
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          {/* Action buttons */}
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', paddingBottom: '8px' }}>
             {!passed && (
-              <Button variant="gradient" onClick={handleRetry} style={{ padding: '10px 24px', fontSize: '13px' }}>
-                {lang === 'ar' ? 'إعادة المحاولة' : 'Try Again'}
+              <Button variant="gradient" onClick={handleRetry} style={{ padding: '12px 28px', fontSize: '13.5px', borderRadius: '10px' }}>
+                {isRTL ? '↺ إعادة المحاولة' : '↺ Try Again'}
               </Button>
             )}
-            <Button variant="outline" onClick={onClose} style={{ padding: '10px 24px', fontSize: '13px', borderColor: '#004c6d', color: '#004c6d' }}>
-              {lang === 'ar' ? 'إغلاق' : 'Close'}
-            </Button>
+            <button onClick={onClose} style={{
+              padding: '12px 28px', fontSize: '13.5px', borderRadius: '10px', cursor: 'pointer',
+              background: 'transparent', border: '1.5px solid rgba(11,40,73,0.2)', color: '#0b2849', fontWeight: '600'
+            }}>
+              {isRTL ? 'إغلاق' : 'Close'}
+            </button>
           </div>
         </div>
       )}
-    </GlassCard>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from 'preact/hooks';
+import { useRef, useCallback, useEffect, useState } from 'preact/hooks';
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { uploadFileToR2 } from '../../../utils/s3Client';
@@ -79,6 +79,7 @@ export function RichTextEditor({
   onUploadingMedia,
   imageBucketFolder = 'editor_images' 
 }) {
+  const [isUploading, setIsUploading] = useState(false);
   const quillRef = useRef(null);
 
   // Add tooltips to Quill toolbar
@@ -117,6 +118,7 @@ export function RichTextEditor({
 
   const uploadAndInsertImage = async (file) => {
     try {
+      setIsUploading(true);
       onUploadingMedia?.(true);
       const webpFile = await convertToWebP(file);
       const url = await uploadFileToR2(webpFile, imageBucketFolder);
@@ -129,6 +131,7 @@ export function RichTextEditor({
       console.error("Failed to upload image:", err);
       alert(isRtl ? "فشل رفع الصورة." : "Failed to upload image.");
     } finally {
+      setIsUploading(false);
       onUploadingMedia?.(false);
     }
   };
@@ -157,6 +160,7 @@ export function RichTextEditor({
       const file = input.files[0];
       if (file) {
         try {
+          setIsUploading(true);
           onUploadingMedia?.(true);
           const url = await uploadFileToR2(file, 'videos');
           const quill = quillRef.current.getEditor();
@@ -186,6 +190,7 @@ export function RichTextEditor({
           uploadAndInsertImage(file);
         } else if (file.type.startsWith('video/')) {
           try {
+            setIsUploading(true);
             onUploadingMedia?.(true);
             const url = await uploadFileToR2(file, 'videos');
             const quill = quillRef.current.getEditor();
@@ -196,6 +201,7 @@ export function RichTextEditor({
             console.error("Failed to upload video:", err);
             alert(isRtl ? "فشل رفع الفيديو." : "Failed to upload video.");
           } finally {
+            setIsUploading(false);
             onUploadingMedia?.(false);
           }
         }
@@ -213,8 +219,9 @@ export function RichTextEditor({
       const file = input.files[0];
       if (file) {
         try {
+          setIsUploading(true);
           onUploadingMedia?.(true);
-          const url = await uploadFileToR2(file, 'course_audio'); // Upload audio file
+          const url = await uploadFileToR2(file, 'course_audio');
           const quill = quillRef.current.getEditor();
           const range = quill.getSelection(true);
           quill.insertEmbed(range.index, 'audio', url);
@@ -223,6 +230,7 @@ export function RichTextEditor({
           console.error("Failed to upload audio:", err);
           alert(isRtl ? "فشل رفع الملف الصوتي." : "Failed to upload audio.");
         } finally {
+          setIsUploading(false);
           onUploadingMedia?.(false);
         }
       }
@@ -262,7 +270,37 @@ export function RichTextEditor({
   }, []);
 
   return (
-    <div className="custom-quill-wrapper">
+    <div className="custom-quill-wrapper" style={{ position: 'relative' }}>
+      {isUploading && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(255,255,255,0.85)',
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(3px)',
+          borderBottomLeftRadius: '10px',
+          borderBottomRightRadius: '10px'
+        }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid rgba(21, 180, 122, 0.2)',
+            borderTopColor: '#15b47a',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }}></div>
+          <p style={{ marginTop: '12px', fontWeight: 'bold', color: '#0b2849' }}>
+            {isRtl ? 'جاري رفع الملف...' : 'Uploading Media...'}
+          </p>
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+          `}} />
+        </div>
+      )}
       <ReactQuill 
         ref={quillRef}
         theme="snow" 

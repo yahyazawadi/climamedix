@@ -111,6 +111,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
   const [uploadProgress, setUploadProgress] = useState(null);
   const [uploadError, setUploadError] = useState('');
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
 
   // Quiz Builder State (attached to active editing lesson or loaded on demand)
   const [quiz, setQuiz] = useState(null);
@@ -835,6 +836,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                           onChange={val => setLessonForm({...lessonForm, content_ar: val})} 
                           isRtl={true} 
                           placeholder="ابدأ بكتابة الدرس أو إدراج وسائط..."
+                          onUploadingMedia={setIsUploadingMedia}
                         />
                       </div>
                     </>
@@ -853,6 +855,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                           onChange={val => setLessonForm({...lessonForm, content_en: val})} 
                           isRtl={false} 
                           placeholder="Start writing the lesson or insert media..."
+                          onUploadingMedia={setIsUploadingMedia}
                         />
                       </div>
                     </>
@@ -870,7 +873,9 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
 
                   <div className="cb-form-actions">
                     <Button type="button" variant="outline" onClick={() => setShowLessonModal(false)}>{lang === 'ar' ? 'إلغاء' : 'Cancel'}</Button>
-                    <Button type="submit" variant="gradient">{lang === 'ar' ? 'حفظ الدرس' : 'Save Lesson'}</Button>
+                    <Button type="submit" variant="gradient" disabled={isUploadingMedia}>
+                      {isUploadingMedia ? (lang === 'ar' ? 'جاري الرفع...' : 'Uploading...') : (lang === 'ar' ? 'حفظ الدرس' : 'Save Lesson')}
+                    </Button>
                   </div>
                 </form>
               </div>

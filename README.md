@@ -129,7 +129,8 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [x] **Learning Management System (LMS) Features:**
     *   [x] Course Categories (Training Courses Carousel)
     *   [x] Premium Custom Video Lessons Player (Decoupled modular architecture with a sleek Neon Glowing central play button, timeline scrubbing, fullscreen support, and professional SVGs)
-    *   [x] High-Tech Control Sliders (Interactive volume and speed slider popups featuring click-toggle functionality, centered metrics with fixed widths to prevent UI shifting)
+    *   [x] Premium Custom Audio Player (Consistent dark-themed UI matching the video player, automatic waveform generation, and synchronized interactive UX)
+    *   [x] High-Tech Control Sliders (Interactive volume and speed slider popups on both media players with expanded hitboxes, click-toggle mute functionality, and double-click speed reset)
     *   [x] Playback Speed Tuning (Precise speed range adjustment from 0.5x to 2.0x in 0.1 increments)
     *   [x] Advanced Player Tools (Picture-in-Picture Miniplayer support, "Copy Frame" screenshot functionality with Cloudflare R2 CORS integration, hover tooltips)
     *   [x] Course Builder Drag & Drop (Interactive lesson reordering within modules, across modules, and module-level reordering)
@@ -188,8 +189,8 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 
 ### 11. 🛡️ Admin Panel
 *   [ ] **Admin Dashboards:**
-    *   [ ] Create/Edit/Delete Courses
-    *   [ ] Upload Videos & Resources
+    *   [x] Create/Edit/Delete Courses
+    *   [x] Upload Videos, Audio & Resources (Multi-file batch uploads with real-time byte-level progress tracking directly to Cloudflare R2 via intercepting Rich Text Editors)
     *   [x] Manage Users & Certificates (Completed: Role & Permission Assignment)
     *   [x] Publish Opportunities, Events, and News (Completed via in-page authorized modals)
     *   [x] View Analytics (Completed: User Stats Dashboard with Interactive Charts)

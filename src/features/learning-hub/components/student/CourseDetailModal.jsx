@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { Button } from '../../../shared/components/Button';
 import { QuizWidget } from '../quizzes/QuizWidget';
 import { RichTextRenderer } from '../../../shared/components/RichTextRenderer';
+import { LMSParticles } from '../LMSParticles';
 import {
   fetchCourseSyllabus,
   fetchCompletedLessons,
@@ -237,10 +238,12 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
       overflow: 'hidden'
     }}>
       <div style={{
-        background: '#ffffff',
+        background: 'transparent',
         width: '100%', height: '100%',
         display: 'flex', flexDirection: 'column',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative',
+        zIndex: 1
       }}>
 
         {/* Header */}
@@ -436,9 +439,12 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
             </div>
             )}
 
-            {/* Main Content Panel */}
-            <div style={{ flexGrow: 1, overflowY: 'auto', padding: '40px' }}>
-              {isLocked ? (
+            {/* Main Content Panel Wrapper */}
+            <div style={{ flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
+              <LMSParticles />
+              {/* Main Content Panel */}
+              <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '40px', zIndex: 1 }}>
+                {isLocked ? (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
                   {course.cover_image ? (
                     <img src={course.cover_image} alt={course.title_en || course.title_ar} style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '20px', marginBottom: '32px', boxShadow: '0 16px 40px rgba(0,76,109,0.15)' }} />
@@ -482,20 +488,30 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                   onClose={() => setQuizMode(false)}
                 />
               ) : activeLesson ? (
-                <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '1000px', margin: '0 auto' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '100%', margin: '0 auto' }}>
                   <h3 style={{ color: '#0b2849', fontSize: '22px', fontWeight: 'bold', marginBottom: '24px', lineHeight: '1.4' }}>
                     {lessonTitle}
                   </h3>
 
                   {/* Unified Rich Text Content (Contains Native Audio/Video) */}
                   {lessonContent && (
-                    <div style={{ color: 'rgba(11,40,73,0.8)', fontSize: '16px', lineHeight: '1.9', marginBottom: '32px', flexGrow: 1 }}>
+                    <div style={{ 
+                      background: '#ffffff',
+                      padding: '40px',
+                      borderRadius: '16px',
+                      boxShadow: '0 4px 24px rgba(11,40,73,0.04)',
+                      color: 'rgba(11,40,73,0.8)', 
+                      fontSize: '16px', 
+                      lineHeight: '1.9', 
+                      marginBottom: '32px', 
+                      flexGrow: 1 
+                    }}>
                       <RichTextRenderer html={lessonContent} lang={lang} />
                     </div>
                   )}
 
-                  {/* Display Result Hero if Quiz is Passed */}
-                  {quizData && lastQuizScore !== null && isCurrentCompleted && (
+                  {/* Display Result Hero if Quiz is Passed or Attempted */}
+                  {quizData && lastQuizScore !== null && (
                     <div style={{ marginTop: '20px', flexGrow: 1 }}>
                       <QuizWidget
                         lang={lang}
@@ -509,7 +525,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                   )}
 
                   {/* Action Bar */}
-                  <div style={{ borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto' }}>
+                  <div style={{ borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '24px', paddingBottom: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto' }}>
                     {isCurrentCompleted ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         {lastQuizScore !== null && (
@@ -545,11 +561,13 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                         </button>
                       </div>
                     ) : quizData ? (
-                      <Button variant="gradient" onClick={() => setQuizMode(true)} style={{ padding: '12px 28px', fontSize: '13.5px' }}>
-                        {lang === 'ar' ? 'خوض اختبار الدرس لقفل التقدم' : 'Take Lesson Quiz'}
+                      <Button variant="gradient" onClick={() => setQuizMode(true)}>
+                        {lastQuizScore !== null
+                          ? (lang === 'ar' ? 'إعادة خوض الاختبار' : 'Retake Quiz')
+                          : (lang === 'ar' ? 'خوض اختبار الدرس لقفل التقدم' : 'Take Lesson Quiz')}
                       </Button>
                     ) : (
-                      <Button variant="gradient" onClick={handleMarkComplete} style={{ padding: '12px 28px', fontSize: '13.5px' }}>
+                      <Button variant="gradient" onClick={handleMarkComplete}>
                         {lang === 'ar' ? 'تحديد الدرس كمكتمل' : 'Mark as Complete'}
                       </Button>
                     )}
@@ -562,9 +580,10 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
               )}
             </div>
           </div>
+        </div>
         )}
       </div>
-      </div>
+    </div>
     </>
   );
 }

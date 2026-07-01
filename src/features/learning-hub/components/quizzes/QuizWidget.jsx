@@ -84,7 +84,7 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar', rev
 
   return (
     <div style={{
-      width: '100%', maxWidth: '680px', margin: '0 auto',
+      width: '100%', maxWidth: '100%', margin: '0 auto',
       direction: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left',
       fontFamily: "'Inter', sans-serif"
     }}>
@@ -197,66 +197,68 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar', rev
             )}
           </div>
 
-          {/* Question review — all questions */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {questionResults.map((result, i) => {
-              const q = result.question;
-              const qText = isRTL ? q.question_text_ar : (q.question_text_en || q.question_text_ar);
+          {/* Question review — all questions (only show if passed or just finished) */}
+          {(!reviewMode || passed) && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {questionResults.map((result, i) => {
+                const q = result.question;
+                const qText = isRTL ? q.question_text_ar : (q.question_text_en || q.question_text_ar);
 
-              return (
-                <div key={q.id} style={{
-                  background: '#fff', borderRadius: '16px',
-                  border: `1.5px solid ${result.isCorrect ? 'rgba(21,180,122,0.3)' : 'rgba(11,40,73,0.1)'}`,
-                  overflow: 'hidden',
-                  boxShadow: '0 2px 12px rgba(11,40,73,0.06)'
-                }}>
-                  {/* Q header */}
-                  <div style={{
-                    padding: '14px 18px',
-                    background: result.isCorrect ? 'rgba(21,180,122,0.06)' : 'rgba(11,40,73,0.02)',
-                    borderBottom: `1px solid ${result.isCorrect ? 'rgba(21,180,122,0.15)' : 'rgba(11,40,73,0.07)'}`
+                return (
+                  <div key={q.id} style={{
+                    background: '#fff', borderRadius: '16px',
+                    border: `1.5px solid ${result.isCorrect ? 'rgba(21,180,122,0.3)' : 'rgba(11,40,73,0.1)'}`,
+                    overflow: 'hidden',
+                    boxShadow: '0 2px 12px rgba(11,40,73,0.06)'
                   }}>
-                    <div style={{ fontSize: '11px', fontWeight: '700', color: result.isCorrect ? '#15b47a' : 'rgba(11,40,73,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                      {isRTL
-                        ? (result.isCorrect ? `سؤال ${i + 1} — إجابة صحيحة` : `سؤال ${i + 1}`)
-                        : (result.isCorrect ? `Q${i + 1} — Correct` : `Q${i + 1}`)}
+                    {/* Q header */}
+                    <div style={{
+                      padding: '14px 18px',
+                      background: result.isCorrect ? 'rgba(21,180,122,0.06)' : 'rgba(11,40,73,0.02)',
+                      borderBottom: `1px solid ${result.isCorrect ? 'rgba(21,180,122,0.15)' : 'rgba(11,40,73,0.07)'}`
+                    }}>
+                      <div style={{ fontSize: '11px', fontWeight: '700', color: result.isCorrect ? '#15b47a' : 'rgba(11,40,73,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {isRTL
+                          ? (result.isCorrect ? `سؤال ${i + 1} — إجابة صحيحة` : `سؤال ${i + 1}`)
+                          : (result.isCorrect ? `Q${i + 1} — Correct` : `Q${i + 1}`)}
+                      </div>
+                      <div style={{ fontSize: '14px', color: '#0b2849', fontWeight: '600', marginTop: '2px' }}>{qText}</div>
                     </div>
-                    <div style={{ fontSize: '14px', color: '#0b2849', fontWeight: '600', marginTop: '2px' }}>{qText}</div>
+
+                    {/* Options review */}
+                    <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {(q.quiz_options || []).map(opt => {
+                        const optText = isRTL ? opt.option_text_ar : (opt.option_text_en || opt.option_text_ar);
+                        const wasSelected = result.selectedIds.includes(opt.id);
+                        const isCorrectOpt = opt.is_correct;
+
+                        let bg = 'transparent', border = 'rgba(11,40,73,0.08)', color = '#344054', icon = null, fw = '400';
+
+                        if (wasSelected && isCorrectOpt) {
+                          // Selected and correct → green
+                          bg = 'rgba(21,180,122,0.08)'; border = '#15b47a'; color = '#0b5e38'; fw = '600';
+                          icon = <span style={{ color: '#15b47a', fontWeight: 'bold', marginInlineStart: 'auto' }}>✓</span>;
+                        }
+                        // Not selected, or selected but wrong → plain (no hints)
+
+                        return (
+                          <div key={opt.id} style={{
+                            display: 'flex', alignItems: 'center', gap: '10px',
+                            padding: '10px 14px', borderRadius: '8px',
+                            background: bg, border: `1.5px solid ${border}`,
+                            fontSize: '13.5px', color, fontWeight: fw
+                          }}>
+                            <span style={{ flex: 1 }}>{optText}</span>
+                            {icon}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-
-                  {/* Options review */}
-                  <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {(q.quiz_options || []).map(opt => {
-                      const optText = isRTL ? opt.option_text_ar : (opt.option_text_en || opt.option_text_ar);
-                      const wasSelected = result.selectedIds.includes(opt.id);
-                      const isCorrectOpt = opt.is_correct;
-
-                      let bg = 'transparent', border = 'rgba(11,40,73,0.08)', color = '#344054', icon = null, fw = '400';
-
-                      if (wasSelected && isCorrectOpt) {
-                        // Selected and correct → green
-                        bg = 'rgba(21,180,122,0.08)'; border = '#15b47a'; color = '#0b5e38'; fw = '600';
-                        icon = <span style={{ color: '#15b47a', fontWeight: 'bold', marginInlineStart: 'auto' }}>✓</span>;
-                      }
-                      // Not selected, or selected but wrong → plain (no hints)
-
-                      return (
-                        <div key={opt.id} style={{
-                          display: 'flex', alignItems: 'center', gap: '10px',
-                          padding: '10px 14px', borderRadius: '8px',
-                          background: bg, border: `1.5px solid ${border}`,
-                          fontSize: '13.5px', color, fontWeight: fw
-                        }}>
-                          <span style={{ flex: 1 }}>{optText}</span>
-                          {icon}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Action buttons */}
           {!reviewMode && (

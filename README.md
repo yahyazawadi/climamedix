@@ -87,6 +87,25 @@ To facilitate seamless local testing of RLS-based visibility without switching a
    * When disabled, the permission is struck through and colored gray (marked as "Disabled / معطلة").
    * The UI immediately updates dynamically (e.g., the "Post Opportunity" button will disappear if `write:opportunities` is deselected), allowing developers to test exact capability levels instantly on the frontend.
 
+#### 🗺️ Testing Workflows (Courses & Quizzes)
+
+**1. Student Flow (Learning & Evaluation)**
+*   **Trigger Admin Mode:** Click the brand logo in the header 7 times to activate Super Admin mode, then open the profile dropdown.
+*   **Permission Setup:** In "Active Account Permissions", ensure `view:all_courses` is toggled ON to simulate a paid subscriber/student.
+*   **Navigate:** Go to the **Learning Hub** (`/learning-hub` or click "My Courses").
+*   **Enrollment:** Click on a course and press "Enroll" (verify database `enrollments` table updates).
+*   **Media Streaming:** Open a video lesson. Test custom player features (volume sliders, PiP, playback speed, "Copy Frame").
+*   **Quizzes:** Reach the end of a module and start a Quiz. 
+    *   *Validation test:* Deliberately fail the quiz. Check that you must select *all* correct checkboxes exactly to earn points (no partial credit).
+    *   *Review Mode test:* Pass the quiz, then review it. Ensure only the correct answers you actually clicked are highlighted in green with a `✓`. Verify that incorrect choices and unselected correct choices give no hints (plain text).
+
+**2. Admin Flow (Course Building)**
+*   **Permission Setup:** In the profile dropdown's "Active Account Permissions", ensure `manage:courses` is toggled ON to simulate an Administrator.
+*   **Navigate:** Go to **Admin Dashboard -> Course Builder** (`/admin/courses`).
+*   **Drag & Drop:** Create a new course. Add multiple modules and drag-and-drop to reorder them. Add lessons inside modules.
+*   **Quiz Creation:** Add a Quiz lesson. Add questions with multiple options. Mark more than one option as `is_correct` to test multi-select logic. Set a custom passing score.
+*   **Publishing:** Save the course, toggle `manage:courses` OFF, and ensure you can view the course correctly as a student.
+
 ---
 
 ## 📋 Platform Development Todo List & Requirements Plan

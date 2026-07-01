@@ -181,7 +181,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       setCourses(data || []);
     } catch (err) {
       console.error(err);
-      alert('Error fetching courses');
+      alert('Error fetching courses: ' + (err.message || JSON.stringify(err)));
     } finally {
       setLoadingCourses(false);
     }
@@ -215,7 +215,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       setModules([]);
     } catch (err) {
       console.error(err);
-      alert('Failed to save course');
+      alert('Failed to save course: ' + (err.message || JSON.stringify(err)));
     }
   }
 
@@ -230,7 +230,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       }
     } catch (err) {
       console.error(err);
-      alert('Failed to delete course');
+      alert('Failed to delete course: ' + (err.message || JSON.stringify(err)));
     }
   }
 
@@ -268,7 +268,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       handleSelectCourse(selectedCourse);
     } catch (err) {
       console.error(err);
-      alert('Failed to save module');
+      alert('Failed to save module: ' + (err.message || JSON.stringify(err)));
     }
   }
 
@@ -279,6 +279,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       handleSelectCourse(selectedCourse);
     } catch (err) {
       console.error(err);
+      alert('Failed to delete module: ' + (err.message || JSON.stringify(err)));
     }
   }
 
@@ -341,7 +342,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       handleSelectCourse(selectedCourse);
     } catch (err) {
       console.error(err);
-      alert('Failed to save lesson');
+      alert('Failed to save lesson: ' + (err.message || JSON.stringify(err)));
     }
   }
 
@@ -352,6 +353,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       handleSelectCourse(selectedCourse);
     } catch (err) {
       console.error(err);
+      alert('Failed to delete lesson: ' + (err.message || JSON.stringify(err)));
     }
   }
 
@@ -387,7 +389,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       }
     } catch (err) {
       console.error(err);
-      alert('Failed to upload cover image.');
+      alert('Failed to upload cover image: ' + (err.message || JSON.stringify(err)));
     } finally {
       setUploadingCover(false);
     }
@@ -407,6 +409,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       setQuiz({ ...q, quiz_questions: [] });
     } catch (err) {
       console.error(err);
+      alert('Failed to create quiz: ' + (err.message || JSON.stringify(err)));
     }
   }
 
@@ -462,7 +465,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       ]);
     } catch (err) {
       console.error(err);
-      alert('Failed to add question');
+      alert('Failed to add question: ' + (err.message || JSON.stringify(err)));
     }
   }
 
@@ -476,6 +479,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       });
     } catch (err) {
       console.error(err);
+      alert('Failed to remove question: ' + (err.message || JSON.stringify(err)));
     }
   }
 

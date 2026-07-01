@@ -1184,6 +1184,9 @@ CREATE POLICY "Manage options" ON public.quiz_options FOR ALL USING (
 CREATE POLICY "Allow read own attempts" ON public.quiz_attempts FOR SELECT USING (
     auth.uid() = user_id OR public.has_permission(auth.uid(), 'approve:users')
 );
+CREATE POLICY "Insert own quiz attempt" ON public.quiz_attempts FOR INSERT WITH CHECK (
+    auth.uid() = user_id
+);
 
 -- ------------------------------------------------------------
 -- 8. Seed roles, permissions, role‑permission mappings

@@ -99,6 +99,18 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
     }
   };
 
+  const toggleMute = () => {
+    if (!audioRef.current) return;
+    if (isMuted) {
+      audioRef.current.muted = false;
+      setIsMuted(false);
+      audioRef.current.volume = volume || 1;
+    } else {
+      audioRef.current.muted = true;
+      setIsMuted(true);
+    }
+  };
+
   const handleTimeUpdate = () => {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);

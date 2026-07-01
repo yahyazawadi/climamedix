@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'preact/hooks';
 
-export function LMSParticles() {
+export function AmbientParticles() {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -26,10 +26,10 @@ export function LMSParticles() {
     const particles = [];
     const particleCount = 25; // less frequent
     const colorTemplates = [
-      { r: 21, g: 180, b: 122, baseAlpha: 0.65 }, // Mint Green
-      { r: 11, g: 40, b: 73, baseAlpha: 0.45 },   // Navy Blue
-      { r: 2, g: 90, b: 110, baseAlpha: 0.55 },   // Deep Teal Blue
-      { r: 21, g: 180, b: 122, baseAlpha: 0.35 }  // Soft Mint
+      { r: 21, g: 180, b: 122, baseAlpha: 0.25 }, // Mint Green (Semi-transparent)
+      { r: 11, g: 40, b: 73, baseAlpha: 0.15 },   // Navy Blue (Semi-transparent)
+      { r: 2, g: 90, b: 110, baseAlpha: 0.20 },   // Deep Teal Blue (Semi-transparent)
+      { r: 21, g: 180, b: 122, baseAlpha: 0.10 }  // Soft Mint (Semi-transparent)
     ];
 
     const mouse = {
@@ -313,13 +313,13 @@ export function LMSParticles() {
           const { dist, dx, dy } = interaction;
           const proximity = (mouse.radius - dist) / mouse.radius; // 0 at outer boundary, 1 at center
           
-          // 1. Friction / Viscosity (Damping) - makes them feel very heavy (15% speed loss per frame)
-          const damping = 1 - (proximity * 0.15); 
+          // 1. Friction / Viscosity (Damping) - light damping so they don't stick too much
+          const damping = 1 - (proximity * 0.05); 
           p.vx *= damping;
           p.vy *= damping;
 
-          // 2. Gentle attraction pull - small pull force so they get left behind easily on fast movement
-          const pullForce = proximity * 0.08;
+          // 2. Very gentle attraction pull so they barely react to the mouse
+          const pullForce = proximity * 0.015;
           p.vx -= (dx / (dist || 1)) * pullForce;
           p.vy -= (dy / (dist || 1)) * pullForce;
         } else {

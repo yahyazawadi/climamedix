@@ -855,8 +855,8 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                   )}
 
                   <div className="cb-form-group">
-                    <label>{lang === 'ar' ? 'المدة / وقت الانتهاء (مثال: 15 دقيقة)' : 'Duration / Time to Complete (e.g. 15 mins)'}</label>
-                    <input type="text" value={lessonForm.duration} onInput={e => setLessonForm({...lessonForm, duration: e.target.value})} placeholder={lang === 'ar' ? 'مثال: 15 دقيقة' : 'e.g. 15 mins'} />
+                    <label>{lang === 'ar' ? 'المدة (بالدقائق)' : 'Duration (in minutes)'}</label>
+                    <input type="number" min="0" value={lessonForm.duration} onInput={e => setLessonForm({...lessonForm, duration: e.target.value})} placeholder={lang === 'ar' ? 'مثال: 15' : 'e.g. 15'} />
                   </div>
 
                   <div className="cb-form-group">

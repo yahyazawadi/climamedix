@@ -443,7 +443,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                               <span>{title}</span>
                               {les.duration && (
                                 <span style={{ fontSize: '11px', opacity: isActive ? 0.8 : 0.5, fontWeight: 'normal' }}>
-                                  {les.duration}
+                                  {les.duration} {lang === 'ar' ? 'دقيقة' : 'mins'}
                                 </span>
                               )}
                             </div>

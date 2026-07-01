@@ -180,63 +180,45 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
             </div>
           </div>
 
-          {/* Question review — correct only */}
-          {questionResults.some(r => r.isCorrect) && (
+          {/* Question review — all questions */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {questionResults.filter(r => r.isCorrect).map((result, i) => {
+            {questionResults.map((result, i) => {
               const q = result.question;
               const qText = isRTL ? q.question_text_ar : (q.question_text_en || q.question_text_ar);
-              const correctIds = (q.quiz_options || []).filter(o => o.is_correct).map(o => o.id);
 
               return (
                 <div key={q.id} style={{
                   background: '#fff', borderRadius: '16px',
-                  border: `1.5px solid ${result.isCorrect ? 'rgba(21,180,122,0.3)' : 'rgba(255,77,77,0.2)'}`,
+                  border: `1.5px solid ${result.isCorrect ? 'rgba(21,180,122,0.3)' : 'rgba(11,40,73,0.1)'}`,
                   overflow: 'hidden',
                   boxShadow: '0 2px 12px rgba(11,40,73,0.06)'
                 }}>
                   {/* Q header */}
                   <div style={{
-                    display: 'flex', alignItems: 'center', gap: '10px',
                     padding: '14px 18px',
-                    background: result.isCorrect ? 'rgba(21,180,122,0.06)' : 'rgba(255,77,77,0.05)',
-                    borderBottom: `1px solid ${result.isCorrect ? 'rgba(21,180,122,0.15)' : 'rgba(255,77,77,0.12)'}`
+                    background: result.isCorrect ? 'rgba(21,180,122,0.06)' : 'rgba(11,40,73,0.02)',
+                    borderBottom: `1px solid ${result.isCorrect ? 'rgba(21,180,122,0.15)' : 'rgba(11,40,73,0.07)'}`
                   }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '11px', fontWeight: '700', color: result.isCorrect ? '#15b47a' : '#ff4d4d', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        {isRTL
-                          ? (result.isCorrect ? `سؤال ${i + 1} — إجابة صحيحة` : `سؤال ${i + 1} — إجابة خاطئة`)
-                          : (result.isCorrect ? `Q${i + 1} — Correct` : `Q${i + 1} — Wrong`)}
-                      </div>
-                      <div style={{ fontSize: '14px', color: '#0b2849', fontWeight: '600', marginTop: '2px' }}>{qText}</div>
+                    <div style={{ fontSize: '11px', fontWeight: '700', color: result.isCorrect ? '#15b47a' : 'rgba(11,40,73,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      {isRTL
+                        ? (result.isCorrect ? `سؤال ${i + 1} — إجابة صحيحة` : `سؤال ${i + 1}`)
+                        : (result.isCorrect ? `Q${i + 1} — Correct` : `Q${i + 1}`)}
                     </div>
+                    <div style={{ fontSize: '14px', color: '#0b2849', fontWeight: '600', marginTop: '2px' }}>{qText}</div>
                   </div>
 
                   {/* Options review */}
                   <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {(q.quiz_options || []).map(opt => {
                       const optText = isRTL ? opt.option_text_ar : (opt.option_text_en || opt.option_text_ar);
-                      const wasSelected = result.selectedIds.includes(opt.id);
                       const isCorrectOpt = opt.is_correct;
 
-                      let bg = 'transparent', border = 'rgba(11,40,73,0.08)', color = '#344054', icon = null;
+                      // Always highlight correct answer in green; no red for wrong picks
+                      let bg = 'transparent', border = 'rgba(11,40,73,0.08)', color = '#344054', icon = null, fw = '400';
 
-                      if (result.isCorrect) {
-                        // Show correct: green for correct options, muted for rest
-                        if (isCorrectOpt) {
-                          bg = 'rgba(21,180,122,0.08)'; border = '#15b47a'; color = '#0b5e38';
-                          icon = <span style={{ color: '#15b47a', fontWeight: 'bold', marginInlineStart: 'auto' }}>✓</span>;
-                        }
-                      } else {
-                        // Show wrong: red for their wrong selection, no reveal of correct
-                        if (wasSelected && !isCorrectOpt) {
-                          bg = 'rgba(255,77,77,0.07)'; border = '#ff4d4d'; color = '#7a1a1a';
-                          icon = <span style={{ color: '#ff4d4d', fontWeight: 'bold', marginInlineStart: 'auto' }}>✕</span>;
-                        } else if (wasSelected && isCorrectOpt) {
-                          // They picked a correct one but missed others — show as neutral selected
-                          bg = 'rgba(0,76,109,0.06)'; border = '#004c6d'; color = '#0b2849';
-                          icon = <span style={{ color: '#004c6d', fontWeight: 'bold', marginInlineStart: 'auto' }}>✓</span>;
-                        }
+                      if (isCorrectOpt) {
+                        bg = 'rgba(21,180,122,0.08)'; border = '#15b47a'; color = '#0b5e38'; fw = '600';
+                        icon = <span style={{ color: '#15b47a', fontWeight: 'bold', marginInlineStart: 'auto' }}>✓</span>;
                       }
 
                       return (
@@ -244,24 +226,18 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
                           display: 'flex', alignItems: 'center', gap: '10px',
                           padding: '10px 14px', borderRadius: '8px',
                           background: bg, border: `1.5px solid ${border}`,
-                          fontSize: '13.5px', color, fontWeight: wasSelected ? '600' : '400'
+                          fontSize: '13.5px', color, fontWeight: fw
                         }}>
                           <span style={{ flex: 1 }}>{optText}</span>
                           {icon}
                         </div>
                       );
                     })}
-                    {!result.isCorrect && (
-                      <div style={{ fontSize: '12px', color: 'rgba(11,40,73,0.4)', marginTop: '4px', fontStyle: 'italic' }}>
-                        {isRTL ? 'راجع هذا السؤال مجدداً عند إعادة الاختبار' : 'Review this question when you retry'}
-                      </div>
-                    )}
                   </div>
                 </div>
               );
             })}
           </div>
-          )}
 
           {/* Action buttons */}
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', paddingBottom: '8px' }}>

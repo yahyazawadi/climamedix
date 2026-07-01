@@ -104,7 +104,7 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
   const activeBarsCount = Math.floor(progressPercent * peaks.length);
 
   return (
-    <div dir="ltr" className="custom-audio-player-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '20px', width: '100%', maxWidth: '600px', background: 'rgba(255, 255, 255, 0.03)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+    <div dir="ltr" className="custom-audio-player-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '24px', width: '100%', maxWidth: '100%', background: '#0b2849', padding: '24px 32px', borderRadius: '16px', boxShadow: '0 8px 30px rgba(11, 40, 73, 0.15)' }}>
       <audio 
         ref={audioRef} 
         src={src} 

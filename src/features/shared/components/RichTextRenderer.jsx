@@ -23,7 +23,7 @@ export function RichTextRenderer({ html, lang = 'ar' }) {
       // -- Intercept Media Tags --
       if (tagName === 'video') {
         const src = node.getAttribute('src');
-        return <div key={index} style={{ margin: '20px 0' }}><CustomVideoPlayer src={src} /></div>;
+        return <div key={index} style={{ margin: '20px 0' }}><CustomVideoPlayer videoUrl={src} lang={lang} /></div>;
       }
       
       if (tagName === 'audio') {

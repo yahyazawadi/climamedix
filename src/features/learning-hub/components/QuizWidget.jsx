@@ -180,9 +180,10 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
             </div>
           </div>
 
-          {/* Question review */}
+          {/* Question review — correct only */}
+          {questionResults.some(r => r.isCorrect) && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {questionResults.map((result, i) => {
+            {questionResults.filter(r => r.isCorrect).map((result, i) => {
               const q = result.question;
               const qText = isRTL ? q.question_text_ar : (q.question_text_en || q.question_text_ar);
               const correctIds = (q.quiz_options || []).filter(o => o.is_correct).map(o => o.id);
@@ -260,6 +261,7 @@ export function QuizWidget({ quizData, onQuizFinished, onClose, lang = 'ar' }) {
               );
             })}
           </div>
+          )}
 
           {/* Action buttons */}
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', paddingBottom: '8px' }}>

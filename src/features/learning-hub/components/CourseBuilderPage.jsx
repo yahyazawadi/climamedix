@@ -824,7 +824,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
 
             <div className="cb-lesson-modal-layout">
               {/* Left Column: Lesson Form */}
-              {activeLessonTab === 'content' && (
+              {(activeLessonTab === 'content' || lessonForm.is_quiz) && (
               <div className="cb-lesson-modal-left">
                 <form onSubmit={saveLesson} className="cb-form">
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
@@ -891,7 +891,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                   <div className="cb-form-actions">
                     <Button type="button" variant="outline" onClick={() => setShowLessonModal(false)}>{lang === 'ar' ? 'إلغاء' : 'Cancel'}</Button>
                     <Button type="submit" variant="gradient" disabled={isUploadingMedia}>
-                      {isUploadingMedia ? (lang === 'ar' ? 'جاري الرفع...' : 'Uploading...') : (lang === 'ar' ? 'حفظ الدرس' : 'Save Lesson')}
+                      {isUploadingMedia ? (lang === 'ar' ? 'جاري الرفع...' : 'Uploading...') : (lessonForm.is_quiz ? (lang === 'ar' ? 'حفظ الاختبار' : 'Save Exam') : (lang === 'ar' ? 'حفظ الدرس' : 'Save Lesson'))}
                     </Button>
                   </div>
                 </form>
@@ -899,9 +899,9 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
               )}
 
               {/* Right Column: Quiz Builder */}
-              {activeLessonTab === 'quiz' && (
+              {(activeLessonTab === 'quiz' || lessonForm.is_quiz) && (
               <div className="cb-lesson-modal-right">
-                <h5>{lang === 'ar' ? 'منشئ الاختبار الخاص بالدرس' : 'Lesson Quiz Builder'}</h5>
+                <h5>{lessonForm.is_quiz ? (lang === 'ar' ? 'منشئ الأسئلة' : 'Exam Builder') : (lang === 'ar' ? 'منشئ الاختبار الخاص بالدرس' : 'Lesson Quiz Builder')}</h5>
                 <hr style={{ border: 'none', borderTop: '1px solid rgba(11,40,73,0.08)', margin: '12px 0' }} />
 
                 {loadingQuiz ? (
@@ -909,7 +909,9 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                 ) : !quiz ? (
                   <div style={{ textAlign: 'center', padding: '24px 0' }}>
                     <p style={{ fontSize: '13px', color: 'rgba(11,40,73,0.5)', marginBottom: '14px' }}>
-                      {lang === 'ar' ? 'لا يوجد اختبار لهذا الدرس.' : 'No quiz created for this lesson yet.'}
+                      {!editingLesson 
+                        ? (lang === 'ar' ? 'يرجى حفظ الاختبار أولاً (من القائمة الجانبية) لتتمكن من إضافة الأسئلة.' : 'Please save the exam first (on the left) before adding questions.')
+                        : (lang === 'ar' ? 'لا يوجد اختبار لهذا الدرس.' : 'No quiz created for this lesson yet.')}
                     </p>
                     <Button variant="outline" onClick={createQuiz} disabled={!editingLesson} style={{ fontSize: '12px' }}>
                       {lang === 'ar' ? 'إنشاء اختبار جديد' : 'Create Quiz'}

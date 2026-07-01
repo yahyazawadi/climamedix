@@ -105,6 +105,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
     sequence_order: 1
   });
   const [activeLessonTab, setActiveLessonTab] = useState('content'); // 'content' or 'quiz'
+  const [activeLangTab, setActiveLangTab] = useState('ar'); // 'ar' or 'en'
 
   // R2 Video Upload State
   const [uploadProgress, setUploadProgress] = useState(null);
@@ -808,35 +809,50 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
               {activeLessonTab === 'content' && (
               <div className="cb-lesson-modal-left">
                 <form onSubmit={saveLesson} className="cb-form">
-                  <div className="cb-form-row">
-                    <div className="cb-form-group">
-                      <label>Lesson Title (AR)</label>
-                      <input type="text" required value={lessonForm.title_ar} onInput={e => setLessonForm({...lessonForm, title_ar: e.target.value})} />
-                    </div>
-                    <div className="cb-form-group">
-                      <label>Lesson Title (EN)</label>
-                      <input type="text" required value={lessonForm.title_en} onInput={e => setLessonForm({...lessonForm, title_en: e.target.value})} />
-                    </div>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                    <button type="button" className={`cb-modal-tab ${activeLangTab === 'ar' ? 'active' : ''}`} onClick={() => setActiveLangTab('ar')} style={{ padding: '6px 12px' }}>
+                      العربية (AR)
+                    </button>
+                    <button type="button" className={`cb-modal-tab ${activeLangTab === 'en' ? 'active' : ''}`} onClick={() => setActiveLangTab('en')} style={{ padding: '6px 12px' }}>
+                      English (EN)
+                    </button>
                   </div>
 
-                  <div className="cb-form-group">
-                    <label>Lesson Content (AR)</label>
-                    <RichTextEditor 
-                      value={lessonForm.content_ar} 
-                      onChange={val => setLessonForm({...lessonForm, content_ar: val})} 
-                      isRtl={true} 
-                      placeholder="ابدأ بكتابة الدرس أو إدراج فيديو/صوت..."
-                    />
-                  </div>
-                  <div className="cb-form-group" style={{ marginTop: '20px' }}>
-                    <label>Lesson Content (EN)</label>
-                    <RichTextEditor 
-                      value={lessonForm.content_en} 
-                      onChange={val => setLessonForm({...lessonForm, content_en: val})} 
-                      isRtl={false} 
-                      placeholder="Start writing the lesson or insert media..."
-                    />
-                  </div>
+                  {activeLangTab === 'ar' && (
+                    <>
+                      <div className="cb-form-group">
+                        <label>Lesson Title (AR)</label>
+                        <input type="text" required value={lessonForm.title_ar} onInput={e => setLessonForm({...lessonForm, title_ar: e.target.value})} />
+                      </div>
+                      <div className="cb-form-group">
+                        <label>Lesson Content (AR)</label>
+                        <RichTextEditor 
+                          value={lessonForm.content_ar} 
+                          onChange={val => setLessonForm({...lessonForm, content_ar: val})} 
+                          isRtl={true} 
+                          placeholder="ابدأ بكتابة الدرس أو إدراج وسائط..."
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {activeLangTab === 'en' && (
+                    <>
+                      <div className="cb-form-group">
+                        <label>Lesson Title (EN)</label>
+                        <input type="text" required value={lessonForm.title_en} onInput={e => setLessonForm({...lessonForm, title_en: e.target.value})} />
+                      </div>
+                      <div className="cb-form-group">
+                        <label>Lesson Content (EN)</label>
+                        <RichTextEditor 
+                          value={lessonForm.content_en} 
+                          onChange={val => setLessonForm({...lessonForm, content_en: val})} 
+                          isRtl={false} 
+                          placeholder="Start writing the lesson or insert media..."
+                        />
+                      </div>
+                    </>
+                  )}
 
                   <div className="cb-form-group">
                     <label>Duration / Time to Complete (e.g. 15 mins)</label>

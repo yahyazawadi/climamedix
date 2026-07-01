@@ -97,8 +97,7 @@ export function RichTextEditor({
       '.ql-list[value="bullet"]': isRtl ? 'قائمة نقطية' : 'Bullet List',
       '.ql-align': isRtl ? 'محاذاة النص' : 'Text Alignment',
       '.ql-link': isRtl ? 'إدراج رابط (Ctrl+K)' : 'Insert Link (Ctrl+K)',
-      '.ql-image': isRtl ? 'إدراج صورة' : 'Insert Image',
-      '.ql-video': isRtl ? 'إدراج فيديو' : 'Insert Video',
+      '.ql-media': isRtl ? 'إدراج وسائط (صورة/فيديو)' : 'Insert Media',
       '.ql-audio': isRtl ? 'إدراج ملف صوتي' : 'Insert Audio',
       '.ql-clean': isRtl ? 'مسح التنسيق' : 'Clear Formatting',
       '.ql-color': isRtl ? 'لون النص' : 'Text Color',
@@ -133,41 +132,31 @@ export function RichTextEditor({
     }
   };
 
-  const imageHandler = useCallback(() => {
+  const mediaHandler = useCallback(() => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image/*');
+    input.setAttribute('accept', 'image/*,video/*');
     input.click();
 
     input.onchange = async () => {
       const file = input.files[0];
       if (file) {
-        uploadAndInsertImage(file);
-      }
-    };
-  }, []);
-
-  const videoHandler = useCallback(() => {
-    const input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'video/*');
-    input.click();
-
-    input.onchange = async () => {
-      const file = input.files[0];
-      if (file) {
-        try {
-          onUploadingMedia?.(true);
-          const url = await uploadVideoToR2(file);
-          const quill = quillRef.current.getEditor();
-          const range = quill.getSelection(true);
-          quill.insertEmbed(range.index, 'video', url);
-          quill.setSelection(range.index + 1);
-        } catch (err) {
-          console.error("Failed to upload video:", err);
-          alert(isRtl ? "فشل رفع الفيديو." : "Failed to upload video.");
-        } finally {
-          onUploadingMedia?.(false);
+        if (file.type.startsWith('image/')) {
+          uploadAndInsertImage(file);
+        } else if (file.type.startsWith('video/')) {
+          try {
+            onUploadingMedia?.(true);
+            const url = await uploadVideoToR2(file);
+            const quill = quillRef.current.getEditor();
+            const range = quill.getSelection(true);
+            quill.insertEmbed(range.index, 'video', url);
+            quill.setSelection(range.index + 1);
+          } catch (err) {
+            console.error("Failed to upload video:", err);
+            alert(isRtl ? "فشل رفع الفيديو." : "Failed to upload video.");
+          } finally {
+            onUploadingMedia?.(false);
+          }
         }
       }
     };
@@ -207,19 +196,22 @@ export function RichTextEditor({
         [{ 'color': [] }, { 'background': [] }],
         [{ 'list': 'ordered'}, { 'list': 'bullet' }],
         [{ 'align': [] }],
-        ['link', 'image', 'video', 'audio'],
+        ['link', 'media', 'audio'],
         ['clean']
       ],
       handlers: {
-        image: imageHandler,
-        video: videoHandler,
+        media: mediaHandler,
         audio: audioHandler
       }
     }
   };
 
-  // Add custom icon for audio since Quill doesn't have one natively
+  // Add custom icons for media and audio since Quill doesn't have them natively
   useEffect(() => {
+    const mediaBtn = document.querySelector('.ql-media');
+    if (mediaBtn && !mediaBtn.innerHTML.includes('svg')) {
+      mediaBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`;
+    }
     const audioBtn = document.querySelector('.ql-audio');
     if (audioBtn && !audioBtn.innerHTML.includes('svg')) {
       audioBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`;

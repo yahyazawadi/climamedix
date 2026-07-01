@@ -1435,3 +1435,27 @@ body.dark-mode .footer {
     text-align: center;
   }
 }
+
+/* Global Fix for Quill Editor Toolbar Header Dropdown */
+.ql-snow .ql-picker.ql-header {
+  width: 120px !important;
+}
+
+.ql-snow .ql-picker.ql-header .ql-picker-label {
+  padding-right: 24px !important;
+  padding-left: 8px !important;
+}
+
+[dir="rtl"] .ql-snow .ql-picker.ql-header .ql-picker-label {
+  padding-left: 24px !important;
+  padding-right: 8px !important;
+}
+
+.ql-snow .ql-picker-label svg {
+  right: 4px !important;
+}
+
+[dir="rtl"] .ql-snow .ql-picker-label svg {
+  right: auto !important;
+  left: 4px !important;
+}

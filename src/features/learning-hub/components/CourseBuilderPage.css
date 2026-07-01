@@ -454,20 +454,6 @@
   border-bottom: 1px solid rgba(11,40,73,0.1);
 }
 
-.custom-quill-wrapper .ql-picker.ql-header {
-  width: 95px !important;
-}
-
-.custom-quill-wrapper .ql-picker-label {
-  padding-right: 18px !important;
-  padding-left: 8px !important;
-}
-
-[dir="rtl"] .custom-quill-wrapper .ql-picker-label {
-  padding-left: 18px !important;
-  padding-right: 8px !important;
-}
-
 /* Upload widget */
 .cb-upload-box {
   margin-top: 8px;

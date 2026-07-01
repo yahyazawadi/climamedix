@@ -1459,3 +1459,33 @@ body.dark-mode .footer {
   right: auto !important;
   left: 4px !important;
 }
+
+/* ==========================================================================
+   CUSTOM RANGE SLIDER (Vertical/Media Players)
+   ========================================================================== */
+.custom-range-slider {
+  -webkit-appearance: none;
+  width: 70px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  outline: none;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  margin: 33px -33px;
+}
+.custom-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #15b47a;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  transition: transform 0.15s ease;
+}
+.custom-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+}

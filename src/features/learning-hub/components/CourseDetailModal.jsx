@@ -224,36 +224,6 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        .custom-range-slider {
-          -webkit-appearance: none;
-          width: 80px;
-          height: 4px;
-          background: rgba(255, 255, 255, 0.3);
-          border-radius: 4px;
-          outline: none;
-          transform: rotate(-90deg);
-          transform-origin: center;
-          margin: 38px -38px;
-        }
-        .custom-range-slider::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          background: #15b47a;
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 0 10px rgba(0,0,0,0.5);
-          transition: transform 0.15s ease;
-        }
-        .custom-range-slider::-webkit-slider-thumb:hover {
-          transform: scale(1.3);
-        }
-        `
-      }} />
       <div style={{
         position: 'fixed', inset: 0,
         background: '#ffffff',

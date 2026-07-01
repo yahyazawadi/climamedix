@@ -134,30 +134,32 @@ export function DebugUIPage() {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [selectedCountryName, setSelectedCountryName] = useState('all');
   const [enrolledCoursesList, setEnrolledCoursesList] = useState([
-    { id: 1, title: 'زمالة طب الكوارث المناخية والبيئية', category: 'طبي بيئي', progress: 50, remainingLessons: 1, lessons: [
-      { 
-        title: 'مقدمة في رصد الأوبئة وتأثير الحرارة', 
-        content: 'يعد رصد الأوبئة من الركائز الأساسية في مواجهة الأزمات الصحية الطارئة. مع تسارع وتيرة الاحتباس الحراري، تتعرض بعض المناطق لموجات حرارية غير مسبوقة تزيد من حدة انتشار النواقل الحشرية المسؤولة عن نقل أمراض مثل حمى الضنك والملاريا.',
-        quiz: [
-          {
-            text: 'ما هي النواقل الحشرية الأكثر تأثراً بالاحتباس الحراري في نقل الأوبئة؟',
-            options: ['القراد والبعوض', 'القوارض', 'الذباب المنزلي', 'كل ما سبق'],
-            correctAnswer: 0
-          }
-        ]
-      },
-      { 
-        title: 'إدارة مخلفات المستشفيات وأثرها الكربوني', 
-        content: 'تساهم إدارة النفايات الطبية غير الصحيحة بنسبة كبيرة في انبعاثات الغازات الدفيئة والملوثات السامة.',
-        quiz: [
-          {
-            text: 'ما هي الطريقة الأفضل بيئياً للتخلص من النفايات الطبية غير الحادة مقارنة بالحرق؟',
-            options: ['الدفن المباشر في التراب', 'التعقيم البخاري (الموصدة)', 'الإلقاء في مجاري المياه', 'الرمي العشوائي'],
-            correctAnswer: 1
-          }
-        ]
-      }
-    ]}
+    {
+      id: 1, title: 'زمالة طب الكوارث المناخية والبيئية', category: 'طبي بيئي', progress: 50, remainingLessons: 1, lessons: [
+        {
+          title: 'مقدمة في رصد الأوبئة وتأثير الحرارة',
+          content: 'يعد رصد الأوبئة من الركائز الأساسية في مواجهة الأزمات الصحية الطارئة. مع تسارع وتيرة الاحتباس الحراري، تتعرض بعض المناطق لموجات حرارية غير مسبوقة تزيد من حدة انتشار النواقل الحشرية المسؤولة عن نقل أمراض مثل حمى الضنك والملاريا.',
+          quiz: [
+            {
+              text: 'ما هي النواقل الحشرية الأكثر تأثراً بالاحتباس الحراري في نقل الأوبئة؟',
+              options: ['القراد والبعوض', 'القوارض', 'الذباب المنزلي', 'كل ما سبق'],
+              correctAnswer: 0
+            }
+          ]
+        },
+        {
+          title: 'إدارة مخلفات المستشفيات وأثرها الكربوني',
+          content: 'تساهم إدارة النفايات الطبية غير الصحيحة بنسبة كبيرة في انبعاثات الغازات الدفيئة والملوثات السامة.',
+          quiz: [
+            {
+              text: 'ما هي الطريقة الأفضل بيئياً للتخلص من النفايات الطبية غير الحادة مقارنة بالحرق؟',
+              options: ['الدفن المباشر في التراب', 'التعقيم البخاري (الموصدة)', 'الإلقاء في مجاري المياه', 'الرمي العشوائي'],
+              correctAnswer: 1
+            }
+          ]
+        }
+      ]
+    }
   ]);
   const [completedCoursesList, setCompletedCoursesList] = useState([]);
   const [activeLearningCourse, setActiveLearningCourse] = useState(null);
@@ -202,9 +204,9 @@ export function DebugUIPage() {
               setVerificationResult(localCerts[id]);
               return;
             }
-          } catch (e) {}
+          } catch (e) { }
         }
-        
+
         setVerificationResult(fallbackObj);
       }
     };
@@ -807,7 +809,7 @@ export function DebugUIPage() {
       const localCerts = JSON.parse(localStorage.getItem('climamedix_certs') || '{}');
       localCerts[uniqueId] = certRecord;
       localStorage.setItem('climamedix_certs', JSON.stringify(localCerts));
-    } catch(e) {}
+    } catch (e) { }
 
     setTimeout(() => {
       setCertGenerating(false);
@@ -2166,13 +2168,13 @@ export function DebugUIPage() {
                         رابط التحقق المرجعي للشهادة:
                       </span>
                       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                        <input 
-                          type="text" 
-                          readOnly 
-                          value={verificationLink} 
+                        <input
+                          type="text"
+                          readOnly
+                          value={verificationLink}
                           style={{ flex: 1, padding: '6px 10px', borderRadius: '8px', border: '1px solid rgba(11,40,73,0.15)', fontSize: '11px', background: '#fff', color: '#004c6d' }}
                         />
-                        <button 
+                        <button
                           onClick={() => {
                             navigator.clipboard.writeText(verificationLink);
                             alert('تم نسخ رابط التحقق المرجعي للشهادة!');
@@ -2181,9 +2183,9 @@ export function DebugUIPage() {
                         >
                           نسخ
                         </button>
-                        <a 
-                          href={verificationLink} 
-                          target="_blank" 
+                        <a
+                          href={verificationLink}
+                          target="_blank"
                           rel="noopener noreferrer"
                           style={{ background: '#15b47a', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', textDecoration: 'none', textAlign: 'center' }}
                         >
@@ -3361,12 +3363,12 @@ export function DebugUIPage() {
                   <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.85)', lineHeight: '1.6', marginBottom: '30px', maxWidth: '480px', textAlign: 'right' }}>
                     {coursesData[activeCourseSlide].desc}
                   </p>
-                  <button 
-                    id="btn-join-course-31" 
-                    className="btn-showcase btn-neon" 
+                  <button
+                    id="btn-join-course-31"
+                    className="btn-showcase btn-neon"
                     onClick={() => setSelectedProgram(coursesData[activeCourseSlide])}
-                    style={{ background: '#15b47a', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }} 
-                    onMouseEnter={(e) => e.target.style.boxShadow = '0 0 15px #15b47a'} 
+                    style={{ background: '#15b47a', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' }}
+                    onMouseEnter={(e) => e.target.style.boxShadow = '0 0 15px #15b47a'}
                     onMouseLeave={(e) => e.target.style.boxShadow = 'none'}
                   >
                     سجل في المساق الآن
@@ -3519,10 +3521,10 @@ export function DebugUIPage() {
           <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '16px', textAlign: 'center', marginBottom: '40px' }}>
             تقويم تفاعلي يعرض الفعاليات والندوات الطبية البيئية
           </p>
-          <EventsCalendar 
-            events={MOCK_EVENTS} 
-            onRegisterEvent={handleRegisterCalendarEvent} 
-            registeredEvents={registeredEvents} 
+          <EventsCalendar
+            events={MOCK_EVENTS}
+            onRegisterEvent={handleRegisterCalendarEvent}
+            registeredEvents={registeredEvents}
           />
         </div>
 
@@ -3536,9 +3538,9 @@ export function DebugUIPage() {
           <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '16px', textAlign: 'center', marginBottom: '40px' }}>
             آخر مقالات المناخ والصحة والأبحاث الطبية
           </p>
-          <NewsFeed 
-            articles={MOCK_ARTICLES} 
-            onReadArticle={(art) => setSelectedArticle(art)} 
+          <NewsFeed
+            articles={MOCK_ARTICLES}
+            onReadArticle={(art) => setSelectedArticle(art)}
           />
         </div>
 
@@ -3569,7 +3571,7 @@ export function DebugUIPage() {
               boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
               position: 'relative'
             }}>
-              <button 
+              <button
                 onClick={() => setSelectedArticle(null)}
                 style={{
                   position: 'absolute',
@@ -3587,12 +3589,12 @@ export function DebugUIPage() {
                 &times;
               </button>
 
-              <span style={{ 
-                background: 'rgba(21, 180, 122, 0.1)', 
-                color: '#15b47a', 
-                padding: '4px 12px', 
-                borderRadius: '20px', 
-                fontSize: '12px', 
+              <span style={{
+                background: 'rgba(21, 180, 122, 0.1)',
+                color: '#15b47a',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                fontSize: '12px',
                 fontWeight: 'bold',
                 display: 'inline-block',
                 marginBottom: '15px'
@@ -3639,11 +3641,11 @@ export function DebugUIPage() {
           <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '16px', textAlign: 'center', marginBottom: '40px' }}>
             متابعة المساقات النشطة والشهادات المكتسبة مع اختبارات الدروس
           </p>
-          <LMSDashboard 
-            enrolledCourses={enrolledCoursesList} 
-            completedCourses={completedCoursesList} 
-            onSelectCourse={handleSelectCourse} 
-            onGenerateCertificate={handleOpenCertificateGenerator} 
+          <LMSDashboard
+            enrolledCourses={enrolledCoursesList}
+            completedCourses={completedCoursesList}
+            onSelectCourse={handleSelectCourse}
+            onGenerateCertificate={handleOpenCertificateGenerator}
           />
         </div>
 
@@ -3665,27 +3667,27 @@ export function DebugUIPage() {
 
         {/* Program Detail Modal Overlay */}
         {selectedProgram && (
-          <ProgramDetailModal 
-            program={selectedProgram} 
-            onClose={() => setSelectedProgram(null)} 
-            onApply={handleEnrollFromProgram} 
+          <ProgramDetailModal
+            program={selectedProgram}
+            onClose={() => setSelectedProgram(null)}
+            onApply={handleEnrollFromProgram}
           />
         )}
 
         {/* Course LMS Reader Overlay */}
         {activeLearningCourse && (
-          <CourseDetailModal 
-            course={activeLearningCourse} 
-            onClose={() => setActiveLearningCourse(null)} 
-            onLessonCompleted={handleLessonCompleted} 
+          <CourseDetailModal
+            course={activeLearningCourse}
+            onClose={() => setActiveLearningCourse(null)}
+            onLessonCompleted={handleLessonCompleted}
           />
         )}
 
         {/* Certificate Render Overlay */}
         {certRecipientCourse && (
-          <CertificateGenerator 
-            courseTitle={certRecipientCourse} 
-            onClose={() => setCertRecipientCourse(null)} 
+          <CertificateGenerator
+            courseTitle={certRecipientCourse}
+            onClose={() => setCertRecipientCourse(null)}
           />
         )}
 
@@ -3744,8 +3746,8 @@ export function DebugUIPage() {
                 </div>
               </div>
 
-              <Button 
-                variant="gradient" 
+              <Button
+                variant="gradient"
                 onClick={() => {
                   setVerificationResult(null);
                   const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
@@ -3770,7 +3772,7 @@ export function DebugUIPage() {
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '40px', background: '#0b2849', padding: '50px', borderRadius: '20px', direction: 'ltr' }}>
-            
+
             {/* Style 1: Premium Teal Gradient */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
               <div style={{ color: '#fff', fontSize: '14px', fontFamily: 'monospace' }}>Style 1: Gradient Circle</div>
@@ -3781,10 +3783,10 @@ export function DebugUIPage() {
                 color: '#ffffff',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.boxShadow = '0 15px 30px rgba(21, 180, 122, 0.5)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(21, 180, 122, 0.3)'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.boxShadow = '0 15px 30px rgba(21, 180, 122, 0.5)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(21, 180, 122, 0.3)'; }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z" /></svg>
               </button>
             </div>
 
@@ -3800,10 +3802,10 @@ export function DebugUIPage() {
                 color: '#ffffff',
                 transition: 'background 0.2s ease, transform 0.2s ease'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'; e.currentTarget.style.transform = 'scale(1)'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'; e.currentTarget.style.transform = 'scale(1)'; }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z" /></svg>
               </button>
             </div>
 
@@ -3818,10 +3820,10 @@ export function DebugUIPage() {
                 color: '#15b47a',
                 transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z" /></svg>
               </button>
             </div>
 
@@ -3835,10 +3837,10 @@ export function DebugUIPage() {
                 color: '#004c6d',
                 transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.15)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.15)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z" /></svg>
               </button>
             </div>
 
@@ -3847,9 +3849,9 @@ export function DebugUIPage() {
         {/* ===== Audio Players Showcase ===== */}
         <div style={{ width: '100%', marginTop: '60px', padding: '40px', background: '#071829', borderRadius: '24px', position: 'relative', overflow: 'hidden' }}>
           <h2 style={{ color: '#fff', textAlign: 'center', marginBottom: '40px', fontFamily: 'monospace' }}>Audio Player Designs (Neon Button Base)</h2>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'center' }}>
-            
+
             {/* Style 1: Horizontal Pill */}
             <div style={{ width: '100%', maxWidth: '600px' }}>
               <div style={{ color: '#15b47a', fontSize: '14px', fontFamily: 'monospace', marginBottom: '10px' }}>Style 1: Sleek Horizontal Pill</div>
@@ -3861,11 +3863,11 @@ export function DebugUIPage() {
                   boxShadow: '0 0 15px rgba(21, 180, 122, 0.4), inset 0 0 10px rgba(21, 180, 122, 0.2)',
                   color: '#15b47a', transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease'
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z" /></svg>
                 </button>
-                
+
                 <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontSize: '14px' }}>
                     <strong style={{ letterSpacing: '1px' }}>Audio_Track_01.mp3</strong>
@@ -3889,7 +3891,7 @@ export function DebugUIPage() {
                   <h4 style={{ color: '#fff', margin: '0 0 5px 0', fontSize: '18px' }}>Podcast Episode 12</h4>
                   <p style={{ color: '#15b47a', margin: 0, fontSize: '13px' }}>Climate & Health</p>
                 </div>
-                
+
                 <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '15px' }}>
                   <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px' }}>1:12</span>
                   <div style={{ flexGrow: 1, height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', position: 'relative' }}>
@@ -3901,7 +3903,7 @@ export function DebugUIPage() {
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
-                  
+
                   {/* Neon Button */}
                   <button style={{
                     width: '60px', height: '60px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -3909,9 +3911,9 @@ export function DebugUIPage() {
                     boxShadow: '0 0 15px rgba(21, 180, 122, 0.4), inset 0 0 10px rgba(21, 180, 122, 0.2)',
                     color: '#15b47a', transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease'
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z" /></svg>
                   </button>
 
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
@@ -3927,7 +3929,7 @@ export function DebugUIPage() {
                   <circle cx="60" cy="60" r="56" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
                   <circle cx="60" cy="60" r="56" fill="none" stroke="#15b47a" strokeWidth="4" strokeDasharray="351.85" strokeDashoffset="140" style={{ filter: 'drop-shadow(0 0 4px #15b47a)', transition: 'stroke-dashoffset 0.3s ease' }} />
                 </svg>
-                
+
                 {/* Neon Button */}
                 <button style={{
                   width: '60px', height: '60px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -3935,16 +3937,16 @@ export function DebugUIPage() {
                   boxShadow: '0 0 15px rgba(21, 180, 122, 0.4), inset 0 0 10px rgba(21, 180, 122, 0.2)',
                   color: '#15b47a', transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease', position: 'relative', zIndex: 2
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z" /></svg>
                 </button>
               </div>
             </div>
 
             {/* Style 4: Minimal Line */}
             <div style={{ width: '100%', maxWidth: '600px' }}>
-              <div style={{ color: '#15b47a', fontSize: '14px', fontFamily: 'monospace', marginBottom: '10px' }}>Style 4: Functional Minimal Line (Actual Audio!)</div>
+              <div style={{ color: '#15b47a', fontSize: '14px', fontFamily: 'monospace', marginBottom: '10px' }}>Style 4: Functional Minimal Line</div>
               <CustomAudioPlayer src="/test-audio.m4a" title="Vance Joy - Riptide" />
             </div>
 
@@ -3959,16 +3961,16 @@ export function DebugUIPage() {
                   boxShadow: '0 0 15px rgba(21, 180, 122, 0.4), inset 0 0 10px rgba(21, 180, 122, 0.2)',
                   color: '#15b47a', transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease'
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z" /></svg>
                 </button>
-                
+
                 <div style={{ flexGrow: 1, paddingRight: '15px' }}>
                   <div style={{ color: '#fff', fontSize: '15px', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Voice Note</div>
                   <div style={{ color: '#15b47a', fontSize: '12px' }}>Playing...</div>
                 </div>
-                
+
                 <div style={{ position: 'relative', width: '30px', height: '30px', marginRight: '10px' }}>
                   <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%' }}>
                     <path style={{ fill: 'none', stroke: 'rgba(255,255,255,0.1)', strokeWidth: 3 }} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />

@@ -1,7 +1,47 @@
 import { useRef, useCallback, useEffect } from 'preact/hooks';
-import ReactQuill from 'react-quill';
+import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { uploadFileToR2 } from '../../../utils/s3Client';
+import { uploadFileToR2, uploadVideoToR2 } from '../../../utils/s3Client';
+
+// Custom Video Blot
+const BlockEmbed = Quill.import('blots/block/embed');
+class VideoBlot extends BlockEmbed {
+  static create(url) {
+    let node = super.create();
+    node.setAttribute('src', url);
+    node.setAttribute('controls', '');
+    node.setAttribute('width', '100%');
+    node.style.borderRadius = '8px';
+    node.style.marginTop = '10px';
+    node.style.marginBottom = '10px';
+    return node;
+  }
+  static value(node) {
+    return node.getAttribute('src');
+  }
+}
+VideoBlot.blotName = 'video';
+VideoBlot.tagName = 'video';
+Quill.register(VideoBlot);
+
+// Custom Audio Blot
+class AudioBlot extends BlockEmbed {
+  static create(url) {
+    let node = super.create();
+    node.setAttribute('src', url);
+    node.setAttribute('controls', '');
+    node.setAttribute('width', '100%');
+    node.style.marginTop = '10px';
+    node.style.marginBottom = '10px';
+    return node;
+  }
+  static value(node) {
+    return node.getAttribute('src');
+  }
+}
+AudioBlot.blotName = 'audio';
+AudioBlot.tagName = 'audio';
+Quill.register(AudioBlot);
 
 const convertToWebP = (file) => {
   return new Promise((resolve, reject) => {
@@ -57,6 +97,8 @@ export function RichTextEditor({
       '.ql-align': isRtl ? 'محاذاة النص' : 'Text Alignment',
       '.ql-link': isRtl ? 'إدراج رابط (Ctrl+K)' : 'Insert Link (Ctrl+K)',
       '.ql-image': isRtl ? 'إدراج صورة' : 'Insert Image',
+      '.ql-video': isRtl ? 'إدراج فيديو' : 'Insert Video',
+      '.ql-audio': isRtl ? 'إدراج ملف صوتي' : 'Insert Audio',
       '.ql-clean': isRtl ? 'مسح التنسيق' : 'Clear Formatting',
       '.ql-color': isRtl ? 'لون النص' : 'Text Color',
       '.ql-background': isRtl ? 'لون الخلفية' : 'Background Color'
@@ -104,6 +146,58 @@ export function RichTextEditor({
     };
   }, []);
 
+  const videoHandler = useCallback(() => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'video/*');
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (file) {
+        try {
+          onUploadingMedia?.(true);
+          const url = await uploadVideoToR2(file);
+          const quill = quillRef.current.getEditor();
+          const range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'video', url);
+          quill.setSelection(range.index + 1);
+        } catch (err) {
+          console.error("Failed to upload video:", err);
+          alert(isRtl ? "فشل رفع الفيديو." : "Failed to upload video.");
+        } finally {
+          onUploadingMedia?.(false);
+        }
+      }
+    };
+  }, []);
+
+  const audioHandler = useCallback(() => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'audio/*');
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (file) {
+        try {
+          onUploadingMedia?.(true);
+          const url = await uploadFileToR2(file, 'course_audio'); // Upload audio file
+          const quill = quillRef.current.getEditor();
+          const range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'audio', url);
+          quill.setSelection(range.index + 1);
+        } catch (err) {
+          console.error("Failed to upload audio:", err);
+          alert(isRtl ? "فشل رفع الملف الصوتي." : "Failed to upload audio.");
+        } finally {
+          onUploadingMedia?.(false);
+        }
+      }
+    };
+  }, []);
+
   const modules = {
     toolbar: {
       container: [
@@ -112,23 +206,35 @@ export function RichTextEditor({
         [{ 'color': [] }, { 'background': [] }],
         [{ 'list': 'ordered'}, { 'list': 'bullet' }],
         [{ 'align': [] }],
-        ['link', 'image'],
+        ['link', 'image', 'video', 'audio'],
         ['clean']
       ],
       handlers: {
-        image: imageHandler
+        image: imageHandler,
+        video: videoHandler,
+        audio: audioHandler
       }
     }
   };
 
+  // Add custom icon for audio since Quill doesn't have one natively
+  useEffect(() => {
+    const audioBtn = document.querySelector('.ql-audio');
+    if (audioBtn && !audioBtn.innerHTML.includes('svg')) {
+      audioBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`;
+    }
+  }, []);
+
   return (
-    <ReactQuill 
-      ref={quillRef}
-      theme="snow" 
-      value={value} 
-      onChange={onChange} 
-      modules={modules}
-      placeholder={placeholder}
-    />
+    <div className="custom-quill-wrapper">
+      <ReactQuill 
+        ref={quillRef}
+        theme="snow" 
+        value={value} 
+        onChange={onChange} 
+        modules={modules}
+        placeholder={placeholder}
+      />
+    </div>
   );
 }

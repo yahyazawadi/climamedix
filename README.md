@@ -137,7 +137,10 @@ This plan tracks the implementation progress of ClimaMedix against the official 
     *   [x] Lesson Duration Support (Integrated duration metadata in the database, course builder forms, and detail sidebar)
     *   [x] Collapsible Modules (Coursera-like sidebar module folding with animated chevron indicators)
     *   [ ] PDF Resources
-    *   [x] Quizzes (Fully functional quiz builder and student answer validation)
+    *   [x] Quizzes (Fully functional quiz builder, checkbox-based multi-correct questions, and student answer validation):
+        *   **Multi-Selection Checkbox UI:** Supports selecting multiple options per question.
+        *   **Exact-Match Grading:** Requires students to match the correct set of options exactly to earn points.
+        *   **Post-Quiz Review Screen:** Displays all questions from the quiz. For correctly answered questions, the selected/correct options are highlighted in green with a checkmark. For incorrectly answered questions, all options are displayed in a plain/neutral style without highlights to encourage retrying.
     *   [x] Progress Tracking & Completed Lesson Badges (Dynamic vertical stepper timeline connecting completed lessons with brand colors)
     *   [x] Toggle Lesson Status (Interactive completion badges that allow unmarking lessons to dynamically reset progress)
     *   [ ] Certificates

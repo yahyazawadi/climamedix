@@ -821,11 +821,11 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                   {activeLangTab === 'ar' && (
                     <>
                       <div className="cb-form-group">
-                        <label>Lesson Title (AR)</label>
+                        <label>{lang === 'ar' ? 'عنوان الدرس (عربي)' : 'Lesson Title (AR)'}</label>
                         <input type="text" required value={lessonForm.title_ar} onInput={e => setLessonForm({...lessonForm, title_ar: e.target.value})} />
                       </div>
                       <div className="cb-form-group">
-                        <label>Lesson Content (AR)</label>
+                        <label>{lang === 'ar' ? 'محتوى الدرس (عربي)' : 'Lesson Content (AR)'}</label>
                         <RichTextEditor 
                           value={lessonForm.content_ar} 
                           onChange={val => setLessonForm({...lessonForm, content_ar: val})} 
@@ -839,11 +839,11 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                   {activeLangTab === 'en' && (
                     <>
                       <div className="cb-form-group">
-                        <label>Lesson Title (EN)</label>
+                        <label>{lang === 'ar' ? 'عنوان الدرس (إنجليزي)' : 'Lesson Title (EN)'}</label>
                         <input type="text" required value={lessonForm.title_en} onInput={e => setLessonForm({...lessonForm, title_en: e.target.value})} />
                       </div>
                       <div className="cb-form-group">
-                        <label>Lesson Content (EN)</label>
+                        <label>{lang === 'ar' ? 'محتوى الدرس (إنجليزي)' : 'Lesson Content (EN)'}</label>
                         <RichTextEditor 
                           value={lessonForm.content_en} 
                           onChange={val => setLessonForm({...lessonForm, content_en: val})} 
@@ -855,12 +855,12 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                   )}
 
                   <div className="cb-form-group">
-                    <label>Duration / Time to Complete (e.g. 15 mins)</label>
-                    <input type="text" value={lessonForm.duration} onInput={e => setLessonForm({...lessonForm, duration: e.target.value})} placeholder="e.g. 15 mins" />
+                    <label>{lang === 'ar' ? 'المدة / وقت الانتهاء (مثال: 15 دقيقة)' : 'Duration / Time to Complete (e.g. 15 mins)'}</label>
+                    <input type="text" value={lessonForm.duration} onInput={e => setLessonForm({...lessonForm, duration: e.target.value})} placeholder={lang === 'ar' ? 'مثال: 15 دقيقة' : 'e.g. 15 mins'} />
                   </div>
 
                   <div className="cb-form-group">
-                    <label>Sequence Order</label>
+                    <label>{lang === 'ar' ? 'ترتيب التسلسل' : 'Sequence Order'}</label>
                     <input type="number" required value={lessonForm.sequence_order} onInput={e => setLessonForm({...lessonForm, sequence_order: Number(e.target.value)})} />
                   </div>
 

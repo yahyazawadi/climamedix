@@ -104,6 +104,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
     duration: '',
     sequence_order: 1
   });
+  const [activeLessonTab, setActiveLessonTab] = useState('content'); // 'content' or 'quiz'
 
   // R2 Video Upload State
   const [uploadProgress, setUploadProgress] = useState(null);
@@ -786,12 +787,26 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
         <div className="cb-modal-overlay">
           <GlassCard className="cb-modal-card cb-large-modal">
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid rgba(11,40,73,0.1)', paddingBottom: '12px' }}>
-              <h4>{editingLesson ? (lang === 'ar' ? 'تعديل الدرس ومحتوياته' : 'Edit Lesson & Content') : (lang === 'ar' ? 'درس جديد' : 'New Lesson')}</h4>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid rgba(11,40,73,0.1)', paddingBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <h4 style={{ margin: 0 }}>{editingLesson ? (lang === 'ar' ? 'تعديل الدرس ومحتوياته' : 'Edit Lesson & Content') : (lang === 'ar' ? 'درس جديد' : 'New Lesson')}</h4>
+                {editingLesson && (
+                  <div className="cb-modal-tabs">
+                    <button type="button" className={`cb-modal-tab ${activeLessonTab === 'content' ? 'active' : ''}`} onClick={() => setActiveLessonTab('content')}>
+                      {lang === 'ar' ? 'محتوى الدرس' : 'Lesson Content'}
+                    </button>
+                    <button type="button" className={`cb-modal-tab ${activeLessonTab === 'quiz' ? 'active' : ''}`} onClick={() => setActiveLessonTab('quiz')}>
+                      {lang === 'ar' ? 'الاختبار (Exam)' : 'Exam (Quiz)'}
+                    </button>
+                  </div>
+                )}
+              </div>
               <button onClick={() => setShowLessonModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>✕</button>
             </div>
 
             <div className="cb-lesson-modal-layout">
               {/* Left Column: Lesson Form */}
+              {activeLessonTab === 'content' && (
               <div className="cb-lesson-modal-left">
                 <form onSubmit={saveLesson} className="cb-form">
                   <div className="cb-form-row">
@@ -840,8 +855,10 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                   </div>
                 </form>
               </div>
+              )}
 
               {/* Right Column: Quiz Builder */}
+              {activeLessonTab === 'quiz' && (
               <div className="cb-lesson-modal-right">
                 <h5>{lang === 'ar' ? 'منشئ الاختبار الخاص بالدرس' : 'Lesson Quiz Builder'}</h5>
                 <hr style={{ border: 'none', borderTop: '1px solid rgba(11,40,73,0.08)', margin: '12px 0' }} />
@@ -942,6 +959,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                   </div>
                 )}
               </div>
+              )}
             </div>
           </GlassCard>
         </div>

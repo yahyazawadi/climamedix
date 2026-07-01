@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { Button } from '../../shared/components/Button';
 import { QuizWidget } from './QuizWidget';
-import { CustomVideoPlayer } from './CustomVideoPlayer';
+import { RichTextRenderer } from '../../shared/components/RichTextRenderer';
 import {
   fetchCourseSyllabus,
   fetchCompletedLessons,
@@ -9,8 +9,7 @@ import {
   unmarkLessonComplete,
   fetchQuiz,
   submitQuizAttempt,
-  fetchPassedAttempt,
-  getSecureVideoUrl,
+  fetchPassedAttempt
 } from '../services/lmsService';
 
 export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted }) {
@@ -23,12 +22,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
   const [collapsedModules, setCollapsedModules] = useState(new Set());
   const [linkCopied, setLinkCopied] = useState(false);
 
-  // Use the new getSecureVideoUrl workflow
-  const [videoUrl, setVideoUrl] = useState(null);
-  const [videoLoading, setVideoLoading] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  // Video URL loaded for the active lesson
 
 
   if (!course) return null;
@@ -93,10 +87,6 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
     if (!activeLessonId) return;
     setQuizData(null);
     setQuizMode(false);
-    setVideoUrl(null);
-    setVideoUrl(null);
-
-
     async function loadLessonData() {
       try {
         // Check quiz
@@ -109,20 +99,6 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
           setQuizPassed(!!passed);
         } else {
           setQuizPassed(false);
-        }
-
-        // Load video if lesson has one
-        if (activeLesson?.video_url) {
-          setVideoLoading(true);
-          try {
-            const url = await getSecureVideoUrl(activeLessonId, course.id);
-            setVideoUrl(url);
-          } catch (e) {
-            console.error('Video URL error:', e);
-            setVideoUrl(null);
-          } finally {
-            setVideoLoading(false);
-          }
         }
       } catch (err) {
         console.error('Lesson data load error:', err);
@@ -471,11 +447,6 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                                 </span>
                               )}
                             </div>
-                            {les.video_url && (
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ opacity: 0.6 }}>
-                                <path d="M8 5v14l11-7z"/>
-                              </svg>
-                            )}
                           </div>
                         </div>
                       );
@@ -544,22 +515,11 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                     {lessonTitle}
                   </h3>
 
-                  {/* Custom Video Player Component */}
-                  {activeLesson.video_url && (
-                    <CustomVideoPlayer 
-                      videoUrl={videoUrl}
-                      videoLoading={videoLoading}
-                      lessonTitle={lessonTitle}
-                      lang={lang}
-                    />
-                  )}
-
-                  {/* Text Content */}
+                  {/* Unified Rich Text Content (Contains Native Audio/Video) */}
                   {lessonContent && (
-                    <div 
-                      style={{ color: 'rgba(11,40,73,0.8)', fontSize: '16px', lineHeight: '1.9', marginBottom: '32px', flexGrow: 1 }}
-                      dangerouslySetInnerHTML={{ __html: lessonContent }}
-                    />
+                    <div style={{ color: 'rgba(11,40,73,0.8)', fontSize: '16px', lineHeight: '1.9', marginBottom: '32px', flexGrow: 1 }}>
+                      <RichTextRenderer html={lessonContent} lang={lang} />
+                    </div>
                   )}
 
                   {/* Action Bar */}

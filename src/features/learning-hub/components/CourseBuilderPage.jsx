@@ -21,11 +21,11 @@ import {
   adminCreateQuestion,
   adminCreateOption,
   adminDeleteQuiz,
-  adminDeleteQuestion,
-  uploadVideoToR2
+  adminDeleteQuestion
 } from '../services/adminLmsService';
 import './CourseBuilderPage.css';
 import { useLmsDragDrop } from '../hooks/useLmsDragDrop';
+import { RichTextEditor } from '../../shared/components/RichTextEditor';
 
 const convertToWebP = (file) => {
   return new Promise((resolve, reject) => {
@@ -101,7 +101,6 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
     title_en: '',
     content_ar: '',
     content_en: '',
-    video_url: '',
     duration: '',
     sequence_order: 1
   });
@@ -290,7 +289,6 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       title_en: '',
       content_ar: '',
       content_en: '',
-      video_url: '',
       duration: '',
       sequence_order: (modules.find(m => m.id === modId)?.lessons?.length || 0) + 1
     });
@@ -306,7 +304,6 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       title_en: lesson.title_en || '',
       content_ar: lesson.content_ar || '',
       content_en: lesson.content_en || '',
-      video_url: lesson.video_url || '',
       duration: lesson.duration || '',
       sequence_order: lesson.sequence_order || 1
     });
@@ -644,7 +641,6 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                                 <span>{lang === 'ar' ? les.title_ar : (les.title_en || les.title_ar)}</span>
                               </div>
                               <div className="cb-lesson-meta" draggable={false} onDragStart={e => e.stopPropagation()} onClick={e => e.stopPropagation()}>
-                                {les.video_url && <span className="cb-badge video-badge">Video</span>}
                                 <button onClick={(e) => { e.stopPropagation(); deleteLesson(les.id); }} className="cb-lesson-del" style={{ color: '#ff4d4d' }}>{lang === 'ar' ? 'حذف' : 'Delete'}</button>
                               </div>
                             </div>
@@ -810,32 +806,22 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                   </div>
 
                   <div className="cb-form-group">
-                    <label>Video Key/URL (Cloudflare R2 Key)</label>
-                    <input type="text" value={lessonForm.video_url} onInput={e => setLessonForm({...lessonForm, video_url: e.target.value})} placeholder="e.g. videos/my-lecture.webm" />
-                    
-                    {/* R2 Video Upload Field */}
-                    <div className="cb-upload-box">
-                      <label className="cb-upload-label">
-                        <span>Upload Video to Cloudflare R2</span>
-                        <input type="file" accept="video/*" onChange={handleVideoUpload} style={{ display: 'none' }} />
-                      </label>
-                      {uploadProgress !== null && (
-                        <div className="cb-progress-bar">
-                          <div className="cb-progress-fill" style={{ width: `${uploadProgress}%` }} />
-                          <span className="cb-progress-text">{uploadProgress}% uploaded</span>
-                        </div>
-                      )}
-                      {uploadError && <div className="cb-upload-error">{uploadError}</div>}
-                    </div>
-                  </div>
-
-                  <div className="cb-form-group">
                     <label>Lesson Content (AR)</label>
-                    <textarea rows={6} value={lessonForm.content_ar} onInput={e => setLessonForm({...lessonForm, content_ar: e.target.value})} />
+                    <RichTextEditor 
+                      value={lessonForm.content_ar} 
+                      onChange={val => setLessonForm({...lessonForm, content_ar: val})} 
+                      isRtl={true} 
+                      placeholder="ابدأ بكتابة الدرس أو إدراج فيديو/صوت..."
+                    />
                   </div>
-                  <div className="cb-form-group">
+                  <div className="cb-form-group" style={{ marginTop: '20px' }}>
                     <label>Lesson Content (EN)</label>
-                    <textarea rows={6} value={lessonForm.content_en} onInput={e => setLessonForm({...lessonForm, content_en: e.target.value})} />
+                    <RichTextEditor 
+                      value={lessonForm.content_en} 
+                      onChange={val => setLessonForm({...lessonForm, content_en: val})} 
+                      isRtl={false} 
+                      placeholder="Start writing the lesson or insert media..."
+                    />
                   </div>
 
                   <div className="cb-form-group">

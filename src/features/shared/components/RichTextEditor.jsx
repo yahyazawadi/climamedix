@@ -1,7 +1,8 @@
 import { useRef, useCallback, useEffect } from 'preact/hooks';
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { uploadFileToR2, uploadVideoToR2 } from '../../../utils/s3Client';
+import { uploadFileToR2 } from '../../../utils/s3Client';
+import { uploadVideoToR2 } from '../../learning-hub/services/adminLmsService';
 
 // Custom Video Blot
 const BlockEmbed = Quill.import('blots/block/embed');

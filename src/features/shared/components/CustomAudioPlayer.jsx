@@ -171,11 +171,15 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {/* Speed Selection */}
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <div 
+              style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '10px', margin: '-10px' }}
+              onMouseEnter={() => { setShowSpeedSlider(true); setShowVolumeSlider(false); }}
+              onMouseLeave={() => setShowSpeedSlider(false)}
+            >
               {showSpeedSlider && (
                 <div style={{
                   position: 'absolute',
-                  bottom: 'calc(100% + 10px)',
+                  bottom: 'calc(100% + 5px)',
                   left: '50%',
                   transform: 'translateX(-50%)',
                   background: 'rgba(11, 40, 73, 0.95)',
@@ -238,7 +242,7 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
             {/* Volume Selection */}
             <div 
               style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '10px', margin: '-10px' }}
-              onMouseEnter={() => setShowVolumeSlider(true)}
+              onMouseEnter={() => { setShowVolumeSlider(true); setShowSpeedSlider(false); }}
               onMouseLeave={() => setShowVolumeSlider(false)}
             >
               {showVolumeSlider && (

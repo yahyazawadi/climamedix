@@ -147,6 +147,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
     *   [x] Progress Tracking & Completed Lesson Badges (Dynamic vertical stepper timeline connecting completed lessons with brand colors)
     *   [x] Toggle Lesson Status (Interactive completion badges that allow unmarking lessons to dynamically reset progress)
     *   [ ] Certificates
+    *   [ ] **Note:** Further testing is needed for courses to ensure all edge cases and module workflows are perfectly stable.
 *   [x] **User Dashboard:**
     *   [x] My Courses (Active and Completed courses split, fetching DB-calculated individual progress and remaining lesson counts)
     *   [x] Overall Analytics (Dynamic "Total Progress Percentage" mathematically averaging exact progress across all enrolled courses)

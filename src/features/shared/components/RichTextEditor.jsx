@@ -22,7 +22,7 @@ class VideoBlot extends BlockEmbed {
 }
 VideoBlot.blotName = 'video';
 VideoBlot.tagName = 'video';
-Quill.register(VideoBlot);
+Quill.register(VideoBlot, true);
 
 // Custom Audio Blot
 class AudioBlot extends BlockEmbed {
@@ -41,7 +41,7 @@ class AudioBlot extends BlockEmbed {
 }
 AudioBlot.blotName = 'audio';
 AudioBlot.tagName = 'audio';
-Quill.register(AudioBlot);
+Quill.register(AudioBlot, true);
 
 const convertToWebP = (file) => {
   return new Promise((resolve, reject) => {

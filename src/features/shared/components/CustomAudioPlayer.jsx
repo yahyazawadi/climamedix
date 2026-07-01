@@ -179,7 +179,7 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
               {showSpeedSlider && (
                 <div style={{
                   position: 'absolute',
-                  bottom: 'calc(100% + 5px)',
+                  bottom: 'calc(100% - 5px)',
                   left: '50%',
                   transform: 'translateX(-50%)',
                   background: 'rgba(11, 40, 73, 0.95)',
@@ -248,7 +248,7 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
               {showVolumeSlider && (
                 <div style={{
                   position: 'absolute',
-                  bottom: 'calc(100% + 5px)',
+                  bottom: 'calc(100% - 5px)',
                   left: '50%',
                   transform: 'translateX(-50%)',
                   background: 'rgba(11, 40, 73, 0.95)',

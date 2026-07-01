@@ -438,12 +438,11 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
         sequence_order: (quiz.quiz_questions?.length || 0) + 1
       });
 
-      const optionsToCreate = newOptions.filter(o => o.textAr.trim()).map((o, idx) => ({
+      const optionsToCreate = newOptions.filter(o => o.textAr.trim()).map((o) => ({
         question_id: q.id,
         option_text_ar: o.textAr,
         option_text_en: o.textEn,
-        is_correct: o.isCorrect,
-        sequence_order: idx + 1
+        is_correct: o.isCorrect
       }));
 
       const createdOptions = [];

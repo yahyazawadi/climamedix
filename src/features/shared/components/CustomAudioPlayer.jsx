@@ -6,6 +6,11 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [showSpeedSlider, setShowSpeedSlider] = useState(false);
   const audioRef = useRef(null);
   const waveformRef = useRef(null);
 
@@ -78,6 +83,22 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
     }
   };
 
+  const changeSpeed = (speed) => {
+    if (!audioRef.current) return;
+    audioRef.current.playbackRate = speed;
+    setPlaybackSpeed(speed);
+  };
+
+  const handleVolumeChange = (newVal) => {
+    setVolume(newVal);
+    if (audioRef.current) {
+      audioRef.current.volume = newVal;
+      const isCurrentlyMuted = newVal === 0;
+      audioRef.current.muted = isCurrentlyMuted;
+      setIsMuted(isCurrentlyMuted);
+    }
+  };
+
   const handleTimeUpdate = () => {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
@@ -133,11 +154,133 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
 
       {/* Info & Waveform */}
       <div style={{ flexGrow: 1 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontSize: '14px', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#fff', fontSize: '14px', marginBottom: '12px' }}>
           <span style={{ fontWeight: 'bold' }}>{title}</span>
-          <span style={{ color: '#15b47a', fontWeight: 'bold' }}>
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* Speed Selection */}
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              {showSpeedSlider && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: 'calc(100% + 10px)',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'rgba(11, 40, 73, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '8px',
+                  padding: '12px 8px',
+                  zIndex: 10,
+                  height: '120px',
+                  minWidth: '46px',
+                  boxSizing: 'border-box',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
+                  gap: '8px'
+                }}>
+                  <span style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
+                    {playbackSpeed.toFixed(1)}x
+                  </span>
+                  <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <input 
+                      type="range"
+                      min="0.5"
+                      max="2.0"
+                      step="0.1"
+                      value={playbackSpeed}
+                      onInput={(e) => changeSpeed(parseFloat(e.target.value))}
+                      className="custom-range-slider"
+                    />
+                  </div>
+                </div>
+              )}
+              <button
+                title="Playback Speed"
+                onClick={() => { setShowSpeedSlider(!showSpeedSlider); setShowVolumeSlider(false); }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.12)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  color: '#ffffff',
+                  borderRadius: '6px',
+                  padding: '2px 6px',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: '36px',
+                  outline: 'none',
+                  lineHeight: '1'
+                }}
+              >
+                <span>{playbackSpeed.toFixed(1)}x</span>
+              </button>
+            </div>
+
+            {/* Volume Selection */}
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              {showVolumeSlider && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: 'calc(100% + 10px)',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'rgba(11, 40, 73, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '8px',
+                  padding: '12px 8px',
+                  zIndex: 10,
+                  height: '120px',
+                  minWidth: '46px',
+                  boxSizing: 'border-box',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
+                  gap: '8px'
+                }}>
+                  <span style={{ fontSize: '10px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
+                    {Math.round((isMuted ? 0 : volume) * 100)}%
+                  </span>
+                  <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <input 
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={isMuted ? 0 : volume}
+                      onInput={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                      className="custom-range-slider"
+                    />
+                  </div>
+                </div>
+              )}
+              <button 
+                title="Volume / Mute"
+                onClick={() => { setShowVolumeSlider(!showVolumeSlider); setShowSpeedSlider(false); }}
+                style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              >
+                {isMuted || volume === 0 ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                ) : volume < 0.5 ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                )}
+              </button>
+            </div>
+            
+            <span style={{ color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace' }}>
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </span>
+          </div>
         </div>
         
         {/* Simple Progress Line */}

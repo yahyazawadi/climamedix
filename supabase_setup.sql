@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS public.lessons (
     audio_url TEXT,
     pdf_url TEXT,
     duration TEXT,
+    is_quiz BOOLEAN DEFAULT FALSE,
     sequence_order INT DEFAULT 0,
     created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL DEFAULT auth.uid(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL

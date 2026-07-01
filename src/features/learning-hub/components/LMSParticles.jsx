@@ -73,8 +73,8 @@ export function LMSParticles() {
       particles.push({
         x: startX,
         y: startY,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: (Math.random() - 0.5) * 0.8,
+        vx: (Math.random() - 0.5) * 0.15,
+        vy: (Math.random() - 0.5) * 0.15,
         radius: Math.random() * 6 + 3, // moderate size (3 to 9)
         r: template.r,
         g: template.g,
@@ -196,12 +196,12 @@ export function LMSParticles() {
       particles.forEach((p, idx) => {
         // 3. Dynamic entropy movement (Brownian noise) - crowded particles shake gently to break clusters
         const isCrowded = neighborCounts[idx] > 4;
-        const crowdAgitation = isCrowded ? 0.07 : 0.05;
+        const crowdAgitation = isCrowded ? 0.015 : 0.005;
         p.vx += (Math.random() - 0.5) * crowdAgitation;
         p.vy += (Math.random() - 0.5) * crowdAgitation;
 
         // Cap speed of free floating particles (allow crowded nodes to move slightly faster to disperse)
-        const maxSpeed = isCrowded ? 1.35 : 1.2;
+        const maxSpeed = isCrowded ? 0.2 : 0.15;
         const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
         if (speed > maxSpeed && !attractedIndices.has(idx)) {
           p.vx = (p.vx / speed) * maxSpeed;
@@ -235,12 +235,12 @@ export function LMSParticles() {
           // 1 at the exact center, 0 at the edge of the content zone
           const penetration = 1 - (Math.abs(centerDistX) / avoidanceRadius);
           // Push left or right depending on which side of the center it is
-          p.vx += (centerDistX > 0 ? 1 : -1) * penetration * 0.08;
+          p.vx += (centerDistX > 0 ? 1 : -1) * penetration * 0.01;
         }
 
         // Subtle vertical gravity so they don't all get stuck at the very top/bottom
         const dyCenter = (height / 2) - p.y;
-        p.vy += dyCenter * 0.00008;
+        p.vy += dyCenter * 0.00003;
 
         // 2. Off-screen recycling & random entropy
         let shouldRespawn = false;
@@ -296,8 +296,8 @@ export function LMSParticles() {
             
             p.x = bestX;
             p.y = bestY;
-            p.vx = (Math.random() - 0.5) * 0.8;
-            p.vy = (Math.random() - 0.5) * 0.8;
+            p.vx = (Math.random() - 0.5) * 0.15;
+            p.vy = (Math.random() - 0.5) * 0.15;
             p.originalVx = p.vx;
             p.originalVy = p.vy;
             p.isDespawning = false; // Transition to fade-in

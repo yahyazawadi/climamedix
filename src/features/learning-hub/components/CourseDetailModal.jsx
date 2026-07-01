@@ -495,6 +495,37 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                     </div>
                   )}
 
+                  {/* Display Result Hero if Quiz is Passed */}
+                  {quizData && lastQuizScore !== null && isCurrentCompleted && (
+                    <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px',
+                        background: lastQuizScore >= (quizData.passing_score ?? 80) ? 'rgba(21,180,122,0.06)' : 'rgba(255,77,77,0.06)',
+                        border: `1px solid ${lastQuizScore >= (quizData.passing_score ?? 80) ? '#15b47a' : '#ff4d4d'}`,
+                        borderRadius: '24px', padding: '40px', width: '100%', maxWidth: '400px', textAlign: 'center'
+                      }}>
+                        <div style={{ fontSize: '56px', marginBottom: '8px' }}>
+                          {lastQuizScore >= (quizData.passing_score ?? 80) ? '🎉' : '📝'}
+                        </div>
+                        <h3 style={{ color: '#0b2849', margin: 0, fontSize: '24px' }}>
+                          {lang === 'ar' ? 'نتيجة الاختبار' : 'Quiz Result'}
+                        </h3>
+                        <div style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '8px',
+                          background: '#fff', padding: '16px 32px', borderRadius: '16px',
+                          boxShadow: '0 8px 24px rgba(11,40,73,0.06)', marginTop: '8px'
+                        }}>
+                          <span style={{ fontSize: '16px', color: '#0b2849', fontWeight: '600' }}>
+                            {lang === 'ar' ? 'الدرجة:' : 'Score:'}
+                          </span>
+                          <span style={{ fontSize: '28px', fontWeight: 'bold', color: lastQuizScore >= (quizData.passing_score ?? 80) ? '#15b47a' : '#ff4d4d' }}>
+                            {lastQuizScore}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Action Bar */}
                   <div style={{ borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto' }}>
                     {isCurrentCompleted ? (

@@ -212,10 +212,11 @@ export async function fetchPassedAttempt(userId, quizId) {
     .eq('user_id', userId)
     .eq('quiz_id', quizId)
     .eq('passed', true)
-    .maybeSingle();
+    .order('attempted_at', { ascending: false })
+    .limit(1);
 
   if (error) throw error;
-  return data; // null if not passed yet
+  return data && data.length > 0 ? data[0] : null;
 }
 
 // ─── SECURE VIDEO URL ─────────────────────────────────────────────────────────

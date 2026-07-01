@@ -532,7 +532,9 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                           onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                         >
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block' }}><polyline points="20 6 9 17 4 12"/></svg>
-                          {lang === 'ar' ? 'تم إتمام هذا الدرس بنجاح!' : 'Lesson completed!'}
+                          {quizData 
+                            ? (lang === 'ar' ? 'تم اجتياز الاختبار بنجاح!' : 'Quiz passed successfully!')
+                            : (lang === 'ar' ? 'تم إتمام هذا الدرس بنجاح!' : 'Lesson completed!')}
                         </button>
                       </div>
                     ) : quizData ? (

@@ -80,6 +80,8 @@ export function RichTextEditor({
   imageBucketFolder = 'editor_images' 
 }) {
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState(''); // 'compressing', 'uploading'
+  const [uploadProgress, setUploadProgress] = useState(0);
   const quillRef = useRef(null);
 
   // Add tooltips to Quill toolbar
@@ -119,9 +121,11 @@ export function RichTextEditor({
   const uploadAndInsertImage = async (file) => {
     try {
       setIsUploading(true);
+      setUploadStatus('compressing');
       onUploadingMedia?.(true);
       const webpFile = await convertToWebP(file);
-      const url = await uploadFileToR2(webpFile, imageBucketFolder);
+      setUploadStatus('uploading');
+      const url = await uploadFileToR2(webpFile, imageBucketFolder, (pct) => setUploadProgress(pct));
       
       const quill = quillRef.current.getEditor();
       const range = quill.getSelection(true);
@@ -132,6 +136,8 @@ export function RichTextEditor({
       alert(isRtl ? "فشل رفع الصورة." : "Failed to upload image.");
     } finally {
       setIsUploading(false);
+      setUploadStatus('');
+      setUploadProgress(0);
       onUploadingMedia?.(false);
     }
   };
@@ -161,8 +167,9 @@ export function RichTextEditor({
       if (file) {
         try {
           setIsUploading(true);
+          setUploadStatus('uploading');
           onUploadingMedia?.(true);
-          const url = await uploadFileToR2(file, 'videos');
+          const url = await uploadFileToR2(file, 'videos', (pct) => setUploadProgress(pct));
           const quill = quillRef.current.getEditor();
           const range = quill.getSelection(true);
           quill.insertEmbed(range.index, 'video', url);
@@ -171,6 +178,9 @@ export function RichTextEditor({
           console.error("Failed to upload video:", err);
           alert(isRtl ? "فشل رفع الفيديو." : "Failed to upload video.");
         } finally {
+          setIsUploading(false);
+          setUploadStatus('');
+          setUploadProgress(0);
           onUploadingMedia?.(false);
         }
       }
@@ -191,8 +201,9 @@ export function RichTextEditor({
         } else if (file.type.startsWith('video/')) {
           try {
             setIsUploading(true);
+            setUploadStatus('uploading');
             onUploadingMedia?.(true);
-            const url = await uploadFileToR2(file, 'videos');
+            const url = await uploadFileToR2(file, 'videos', (pct) => setUploadProgress(pct));
             const quill = quillRef.current.getEditor();
             const range = quill.getSelection(true);
             quill.insertEmbed(range.index, 'video', url);
@@ -202,6 +213,8 @@ export function RichTextEditor({
             alert(isRtl ? "فشل رفع الفيديو." : "Failed to upload video.");
           } finally {
             setIsUploading(false);
+            setUploadStatus('');
+            setUploadProgress(0);
             onUploadingMedia?.(false);
           }
         }
@@ -220,8 +233,9 @@ export function RichTextEditor({
       if (file) {
         try {
           setIsUploading(true);
+          setUploadStatus('uploading');
           onUploadingMedia?.(true);
-          const url = await uploadFileToR2(file, 'course_audio');
+          const url = await uploadFileToR2(file, 'course_audio', (pct) => setUploadProgress(pct));
           const quill = quillRef.current.getEditor();
           const range = quill.getSelection(true);
           quill.insertEmbed(range.index, 'audio', url);
@@ -231,6 +245,8 @@ export function RichTextEditor({
           alert(isRtl ? "فشل رفع الملف الصوتي." : "Failed to upload audio.");
         } finally {
           setIsUploading(false);
+          setUploadStatus('');
+          setUploadProgress(0);
           onUploadingMedia?.(false);
         }
       }
@@ -294,8 +310,13 @@ export function RichTextEditor({
             animation: 'spin 1s linear infinite'
           }}></div>
           <p style={{ marginTop: '12px', fontWeight: 'bold', color: '#0b2849' }}>
-            {isRtl ? 'جاري رفع الملف...' : 'Uploading Media...'}
+            {uploadStatus === 'compressing' ? (isRtl ? 'جاري ضغط الصورة ومعالجتها...' : 'Compressing Image...') : (isRtl ? `جاري رفع الملف... ${uploadProgress}%` : `Uploading Media... ${uploadProgress}%`)}
           </p>
+          {uploadStatus === 'uploading' && (
+            <div style={{ width: '200px', height: '6px', background: 'rgba(11,40,73,0.1)', borderRadius: '10px', marginTop: '10px', overflow: 'hidden' }}>
+              <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#15b47a', transition: 'width 0.2s ease' }} />
+            </div>
+          )}
           <style dangerouslySetInnerHTML={{__html: `
             @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
           `}} />

@@ -285,7 +285,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
   }
 
   // ─── Lesson Save/Edit ───
-  async function openLessonModalForNew(modId) {
+  async function openLessonModalForNew(modId, isExam = false) {
     setEditingLesson(null);
     setLessonModuleId(modId);
     setLessonForm({
@@ -294,9 +294,11 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       content_ar: '',
       content_en: '',
       duration: '',
+      is_quiz: isExam,
       sequence_order: (modules.find(m => m.id === modId)?.lessons?.length || 0) + 1
     });
     setQuiz(null);
+    setActiveLessonTab(isExam ? 'quiz' : 'content');
     setShowLessonModal(true);
   }
 
@@ -309,8 +311,10 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
       content_ar: lesson.content_ar || '',
       content_en: lesson.content_en || '',
       duration: lesson.duration || '',
+      is_quiz: lesson.is_quiz || false,
       sequence_order: lesson.sequence_order || 1
     });
+    setActiveLessonTab(lesson.is_quiz ? 'quiz' : 'content');
     setShowLessonModal(true);
     loadLessonQuiz(lesson.id);
   }
@@ -420,8 +424,8 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
 
     // Validate options
     const correctCount = newOptions.filter(o => o.isCorrect).length;
-    if (correctCount !== 1) {
-      alert('You must select exactly one correct option.');
+    if (correctCount < 1) {
+      alert(lang === 'ar' ? 'يجب تحديد خيار صحيح واحد على الأقل.' : 'You must select at least one correct option.');
       return;
     }
 
@@ -610,7 +614,8 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                             </h4>
                           </div>
                           <div className="cb-module-actions" draggable={false} onDragStart={e => e.stopPropagation()} onClick={e => e.stopPropagation()}>
-                            <button onClick={() => openLessonModalForNew(mod.id)} title="Add Lesson" style={{ fontSize: '11px' }}>+ {lang === 'ar' ? 'درس' : 'Lesson'}</button>
+                            <button onClick={() => openLessonModalForNew(mod.id, false)} title="Add Lesson" style={{ fontSize: '11px' }}>+ {lang === 'ar' ? 'درس' : 'Lesson'}</button>
+                            <button onClick={() => openLessonModalForNew(mod.id, true)} title="Add Exam" style={{ fontSize: '11px', background: 'rgba(234, 67, 53, 0.1)', color: '#ea4335' }}>+ {lang === 'ar' ? 'اختبار' : 'Exam'}</button>
                             <button onClick={() => {
                               setEditingModule(mod);
                               setModuleForm({
@@ -645,7 +650,10 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                                   <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
                                   <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
                                 </svg>
-                                <span>{lang === 'ar' ? les.title_ar : (les.title_en || les.title_ar)}</span>
+                                <span>
+                                  {les.is_quiz && <span style={{ color: '#ea4335', marginRight: '4px', fontSize: '12px' }}>★</span>}
+                                  {lang === 'ar' ? les.title_ar : (les.title_en || les.title_ar)}
+                                </span>
                               </div>
                               <div className="cb-lesson-meta" draggable={false} onDragStart={e => e.stopPropagation()} onClick={e => e.stopPropagation()}>
                                 <button onClick={(e) => { e.stopPropagation(); deleteLesson(les.id); }} className="cb-lesson-del" style={{ color: '#ff4d4d' }}>{lang === 'ar' ? 'حذف' : 'Delete'}</button>
@@ -794,8 +802,13 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
           <GlassCard className="cb-modal-card cb-large-modal">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid rgba(11,40,73,0.1)', paddingBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <h4 style={{ margin: 0 }}>{editingLesson ? (lang === 'ar' ? 'تعديل الدرس ومحتوياته' : 'Edit Lesson & Content') : (lang === 'ar' ? 'درس جديد' : 'New Lesson')}</h4>
-                {editingLesson && (
+                <h4 style={{ margin: 0 }}>
+                  {editingLesson 
+                    ? (lessonForm.is_quiz ? (lang === 'ar' ? 'تعديل الاختبار' : 'Edit Exam') : (lang === 'ar' ? 'تعديل الدرس' : 'Edit Lesson')) 
+                    : (lessonForm.is_quiz ? (lang === 'ar' ? 'اختبار جديد' : 'New Exam') : (lang === 'ar' ? 'درس جديد' : 'New Lesson'))
+                  }
+                </h4>
+                {(editingLesson && !lessonForm.is_quiz) && (
                   <div className="cb-modal-tabs">
                     <button type="button" className={`cb-modal-tab ${activeLessonTab === 'content' ? 'active' : ''}`} onClick={() => setActiveLessonTab('content')}>
                       {lang === 'ar' ? 'محتوى الدرس' : 'Lesson Content'}
@@ -826,38 +839,42 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                   {activeLangTab === 'ar' && (
                     <>
                       <div className="cb-form-group">
-                        <label>{lang === 'ar' ? 'عنوان الدرس (عربي)' : 'Lesson Title (AR)'}</label>
+                        <label>{lessonForm.is_quiz ? (lang === 'ar' ? 'عنوان الاختبار (عربي)' : 'Exam Title (AR)') : (lang === 'ar' ? 'عنوان الدرس (عربي)' : 'Lesson Title (AR)')}</label>
                         <input type="text" required value={lessonForm.title_ar} onInput={e => setLessonForm({...lessonForm, title_ar: e.target.value})} />
                       </div>
-                      <div className="cb-form-group">
-                        <label>{lang === 'ar' ? 'محتوى الدرس (عربي)' : 'Lesson Content (AR)'}</label>
-                        <RichTextEditor 
-                          value={lessonForm.content_ar} 
-                          onChange={val => setLessonForm({...lessonForm, content_ar: val})} 
-                          isRtl={true} 
-                          placeholder="ابدأ بكتابة الدرس أو إدراج وسائط..."
-                          onUploadingMedia={setIsUploadingMedia}
-                        />
-                      </div>
+                      {!lessonForm.is_quiz && (
+                        <div className="cb-form-group">
+                          <label>{lang === 'ar' ? 'محتوى الدرس (عربي)' : 'Lesson Content (AR)'}</label>
+                          <RichTextEditor 
+                            value={lessonForm.content_ar} 
+                            onChange={val => setLessonForm({...lessonForm, content_ar: val})} 
+                            isRtl={true} 
+                            placeholder="ابدأ بكتابة الدرس أو إدراج وسائط..."
+                            onUploadingMedia={setIsUploadingMedia}
+                          />
+                        </div>
+                      )}
                     </>
                   )}
 
                   {activeLangTab === 'en' && (
                     <>
                       <div className="cb-form-group">
-                        <label>{lang === 'ar' ? 'عنوان الدرس (إنجليزي)' : 'Lesson Title (EN)'}</label>
+                        <label>{lessonForm.is_quiz ? (lang === 'ar' ? 'عنوان الاختبار (إنجليزي)' : 'Exam Title (EN)') : (lang === 'ar' ? 'عنوان الدرس (إنجليزي)' : 'Lesson Title (EN)')}</label>
                         <input type="text" required value={lessonForm.title_en} onInput={e => setLessonForm({...lessonForm, title_en: e.target.value})} />
                       </div>
-                      <div className="cb-form-group">
-                        <label>{lang === 'ar' ? 'محتوى الدرس (إنجليزي)' : 'Lesson Content (EN)'}</label>
-                        <RichTextEditor 
-                          value={lessonForm.content_en} 
-                          onChange={val => setLessonForm({...lessonForm, content_en: val})} 
-                          isRtl={false} 
-                          placeholder="Start writing the lesson or insert media..."
-                          onUploadingMedia={setIsUploadingMedia}
-                        />
-                      </div>
+                      {!lessonForm.is_quiz && (
+                        <div className="cb-form-group">
+                          <label>{lang === 'ar' ? 'محتوى الدرس (إنجليزي)' : 'Lesson Content (EN)'}</label>
+                          <RichTextEditor 
+                            value={lessonForm.content_en} 
+                            onChange={val => setLessonForm({...lessonForm, content_en: val})} 
+                            isRtl={false} 
+                            placeholder="Start writing the lesson or insert media..."
+                            onUploadingMedia={setIsUploadingMedia}
+                          />
+                        </div>
+                      )}
                     </>
                   )}
 
@@ -940,16 +957,18 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                       </div>
 
                       {/* Options */}
-                      <label style={{ fontSize: '11px', display: 'block', marginBottom: '6px' }}>Options (Select one correct option):</label>
+                      <label style={{ fontSize: '11px', display: 'block', marginBottom: '6px' }}>
+                        {lang === 'ar' ? 'الخيارات (حدد الخيارات الصحيحة):' : 'Options (Select correct options):'}
+                      </label>
                       <div className="cb-new-options-list">
                         {newOptions.map((opt, idx) => (
                           <div key={idx} className="cb-option-input-row">
                             <input 
-                              type="radio" 
-                              name="correctOption" 
+                              type="checkbox" 
                               checked={opt.isCorrect} 
-                              onChange={() => {
-                                setNewOptions(prev => prev.map((o, i) => ({ ...o, isCorrect: i === idx })));
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setNewOptions(prev => prev.map((o, i) => i === idx ? { ...o, isCorrect: checked } : o));
                               }} 
                             />
                             <input 
@@ -972,9 +991,27 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                               }} 
                               style={{ fontSize: '12px', padding: '6px' }}
                             />
+                            {newOptions.length > 2 && (
+                              <button 
+                                type="button" 
+                                onClick={() => setNewOptions(prev => prev.filter((_, i) => i !== idx))} 
+                                style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer', fontSize: '16px', padding: '0 4px' }}
+                                title="Remove Option"
+                              >
+                                ✕
+                              </button>
+                            )}
                           </div>
                         ))}
                       </div>
+
+                      <button 
+                        type="button" 
+                        onClick={() => setNewOptions(prev => [...prev, { textAr: '', textEn: '', isCorrect: false }])} 
+                        style={{ background: 'none', border: 'none', color: '#4CAF50', cursor: 'pointer', fontSize: '12px', marginTop: '6px', fontWeight: 'bold' }}
+                      >
+                        + {lang === 'ar' ? 'إضافة خيار' : 'Add Option'}
+                      </button>
 
                       <Button onClick={addQuestionToQuiz} variant="gradient" style={{ fontSize: '12px', padding: '8px 16px', marginTop: '12px', width: '100%' }}>
                         {lang === 'ar' ? 'إضافة السؤال للاختبار' : 'Add Question'}

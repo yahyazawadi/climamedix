@@ -353,6 +353,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                     <button
                       title={lang === 'ar' ? 'سرعة التشغيل' : 'Playback Speed'}
                       onClick={() => { setShowSpeedSlider(!showSpeedSlider); setShowVolumeSlider(false); }}
+                      onDoubleClick={() => changeSpeed(1)}
                       style={{
                         background: 'rgba(255, 255, 255, 0.12)',
                         border: '1px solid rgba(255, 255, 255, 0.25)',
@@ -375,11 +376,15 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                   </div>
 
                   {/* Volume Selection */}
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <div 
+                    style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '10px', margin: '-10px' }}
+                    onMouseEnter={() => setShowVolumeSlider(true)}
+                    onMouseLeave={() => setShowVolumeSlider(false)}
+                  >
                     {showVolumeSlider && (
                       <div style={{
                         position: 'absolute',
-                        bottom: 'calc(100% + 10px)',
+                        bottom: 'calc(100% + 5px)',
                         left: '50%',
                         transform: 'translateX(-50%)',
                         background: 'rgba(11, 40, 73, 0.95)',
@@ -416,7 +421,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                     )}
                     <button 
                       title={lang === 'ar' ? 'مستوى الصوت / كتم' : 'Volume / Mute'}
-                      onClick={() => { setShowVolumeSlider(!showVolumeSlider); setShowSpeedSlider(false); }}
+                      onClick={toggleMute}
                       style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                     >
                       {isMuted || volume === 0 ? (

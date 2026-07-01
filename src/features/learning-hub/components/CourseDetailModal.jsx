@@ -96,10 +96,17 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
 
         // Check if already passed
         if (quiz) {
-          const passed = await fetchPassedAttempt(userId, quiz.id);
-          setQuizPassed(!!passed);
+          const attempt = await fetchPassedAttempt(userId, quiz.id);
+          if (attempt) {
+            setQuizPassed(true);
+            setLastQuizScore(attempt.score);
+          } else {
+            setQuizPassed(false);
+            setLastQuizScore(null);
+          }
         } else {
           setQuizPassed(false);
+          setLastQuizScore(null);
         }
       } catch (err) {
         console.error('Lesson data load error:', err);

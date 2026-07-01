@@ -149,7 +149,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
     *   [x] Overall Analytics (Dynamic "Total Progress Percentage" mathematically averaging exact progress across all enrolled courses)
     *   [x] Completed Courses (Rendering fetched completed courses)
     *   [ ] Certificates (UI built, auto-generation pending)
-    *   [ ] Quiz Results
+    *   [x] Quiz Results (Users can view their passed scores directly within the course modules)
 
 ### 5. 🧪 Research Center
 *   [x] **Sections Layout:**

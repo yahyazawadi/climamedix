@@ -27,12 +27,7 @@ export function ResearchUploadPage({ lang, onNavigate }) {
 
   const isRtl = lang === 'ar';
 
-  const canWrite = userProfile && (
-    userProfile.role === 'admin' ||
-    userProfile.role === 'superadmin' ||
-    userProfile.role === 'researcher' ||
-    (hasPermission && hasPermission('write:research'))
-  );
+  const canWrite = hasPermission && hasPermission('write:research');
 
   const handleSave = async (e) => {
     e.preventDefault();

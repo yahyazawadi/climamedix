@@ -72,12 +72,7 @@ export function ArticleEditorPage({ lang, onNavigate }) {
 
   const isRtl = lang === 'ar';
 
-  const canWrite = userProfile && (
-    userProfile.role === 'admin' ||
-    userProfile.role === 'superadmin' ||
-    userProfile.role === 'researcher' ||
-    (hasPermission && hasPermission('write:articles'))
-  );
+  const canWrite = hasPermission && hasPermission('write:articles');
 
   const applyThumbnailFile = async (file) => {
     if (!file || !file.type.startsWith('image/')) return;

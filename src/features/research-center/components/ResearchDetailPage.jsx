@@ -122,16 +122,25 @@ export function ResearchDetailPage({ lang, onNavigate }) {
         {/* Sidebar */}
         <div className="rdp-sidebar">
           {/* Download Card */}
-          {pub.pdf_url && (
-            <div className="rdp-card">
-              <h4>{isRtl ? 'تحميل الملف' : 'Download File'}</h4>
-              <div className="rdp-file-type">{getFileType(pub.pdf_url)}</div>
-              <a href={pub.pdf_url} target="_blank" rel="noreferrer" className="rdp-download-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                {isRtl ? 'تحميل' : 'Download'}
-              </a>
-            </div>
-          )}
+          {pub.pdf_url && (() => {
+            const canDownload = !pub.full_access_permission_key || (hasPermission && hasPermission(pub.full_access_permission_key));
+            return (
+              <div className="rdp-card">
+                <h4>{isRtl ? 'تحميل الملف' : 'Download File'}</h4>
+                <div className="rdp-file-type">{getFileType(pub.pdf_url)}</div>
+                {canDownload ? (
+                  <a href={pub.pdf_url} target="_blank" rel="noreferrer" className="rdp-download-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    {isRtl ? 'تحميل' : 'Download'}
+                  </a>
+                ) : (
+                  <button className="rdp-download-btn" style={{ background: '#e2e8f0', color: '#64748b', cursor: 'not-allowed', border: 'none' }}>
+                    {isRtl ? 'مطلوب ترقية الحساب' : 'Upgrade to Download'}
+                  </button>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Info Card */}
           <div className="rdp-card">

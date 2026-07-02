@@ -32,8 +32,7 @@ export function OpportunitiesPage({ lang }) {
 
   const t = translations[lang] || translations.ar;
 
-  const canPost = userProfile?.role === 'admin' || 
-                  (hasPermission ? hasPermission('write:opportunities') : userProfile?.role === 'superadmin');
+  const canPost = hasPermission && hasPermission('write:opportunities');
 
   const teaserPermissionOptions = [
     { 

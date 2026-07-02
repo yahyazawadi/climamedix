@@ -9,12 +9,7 @@ export function ResearchHubPage({ lang, onNavigate }) {
   const { hasPermission, userProfile } = useAuth();
   const isRtl = lang === 'ar';
 
-  const canWrite = userProfile && (
-    userProfile.role === 'admin' ||
-    userProfile.role === 'superadmin' ||
-    userProfile.role === 'researcher' ||
-    (hasPermission && hasPermission('write:research'))
-  );
+  const canWrite = hasPermission && hasPermission('write:research');
 
   useEffect(() => {
     fetchPublications();
@@ -49,6 +44,19 @@ export function ResearchHubPage({ lang, onNavigate }) {
     if (ext === 'ppt' || ext === 'pptx') return 'PPT';
     if (ext === 'xls' || ext === 'xlsx') return 'Excel';
     return 'File';
+  };
+
+  const CATEGORY_LABELS = {
+    research: { ar: 'أبحاث', en: 'Research' },
+    climate: { ar: 'مناخ', en: 'Climate' },
+    health: { ar: 'صحة', en: 'Health' },
+    policy: { ar: 'سياسات', en: 'Policy' },
+    all: { ar: 'عام', en: 'General' },
+  };
+
+  const getCategoryLabel = (cat) => {
+    const key = cat || 'research';
+    return CATEGORY_LABELS[key]?.[lang] || key;
   };
 
   return (
@@ -128,9 +136,11 @@ export function ResearchHubPage({ lang, onNavigate }) {
         </div>
       ) : (
         <div className="rhp-grid">
-          {publications.map(pub => (
+          {publications.filter(pub => !pub.teaser_permission_key || (hasPermission && hasPermission(pub.teaser_permission_key))).map(pub => {
+            const canDownload = !pub.full_access_permission_key || (hasPermission && hasPermission(pub.full_access_permission_key));
+            return (
             <div key={pub.id} className="rhp-card" onClick={() => onNavigate?.('research-detail', pub.id)} style={{ cursor: 'pointer' }}>
-              <div className="rhp-card-badge">{pub.category || 'research'}</div>
+              <div className="rhp-card-badge">{getCategoryLabel(pub.category)}</div>
               <h3 className="rhp-card-title">{isRtl ? pub.title_ar : (pub.title_en || pub.title_ar)}</h3>
               <div className="rhp-card-meta">
                 <span>{pub.authors}</span>
@@ -142,15 +152,21 @@ export function ResearchHubPage({ lang, onNavigate }) {
               
               <div className="rhp-card-footer">
                 {pub.pdf_url ? (
-                  <a href={pub.pdf_url} target="_blank" rel="noreferrer" className="rhp-download-btn" onClick={e => e.stopPropagation()}>
-                    {renderIcon(pub.pdf_url)} {isRtl ? 'تحميل' : 'Download'}
-                  </a>
+                  canDownload ? (
+                    <a href={pub.pdf_url} target="_blank" rel="noreferrer" className="rhp-download-btn" onClick={e => e.stopPropagation()}>
+                      {renderIcon(pub.pdf_url)} {isRtl ? 'تحميل' : 'Download'}
+                    </a>
+                  ) : (
+                    <button className="rhp-download-btn" style={{ background: '#e2e8f0', color: '#64748b', cursor: 'not-allowed' }} onClick={e => e.stopPropagation()}>
+                      {isRtl ? 'مطلوب ترقية الحساب' : 'Upgrade to Download'}
+                    </button>
+                  )
                 ) : (
                   <span className="rhp-no-file">{isRtl ? 'لا يوجد ملف' : 'No file'}</span>
                 )}
               </div>
             </div>
-          ))}
+          )})}
         </div>
       )}
       </div>

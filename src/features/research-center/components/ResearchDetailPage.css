@@ -1,0 +1,233 @@
+.rdp-loading, .rdp-not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: 16px;
+  color: #64748b;
+  font-family: 'Inter', 'Cairo', sans-serif;
+}
+
+.rdp-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(21, 180, 122, 0.2);
+  border-top-color: #15b47a;
+  border-radius: 50%;
+  animation: rdp-spin 1s linear infinite;
+}
+
+@keyframes rdp-spin {
+  to { transform: rotate(360deg); }
+}
+
+.rdp-btn {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #15b47a, #0c8774);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rdp-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 20px;
+  transition: all 0.2s;
+}
+
+.rdp-back-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.rdp-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.rdp-badge {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rdp-year {
+  color: rgba(255,255,255,0.7);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.rdp-title {
+  font-size: clamp(24px, 3.5vw, 36px);
+  font-weight: 800;
+  color: white;
+  margin: 0 0 10px 0;
+  line-height: 1.3;
+}
+
+.rdp-alt-title {
+  color: rgba(255,255,255,0.6);
+  font-size: 16px;
+  margin: 0;
+  font-style: italic;
+}
+
+.rdp-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 30px;
+}
+
+.rdp-main {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.rdp-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(11, 40, 73, 0.04);
+  border: 1px solid rgba(11, 40, 73, 0.05);
+}
+
+.rdp-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px 0;
+}
+
+.rdp-authors {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0b2849;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.rdp-abstract {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #334155;
+}
+
+.rdp-alt-abstract {
+  margin-top: 16px;
+  border-top: 1px solid rgba(11, 40, 73, 0.05);
+  padding-top: 12px;
+}
+
+.rdp-alt-abstract summary {
+  cursor: pointer;
+  color: #15b47a;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.rdp-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rdp-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(11, 40, 73, 0.04);
+  border: 1px solid rgba(11, 40, 73, 0.05);
+}
+
+.rdp-card h4 {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0b2849;
+}
+
+.rdp-file-type {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.rdp-download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #15b47a, #0c8774);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.rdp-download-btn:hover {
+  opacity: 0.9;
+}
+
+.rdp-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(11, 40, 73, 0.05);
+}
+
+.rdp-info-row:last-child {
+  border-bottom: none;
+}
+
+.rdp-info-label {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.rdp-info-value {
+  font-size: 13px;
+  color: #0b2849;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .rdp-content {
+    grid-template-columns: 1fr;
+  }
+}

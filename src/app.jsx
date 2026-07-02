@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'preact/hooks'
 import './app.css'
-
 // Import newly created Header & Footer components
 import { Header } from './features/main/components/Header'
 import { Footer } from './features/main/components/Footer'
@@ -25,11 +24,13 @@ import { LearningHubPage } from './features/learning-hub/components/student/Lear
 import { UserManagementDashboard } from './features/admin/components/UserManagementDashboard'
 import { UserStatsDashboard } from './features/admin/components/UserStatsDashboard'
 import { CourseBuilderPage } from './features/learning-hub/components/admin/CourseBuilderPage'
+import { ResearchHubPage } from './features/research-center/components/ResearchHubPage'
+import { ResearchUploadPage } from './features/research-center/components/ResearchUploadPage'
+import { ResearchDetailPage } from './features/research-center/components/ResearchDetailPage'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import doctorImg from './assets/bg_3.png'
 import whiteLogo from './assets/footer_logo.svg'
-
 // Import section assets
 import research1 from './assets/research_1.png'
 import research2 from './assets/research_2.png'
@@ -47,7 +48,6 @@ import iconFavorite from './assets/icon_favorite.svg'
 import iconResearch from './assets/icon_research.svg'
 import iconTraining from './assets/icon_training.svg'
 import iconContact from './assets/icon_contact.svg'
-
 const DISCOVERY_ITEMS = [
   {
     id: 'disc-1',
@@ -115,7 +115,6 @@ const DISCOVERY_ITEMS = [
     comments: 38
   }
 ];
-
 export function App() {
   return (
     <AuthProvider>
@@ -123,7 +122,6 @@ export function App() {
     </AuthProvider>
   );
 }
-
 function AppContent() {
   const [theme, setTheme] = useState('light');
   const [lang, setLang] = useState(() => {
@@ -131,30 +129,25 @@ function AppContent() {
   });
   const [activeSection, setActiveSection] = useState('home');
   const [openedModal, setOpenedModal] = useState(null); // 'join', 'policy'
-  const [currentView, setCurrentView] = useState('home'); // 'home' or 'about-us'
+  const [currentView, setCurrentView] = useState('home'); // 'home' or 'about'
   const { user, userProfile, signOut } = useAuth();
-
   const [discoveryIndex, setDiscoveryIndex] = useState(0);
   const [likedItems, setLikedItems] = useState({});
   const itemsPerView = window.innerWidth < 600 ? 1 : window.innerWidth < 992 ? 2 : 3;
-
   const handleNextDiscovery = () => {
     setDiscoveryIndex((prev) => (prev + 1) % (DISCOVERY_ITEMS.length - itemsPerView + 1));
   };
-
   const handlePrevDiscovery = () => {
     setDiscoveryIndex((prev) => 
       prev === 0 ? DISCOVERY_ITEMS.length - itemsPerView : prev - 1
     );
   };
-
   const handleLike = (id) => {
     setLikedItems(prev => ({
       ...prev,
       [id]: !prev[id]
     }));
   };
-
   const handleLogout = async () => {
     await signOut();
     setCurrentView('home');
@@ -166,50 +159,52 @@ function AppContent() {
     document.documentElement.setAttribute('lang', newLang);
     document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
   };
-
   // Form States for Header/Footer modal triggers
   const [joinForm, setJoinForm] = useState({ name: '', email: '', profession: '' });
   const [joinSuccess, setJoinSuccess] = useState(false);
   const [joinSubmitting, setJoinSubmitting] = useState(false);
-
   const t = translations[lang] || translations.ar;
-
   // Theme Sync on Mount + Path Routing
   useEffect(() => {
     // Force light theme
     setTheme('light');
     document.body.classList.remove('dark-mode');
-
     // Set initial view from URL path
     const path = window.location.pathname.replace(/\/$/, "");
-    if (path === '/about-us' || path === '/about') {
-      setCurrentView('about-us');
+    if (path === '/about') {
+      setCurrentView('about');
     } else if (path === '/debug') {
       setCurrentView('debug');
     } else if (path === '/auth') {
       setCurrentView('auth');
     } else if (path === '/opportunities') {
       setCurrentView('opportunities');
-    } else if (path === '/join-us') {
-      setCurrentView('join-us');
+    } else if (path === '/join') {
+      setCurrentView('join');
     } else if (path === '/events') {
       setCurrentView('events');
     } else if (path === '/write-article') {
       setCurrentView('write-article');
     } else if (path === '/profile') {
       setCurrentView('profile');
-    } else if (path === '/news-blog') {
-      setCurrentView('news-blog');
+    } else if (path === '/news') {
+      setCurrentView('news');
     } else if (path === '/article') {
       setCurrentView('article');
-    } else if (path === '/learning-hub' || path === '/courses') {
-      setCurrentView('learning-hub');
+    } else if (path === '/courses') {
+      setCurrentView('courses');
     } else if (path === '/admin/users') {
       setCurrentView('admin-users');
     } else if (path === '/admin/stats') {
       setCurrentView('admin-stats');
     } else if (path === '/admin/courses') {
       setCurrentView('admin-courses');
+    } else if (path === '/research') {
+      setCurrentView('research');
+    } else if (path === '/research-upload') {
+      setCurrentView('research-upload');
+    } else if (path === '/research-detail') {
+      setCurrentView('research-detail');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -221,38 +216,43 @@ function AppContent() {
         }, 150);
       }
     }
-
     // Listen for path changes (browser back/forward)
     const handlePopState = () => {
       const p = window.location.pathname.replace(/\/$/, "");
-      if (p === '/about-us' || p === '/about') {
-        setCurrentView('about-us');
+      if (p === '/about') {
+        setCurrentView('about');
       } else if (p === '/debug') {
         setCurrentView('debug');
       } else if (p === '/auth') {
         setCurrentView('auth');
       } else if (p === '/opportunities') {
         setCurrentView('opportunities');
-      } else if (p === '/join-us') {
-        setCurrentView('join-us');
+      } else if (p === '/join') {
+        setCurrentView('join');
       } else if (p === '/events') {
         setCurrentView('events');
       } else if (p === '/write-article') {
         setCurrentView('write-article');
       } else if (p === '/profile') {
         setCurrentView('profile');
-      } else if (p === '/news-blog') {
-        setCurrentView('news-blog');
+      } else if (p === '/news') {
+        setCurrentView('news');
       } else if (p === '/article') {
         setCurrentView('article');
-      } else if (p === '/learning-hub' || p === '/courses') {
-        setCurrentView('learning-hub');
+      } else if (p === '/courses') {
+        setCurrentView('courses');
       } else if (p === '/admin/users') {
         setCurrentView('admin-users');
       } else if (p === '/admin/stats') {
         setCurrentView('admin-stats');
       } else if (p === '/admin/courses') {
         setCurrentView('admin-courses');
+      } else if (p === '/research') {
+        setCurrentView('research');
+      } else if (p === '/research-upload') {
+        setCurrentView('research-upload');
+      } else if (p === '/research-detail') {
+        setCurrentView('research-detail');
       } else {
         setCurrentView('home');
       }
@@ -260,14 +260,12 @@ function AppContent() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
-
   // Scroll to top when navigating to auth view
   useEffect(() => {
     if (currentView === 'auth') {
       window.scrollTo(0, 0);
     }
   }, [currentView]);
-
   // Theme Switch handler
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -279,7 +277,6 @@ function AppContent() {
       document.body.classList.remove('dark-mode');
     }
   };
-
   // Scroll Spy for active section styling
   useEffect(() => {
     const handleScroll = () => {
@@ -296,11 +293,9 @@ function AppContent() {
       });
       setActiveSection(currentSection);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
   // Join form submission
   const handleJoinSubmit = (e) => {
     e.preventDefault();
@@ -315,7 +310,6 @@ function AppContent() {
       }, 2000);
     }, 1000);
   };
-
   return (
     <div style={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh' }}>
       {/* Background components */}
@@ -326,7 +320,6 @@ function AppContent() {
           <ColoredBackground />
         </>
       ) : null}
-
       {/* Header component */}
       <Header 
         theme={theme} 
@@ -340,30 +333,32 @@ function AppContent() {
         toggleLanguage={toggleLanguage}
         onNavigate={(view, sectionId) => {
           setCurrentView(view);
-          if (view === 'about-us') {
-            window.history.pushState({}, '', '/about-us');
+          if (view === 'about') {
+            window.history.pushState({}, '', '/about');
           } else if (view === 'debug') {
             window.history.pushState({}, '', '/debug');
           } else if (view === 'auth') {
             window.history.pushState({}, '', '/auth');
           } else if (view === 'opportunities') {
             window.history.pushState({}, '', '/opportunities');
-          } else if (view === 'join-us') {
-            window.history.pushState({}, '', '/join-us');
+          } else if (view === 'join') {
+            window.history.pushState({}, '', '/join');
           } else if (view === 'events') {
             window.history.pushState({}, '', '/events');
-          } else if (view === 'write-article') {
-            window.history.pushState({}, '', '/write-article');
-          } else if (view === 'news-blog') {
-            window.history.pushState({}, '', '/news-blog');
-          } else if (view === 'learning-hub') {
-            window.history.pushState({}, '', '/learning-hub');
+          } else if (view === 'news') {
+            window.history.pushState({}, '', '/news');
+          } else if (view === 'courses') {
+            window.history.pushState({}, '', '/courses');
           } else if (view === 'admin-users') {
             window.history.pushState({}, '', '/admin/users');
           } else if (view === 'admin-stats') {
             window.history.pushState({}, '', '/admin/stats');
           } else if (view === 'admin-courses') {
             window.history.pushState({}, '', '/admin/courses');
+          } else if (view === 'research') {
+            window.history.pushState({}, '', '/research');
+          } else if (view === 'research-upload') {
+            window.history.pushState({}, '', '/research-upload');
           } else if (sectionId) {
             window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
@@ -374,9 +369,8 @@ function AppContent() {
             window.history.pushState({}, '', '/');
           }
         }}
-        onJoinClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }} 
+        onJoinClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }} 
       />
-
       {currentView === 'home' ? (
         <main className="figma-main-content">
         <section id="home" className="figma-hero-section">
@@ -401,11 +395,9 @@ function AppContent() {
                   <span className="figma-hero-desc-bottom">{t.heroDescBottom}</span>
                 </p>
               </div>
-
             </div>
           </div>
         </section>
-
         {/* Home News Widget inserted right after Hero */}
         <HomeNewsWidget 
           lang={lang} 
@@ -419,7 +411,6 @@ function AppContent() {
             }
           }} 
         />
-
         {/* Dynamic Discovery Carousel Section */}
         <section className="figma-discovery-section">
           <div className="discovery-container">
@@ -433,7 +424,6 @@ function AppContent() {
                   : 'Explore the latest articles, medical research, and training courses in one place'}
               </p>
             </div>
-
             <div className="discovery-carousel-outer">
               <div 
                 className="discovery-carousel-inner"
@@ -468,7 +458,6 @@ function AppContent() {
                   </div>
                 ))}
               </div>
-
               {/* Navigation buttons */}
               <button className="discovery-nav-btn prev" onClick={handlePrevDiscovery}>
                 {lang === 'ar' ? '←' : '→'}
@@ -479,7 +468,6 @@ function AppContent() {
             </div>
           </div>
         </section>
-
         {/* About Section */}
         <section id="about" className="figma-about-section">
           <div className="figma-section-container">
@@ -489,7 +477,7 @@ function AppContent() {
                 {t.aboutIntroText}
               </p>
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
-                <Button variant="gradient" onClick={() => setCurrentView('about-us')}>
+                <Button variant="gradient" onClick={() => setCurrentView('about')}>
                   {t.viewMore}
                 </Button>
               </div>
@@ -511,7 +499,6 @@ function AppContent() {
             </div>
           </div>
         </section>
-
         {/* Research Section */}
         <section id="research" className="figma-research-section">
           <div className="figma-section-container">
@@ -535,7 +522,6 @@ function AppContent() {
                   <Button variant="more" onClick={() => setOpenedModal('policy')}>{lang === 'ar' ? 'المزيد' : 'More'}</Button>
                 </div>
               </div>
-
               {/* Card 2 */}
               <div className="figma-item-card">
                 <div className="figma-item-card-image-wrap">
@@ -553,7 +539,6 @@ function AppContent() {
                   <Button variant="more" onClick={() => setOpenedModal('policy')}>{lang === 'ar' ? 'المزيد' : 'More'}</Button>
                 </div>
               </div>
-
               {/* Card 3 */}
               <div className="figma-item-card">
                 <div className="figma-item-card-image-wrap">
@@ -571,7 +556,6 @@ function AppContent() {
                   <Button variant="more" onClick={() => setOpenedModal('policy')}>{lang === 'ar' ? 'المزيد' : 'More'}</Button>
                 </div>
               </div>
-
               {/* Card 4 */}
               <div className="figma-item-card">
                 <div className="figma-item-card-image-wrap">
@@ -592,13 +576,12 @@ function AppContent() {
             </div>
             
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
-              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>
+              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => { setCurrentView('research'); window.history.pushState({}, '', '/research'); }}>
                 {lang === 'ar' ? 'تصفح جميع الأبحاث' : 'Browse All Research'}
               </Button>
             </div>
           </div>
         </section>
-
         {/* Newsletter/Join CTA Block (Frame 45) */}
         <section className="figma-newsletter-cta-section">
           <div className="figma-cta-section-wrap">
@@ -606,12 +589,11 @@ function AppContent() {
             <p className="figma-cta-description">
               {lang === 'ar' ? 'نحن نخطط لإطلاق عدد من المشاريع البحثية الجديدة قريبًا. إذا كنت مهتمًا بالمشاركة، يمكنك التقديم عبر نموذج التسجيل أدناه.' : 'We plan to launch several new research projects soon. If you are interested in participating, you can apply via the registration form below.'}
             </p>
-            <Button variant="gradient" onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>
+            <Button variant="gradient" onClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }}>
               {lang === 'ar' ? 'انضم لفريق البحث' : 'Join the Research Team'}
             </Button>
           </div>
         </section>
-
         {/* Community Network Map Section */}
         <section id="community" className="figma-training-section" style={{ background: '#f8fafc', position: 'relative', zIndex: 5 }}>
           <div className="figma-section-container">
@@ -629,13 +611,12 @@ function AppContent() {
             <ArabWorldMap lang={lang} />
             
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
-              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>
+              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }}>
                 {lang === 'ar' ? 'استعرض دليل السفراء والأعضاء' : 'Browse Network Directory'}
               </Button>
             </div>
           </div>
         </section>
-
         {/* Training Section */}
         <section id="training" className="figma-training-section">
           <div className="figma-section-container">
@@ -650,10 +631,9 @@ function AppContent() {
                 <div className="figma-item-card-content">
                   <h3 className="figma-item-card-title">{lang === 'ar' ? 'دورات البحوث العلمية المتخصصة في قطاع الصحة والبيئة.' : 'Specialized research training courses in the health and environment sector.'}</h3>
                   <span className="figma-item-card-trainees">{lang === 'ar' ? '+1308 متدرب' : '+1308 Trainees'}</span>
-                  <Button variant="more" onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
+                  <Button variant="more" onClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
                 </div>
               </div>
-
               {/* Card 2 */}
               <div className="figma-item-card">
                 <div className="figma-item-card-image-wrap">
@@ -662,10 +642,9 @@ function AppContent() {
                 <div className="figma-item-card-content">
                   <h3 className="figma-item-card-title">{lang === 'ar' ? 'الاستجابة الطبية الطارئة للكوارث المناخية والبيئية.' : 'Emergency medical response to climate and environmental disasters.'}</h3>
                   <span className="figma-item-card-trainees">{lang === 'ar' ? '+850 متدرب' : '+850 Trainees'}</span>
-                  <Button variant="more" onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
+                  <Button variant="more" onClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
                 </div>
               </div>
-
               {/* Card 3 */}
               <div className="figma-item-card">
                 <div className="figma-item-card-image-wrap">
@@ -674,10 +653,9 @@ function AppContent() {
                 <div className="figma-item-card-content">
                   <h3 className="figma-item-card-title">{lang === 'ar' ? 'مبادئ الصحة العامة البيئية وتطبيقاتها السريرية.' : 'Principles of environmental public health and clinical applications.'}</h3>
                   <span className="figma-item-card-trainees">{lang === 'ar' ? '+1120 متدرب' : '+1120 Trainees'}</span>
-                  <Button variant="more" onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
+                  <Button variant="more" onClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
                 </div>
               </div>
-
               {/* Card 4 */}
               <div className="figma-item-card">
                 <div className="figma-item-card-image-wrap">
@@ -686,19 +664,18 @@ function AppContent() {
                 <div className="figma-item-card-content">
                   <h3 className="figma-item-card-title">{lang === 'ar' ? 'مهارات الكتابة العلمية للأبحاث الطبية والبيئية.' : 'Scientific writing skills for medical and environmental research.'}</h3>
                   <span className="figma-item-card-trainees">{lang === 'ar' ? '+950 متدرب' : '+950 Trainees'}</span>
-                  <Button variant="more" onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
+                  <Button variant="more" onClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }}>{lang === 'ar' ? 'سجل الآن' : 'Register Now'}</Button>
                 </div>
               </div>
             </div>
             
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
-              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}>
+              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }}>
                 {lang === 'ar' ? 'تصفح جميع الدورات' : 'Browse All Courses'}
               </Button>
             </div>
           </div>
         </section>
-
         {/* Upcoming Section */}
         <section id="upcoming" className="figma-upcoming-section">
           <div className="figma-section-container">
@@ -715,7 +692,6 @@ function AppContent() {
                   <h3 className="figma-item-card-title" style={{ fontSize: '18px', marginTop: '10px' }}>{lang === 'ar' ? 'دراسة وطنية شاملة حول جودة الهواء والصحة العامة.' : 'A comprehensive national study on air quality and public health.'}</h3>
                 </div>
               </div>
-
               {/* Upcoming Card 2 */}
               <div className="figma-item-card" style={{ flexDirection: 'row-reverse', height: '180px' }}>
                 <div className="figma-item-card-image-wrap" style={{ width: '40%', height: '100%', borderRadius: '0 18px 18px 0' }}>
@@ -739,7 +715,7 @@ function AppContent() {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />
-      ) : currentView === 'join-us' ? (
+      ) : currentView === 'join' ? (
         <JoinUsPage lang={lang} onNavigate={(view) => {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
@@ -759,7 +735,7 @@ function AppContent() {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />
-      ) : currentView === 'news-blog' ? (
+      ) : currentView === 'news' ? (
         <NewsPage lang={lang} onNavigate={(view, articleId) => {
           if (view === 'article') {
             setCurrentView('article');
@@ -774,7 +750,7 @@ function AppContent() {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />
-      ) : currentView === 'learning-hub' ? (
+      ) : currentView === 'courses' ? (
         <LearningHubPage lang={lang} onNavigate={(view) => {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
@@ -794,14 +770,34 @@ function AppContent() {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />
+      ) : currentView === 'research' ? (
+        <ResearchHubPage lang={lang} onNavigate={(view, pubId) => {
+          if (view === 'research-detail') {
+            setCurrentView('research-detail');
+            window.history.pushState({}, '', '/research-detail?id=' + pubId);
+          } else {
+            setCurrentView(view);
+            window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+          }
+        }} />
+      ) : currentView === 'research-upload' ? (
+        <ResearchUploadPage lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
+      ) : currentView === 'research-detail' ? (
+        <ResearchDetailPage lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
       ) : (
         <AboutUsPage
           lang={lang}
-          onJoinClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }}
+          onJoinClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }}
           onNavigate={(view, sectionId) => {
             setCurrentView(view);
-            if (view === 'about-us') {
-              window.history.pushState({}, '', '/about-us');
+            if (view === 'about') {
+              window.history.pushState({}, '', '/about');
             } else if (view === 'debug') {
               window.history.pushState({}, '', '/debug');
             } else {
@@ -816,11 +812,10 @@ function AppContent() {
           }}
         />
       )}
-
       {/* Footer component */}
       <Footer 
         lang={lang}
-        onJoinClick={() => { setCurrentView('join-us'); window.history.pushState({}, '', '/join-us'); }} 
+        onJoinClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }} 
         onPolicyClick={() => setOpenedModal('policy')} 
         onNavigate={(view, sectionId) => {
             setCurrentView(view);
@@ -828,12 +823,12 @@ function AppContent() {
               window.history.pushState({}, '', '/about-us');
             } else if (view === 'opportunities') {
               window.history.pushState({}, '', '/opportunities');
-            } else if (view === 'join-us') {
-              window.history.pushState({}, '', '/join-us');
+            } else if (view === 'join') {
+              window.history.pushState({}, '', '/join');
             } else if (view === 'events') {
               window.history.pushState({}, '', '/events');
-            } else if (view === 'news-blog') {
-              window.history.pushState({}, '', '/news-blog');
+            } else if (view === 'news') {
+              window.history.pushState({}, '', '/news');
             } else if (sectionId) {
               window.history.pushState({}, '', '/' + sectionId);
               setTimeout(() => {
@@ -845,7 +840,6 @@ function AppContent() {
             }
           }}
       />
-
       {/* ==========================================================================
          MODALS
          ========================================================================== */}
@@ -908,7 +902,6 @@ function AppContent() {
           )}
         </div>
       </div>
-
       {/* Use Policy Modal */}
       <div class={`modal-overlay ${openedModal === 'policy' ? 'open' : ''}`}>
         <div class="modal-card">

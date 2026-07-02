@@ -1,0 +1,188 @@
+.rhp-root {
+  padding: 40px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Inter', 'Cairo', sans-serif;
+  color: #0b2849;
+}
+
+.rhp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(11, 40, 73, 0.04);
+  border: 1px solid rgba(11, 40, 73, 0.05);
+}
+
+.rhp-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: #0b2849;
+}
+
+.rhp-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 16px;
+}
+
+.rhp-upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #15b47a, #0c8774);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(21, 180, 122, 0.3);
+}
+
+.rhp-upload-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(21, 180, 122, 0.4);
+}
+
+.rhp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.rhp-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(11, 40, 73, 0.04);
+  border: 1px solid rgba(11, 40, 73, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.rhp-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(11, 40, 73, 0.08);
+}
+
+.rhp-card-badge {
+  background: #f0fdf4;
+  color: #15b47a;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-block;
+  align-self: flex-start;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rhp-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.rhp-card-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.rhp-card-date {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.rhp-card-abstract {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.rhp-card-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(11, 40, 73, 0.05);
+}
+
+.rhp-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  color: #0b2849;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+  border: 1px solid rgba(11, 40, 73, 0.1);
+  width: 100%;
+  justify-content: center;
+}
+
+.rhp-download-btn:hover {
+  background: #15b47a;
+  color: white;
+  border-color: #15b47a;
+}
+
+.rhp-no-file {
+  color: #94a3b8;
+  font-size: 14px;
+  display: block;
+  text-align: center;
+}
+
+.rhp-loading, .rhp-empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: #64748b;
+}
+
+.rhp-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(21, 180, 122, 0.2);
+  border-top-color: #15b47a;
+  border-radius: 50%;
+  margin: 0 auto 20px auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .rhp-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+}

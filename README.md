@@ -65,14 +65,14 @@ The role levels correspond to the following `role` column enum strings in the `p
 *   **Super Admin:** `'superadmin'`
 #### 🧪 Local Permission Toggling for Superadmins (Testing Tool)
 To facilitate seamless local testing of RLS-based visibility without switching accounts:
-1. **Trigger Admin Mode**: Click the brand logo in the header 7 times to bypass verification and activate Super Admin mode.
+1. **Log in as Super Admin**: Ensure your account is assigned the 'superadmin' role in the database.
 2. **Interactive Toggling**: In the user profile menu, click **صلاحيات الحساب النشطة / Active Account Permissions**.
 3. **Toggle Capabilities**: Click on individual permissions (e.g., `write:opportunities`).
    * When disabled, the permission is struck through and colored gray (marked as "Disabled / معطلة").
    * The UI immediately updates dynamically (e.g., the "Post Opportunity" button will disappear if `write:opportunities` is deselected), allowing developers to test exact capability levels instantly on the frontend.
 #### 🗺️ Testing Workflows (Courses & Quizzes)
 **1. Student Flow (Learning & Evaluation)**
-*   **Trigger Admin Mode:** Click the brand logo in the header 7 times to activate Super Admin mode, then open the profile dropdown.
+*   **Trigger Admin Mode:** Log in as a Super Admin, then open the profile dropdown.
 *   **Permission Setup:** In "Active Account Permissions", ensure `view:all_courses` is toggled ON to simulate a paid subscriber/student.
 *   **Navigate:** Go to the **Learning Hub** (`/learning-hub` or click "My Courses").
 *   **Enrollment:** Click on a course and press "Enroll" (verify database `enrollments` table updates).

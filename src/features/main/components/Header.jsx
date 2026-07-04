@@ -20,8 +20,8 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showPermsList, setShowPermsList] = useState(false);
   const [permSearchQuery, setPermSearchQuery] = useState('');
-  const [logoClicks, setLogoClicks] = useState(0);
-  const { verifyAndSetDevAdmin, disabledPermissions, togglePermission } = useAuth();
+
+  const { disabledPermissions, togglePermission } = useAuth();
   
   const t = translations[lang] || translations.ar;
 
@@ -49,17 +49,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
             href="#home" 
             onClick={(e) => {
               e.preventDefault();
-              const nextClicks = logoClicks + 1;
-              setLogoClicks(nextClicks);
-              if (nextClicks === 7) {
-                setLogoClicks(0);
-                verifyAndSetDevAdmin().then(() => {
-                  alert(lang === 'ar' ? 'تم تفعيل وضع المسؤول بنجاح!' : 'Admin view toggled & Super Admin permissions granted!');
-                  onNavigate('debug');
-                });
-              } else {
-                onNavigate('home', 'home');
-              }
+              onNavigate('home', 'home');
             }}
             class="figma-logo-link"
           >

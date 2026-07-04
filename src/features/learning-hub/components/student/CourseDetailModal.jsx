@@ -481,7 +481,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                       marginBottom: '32px', 
                       flexGrow: 1 
                     }}>
-                      <RichTextRenderer html={lessonContent} lang={lang} />
+                      <RichTextRenderer html={lessonContent} lang={lang} userId={userId} lessonId={activeLessonId} />
                     </div>
                   )}
 

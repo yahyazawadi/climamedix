@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'preact/hooks';
+import { supabase } from '../../../../utils/supabaseClient';
 
-export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 'ar' }) {
+export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 'ar', userId, lessonId }) {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -12,6 +13,13 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [showSpeedSlider, setShowSpeedSlider] = useState(false);
 
+  const telemetry = useRef({
+    maxPercentage: 0,
+    furthestSecond: 0,
+    actualPlayDuration: 0,
+    lastPlayStart: null,
+  });
+
   useEffect(() => {
     setIsPlaying(false);
     setCurrentTime(0);
@@ -22,7 +30,78 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
     if (videoRef.current) {
       videoRef.current.playbackRate = 1;
     }
+    telemetry.current = { maxPercentage: 0, furthestSecond: 0, actualPlayDuration: 0, lastPlayStart: null };
   }, [videoUrl]);
+
+  const flushTelemetry = async () => {
+    if (!userId || !lessonId) return;
+    const { furthestSecond, maxPercentage, actualPlayDuration } = telemetry.current;
+    if (furthestSecond === 0 && actualPlayDuration === 0) return;
+
+    try {
+      const { data: existing } = await supabase
+        .from('lesson_watch_metrics')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('lesson_id', lessonId)
+        .single();
+
+      const newFurthest = Math.max(furthestSecond, existing?.furthest_second_reached || 0);
+      const newMaxPct = Math.max(maxPercentage, existing?.max_percentage_watched || 0);
+      const newActualPlay = (existing?.actual_play_duration_seconds || 0) + actualPlayDuration;
+
+      telemetry.current.actualPlayDuration = 0; 
+      telemetry.current.furthestSecond = newFurthest;
+      telemetry.current.maxPercentage = newMaxPct;
+
+      await supabase
+        .from('lesson_watch_metrics')
+        .upsert({
+          user_id: userId,
+          lesson_id: lessonId,
+          furthest_second_reached: newFurthest,
+          max_percentage_watched: newMaxPct,
+          actual_play_duration_seconds: newActualPlay,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id, lesson_id' });
+    } catch (err) {
+      // Quiet fail if network goes down
+    }
+  };
+
+  useEffect(() => {
+    if (isPlaying) {
+      telemetry.current.lastPlayStart = Date.now();
+    } else {
+      if (telemetry.current.lastPlayStart) {
+        const elapsed = (Date.now() - telemetry.current.lastPlayStart) / 1000;
+        telemetry.current.actualPlayDuration += elapsed;
+        telemetry.current.lastPlayStart = null;
+      }
+      flushTelemetry();
+    }
+  }, [isPlaying]);
+
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') {
+        if (isPlaying && telemetry.current.lastPlayStart) {
+          const elapsed = (Date.now() - telemetry.current.lastPlayStart) / 1000;
+          telemetry.current.actualPlayDuration += elapsed;
+          telemetry.current.lastPlayStart = Date.now();
+        }
+        flushTelemetry();
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (telemetry.current.lastPlayStart) {
+        telemetry.current.actualPlayDuration += (Date.now() - telemetry.current.lastPlayStart) / 1000;
+      }
+      flushTelemetry();
+    };
+  }, [isPlaying, userId, lessonId]);
 
   function togglePlay(e) {
     if (e && e.stopPropagation) e.stopPropagation();
@@ -155,7 +234,18 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
             onTimeUpdate={() => {
-              if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
+              if (videoRef.current) {
+                const ct = videoRef.current.currentTime;
+                const dur = videoRef.current.duration || 0;
+                setCurrentTime(ct);
+                
+                if (ct > telemetry.current.furthestSecond) {
+                  telemetry.current.furthestSecond = ct;
+                  if (dur > 0) {
+                    telemetry.current.maxPercentage = (ct / dur) * 100;
+                  }
+                }
+              }
             }}
             onLoadedMetadata={() => {
               if (videoRef.current) setDuration(videoRef.current.duration);

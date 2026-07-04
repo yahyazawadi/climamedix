@@ -2,7 +2,7 @@ import { createElement } from 'preact';
 import { CustomVideoPlayer } from '../../learning-hub/components/player/CustomVideoPlayer';
 import { CustomAudioPlayer } from './CustomAudioPlayer';
 
-export function RichTextRenderer({ html, lang = 'ar' }) {
+export function RichTextRenderer({ html, lang = 'ar', userId, lessonId }) {
   if (!html) return null;
 
   // Parse the HTML string into a DOM tree
@@ -23,7 +23,7 @@ export function RichTextRenderer({ html, lang = 'ar' }) {
       // -- Intercept Media Tags --
       if (tagName === 'video') {
         const src = node.getAttribute('src');
-        return <div key={index} style={{ margin: '20px 0' }}><CustomVideoPlayer videoUrl={src} lang={lang} /></div>;
+        return <div key={index} style={{ margin: '20px 0' }}><CustomVideoPlayer videoUrl={src} lang={lang} userId={userId} lessonId={lessonId} /></div>;
       }
       
       if (tagName === 'audio') {

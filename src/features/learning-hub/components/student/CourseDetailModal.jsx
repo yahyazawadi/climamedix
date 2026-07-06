@@ -733,8 +733,51 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                   </div>
                 </div>
               ) : (
-                <div style={{ textAlign: 'center', padding: '60px', color: 'rgba(11,40,73,0.4)' }}>
-                  {lang === 'ar' ? 'اختر درساً من القائمة' : 'Select a lesson from the list'}
+                <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto', textAlign: 'center', animation: 'fadeIn 0.5s ease' }}>
+                  {course.cover_image && (
+                    <img 
+                      src={course.cover_image} 
+                      alt={lang === 'ar' ? course.title_ar : course.title_en}
+                      style={{ width: '100%', height: '320px', objectFit: 'cover', borderRadius: '20px', marginBottom: '32px', boxShadow: '0 12px 40px rgba(11,40,73,0.15)' }}
+                    />
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '20px' }}>
+                    {course.category && (
+                      <span style={{ background: 'rgba(21, 180, 122, 0.1)', color: '#15b47a', padding: '6px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: 'bold' }}>
+                        {course.category}
+                      </span>
+                    )}
+                    {course.duration && (
+                      <span style={{ background: 'rgba(11, 40, 73, 0.05)', color: 'rgba(11,40,73,0.7)', padding: '6px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: 'bold' }}>
+                        ⏱ {course.duration} {lang === 'ar' ? 'ساعات' : 'Hours'}
+                      </span>
+                    )}
+                  </div>
+                  <h2 style={{ color: '#0b2849', fontSize: '32px', fontWeight: 'bold', marginBottom: '24px', lineHeight: '1.4' }}>
+                    {lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)}
+                  </h2>
+                  <p style={{ color: 'rgba(11,40,73,0.7)', fontSize: '17px', lineHeight: '1.8', marginBottom: '40px', maxWidth: '700px', margin: '0 auto 40px auto' }}>
+                    {lang === 'ar' ? course.description_ar : (course.description_en || course.description_ar)}
+                  </p>
+                  
+                  {allLessons.length > 0 ? (
+                    <Button variant="gradient" onClick={() => {
+                      // Find first incomplete lesson, or just first lesson
+                      const firstIncomplete = allLessons.find(l => !completedSet.has(l.id)) || allLessons[0];
+                      setActiveLessonId(firstIncomplete.id);
+                    }} style={{ padding: '16px 48px', fontSize: '18px', borderRadius: '12px', boxShadow: '0 8px 20px rgba(21,180,122,0.3)' }}>
+                      {completedSet.size === 0 
+                        ? (lang === 'ar' ? 'ابدأ المساق الآن' : 'Start Course Now')
+                        : completedSet.size === allLessons.length
+                          ? (lang === 'ar' ? 'مراجعة المساق' : 'Review Course')
+                          : (lang === 'ar' ? 'متابعة التعلم' : 'Continue Learning')
+                      }
+                    </Button>
+                  ) : (
+                    <div style={{ color: '#ffb300', fontWeight: 'bold', padding: '20px', background: 'rgba(255, 179, 0, 0.1)', borderRadius: '12px', display: 'inline-block' }}>
+                      {lang === 'ar' ? 'جاري إعداد محتوى هذا المساق...' : 'Course content is being prepared...'}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -74,7 +74,7 @@ export function HomeNewsWidget({ lang, onNavigate }) {
               {lang === 'ar' ? 'ابق على اطلاع بآخر التطورات في مجال المناخ والصحة' : 'Stay informed with the latest developments in climate and health'}
             </p>
           </div>
-          <Button variant="outline" onClick={() => onNavigate('news-blog')}>
+          <Button variant="outline" onClick={() => onNavigate('news')}>
             {lang === 'ar' ? 'عرض الكل' : 'View All'}
           </Button>
         </div>

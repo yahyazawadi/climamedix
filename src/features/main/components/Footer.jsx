@@ -1,7 +1,7 @@
 import { FooterCard } from './FooterCard'
 import { translations } from '../../../i18n/translations'
 
-export function Footer({ onJoinClick, onNavigate, lang }) {
+export function Footer({ onJoinClick, onNavigate, lang, currentView }) {
   const t = translations[lang] || translations.ar;
 
   return (
@@ -18,8 +18,8 @@ export function Footer({ onJoinClick, onNavigate, lang }) {
             <div class="figma-col">
               <h4>{t.footerTitle}</h4>
               <ul>
-                <li><a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('home', 'about'); }}>{lang === 'ar' ? 'عن المنصة' : 'About Platform'}</a></li>
-                <li><a href="#training" onClick={(e) => { e.preventDefault(); onNavigate('home', 'contact'); }}>{lang === 'ar' ? 'تواصل معنا' : 'Contact Us'}</a></li>
+                <li><a href="#about" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'about'); }}>{lang === 'ar' ? 'عن المنصة' : 'About Platform'}</a></li>
+                <li><a href="#training" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'contact'); }}>{lang === 'ar' ? 'تواصل معنا' : 'Contact Us'}</a></li>
                 <li><a href="#" onClick={(e) => { e.preventDefault(); }}>{lang === 'ar' ? 'سياسة الاستخدام' : 'Terms of Use'}</a></li>
                 <li><a href="#">{lang === 'ar' ? 'حقوق الملكية' : 'Intellectual Property'}</a></li>
                 <li><a href="#">{lang === 'ar' ? 'الأسئلة الشائعة' : 'FAQs'}</a></li>
@@ -30,11 +30,11 @@ export function Footer({ onJoinClick, onNavigate, lang }) {
             <div class="figma-col">
               <h4>{t.quickLinks}</h4>
               <ul>
-                <li><a href="#training" onClick={(e) => { e.preventDefault(); onNavigate('home', 'training'); }}>{t.trainingCourses}</a></li>
-                <li><a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('home', 'about'); }}>{t.about}</a></li>
-                <li><a href="#research" onClick={(e) => { e.preventDefault(); onNavigate('home', 'research'); }}>{t.latestResearch}</a></li>
+                <li><a href="#training" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'training'); }}>{t.trainingCourses}</a></li>
+                <li><a href="#about" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'about'); }}>{t.about}</a></li>
+                <li><a href="#research" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'research'); }}>{t.latestResearch}</a></li>
                 <li><a href="/write-article" onClick={(e) => { e.preventDefault(); onNavigate('write-article'); }}>{lang === 'ar' ? 'كتابة مقال' : 'Write Article'}</a></li>
-                <li><a href="#upcoming" onClick={(e) => { e.preventDefault(); onNavigate('home', 'upcoming'); }}>{lang === 'ar' ? 'الأنشطة القادمة' : 'Upcoming Activities'}</a></li>
+                <li><a href="#upcoming" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'upcoming'); }}>{lang === 'ar' ? 'الأنشطة القادمة' : 'Upcoming Activities'}</a></li>
               </ul>
             </div>
 

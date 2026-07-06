@@ -21,6 +21,7 @@ import { HomeNewsWidget } from './features/news-blog/components/HomeNewsWidget'
 import { ArabWorldMap } from './features/main/components/ArabWorldMap'
 import { ProfilePage } from './features/profile/components/ProfilePage'
 import { LearningHubPage } from './features/learning-hub/components/student/LearningHubPage'
+import { NewHomePage } from './features/main/components/NewHomePage'
 import { UserManagementDashboard } from './features/admin/components/UserManagementDashboard'
 import { UserStatsDashboard } from './features/admin/components/UserStatsDashboard'
 import { CourseBuilderPage } from './features/learning-hub/components/admin/CourseBuilderPage'
@@ -182,7 +183,7 @@ function AppContent() {
     } else if (path === '/opportunities') {
       setCurrentView('opportunities');
     } else if (path === '/join') {
-      setCurrentView('join');
+      setOpenedModal('join');
     } else if (path === '/events') {
       setCurrentView('events');
     } else if (path === '/write-article') {
@@ -211,6 +212,8 @@ function AppContent() {
       setCurrentView('research-detail');
     } else if (path.startsWith('/verify/')) {
       setCurrentView('verify');
+    } else if (path === '/newhome') {
+      setCurrentView('newhome');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -234,7 +237,7 @@ function AppContent() {
       } else if (p === '/opportunities') {
         setCurrentView('opportunities');
       } else if (p === '/join') {
-        setCurrentView('join');
+        setOpenedModal('join');
       } else if (p === '/events') {
         setCurrentView('events');
       } else if (p === '/write-article') {
@@ -263,6 +266,8 @@ function AppContent() {
         setCurrentView('research-detail');
       } else if (p.startsWith('/verify/')) {
         setCurrentView('verify');
+      } else if (p === '/newhome') {
+        setCurrentView('newhome');
       } else {
         setCurrentView('home');
       }
@@ -323,7 +328,7 @@ function AppContent() {
   return (
     <div style={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh' }}>
       {/* Background components */}
-      {currentView === 'home' ? (
+      {currentView === 'home' || currentView === 'newhome' ? (
         <>
           <TopBackground />
           <NeatScripples />
@@ -342,7 +347,7 @@ function AppContent() {
         lang={lang}
         toggleLanguage={toggleLanguage}
         onNavigate={(view, sectionId) => {
-          setCurrentView(view);
+          if (view !== 'join') setCurrentView(view);
           if (view === 'about') {
             window.history.pushState({}, '', '/about');
           } else if (view === 'debug') {
@@ -352,6 +357,7 @@ function AppContent() {
           } else if (view === 'opportunities') {
             window.history.pushState({}, '', '/opportunities');
           } else if (view === 'join') {
+            setOpenedModal('join');
             window.history.pushState({}, '', '/join');
           } else if (view === 'events') {
             window.history.pushState({}, '', '/events');
@@ -371,6 +377,8 @@ function AppContent() {
             window.history.pushState({}, '', '/research');
           } else if (view === 'research-upload') {
             window.history.pushState({}, '', '/research-upload');
+          } else if (view === 'newhome') {
+            window.history.pushState({}, '', '/newhome');
           } else if (sectionId) {
             window.history.pushState({}, '', '/' + sectionId);
             setTimeout(() => {
@@ -381,7 +389,7 @@ function AppContent() {
             window.history.pushState({}, '', '/');
           }
         }}
-        onJoinClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }} 
+        onJoinClick={() => { setOpenedModal('join'); window.history.pushState({}, '', '/join'); }} 
       />
       {currentView === 'home' ? (
         <main className="figma-main-content">
@@ -807,6 +815,8 @@ function AppContent() {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />
+      ) : currentView === 'newhome' ? (
+        <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} />
       ) : currentView === 'verify' ? (
         <CertificateVerificationPage 
           lang={lang} 
@@ -815,21 +825,30 @@ function AppContent() {
       ) : (
         <AboutUsPage
           lang={lang}
-          onJoinClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }}
+          onJoinClick={() => { setOpenedModal('join'); window.history.pushState({}, '', '/join'); }}
           onNavigate={(view, sectionId) => {
-            setCurrentView(view);
+            if (view !== 'join') setCurrentView(view);
             if (view === 'about') {
               window.history.pushState({}, '', '/about');
             } else if (view === 'debug') {
               window.history.pushState({}, '', '/debug');
+            } else if (view === 'opportunities') {
+              window.history.pushState({}, '', '/opportunities');
+            } else if (view === 'join') {
+              setOpenedModal('join');
+              window.history.pushState({}, '', '/join');
+            } else if (view === 'events') {
+              window.history.pushState({}, '', '/events');
+            } else if (view === 'news') {
+              window.history.pushState({}, '', '/news');
+            } else if (sectionId) {
+              window.history.pushState({}, '', '/' + sectionId);
+              setTimeout(() => {
+                const el = document.getElementById(sectionId);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }, 100);
             } else {
-              window.history.pushState({}, '', sectionId ? '/' + sectionId : '/');
-              if (sectionId) {
-                setTimeout(() => {
-                  const el = document.getElementById(sectionId);
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-              }
+              window.history.pushState({}, '', '/');
             }
           }}
         />
@@ -837,15 +856,17 @@ function AppContent() {
       {/* Footer component */}
       <Footer 
         lang={lang}
-        onJoinClick={() => { setCurrentView('join'); window.history.pushState({}, '', '/join'); }} 
+        currentView={currentView}
+        onJoinClick={() => { setOpenedModal('join'); window.history.pushState({}, '', '/join'); }} 
         onPolicyClick={() => setOpenedModal('policy')} 
         onNavigate={(view, sectionId) => {
-            setCurrentView(view);
+            if (view !== 'join') setCurrentView(view);
             if (view === 'about-us') {
               window.history.pushState({}, '', '/about-us');
             } else if (view === 'opportunities') {
               window.history.pushState({}, '', '/opportunities');
             } else if (view === 'join') {
+              setOpenedModal('join');
               window.history.pushState({}, '', '/join');
             } else if (view === 'events') {
               window.history.pushState({}, '', '/events');

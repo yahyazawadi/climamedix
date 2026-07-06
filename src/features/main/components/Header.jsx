@@ -49,7 +49,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
             href="#home" 
             onClick={(e) => {
               e.preventDefault();
-              onNavigate('home', 'home');
+              onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'home');
             }}
             class="figma-logo-link"
           >
@@ -676,9 +676,9 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               href="#upcoming" 
               onClick={(e) => {
                 e.preventDefault();
-                onNavigate('home', 'upcoming');
+                onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'upcoming');
               }}
-              class={`figma-nav-item ${activeSection === 'upcoming' && currentView === 'home' ? 'active' : ''}`}
+              class={`figma-nav-item ${activeSection === 'upcoming' && (currentView === 'home' || currentView === 'newhome') ? 'active' : ''}`}
             >
               <img src={iconNews} class="figma-nav-icon" alt="الأخبار" />
               <span class="figma-nav-text">{t.newsBlog}</span>
@@ -727,9 +727,9 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               href="#research" 
               onClick={(e) => {
                 e.preventDefault();
-                onNavigate('home', 'research');
+                onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'research');
               }}
-              class={`figma-nav-item ${activeSection === 'research' && currentView === 'home' ? 'active' : ''}`}
+              class={`figma-nav-item ${activeSection === 'research' && (currentView === 'home' || currentView === 'newhome') ? 'active' : ''}`}
             >
               <img src={iconResearch} class="figma-nav-icon" alt="أبحاث" />
               <span class="figma-nav-text">{t.research}</span>
@@ -740,9 +740,9 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               href="#about" 
               onClick={(e) => {
                 e.preventDefault();
-                onNavigate('home', 'about');
+                onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'about');
               }}
-              class={`figma-nav-item ${activeSection === 'about' && currentView === 'home' ? 'active' : ''}`}
+              class={`figma-nav-item ${activeSection === 'about' && (currentView === 'home' || currentView === 'newhome') ? 'active' : ''}`}
             >
               <img src={iconAbout} class="figma-nav-icon" alt="من نحن" />
               <span class="figma-nav-text">{t.about}</span>
@@ -765,9 +765,9 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               href="#home" 
               onClick={(e) => {
                 e.preventDefault();
-                onNavigate('home', 'home');
+                onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'home');
               }}
-              class={`figma-nav-item ${activeSection === 'home' && currentView === 'home' ? 'active' : ''}`}
+              class={`figma-nav-item ${activeSection === 'home' && (currentView === 'home' || currentView === 'newhome') ? 'active' : ''}`}
             >
               <img src={iconHome} class="figma-nav-icon" alt="الرئيسية" />
               <span class="figma-nav-text">{t.home}</span>
@@ -938,14 +938,14 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
           ) : (
             <a href="#auth" onClick={(e) => { e.preventDefault(); onNavigate('auth'); setDrawerOpen(false); }} class="drawer-link" style={{ color: '#15b47a' }}>{t.login}</a>
           )}
-          <a href="#home" onClick={(e) => { e.preventDefault(); onNavigate('home', 'home'); setDrawerOpen(false); }} class="drawer-link">{t.home}</a>
-          <a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('home', 'about'); setDrawerOpen(false); }} class="drawer-link">{t.about}</a>
-          <a href="#research" onClick={(e) => { e.preventDefault(); onNavigate('home', 'research'); setDrawerOpen(false); }} class="drawer-link">{t.research}</a>
-          <a href="#training" onClick={(e) => { e.preventDefault(); onNavigate('home', 'training'); setDrawerOpen(false); }} class="drawer-link">{t.training}</a>
-          <a href="#learning-hub" onClick={(e) => { e.preventDefault(); onNavigate('learning-hub'); setDrawerOpen(false); }} class="drawer-link">{lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}</a>
+          <a href="#home" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'home'); setDrawerOpen(false); }} class="drawer-link">{t.home}</a>
+          <a href="#about" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'about'); setDrawerOpen(false); }} class="drawer-link">{t.about}</a>
+          <a href="#research" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'research'); setDrawerOpen(false); }} class="drawer-link">{t.research}</a>
+          <a href="#training" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'training'); setDrawerOpen(false); }} class="drawer-link">{t.training}</a>
+          <a href="#learning-hub" onClick={(e) => { e.preventDefault(); onNavigate('courses'); setDrawerOpen(false); }} class="drawer-link">{lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}</a>
           <a href="#opportunities" onClick={(e) => { e.preventDefault(); onNavigate('opportunities'); setDrawerOpen(false); }} class="drawer-link">{t.opportunities}</a>
-          <a href="#join-us" onClick={(e) => { e.preventDefault(); onNavigate('join-us'); setDrawerOpen(false); }} class="drawer-link">{t.joinUs}</a>
-          <a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate('home', 'contact'); setDrawerOpen(false); }} class="drawer-link">{t.contact}</a>
+          <a href="#join-us" onClick={(e) => { e.preventDefault(); onNavigate('join'); setDrawerOpen(false); }} class="drawer-link">{t.joinUs}</a>
+          <a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'contact'); setDrawerOpen(false); }} class="drawer-link">{t.contact}</a>
         </nav>
       </div>
       <div onClick={() => setDrawerOpen(false)} class={`drawer-overlay ${drawerOpen ? 'open' : ''}`}></div>

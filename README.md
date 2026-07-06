@@ -151,13 +151,13 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 ### 5. 🧪 Research Center
 *   [x] **Sections Layout:**
     *   [x] Research Projects Showcase
-    *   [ ] Publications Abstract Registry
-    *   [ ] Research Database
+    *   [x] Publications Abstract Registry
+    *   [x] Research Database
     *   [x] Join Research Team Form (Join Us Page with track selection [Research Track / Community Health Educator], "Are you a researcher?" conditional field, Cloudflare R2 CV upload, IP-based location detection, and granular 'approve:users' admin view)
-*   [ ] **Publication Detail Fields:**
-    *   [ ] Title & Authors
-    *   [ ] Abstract
-    *   [ ] Download PDF Button
+*   **Publication Detail Fields:**
+    *   [x] Title & Authors
+    *   [x] Abstract
+    *   [x] Download PDF Button
 ### 6. 💼 Opportunities (Admin Postings)
 *   [x] **Opportunities Database & Display:**
     *   [x] Fellowship postings
@@ -182,7 +182,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 ### 10. 📞 Contact Us
 *   [x] **Contact Details:** Form submission panel, email links, and social media handles.
 ### 11. 🛡️ Admin Panel
-*   [ ] **Admin Dashboards:**
+*   [x] **Admin Dashboards:**
     *   [x] Create/Edit/Delete Courses
     *   [x] Upload Videos, Audio & Resources (Multi-file batch uploads with real-time byte-level progress tracking directly to Cloudflare R2 via intercepting Rich Text Editors)
     *   [x] Manage Users & Certificates (Completed: Role & Permission Assignment)
@@ -191,7 +191,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 ### 12. 👤 User Accounts
 *   [x] **Register/Login:** Supabase Auth Integration (Email sign-in/sign-up & Google OAuth) with beautiful Mitchell's best-candidate particle canvas background, layout swaps, and Outfit/Tajawal font custom settings.
 *   [x] **User Profiles Section:** Setting up profile management, displaying role capabilities, and managing account information.
-*   [ ] **LMS Interactions:** Enroll in courses, take quizzes, download certificates, and track progress.
+*   [x] **LMS Interactions:** Enroll in courses, take quizzes, download certificates, and track progress.
 ### 13. ⚙️ Technical Requirements
 *   [x] Mobile Responsive Layouts
 *   [x] SEO Friendly Structure
@@ -199,9 +199,9 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [x] Secure Authentication (Supabase)
 *   [x] Arabic RTL Support (Default)
 *   [x] English LTR Support
-*   [ ] Certificate Generation System
-*   [ ] LMS Integration
-*   [ ] Analytics Dashboard
+*   [x] Certificate Generation System
+*   [x] LMS Integration
+*   [x] Analytics Dashboard
 ---
 ## 🗺️ ClimaMedix Feature Implementation Roadmap
 This roadmap orders the remaining website requirements from **easiest to most complex** based on dependencies, existing UI components, and implementation effort.
@@ -271,7 +271,7 @@ graph TD
     * **Scope:**
       * [x] Add role-based security ensuring only verified admins can access `/admin`.
       * [x] Create database CRUD interfaces to publish opportunities and events (Completed via frontend authenticated panels).
-      * [ ] Create database CRUD interfaces to publish courses, upload videos/resources, and manage certificate approvals.
+      * [x] Create database CRUD interfaces to publish courses, upload videos/resources, and manage certificate approvals.
       * [x] Incorporate simple analytics charts (total active students, completions, sign-ups).
 ---
 ## 🛠️ Technology Stack

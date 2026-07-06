@@ -81,20 +81,21 @@ export function LearningHubPage({ lang, onNavigate }) {
       const validEnrolled = enriched.filter(Boolean);
 
       // Split into completed (100%) vs active
-      // We mark as completed if the user has a certificate for that course
-      const certCourseTitles = new Set((certs || []).map(c => c.course));
-      const completed = validEnrolled.filter(c =>
-        certCourseTitles.has(lang === 'ar' ? c._raw.title_ar : (c._raw.title_en || c._raw.title_ar))
-      );
-      const active = validEnrolled.filter(c =>
-        !certCourseTitles.has(lang === 'ar' ? c._raw.title_ar : (c._raw.title_en || c._raw.title_ar))
-      );
+      // We mark as completed if the user has an approved certificate_request for that course
+      const certCourseIds = new Set((certs || []).map(c => c.course_id));
+      const completed = validEnrolled.filter(c => certCourseIds.has(c.id));
+      const active = validEnrolled.filter(c => !certCourseIds.has(c.id));
 
       setEnrolledCourses(active);
-      setCompletedCourses(completed.map(c => ({
-        ...c,
-        quizScore: null // could be fetched from quiz_attempts if needed
-      })));
+      setCompletedCourses(completed.map(c => {
+        const cert = (certs || []).find(r => r.course_id === c.id);
+        return {
+          ...c,
+          certName: cert?.requested_name_ar || cert?.requested_name_en,
+          certId: cert?.id,
+          quizScore: null
+        };
+      }));
 
       // Check URL for course auto-open
       const params = new URLSearchParams(window.location.search);
@@ -392,7 +393,7 @@ export function LearningHubPage({ lang, onNavigate }) {
                 enrolledCourses={enrolledCourses}
                 completedCourses={completedCourses}
                 onSelectCourse={handleSelectCourse}
-                onGenerateCertificate={(courseTitle) => setShowCertFor(courseTitle)}
+                onGenerateCertificate={(courseTitle, certName, certId) => setShowCertFor({ course: courseTitle, name: certName || userProfile?.full_name || user.email, certId })}
               />
             )}
           </div>
@@ -412,6 +413,11 @@ export function LearningHubPage({ lang, onNavigate }) {
           onLessonCompleted={handleLessonCompleted}
           onCourseCompleted={handleCourseCompleted}
           onUpgrade={() => onNavigate('join-us')}
+          onDownloadCertificate={(certRequest) => setShowCertFor({ 
+            name: certRequest.requested_name_ar || certRequest.requested_name_en || userProfile?.full_name || user.email, 
+            course: lang === 'ar' ? selectedCourse.title_ar : (selectedCourse.title_en || selectedCourse.title_ar),
+            certId: certRequest.id
+          })}
         />
       )}
 
@@ -421,9 +427,10 @@ export function LearningHubPage({ lang, onNavigate }) {
           <div style={{ background: '#fff', borderRadius: '24px', padding: '32px', maxWidth: '800px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
             <button onClick={() => setShowCertFor(null)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#0b2849' }}>✕</button>
             <CertificateGenerator
-              name={userProfile?.full_name || user.email}
-              course={showCertFor}
-              email={user.email}
+              recipientName={showCertFor.name}
+              courseTitle={showCertFor.course}
+              certId={showCertFor.certId}
+              onClose={() => setShowCertFor(null)}
             />
           </div>
         </div>

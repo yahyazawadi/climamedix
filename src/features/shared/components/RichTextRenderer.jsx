@@ -2,7 +2,7 @@ import { createElement } from 'preact';
 import { CustomVideoPlayer } from '../../learning-hub/components/player/CustomVideoPlayer';
 import { CustomAudioPlayer } from './CustomAudioPlayer';
 
-export function RichTextRenderer({ html, lang = 'ar', userId, lessonId }) {
+export function RichTextRenderer({ html, lang = 'ar', userId, lessonId, courseId }) {
   if (!html) return null;
 
   // Parse the HTML string into a DOM tree
@@ -23,7 +23,7 @@ export function RichTextRenderer({ html, lang = 'ar', userId, lessonId }) {
       // -- Intercept Media Tags --
       if (tagName === 'video') {
         const src = node.getAttribute('src');
-        return <div key={index} style={{ margin: '20px 0' }}><CustomVideoPlayer videoUrl={src} lang={lang} userId={userId} lessonId={lessonId} /></div>;
+        return <div key={index} style={{ margin: '20px 0' }}><CustomVideoPlayer videoUrl={src} lang={lang} userId={userId} lessonId={lessonId} courseId={courseId} /></div>;
       }
       
       if (tagName === 'audio') {
@@ -34,7 +34,7 @@ export function RichTextRenderer({ html, lang = 'ar', userId, lessonId }) {
            title = parts[parts.length - 1] || 'Audio Track';
            title = decodeURIComponent(title).replace(/\.[^/.]+$/, "");
         }
-        return <div key={index} style={{ margin: '20px 0' }}><CustomAudioPlayer src={src} title={title} /></div>;
+        return <div key={index} style={{ margin: '20px 0' }}><CustomAudioPlayer src={src} title={title} userId={userId} lessonId={lessonId} /></div>;
       }
 
       // -- Standard HTML Tags --

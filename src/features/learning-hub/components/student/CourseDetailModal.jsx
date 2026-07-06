@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { Button } from '../../../shared/components/Button';
+import { supabase } from '../../../../utils/supabaseClient';
 import { QuizWidget } from '../quizzes/QuizWidget';
 import { RichTextRenderer } from '../../../shared/components/RichTextRenderer';
 import { AmbientParticles } from '../../../shared/components/AmbientParticles';
 import { ShareActionButtons } from '../../../shared/components/ShareActionButtons';
+import { CustomVideoPlayer } from '../player/CustomVideoPlayer';
 import {
   fetchCourseSyllabus,
   fetchCompletedLessons,
@@ -14,7 +16,7 @@ import {
   fetchPassedAttempt
 } from '../../services/lmsService';
 
-export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted }) {
+export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted, onDownloadCertificate }) {
   const [modules, setModules] = useState([]);
   const [activeLessonId, setActiveLessonId] = useState(null);
   const [completedSet, setCompletedSet] = useState(new Set());
@@ -25,6 +27,12 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
   const [collapsedModules, setCollapsedModules] = useState(new Set());
 
   const [loading, setLoading] = useState(true);
+
+  // Certificate Request State
+  const [certRequest, setCertRequest] = useState(null);
+  const [certRequestLoading, setCertRequestLoading] = useState(false);
+  const [certNameAr, setCertNameAr] = useState('');
+  const [certNameEn, setCertNameEn] = useState('');
 
 
   if (!course) return null;
@@ -75,6 +83,58 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
     load();
   }, [course.id, userId]);
 
+  useEffect(() => {
+    async function loadCertRequest() {
+      if (allLessons.length > 0 && completedSet.size === allLessons.length) {
+        setCertRequestLoading(true);
+        const { data, error } = await supabase
+          .from('certificate_requests')
+          .select('*')
+          .eq('course_id', course.id)
+          .eq('user_id', userId)
+          .single();
+        if (data) {
+          setCertRequest(data);
+          if (data.requested_name_ar) setCertNameAr(data.requested_name_ar);
+          if (data.requested_name_en) setCertNameEn(data.requested_name_en);
+        }
+        setCertRequestLoading(false);
+      }
+    }
+    loadCertRequest();
+  }, [completedSet.size, allLessons.length, course.id, userId]);
+
+  async function handleSubmitCertRequest() {
+    if (!certNameAr || !certNameEn) {
+      alert(lang === 'ar' ? 'يرجى إدخال اسمك باللغتين العربية والإنجليزية.' : 'Please enter your name in both Arabic and English.');
+      return;
+    }
+    setCertRequestLoading(true);
+    const payload = {
+      course_id: course.id,
+      user_id: userId,
+      requested_name_ar: certNameAr,
+      requested_name_en: certNameEn,
+      status: 'pending',
+      rejection_reason: null,
+      requested_at: new Date().toISOString()
+    };
+    
+    const { data, error } = await supabase
+      .from('certificate_requests')
+      .upsert(payload, { onConflict: 'user_id, course_id' })
+      .select()
+      .single();
+
+    if (!error && data) {
+      setCertRequest(data);
+    } else {
+      console.error('Submit Cert Request Error:', error);
+      alert(lang === 'ar' ? 'حدث خطأ أثناء تقديم الطلب.' : 'An error occurred while submitting the request.');
+    }
+    setCertRequestLoading(false);
+  }
+
   // ─── URL Syncing ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (!activeLessonId) return;
@@ -101,6 +161,16 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
           if (attempt) {
             setQuizPassed(true);
             setLastQuizScore(attempt.score);
+            // Retroactively ensure this lesson is in the completedSet
+            setCompletedSet(prev => {
+              if (!prev.has(activeLessonId)) {
+                const newSet = new Set([...prev, activeLessonId]);
+                // Try to sync it with DB just in case it was missing
+                markLessonComplete(userId, activeLessonId).catch(console.error);
+                return newSet;
+              }
+              return prev;
+            });
           } else {
             setQuizPassed(false);
             setLastQuizScore(null);
@@ -411,6 +481,33 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                   {lang === 'ar' ? 'لا توجد وحدات بعد.' : 'No modules yet.'}
                 </p>
               )}
+              
+              {/* Virtual Certificate Module */}
+              {allLessons.length > 0 && completedSet.size === allLessons.length && (
+                 <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px dashed rgba(11,40,73,0.1)' }}>
+                   <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#15b47a', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>
+                     {lang === 'ar' ? 'الوحدة النهائية' : 'Final Module'}
+                   </span>
+                   <div style={{ display: 'flex', marginTop: '12px' }}>
+                     <div
+                        onClick={() => { setActiveLessonId('CERTIFICATE_MODULE'); setQuizMode(false); }}
+                        style={{
+                          flexGrow: 1,
+                          padding: '12px 14px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px',
+                          background: activeLessonId === 'CERTIFICATE_MODULE' ? '#15b47a' : 'transparent',
+                          color: activeLessonId === 'CERTIFICATE_MODULE' ? '#fff' : '#0b2849',
+                          border: `1px solid ${activeLessonId === 'CERTIFICATE_MODULE' ? '#15b47a' : 'rgba(21,180,122,0.3)'}`,
+                          display: 'flex', gap: '12px', alignItems: 'center', fontWeight: 'bold'
+                        }}
+                     >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15l-2 5l9-5-9-5-2 5z"/></svg>
+                        {certRequest?.status === 'approved' 
+                          ? (lang === 'ar' ? 'عرض الشهادة المعتمدة' : 'View Official Certificate')
+                          : (lang === 'ar' ? 'طلب الشهادة المعتمدة' : 'Official Certificate Request')}
+                     </div>
+                   </div>
+                 </div>
+              )}
             </div>
             )}
 
@@ -462,11 +559,98 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                   onQuizFinished={handleQuizFinished}
                   onClose={() => setQuizMode(false)}
                 />
+              ) : activeLessonId === 'CERTIFICATE_MODULE' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '700px', margin: '0 auto', textAlign: lang === 'ar' ? 'right' : 'left' }}>
+                  <h3 style={{ color: '#0b2849', fontSize: '26px', fontWeight: 'bold', marginBottom: '16px' }}>
+                    {lang === 'ar' ? 'تهانينا على إتمام المساق!' : 'Congratulations on completing the course!'}
+                  </h3>
+                  <p style={{ color: 'rgba(11,40,73,0.7)', fontSize: '16px', marginBottom: '32px', lineHeight: '1.6' }}>
+                    {lang === 'ar' ? 'لقد أكملت جميع الدروس واجتزت المتطلبات. يمكنك الآن تقديم طلب للحصول على شهادتك المعتمدة ليتم مراجعتها من قبل الإدارة وإصدارها رسمياً.' : 'You have completed all lessons and requirements. You can now submit a request for your official certificate to be reviewed and issued.'}
+                  </p>
+                  
+                  {certRequest?.status === 'approved' ? (
+                    <div style={{ padding: '30px', background: 'rgba(21, 180, 122, 0.1)', borderRadius: '16px', border: '1px solid rgba(21, 180, 122, 0.3)', textAlign: 'center' }}>
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#15b47a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '16px', margin: '0 auto' }}><polyline points="20 6 9 17 4 12"/></svg>
+                      <h4 style={{ fontSize: '20px', color: '#15b47a', fontWeight: 'bold', marginBottom: '12px' }}>
+                        {lang === 'ar' ? 'تم اعتماد شهادتك بنجاح!' : 'Certificate Approved!'}
+                      </h4>
+                      <Button 
+                        variant="gradient" 
+                        onClick={() => {
+                          if (onDownloadCertificate) onDownloadCertificate(certRequest);
+                        }}
+                        style={{ marginTop: '16px', margin: '0 auto', display: 'flex' }}
+                      >
+                        {lang === 'ar' ? 'تحميل الشهادة' : 'Download Certificate'}
+                      </Button>
+                    </div>
+                  ) : certRequest?.status === 'pending' ? (
+                    <div style={{ padding: '30px', background: 'rgba(255, 179, 0, 0.1)', borderRadius: '16px', border: '1px solid rgba(255, 179, 0, 0.3)', textAlign: 'center' }}>
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ffb300" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '16px', margin: '0 auto' }}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      <h4 style={{ fontSize: '20px', color: '#ffb300', fontWeight: 'bold', marginBottom: '12px' }}>
+                        {lang === 'ar' ? 'طلبك قيد المراجعة' : 'Request Pending Review'}
+                      </h4>
+                      <p style={{ color: 'rgba(11,40,73,0.7)', maxWidth: '500px', margin: '0 auto' }}>
+                        {lang === 'ar' ? 'يقوم فريقنا بمراجعة سجل الحضور وتقدمك في المساق للتأكد من استيفاء جميع الشروط. سيتم إشعارك فور الاعتماد.' : 'Our team is reviewing your attendance and progress to ensure all requirements are met. You will be notified upon approval.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div style={{ background: '#ffffff', padding: '32px', borderRadius: '16px', boxShadow: '0 4px 24px rgba(11,40,73,0.06)' }}>
+                      {certRequest?.status === 'rejected' && (
+                        <div style={{ padding: '20px', background: 'rgba(255, 77, 77, 0.1)', border: '1px solid rgba(255, 77, 77, 0.3)', borderRadius: '12px', marginBottom: '24px' }}>
+                          <h4 style={{ color: '#ff4d4d', fontWeight: 'bold', marginBottom: '8px' }}>
+                            {lang === 'ar' ? 'تنبيه: تم رفض الطلب لوجود خلل' : 'Alert: Request Denied'}
+                          </h4>
+                          <p style={{ color: '#ff4d4d', fontSize: '14px', margin: 0 }}>
+                            {certRequest.rejection_reason || (lang === 'ar' ? 'لم يتم استيفاء معايير الحضور وتخطي الفيديوهات.' : 'Course attendance criteria not met.')}
+                          </p>
+                        </div>
+                      )}
+                      
+                      <div style={{ marginBottom: '24px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#0b2849' }}>
+                          {lang === 'ar' ? 'الاسم الثلاثي باللغة العربية' : 'Full Name in Arabic'}
+                        </label>
+                        <input 
+                          type="text" 
+                          value={certNameAr}
+                          onInput={e => setCertNameAr(e.target.value)}
+                          placeholder="مثال: د. محمد أحمد عبدلله"
+                          style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid rgba(11,40,73,0.15)', fontSize: '15px' }}
+                        />
+                      </div>
+                      
+                      <div style={{ marginBottom: '32px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#0b2849' }}>
+                          {lang === 'ar' ? 'الاسم الثلاثي باللغة الإنجليزية' : 'Full Name in English'}
+                        </label>
+                        <input 
+                          type="text" 
+                          value={certNameEn}
+                          onInput={e => setCertNameEn(e.target.value)}
+                          placeholder="Example: Dr. Mohammed Ahmed Abdullah"
+                          style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid rgba(11,40,73,0.15)', fontSize: '15px' }}
+                        />
+                      </div>
+                      
+                      <Button variant="gradient" onClick={handleSubmitCertRequest} disabled={certRequestLoading} style={{ width: '100%', justifyContent: 'center' }}>
+                        {certRequestLoading ? '...' : (certRequest?.status === 'rejected' ? (lang === 'ar' ? 'إعادة تقديم الطلب' : 'Resubmit Request') : (lang === 'ar' ? 'تقديم الطلب للتدقيق' : 'Submit for Audit'))}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               ) : activeLesson ? (
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '100%', margin: '0 auto' }}>
                   <h3 style={{ color: '#0b2849', fontSize: '22px', fontWeight: 'bold', marginBottom: '24px', lineHeight: '1.4' }}>
                     {lessonTitle}
                   </h3>
+
+                  {/* Dedicated Video Player for lesson.video_url */}
+                  {activeLesson.video_url && (
+                    <div style={{ marginBottom: '32px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(11,40,73,0.08)' }}>
+                      <CustomVideoPlayer videoUrl={activeLesson.video_url} lang={lang} userId={userId} lessonId={activeLessonId} courseId={course?.id} />
+                    </div>
+                  )}
 
                   {/* Unified Rich Text Content (Contains Native Audio/Video) */}
                   {lessonContent && (
@@ -481,7 +665,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                       marginBottom: '32px', 
                       flexGrow: 1 
                     }}>
-                      <RichTextRenderer html={lessonContent} lang={lang} userId={userId} lessonId={activeLessonId} />
+                      <RichTextRenderer html={lessonContent} lang={lang} userId={userId} lessonId={activeLessonId} courseId={course?.id} />
                     </div>
                   )}
 

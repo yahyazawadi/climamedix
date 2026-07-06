@@ -10,7 +10,11 @@ class VideoBlot extends BlockEmbed {
     let node = super.create();
     node.setAttribute('src', url);
     node.setAttribute('controls', '');
-    node.setAttribute('width', '100%');
+    node.style.width = '100%';
+    node.style.height = 'auto';
+    node.style.aspectRatio = '16/9';
+    node.style.objectFit = 'contain';
+    node.style.backgroundColor = '#000';
     node.style.borderRadius = '8px';
     node.style.marginTop = '10px';
     node.style.marginBottom = '10px';

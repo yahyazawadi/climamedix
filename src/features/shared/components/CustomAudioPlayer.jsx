@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
+import { supabase } from '../../../utils/supabaseClient';
 
-export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
+export function CustomAudioPlayer({ src, title = 'Audio Track', userId, lessonId }) {
   const [peaks, setPeaks] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -20,6 +21,49 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
     const min = Math.floor(time / 60);
     const sec = Math.floor(time % 60);
     return `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+  };
+
+  const telemetry = useRef({
+    maxPercentage: 0,
+    furthestSecond: 0,
+    actualPlayDuration: 0,
+    lastPlayStart: null,
+  });
+
+  const flushTelemetry = async () => {
+    if (!userId || !lessonId) return;
+    const { furthestSecond, maxPercentage, actualPlayDuration } = telemetry.current;
+    if (furthestSecond === 0 && actualPlayDuration === 0) return;
+
+    try {
+      const { data: existing } = await supabase
+        .from('lesson_watch_metrics')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('lesson_id', lessonId)
+        .single();
+
+      const newFurthest = Math.max(furthestSecond, existing?.furthest_second_reached || 0);
+      const newMaxPct = Math.max(maxPercentage, existing?.max_percentage_watched || 0);
+      const newActualPlay = (existing?.actual_play_duration_seconds || 0) + actualPlayDuration;
+
+      telemetry.current.actualPlayDuration = 0; 
+      telemetry.current.furthestSecond = newFurthest;
+      telemetry.current.maxPercentage = newMaxPct;
+
+      await supabase
+        .from('lesson_watch_metrics')
+        .upsert({
+          user_id: userId,
+          lesson_id: lessonId,
+          furthest_second_reached: newFurthest,
+          max_percentage_watched: newMaxPct,
+          actual_play_duration_seconds: newActualPlay,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id, lesson_id' });
+    } catch (err) {
+      // Quiet fail
+    }
   };
 
   useEffect(() => {
@@ -60,7 +104,10 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
         setDuration(audioBuffer.duration);
         setLoading(false);
       } catch (err) {
-        console.error("Error generating waveform", err);
+        console.warn("Could not generate exact waveform (likely CORS), using fallback:", err);
+        if (!isMounted) return;
+        const dummyPeaks = Array.from({ length: 100 }, () => Math.random() * 0.6 + 0.2);
+        setPeaks(dummyPeaks);
         setLoading(false);
       }
     };
@@ -82,6 +129,40 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
       setIsPlaying(!isPlaying);
     }
   };
+
+  useEffect(() => {
+    if (isPlaying) {
+      telemetry.current.lastPlayStart = Date.now();
+    } else {
+      if (telemetry.current.lastPlayStart) {
+        const elapsed = (Date.now() - telemetry.current.lastPlayStart) / 1000;
+        telemetry.current.actualPlayDuration += elapsed;
+        telemetry.current.lastPlayStart = null;
+      }
+      flushTelemetry();
+    }
+  }, [isPlaying]);
+
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') {
+        if (isPlaying && telemetry.current.lastPlayStart) {
+          const elapsed = (Date.now() - telemetry.current.lastPlayStart) / 1000;
+          telemetry.current.actualPlayDuration += elapsed;
+          telemetry.current.lastPlayStart = Date.now();
+        }
+        flushTelemetry();
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (telemetry.current.lastPlayStart) {
+        telemetry.current.actualPlayDuration += (Date.now() - telemetry.current.lastPlayStart) / 1000;
+      }
+      flushTelemetry();
+    };
+  }, [isPlaying, userId, lessonId]);
 
   const changeSpeed = (speed) => {
     if (!audioRef.current) return;
@@ -113,7 +194,15 @@ export function CustomAudioPlayer({ src, title = 'Audio Track' }) {
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
+      const ct = audioRef.current.currentTime;
+      setCurrentTime(ct);
+
+      if (ct > telemetry.current.furthestSecond) {
+        telemetry.current.furthestSecond = ct;
+        if (duration > 0) {
+          telemetry.current.maxPercentage = (ct / duration) * 100;
+        }
+      }
     }
   };
 

@@ -1,7 +1,11 @@
 import { useState, useRef, useEffect } from 'preact/hooks';
 import { supabase } from '../../../../utils/supabaseClient';
+import { getSecureVideoUrl } from '../../services/lmsService';
 
-export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 'ar', userId, lessonId }) {
+export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 'ar', userId, lessonId, courseId }) {
+  const [resolvedUrl, setResolvedUrl] = useState(null);
+  const [resolving, setResolving] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -31,7 +35,36 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
       videoRef.current.playbackRate = 1;
     }
     telemetry.current = { maxPercentage: 0, furthestSecond: 0, actualPlayDuration: 0, lastPlayStart: null };
-  }, [videoUrl]);
+    setVideoError(false);
+
+    // Resolve URL
+    if (!videoUrl) {
+      setResolvedUrl(null);
+      return;
+    }
+
+    if (videoUrl.startsWith('http') || videoUrl.startsWith('blob:')) {
+      setResolvedUrl(videoUrl);
+      return;
+    }
+
+    // It's likely an R2 key, resolve it
+    if (lessonId && courseId) {
+      setResolving(true);
+      getSecureVideoUrl(lessonId, courseId)
+        .then(url => {
+          setResolvedUrl(url || null);
+          setResolving(false);
+        })
+        .catch(err => {
+          console.error('Failed to resolve secure video URL:', err);
+          setResolving(false);
+        });
+    } else {
+      setResolvedUrl(videoUrl); // fallback
+    }
+
+  }, [videoUrl, lessonId, courseId]);
 
   const flushTelemetry = async () => {
     if (!userId || !lessonId) return;
@@ -209,6 +242,8 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
       style={{
         width: '100%',
         aspectRatio: '16/9',
+        minHeight: '300px',
+        flexShrink: 0,
         background: '#000000',
         borderRadius: '16px',
         marginBottom: '32px',
@@ -218,17 +253,17 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
         border: '1px solid rgba(0, 76, 109, 0.12)'
       }}
     >
-      {videoLoading ? (
+      {(videoLoading || resolving) ? (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px', flexDirection: 'column', gap: '12px' }}>
           <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.15)', borderTop: '3px solid #15b47a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           {lang === 'ar' ? 'جاري تحميل الفيديو...' : 'Loading video...'}
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
-      ) : videoUrl ? (
+      ) : (resolvedUrl && !videoError) ? (
         <>
           <video
             ref={videoRef}
-            src={videoUrl}
+            src={resolvedUrl}
             style={{ width: '100%', height: '100%', objectFit: 'contain', cursor: 'pointer' }}
             onClick={togglePlay}
             onPlay={() => setIsPlaying(true)}
@@ -249,6 +284,10 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
             }}
             onLoadedMetadata={() => {
               if (videoRef.current) setDuration(videoRef.current.duration);
+            }}
+            onError={(e) => {
+              console.error('Video load error:', e.target.error);
+              setVideoError(true);
             }}
             crossOrigin="anonymous"
           />
@@ -542,8 +581,20 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
           )}
         </>
       ) : (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>
-          {lang === 'ar' ? 'الفيديو غير متوفر' : 'Video unavailable'}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ff4d4d', fontSize: '15px', flexDirection: 'column', gap: '8px' }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{lang === 'ar' ? 'الفيديو غير متوفر أو الرابط تالف' : 'Video not available or link corrupted'}</span>
+          <button 
+            onClick={() => {
+              setResolvedUrl('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4');
+              setVideoError(false);
+            }}
+            style={{ marginTop: '12px', padding: '6px 16px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontSize: '12px' }}
+          >
+            {lang === 'ar' ? 'تحميل فيديو تجريبي (للاختبار)' : 'Load Sample Video (Testing)'}
+          </button>
         </div>
       )}
     </div>

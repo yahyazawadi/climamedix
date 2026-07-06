@@ -109,10 +109,10 @@ export function LMSDashboard({ enrolledCourses = [], completedCourses = [], onSe
                   <span style={{ fontSize: '12px', color: 'rgba(11,40,73,0.5)' }}>صدرت في: 2026</span>
                   <Button 
                     variant="outline" 
-                    onClick={() => onGenerateCertificate(course.title)}
-                    style={{ padding: '6px 16px', fontSize: '12px', borderColor: '#004c6d', color: '#004c6d' }}
+                    onClick={() => onGenerateCertificate(course.title, course.certName, course.certId)}
+                    style={{ padding: '6px 16px', fontSize: '12px', borderColor: '#15b47a', color: '#15b47a' }}
                   >
-                    عرض وتوليد الشهادة
+                    عرض الشهادة
                   </Button>
                 </div>
               </GlassCard>

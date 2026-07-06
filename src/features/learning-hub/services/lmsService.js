@@ -308,10 +308,11 @@ export async function issueCertificate({ userId, courseId, userName, courseTitle
  */
 export async function fetchUserCertificates(userId) {
   const { data, error } = await supabase
-    .from('certificates')
+    .from('certificate_requests')
     .select('*')
     .eq('user_id', userId)
-    .order('issued_at', { ascending: false });
+    .eq('status', 'approved')
+    .order('requested_at', { ascending: false });
 
   if (error) throw error;
   return data;

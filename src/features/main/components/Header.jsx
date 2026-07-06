@@ -591,6 +591,42 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                           {lang === 'ar' ? 'الإحصائيات' : 'Statistics'}
                         </a>
                       )}
+                      
+                      {userProfile?.role === 'superadmin' && (
+                        <a 
+                          href="#admin-certificates"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onNavigate('admin-certificates');
+                            setShowProfileDropdown(false);
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '10px 12px',
+                            borderRadius: '8px',
+                            color: '#ffffff',
+                            textDecoration: 'none',
+                            fontSize: '14px',
+                            fontWeight: 'bold',
+                            background: 'rgba(225, 239, 250, 0.05)',
+                            border: '1px solid rgba(225, 239, 250, 0.1)',
+                            transition: 'all 0.2s',
+                            marginTop: '4px'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = 'rgba(59, 130, 246, 0.15)';
+                            e.target.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'rgba(225, 239, 250, 0.05)';
+                            e.target.style.borderColor = 'rgba(225, 239, 250, 0.1)';
+                          }}
+                        >
+                          {lang === 'ar' ? 'تدقيق الشهادات' : 'Cert Audit'}
+                        </a>
+                      )}
 
                       <a 
                         href="#logout"
@@ -637,12 +673,12 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
 
             {/* 6. الأخبار */}
             <a 
-              href="#news-blog" 
+              href="#upcoming" 
               onClick={(e) => {
                 e.preventDefault();
-                onNavigate('news-blog');
+                onNavigate('home', 'upcoming');
               }}
-              class={`figma-nav-item ${currentView === 'news-blog' || activeSection === 'news-blog' ? 'active' : ''}`}
+              class={`figma-nav-item ${activeSection === 'upcoming' && currentView === 'home' ? 'active' : ''}`}
             >
               <img src={iconNews} class="figma-nav-icon" alt="الأخبار" />
               <span class="figma-nav-text">{t.newsBlog}</span>
@@ -652,9 +688,9 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               href="#join-us" 
               onClick={(e) => {
                 e.preventDefault();
-                onNavigate('join-us');
+                onNavigate('join');
               }}
-              class={`figma-nav-item ${currentView === 'join-us' ? 'active' : ''}`}
+              class={`figma-nav-item ${currentView === 'join' ? 'active' : ''}`}
             >
               <img src={iconCommunity} class="figma-nav-icon" alt="انضم إلينا" />
               <span class="figma-nav-text">{t.joinUs}</span>
@@ -673,14 +709,14 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               <span class="figma-nav-text">{t.opportunities}</span>
             </a>
 
-                    {/* Learning Hub (New Page) */}
+            {/* Learning Hub (New Page) */}
             <a 
-              href="#learning-hub" 
+              href="#courses" 
               onClick={(e) => {
                 e.preventDefault();
-                onNavigate('learning-hub');
+                onNavigate('courses');
               }}
-              class={`figma-nav-item ${currentView === 'learning-hub' ? 'active' : ''}`}
+              class={`figma-nav-item ${currentView === 'courses' ? 'active' : ''}`}
             >
               <img src={iconTraining} class="figma-nav-icon" alt="المركز التعليمي" />
               <span class="figma-nav-text">{lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}</span>
@@ -861,6 +897,18 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         style={{ color: '#3b82f6', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
                       >
                         {lang === 'ar' ? 'إحصائيات' : 'Stats'}
+                      </a>
+                      <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
+                      </>
+                  )}
+                  {userProfile?.role === 'superadmin' && (
+                    <>
+                      <a 
+                        href="#admin-certificates" 
+                        onClick={(e) => { e.preventDefault(); onNavigate('admin-certificates'); setDrawerOpen(false); }} 
+                        style={{ color: '#8b5cf6', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
+                      >
+                        {lang === 'ar' ? 'الشهادات' : 'Certs'}
                       </a>
                       <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
                     </>

@@ -24,9 +24,11 @@ import { LearningHubPage } from './features/learning-hub/components/student/Lear
 import { UserManagementDashboard } from './features/admin/components/UserManagementDashboard'
 import { UserStatsDashboard } from './features/admin/components/UserStatsDashboard'
 import { CourseBuilderPage } from './features/learning-hub/components/admin/CourseBuilderPage'
+import { CertificateAuditDashboard } from './features/admin/components/CertificateAuditDashboard'
 import { ResearchHubPage } from './features/research-center/components/ResearchHubPage'
 import { ResearchUploadPage } from './features/research-center/components/ResearchUploadPage'
 import { ResearchDetailPage } from './features/research-center/components/ResearchDetailPage'
+import { CertificateVerificationPage } from './features/learning-hub/components/certificates/CertificateVerificationPage'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import doctorImg from './assets/bg_3.png'
@@ -199,12 +201,16 @@ function AppContent() {
       setCurrentView('admin-stats');
     } else if (path === '/admin/courses') {
       setCurrentView('admin-courses');
+    } else if (path === '/admin/certificates') {
+      setCurrentView('admin-certificates');
     } else if (path === '/research') {
       setCurrentView('research');
     } else if (path === '/research-upload') {
       setCurrentView('research-upload');
     } else if (path === '/research-detail') {
       setCurrentView('research-detail');
+    } else if (path.startsWith('/verify/')) {
+      setCurrentView('verify');
     } else {
       setCurrentView('home');
       // Scroll to segment if matching home section
@@ -247,12 +253,16 @@ function AppContent() {
         setCurrentView('admin-stats');
       } else if (p === '/admin/courses') {
         setCurrentView('admin-courses');
+      } else if (p === '/admin/certificates') {
+        setCurrentView('admin-certificates');
       } else if (p === '/research') {
         setCurrentView('research');
       } else if (p === '/research-upload') {
         setCurrentView('research-upload');
       } else if (p === '/research-detail') {
         setCurrentView('research-detail');
+      } else if (p.startsWith('/verify/')) {
+        setCurrentView('verify');
       } else {
         setCurrentView('home');
       }
@@ -355,6 +365,8 @@ function AppContent() {
             window.history.pushState({}, '', '/admin/stats');
           } else if (view === 'admin-courses') {
             window.history.pushState({}, '', '/admin/courses');
+          } else if (view === 'admin-certificates') {
+            window.history.pushState({}, '', '/admin/certificates');
           } else if (view === 'research') {
             window.history.pushState({}, '', '/research');
           } else if (view === 'research-upload') {
@@ -770,6 +782,11 @@ function AppContent() {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />
+      ) : currentView === 'admin-certificates' ? (
+        <CertificateAuditDashboard lang={lang} onNavigate={(view) => {
+          setCurrentView(view);
+          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
+        }} />
       ) : currentView === 'research' ? (
         <ResearchHubPage lang={lang} onNavigate={(view, pubId) => {
           if (view === 'research-detail') {
@@ -790,6 +807,11 @@ function AppContent() {
           setCurrentView(view);
           window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
         }} />
+      ) : currentView === 'verify' ? (
+        <CertificateVerificationPage 
+          lang={lang} 
+          certId={window.location.pathname.split('/').pop()} 
+        />
       ) : (
         <AboutUsPage
           lang={lang}

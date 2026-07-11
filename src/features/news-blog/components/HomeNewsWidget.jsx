@@ -63,7 +63,7 @@ export function HomeNewsWidget({ lang, onNavigate }) {
   if (loading || articles.length === 0) return null;
 
   return (
-    <section className="figma-discovery-section" style={{ padding: '60px 20px', position: 'relative', zIndex: 10, background: 'rgba(255,255,255,0.3)' }}>
+    <section className="figma-discovery-section" style={{ padding: '60px 20px', position: 'relative', zIndex: 10 }}>
       <div className="discovery-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
           <div>

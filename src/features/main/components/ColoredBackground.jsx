@@ -10,13 +10,27 @@ export function ColoredBackground() {
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundImage: `url(${bg1})`,
-        backgroundSize: '100% 100%',
-        backgroundPosition: 'top center',
-        backgroundRepeat: 'no-repeat',
         zIndex: -3,
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
       }}
-    />
+    >
+      {[...Array(20)].map((_, i) => (
+        <img 
+          key={i}
+          src={bg1} 
+          alt="" 
+          style={{ 
+            width: '100%', 
+            height: 'auto', 
+            display: 'block',
+            transform: i % 2 !== 0 ? 'scaleY(-1)' : 'none',
+            flexShrink: 0
+          }} 
+        />
+      ))}
+    </div>
   );
 }

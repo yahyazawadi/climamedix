@@ -14,29 +14,31 @@ export function NeatScripples() {
       zIndex: -1,
       overflow: 'hidden'
     }}>
-      <img 
-        src={leftScribble} 
-        alt="" 
+      <div 
         className="neat-scribble-left"
         style={{
           position: 'absolute',
           left: '-180px',
           top: '10px',
+          bottom: 0,
           width: '633px',
-          height: 'auto',
+          backgroundImage: `url(${leftScribble})`,
+          backgroundRepeat: 'repeat-y',
+          backgroundSize: '100% auto',
           pointerEvents: 'none'
         }}
       />
-      <img 
-        src={rightScribble} 
-        alt="" 
+      <div 
         className="neat-scribble-right"
         style={{
           position: 'absolute',
           right: '-120px',
           top: '1486px',
+          bottom: 0,
           width: '467px',
-          height: 'auto',
+          backgroundImage: `url(${rightScribble})`,
+          backgroundRepeat: 'repeat-y',
+          backgroundSize: '100% auto',
           pointerEvents: 'none'
         }}
       />

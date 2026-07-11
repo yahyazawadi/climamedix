@@ -288,7 +288,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
         </section>
         
         {/* Community Network Map Section */}
-        <section id="community" className="figma-training-section" style={{ background: '#f8fafc', position: 'relative', zIndex: 5 }}>
+        <section id="community" className="figma-training-section" style={{ position: 'relative', zIndex: 5 }}>
           <div className="figma-section-container">
             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
               <h2 className="figma-section-title-main" style={{ color: '#0b2849', marginBottom: '10px' }}>

@@ -94,11 +94,32 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
   const [loadingPubs, setLoadingPubs] = useState(true);
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
+  const [events, setEvents] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
   
   useEffect(() => {
     fetchPublications();
     fetchCoursesList();
+    fetchEvents();
   }, []);
+
+  const fetchEvents = async () => {
+    try {
+      setLoadingEvents(true);
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('date', { ascending: true })
+        .gte('date', new Date().toISOString().split('T')[0])
+        .limit(2);
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (err) {
+      console.error("Error fetching events:", err);
+    } finally {
+      setLoadingEvents(false);
+    }
+  };
 
   const fetchCoursesList = async () => {
     try {
@@ -382,26 +403,38 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
             <h2 className="figma-section-title-main">{lang === 'ar' ? 'الأنشطة القادمة' : 'UPCOMING ACTIVITIES'}</h2>
             
             <div className="figma-vision-mission-grid">
-              {/* Upcoming Card 1 */}
-              <div className="figma-item-card" style={{ flexDirection: 'row-reverse', height: '180px' }}>
-                <div className="figma-item-card-image-wrap" style={{ width: '40%', height: '100%', borderRadius: '0 18px 18px 0' }}>
-                  <img src={upcoming1} alt="دراسة وطنية شاملة" style={{ height: '100%' }} />
+              {loadingEvents ? (
+                <div style={{ textAlign: 'center', width: '100%', padding: '40px', color: '#64748b' }}>
+                  {lang === 'ar' ? 'جاري تحميل الأنشطة...' : 'Loading activities...'}
                 </div>
-                <div className="figma-item-card-content" style={{ padding: '24px', justifyContent: 'center' }}>
-                  <span className="figma-item-card-trainees" style={{ backgroundColor: '#e2effa', color: '#004c6d', padding: '4px 10px', borderRadius: '20px', width: 'fit-content', fontSize: '12px' }}>{lang === 'ar' ? 'سبتمبر 2026' : 'September 2026'}</span>
-                  <h3 className="figma-item-card-title" style={{ fontSize: '18px', marginTop: '10px' }}>{lang === 'ar' ? 'دراسة وطنية شاملة حول جودة الهواء والصحة العامة.' : 'A comprehensive national study on air quality and public health.'}</h3>
+              ) : events.length === 0 ? (
+                <div style={{ textAlign: 'center', width: '100%', padding: '40px', color: '#64748b' }}>
+                  {lang === 'ar' ? 'لا توجد أنشطة قادمة حالياً.' : 'No upcoming activities.'}
                 </div>
-              </div>
-              {/* Upcoming Card 2 */}
-              <div className="figma-item-card" style={{ flexDirection: 'row-reverse', height: '180px' }}>
-                <div className="figma-item-card-image-wrap" style={{ width: '40%', height: '100%', borderRadius: '0 18px 18px 0' }}>
-                  <img src={upcoming2} alt="برنامج تدريبي متكامل" style={{ height: '100%' }} />
-                </div>
-                <div className="figma-item-card-content" style={{ padding: '24px', justifyContent: 'center' }}>
-                  <span className="figma-item-card-trainees" style={{ backgroundColor: '#e2effa', color: '#004c6d', padding: '4px 10px', borderRadius: '20px', width: 'fit-content', fontSize: '12px' }}>{lang === 'ar' ? 'نوفمبر 2026' : 'November 2026'}</span>
-                  <h3 className="figma-item-card-title" style={{ fontSize: '18px', marginTop: '10px' }}>{lang === 'ar' ? 'برنامج تدريبي متكامل لإعداد قيادات العمل المناخي الصحي.' : 'An integrated training program to prepare healthcare climate leaders.'}</h3>
-                </div>
-              </div>
+              ) : (
+                events.map((event, idx) => {
+                  const fallbackImages = [upcoming1, upcoming2];
+                  const eventImage = event.image_url || fallbackImages[idx % fallbackImages.length];
+                  const eventDate = new Date(event.date);
+                  const month = eventDate.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US', { month: 'long', year: 'numeric' });
+                  
+                  return (
+                    <div key={event.id} className="figma-item-card" style={{ flexDirection: 'row-reverse', height: '180px', cursor: 'pointer' }} onClick={() => onNavigate('events')}>
+                      <div className="figma-item-card-image-wrap" style={{ width: '40%', height: '100%', borderRadius: lang === 'ar' ? '0 18px 18px 0' : '18px 0 0 18px' }}>
+                        <img src={eventImage} alt={event.title_ar || event.title} style={{ height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <div className="figma-item-card-content" style={{ padding: '24px', justifyContent: 'center' }}>
+                        <span className="figma-item-card-trainees" style={{ backgroundColor: '#e2effa', color: '#004c6d', padding: '4px 10px', borderRadius: '20px', width: 'fit-content', fontSize: '12px' }}>
+                          {month}
+                        </span>
+                        <h3 className="figma-item-card-title" style={{ fontSize: '18px', marginTop: '10px' }}>
+                          {lang === 'ar' ? (event.title_ar || event.title) : (event.title_en || event.title)}
+                        </h3>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </section>

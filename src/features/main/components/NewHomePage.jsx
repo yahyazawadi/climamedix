@@ -142,12 +142,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal }) {
           lang={lang} 
           onNavigate={(view) => { 
             setCurrentView(view); 
-            window.history.pushState({}, '', '/' + view); 
-          }} 
         />
-        
-        {/* Dynamic Database-driven Slider (managed by Slider Manager) */}
-        <DynamicHomeSlider lang={lang} onNavigate={setCurrentView} />
 
         <section id="home" className="figma-hero-section">
           <div className="figma-hero-container">
@@ -175,7 +170,10 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal }) {
           </div>
         </section>
         
-        {/* Home News Widget inserted right after Hero */}
+        {/* Dynamic Database-driven Slider (managed by Slider Manager) */}
+        <DynamicHomeSlider lang={lang} onNavigate={setCurrentView} />
+        
+        {/* Home News Widget inserted right after Slider */}
         <HomeNewsWidget 
           lang={lang} 
           onNavigate={(view, articleId) => {

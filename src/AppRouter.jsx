@@ -20,6 +20,7 @@ import { ResearchHubPage } from './features/research-center/components/ResearchH
 import { ResearchUploadPage } from './features/research-center/components/ResearchUploadPage';
 import { ResearchDetailPage } from './features/research-center/components/ResearchDetailPage';
 import { CertificateVerificationPage } from './features/learning-hub/components/certificates/CertificateVerificationPage';
+import { SliderManagerPage } from './features/admin/components/SliderManagerPage';
 
 const ROUTE_ALIASES = {
   // Public Pages
@@ -48,6 +49,7 @@ const ROUTE_ALIASES = {
   'admin-stats': ['/admin/stats', '/admin/analytics', '/admin/dashboard'],
   'admin-courses': ['/admin/courses', '/admin/lms', '/admin/builder'],
   'admin-certificates': ['/admin/certificates', '/admin/certs', '/admin/audit'],
+  'admin-slider': ['/admin/slider', '/admin/homepage-slider'],
   
   // Utilities
   'debug': ['/debug', '/test', '/ui-test']
@@ -160,6 +162,7 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
   if (currentView === 'admin-stats') return <UserStatsDashboard lang={lang} onNavigate={simpleNav} />;
   if (currentView === 'admin-courses') return <CourseBuilderPage lang={lang} onNavigate={simpleNav} />;
   if (currentView === 'admin-certificates') return <CertificateAuditDashboard lang={lang} onNavigate={simpleNav} />;
+  if (currentView === 'admin-slider') return <SliderManagerPage lang={lang} onNavigate={simpleNav} />;
   
   if (currentView === 'research') return <ResearchHubPage lang={lang} onNavigate={(v, id) => {
     if (v === 'research-detail') paramNav('research-detail', 'id', id); else simpleNav(v);

@@ -65,25 +65,23 @@ export function HomeNewsWidget({ lang, onNavigate }) {
   return (
     <section className="figma-discovery-section" style={{ padding: '60px 20px', position: 'relative', zIndex: 10 }}>
       <div className="discovery-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-          <div>
-            <h2 className="discovery-title" style={{ margin: '0 0 10px 0', fontSize: '2rem', color: '#0b2849' }}>
-              {lang === 'ar' ? 'أحدث الأخبار والمقالات' : 'Latest News & Articles'}
-            </h2>
-            <p className="discovery-subtitle" style={{ margin: 0, color: '#4a6b8c' }}>
-              {lang === 'ar' ? 'ابق على اطلاع بآخر التطورات في مجال المناخ والصحة' : 'Stay informed with the latest developments in climate and health'}
-            </p>
-          </div>
-          <Button variant="outline" onClick={() => onNavigate('news')}>
-            {lang === 'ar' ? 'عرض الكل' : 'View All'}
-          </Button>
-        </div>
+        <h2 className="figma-section-title-main">
+          {lang === 'ar' ? 'أحدث الأخبار والمقالات' : 'Latest News & Articles'}
+        </h2>
+        <p style={{ textAlign: 'center', marginBottom: '30px', color: '#64748b' }}>
+          {lang === 'ar' ? 'ابق على اطلاع بآخر التطورات في مجال المناخ والصحة' : 'Stay informed with the latest developments in climate and health'}
+        </p>
         <NewsFeed 
           articles={articles} 
           lang={lang}
           hideFilters={true}
           onReadArticle={(article) => onNavigate('article', article.id)} 
         />
+        <div style={{ textAlign: 'center', marginTop: '30px' }}>
+          <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => onNavigate('news')}>
+            {lang === 'ar' ? 'تصفح جميع الأخبار' : 'Browse All News'}
+          </Button>
+        </div>
       </div>
     </section>
   );

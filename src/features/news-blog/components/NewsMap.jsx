@@ -79,6 +79,8 @@ export function NewsMap({ lang = 'ar' }) {
         setNewCoords({ lat: e.lngLat.lat, lng: e.lngLat.lng });
         setShowForm(true);
         setIsAddingMode(false);
+      } else if (showForm) {
+        setNewCoords({ lat: e.lngLat.lat, lng: e.lngLat.lng });
       }
     };
 
@@ -92,7 +94,7 @@ export function NewsMap({ lang = 'ar' }) {
       }
     };
 
-  }, [mapboxLoaded, isAddingMode]);
+  }, [mapboxLoaded, isAddingMode, showForm]);
 
   // Update markers and circles when nodes change
   useEffect(() => {

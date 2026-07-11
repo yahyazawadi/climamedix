@@ -106,19 +106,18 @@ export function NewsMap({ lang = 'ar' }) {
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
 
-    const displayNodes = newCoords ? [
-      ...nodes.filter(n => n.id !== editingNodeId),
-      {
-        id: 'draft',
-        latitude: newCoords.lat,
-        longitude: newCoords.lng,
-        radius_km: Number(formData.radius_km) || 0,
-        icon_type: formData.icon_type,
-        description_ar: formData.description_ar,
-        description_en: formData.description_en,
-        link: formData.link
-      }
-    ] : nodes;
+    const baseNodes = editingNodeId && newCoords ? nodes.filter(n => n.id !== editingNodeId) : nodes;
+
+    const displayNodes = newCoords ? [...baseNodes, {
+      id: 'draft',
+      latitude: newCoords.lat,
+      longitude: newCoords.lng,
+      radius_km: Number(formData.radius_km) || 0,
+      icon_type: formData.icon_type,
+      description_ar: formData.description_ar,
+      description_en: formData.description_en,
+      link: formData.link
+    }] : nodes;
 
     const updateSource = () => {
       const geojsonData = {
@@ -212,7 +211,7 @@ export function NewsMap({ lang = 'ar' }) {
           </div>
         `;
 
-        const popup = new window.mapboxgl.Popup({ offset: 25, focusAfterOpen: false, closeButton: false, closeOnClick: false }).setHTML(popupHTML);
+        const popup = new window.mapboxgl.Popup({ offset: 25, focusAfterOpen: false, closeButton: false }).setHTML(popupHTML);
 
         const marker = new window.mapboxgl.Marker(el)
           .setLngLat([node.longitude, node.latitude])

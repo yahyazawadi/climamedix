@@ -207,8 +207,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [ ] **LMS Progression:** In courses, automatically open the next lesson upon completion.
 *   [ ] **Quiz Review Enhancements:** Add a reason/explanation for why an answer is right or wrong, including a reference/source for the question in the quiz JSON schema.
 *   [ ] **Research Upload Links:** In the research page, allow uploading a link to an external website hosting the file instead of just direct file uploads.
-*   [x] **News Map Accuracy:** Verify and ensure the radius calculation logic on the News Map is accurate.
-    *   *Note: Due to Mapbox's `circle` layer implementation, the shape renders as a perfect circle on-screen rather than distorting into a geodesic oval near the poles. However, the pixel radius correctly scales to match the exact kilometer distance at the center coordinate.*
+*   [x] **News Map Accuracy:** Verify and ensure the radius calculation logic on the News Map is accurate. *(Note: Mapbox `circle` layer always draws perfect screen circles. While the radius is mathematically scaled to represent true km at the center latitude, it does not visually warp into an oval at the poles like a true geodesic polygon. For our <1000km distances, this mathematical center-scaling is perfectly acceptable).*
 *   [ ] **Activity Notifications:** Send an automated email to users upon specific activities.
 *   [ ] **LMS Final Exam & Certification:** Implement a final exam for courses to ensure certificates are not rejected or issued prematurely.
 *   [ ] **Lesson Resources:** Ensure there is a dedicated file resource for every lesson; remove the native slider if unnecessary.

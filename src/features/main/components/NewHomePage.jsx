@@ -109,9 +109,9 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .order('date', { ascending: true })
-        .gte('date', new Date().toISOString().split('T')[0])
-        .limit(2);
+        .order('event_date', { ascending: true })
+        .gte('event_date', new Date().toISOString().split('T')[0])
+        .limit(6);
       if (error) throw error;
       setEvents(data || []);
     } catch (err) {
@@ -415,7 +415,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
                 events.map((event, idx) => {
                   const fallbackImages = [upcoming1, upcoming2];
                   const eventImage = event.image_url || fallbackImages[idx % fallbackImages.length];
-                  const eventDate = new Date(event.date);
+                  const eventDate = new Date(event.event_date);
                   const month = eventDate.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US', { month: 'long', year: 'numeric' });
                   
                   return (

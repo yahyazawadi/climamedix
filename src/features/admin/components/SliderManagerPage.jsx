@@ -33,8 +33,8 @@ export function SliderManagerPage({ lang, onNavigate }) {
       // 1. Fetch Courses
       const { data: courses } = await supabase.from('courses').select('id, title_ar, title_en, cover_image, created_at');
       
-      // 2. Fetch News
-      const { data: news } = await supabase.from('news').select('id, title_ar, title_en, cover_image_url, created_at');
+      // 2. Fetch News (Using correct table: news_articles)
+      const { data: news } = await supabase.from('news_articles').select('id, title_ar, title_en, cover_image, published_at');
       
       // 3. Fetch Events
       const { data: events } = await supabase.from('events').select('id, title_ar, title_en, cover_image, created_at');
@@ -42,7 +42,10 @@ export function SliderManagerPage({ lang, onNavigate }) {
       // 4. Fetch Opportunities
       const { data: opportunities } = await supabase.from('opportunities').select('id, title_ar, title_en, image_url, created_at');
 
-      // 5. Fetch Active Slider Items (Assuming table exists, otherwise catch error)
+      // 5. Fetch Research
+      const { data: research } = await supabase.from('publications').select('id, title_ar, title_en, created_at');
+
+      // 6. Fetch Active Slider Items
       const { data: sliderData, error: sliderError } = await supabase.from('home_slider').select('*').order('sequence_order', { ascending: true });
       if (!sliderError && sliderData) {
         setSliderItems(sliderData);
@@ -51,13 +54,14 @@ export function SliderManagerPage({ lang, onNavigate }) {
       // Merge all content into one universal list
       let allContent = [];
       
-      if (courses) allContent.push(...courses.map(c => ({ ...c, type: 'course', image: c.cover_image, title: lang === 'ar' ? c.title_ar : c.title_en })));
-      if (news) allContent.push(...news.map(n => ({ ...n, type: 'news', image: n.cover_image_url, title: lang === 'ar' ? n.title_ar : n.title_en })));
-      if (events) allContent.push(...events.map(e => ({ ...e, type: 'event', image: e.cover_image, title: lang === 'ar' ? e.title_ar : e.title_en })));
-      if (opportunities) allContent.push(...opportunities.map(o => ({ ...o, type: 'opportunity', image: o.image_url, title: lang === 'ar' ? o.title_ar : o.title_en })));
+      if (courses) allContent.push(...courses.map(c => ({ ...c, type: 'course', image: c.cover_image, title: lang === 'ar' ? c.title_ar : c.title_en, created: c.created_at })));
+      if (news) allContent.push(...news.map(n => ({ ...n, type: 'news', image: n.cover_image, title: lang === 'ar' ? n.title_ar : n.title_en, created: n.published_at })));
+      if (events) allContent.push(...events.map(e => ({ ...e, type: 'event', image: e.cover_image, title: lang === 'ar' ? e.title_ar : e.title_en, created: e.created_at })));
+      if (opportunities) allContent.push(...opportunities.map(o => ({ ...o, type: 'opportunity', image: o.image_url, title: lang === 'ar' ? o.title_ar : o.title_en, created: o.created_at })));
+      if (research) allContent.push(...research.map(r => ({ ...r, type: 'research', image: null, title: lang === 'ar' ? r.title_ar : r.title_en, created: r.created_at })));
 
       // Sort by newest
-      allContent.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      allContent.sort((a, b) => new Date(b.created || 0) - new Date(a.created || 0));
       
       setContentList(allContent);
     } catch (err) {
@@ -67,23 +71,27 @@ export function SliderManagerPage({ lang, onNavigate }) {
     }
   };
 
-  const handleAddToSlider = async (content, customImg = null) => {
-    const finalImage = customImg || content.image;
+  const handleInitiateAdd = (content) => {
+    setSelectedContent(content);
+    setCustomImageUrl(content.image || '');
+    setShowModal(true);
+  };
+
+  const handleAddToSlider = async () => {
+    if (!selectedContent) return;
     
-    // Safety check - force image upload if missing
-    if (!finalImage && !customImg) {
-      setSelectedContent(content);
-      setShowModal(true);
+    if (!customImageUrl) {
+      alert(lang === 'ar' ? 'يرجى إرفاق صورة أولاً.' : 'Please provide an image URL.');
       return;
     }
 
     const payload = {
-      entity_type: content.type,
-      entity_id: content.id,
-      title_ar: content.title_ar,
-      title_en: content.title_en,
-      image_url: finalImage,
-      link_url: `/${content.type}/${content.id}`,
+      entity_type: selectedContent.type,
+      entity_id: selectedContent.id,
+      title_ar: selectedContent.title_ar,
+      title_en: selectedContent.title_en,
+      image_url: customImageUrl,
+      link_url: selectedContent.type === 'research' ? `/research-detail?id=${selectedContent.id}` : (selectedContent.type === 'news' ? `/article?id=${selectedContent.id}` : `/${selectedContent.type}/${selectedContent.id}`),
       sequence_order: sliderItems.length + 1
     };
 
@@ -91,14 +99,15 @@ export function SliderManagerPage({ lang, onNavigate }) {
     setSliderItems([...sliderItems, payload]);
     setShowModal(false);
     setCustomImageUrl('');
+    setSelectedContent(null);
 
     // Save to DB
     const { error } = await supabase.from('home_slider').insert(payload);
     if (error) {
-      console.error("Failed to add to slider table. Please ensure the 'home_slider' table exists.", error);
-      alert("Database table 'home_slider' missing! Run the SQL script to create it.");
+      console.error("Failed to add to slider table:", error);
+      alert("Database error: " + error.message);
     } else {
-      fetchEverything(); // refresh IDs
+      fetchEverything();
     }
   };
 
@@ -268,6 +277,7 @@ export function SliderManagerPage({ lang, onNavigate }) {
                   <option value="news">{lang === 'ar' ? 'الأخبار' : 'News'}</option>
                   <option value="event">{lang === 'ar' ? 'الفعاليات' : 'Events'}</option>
                   <option value="opportunity">{lang === 'ar' ? 'الفرص' : 'Opportunities'}</option>
+                  <option value="research">{lang === 'ar' ? 'الأبحاث' : 'Research'}</option>
                 </select>
               </div>
             </div>
@@ -305,7 +315,7 @@ export function SliderManagerPage({ lang, onNavigate }) {
                         </td>
                         <td style={{ padding: '16px', textAlign: 'center' }}>
                           <button 
-                            onClick={() => handleAddToSlider(item)}
+                            onClick={() => handleInitiateAdd(item)}
                             style={{ background: '#15b47a', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
                             onMouseEnter={e => e.target.style.background = '#129a68'}
                             onMouseLeave={e => e.target.style.background = '#15b47a'}
@@ -323,24 +333,27 @@ export function SliderManagerPage({ lang, onNavigate }) {
         </div>
       </div>
 
-      {/* Modal for Missing Images */}
+      {/* Modal for Setting Slider Image */}
       {showModal && selectedContent && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(5, 12, 26, 0.65)', backdropFilter: 'blur(15px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
           <div style={{ background: '#ffffff', padding: '30px', borderRadius: '24px', width: '90%', maxWidth: '500px', border: '1px solid rgba(11, 40, 73, 0.15)', boxShadow: '0 24px 60px rgba(0,0,0,0.3)', direction: lang === 'ar' ? 'rtl' : 'ltr', textAlign: lang === 'ar' ? 'right' : 'left' }}>
-            <h3 style={{ marginTop: 0, color: '#0b2849' }}>{lang === 'ar' ? 'تنبيه: الصورة مفقودة' : 'Notice: Missing Cover Image'}</h3>
+            <h3 style={{ marginTop: 0, color: '#0b2849' }}>{lang === 'ar' ? 'تأكيد صورة الشريحة' : 'Confirm Slider Image'}</h3>
             <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '14px', lineHeight: '1.5' }}>
-              {lang === 'ar' ? 'هذا المحتوى ليس له صورة غلاف افتراضية. لتتمكن من عرضه في الواجهة الرئيسية، يرجى إرفاق رابط صورة هنا:' : `This ${selectedContent.type} has no default cover image. To feature it on the homepage, please provide an image URL:`}
+              {lang === 'ar' ? 'يمكنك استخدام الصورة الحالية أو إرفاق رابط صورة مخصصة تتناسب مع أبعاد الواجهة الرئيسية (يفضل 16:9):' : `You can use the default image or provide a custom image URL that fits the homepage slider layout (16:9 recommended):`}
             </p>
             <input 
               type="text" 
               placeholder="https://images.unsplash.com/photo-..."
               value={customImageUrl}
               onInput={e => setCustomImageUrl(e.target.value)}
-              style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid rgba(11, 40, 73, 0.15)', color: '#0b2849', outline: 'none', marginBottom: '20px' }}
+              style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid rgba(11, 40, 73, 0.15)', color: '#0b2849', outline: 'none', marginBottom: '15px' }}
             />
+            {customImageUrl && (
+              <img src={customImageUrl} alt="Preview" style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', marginBottom: '20px', border: '1px solid rgba(11, 40, 73, 0.1)' }} />
+            )}
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowModal(false)} style={{ padding: '10px 20px', borderRadius: '8px', background: '#f1f5f9', color: '#0b2849', border: '1px solid rgba(11, 40, 73, 0.1)', cursor: 'pointer', fontWeight: 'bold' }}>Cancel</button>
-              <button onClick={() => handleAddToSlider(selectedContent, customImageUrl)} style={{ padding: '10px 20px', borderRadius: '8px', background: '#15b47a', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>Upload & Add</button>
+              <button onClick={() => { setShowModal(false); setSelectedContent(null); }} style={{ padding: '10px 20px', borderRadius: '8px', background: '#f1f5f9', color: '#0b2849', border: '1px solid rgba(11, 40, 73, 0.1)', cursor: 'pointer', fontWeight: 'bold' }}>Cancel</button>
+              <button onClick={handleAddToSlider} style={{ padding: '10px 20px', borderRadius: '8px', background: '#15b47a', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>Confirm & Add</button>
             </div>
           </div>
         </div>

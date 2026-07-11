@@ -3378,8 +3378,12 @@ export function DebugUIPage() {
                 </div>
 
                 {/* Navigation Buttons */}
-                <button className="carousel-nav-btn prev" onClick={handlePrevCourse}>&lt;</button>
-                <button className="carousel-nav-btn next" onClick={handleNextCourse}>&gt;</button>
+                <button className="carousel-nav-btn prev" onClick={handlePrevCourse} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <button className="carousel-nav-btn next" onClick={handleNextCourse} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
               </div>
             </div>
 

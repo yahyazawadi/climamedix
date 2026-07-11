@@ -141,142 +141,194 @@ export function SliderManagerPage({ lang, onNavigate }) {
   }
 
   return (
-    <div style={{ padding: '120px 40px 60px', minHeight: '100vh', background: '#050c1a', color: '#fff', direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc', direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
       
-      {/* Header Section */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-        <div>
-          <h1 style={{ fontSize: '32px', fontWeight: 'bold', margin: '0 0 10px 0', color: '#15b47a' }}>
+      {/* 1. Header Banner Block (Green-to-Blue Gradient) */}
+      <div 
+        style={{
+          background: 'linear-gradient(90deg, #15b47a 0%, #12a978 5%, #0c8774 23%, #066d71 41%, #025a6e 60%, #004f6d 79%, #004c6d 100%)',
+          padding: '160px 20px 50px 20px',
+          textAlign: 'center',
+          position: 'relative',
+          boxShadow: '0 4px 20px rgba(11, 40, 73, 0.1)'
+        }}
+      >
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h1 style={{ 
+            fontSize: 'clamp(28px, 4vw, 40px)', 
+            fontWeight: 'bold', 
+            color: '#ffffff', 
+            marginBottom: '16px',
+            fontFamily: lang === 'ar' ? 'Tajawal, sans-serif' : 'Outfit, sans-serif',
+            textShadow: '0 2px 4px rgba(0,0,0,0.15)'
+          }}>
             {lang === 'ar' ? 'إدارة واجهة الرئيسية (Slider Manager)' : 'Homepage Slider Manager'}
           </h1>
-          <p style={{ margin: 0, opacity: 0.7 }}>
+          <p style={{ 
+            fontSize: 'clamp(14px, 1.8vw, 16px)', 
+            color: 'rgba(255, 255, 255, 0.9)', 
+            maxWidth: '750px', 
+            margin: '0 auto 35px auto',
+            lineHeight: '1.6',
+            fontFamily: lang === 'ar' ? 'Tajawal, sans-serif' : 'Outfit, sans-serif'
+          }}>
             {lang === 'ar' ? 'حدد المحتوى الذي تريد إبرازه في الشريحة العلوية للصفحة الرئيسية.' : 'Select content to feature on the homepage hero slider.'}
           </p>
+
+          <button 
+            onClick={() => setShowCustomModal(true)}
+            style={{
+              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+              color: '#ffffff',
+              border: 'none',
+              padding: '12px 28px',
+              borderRadius: '30px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '14px',
+              fontFamily: lang === 'ar' ? 'Tajawal, sans-serif' : 'Outfit, sans-serif',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: '0 6px 20px rgba(59, 130, 246, 0.3)',
+              transition: 'all 0.25s ease',
+              outline: 'none'
+            }}
+          >
+            <span style={{ fontSize: '16px' }}>+</span>
+            <span>{lang === 'ar' ? 'إعلان مخصص' : 'Custom Announcement'}</span>
+          </button>
         </div>
-        <button 
-          onClick={() => setShowCustomModal(true)}
-          style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6', border: '1px solid #3b82f6', padding: '12px 24px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}
-        >
-          {lang === 'ar' ? '+ إعلان مخصص' : '+ Custom Announcement'}
-        </button>
       </div>
 
-      {/* Top Half: Active Slider Items */}
-      <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '24px', padding: '30px', marginBottom: '40px' }}>
-        <h2 style={{ fontSize: '20px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ width: '12px', height: '12px', background: '#15b47a', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 10px #15b47a' }}></span>
-          {lang === 'ar' ? 'الشرائح النشطة حالياً' : 'Currently Active on Homepage'}
-        </h2>
-        
-        {sliderItems.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', background: 'rgba(0,0,0,0.2)', borderRadius: '16px', opacity: 0.5 }}>
-            {lang === 'ar' ? 'لا يوجد محتوى في واجهة الرئيسية حالياً.' : 'Slider is currently empty.'}
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-            {sliderItems.map((item, idx) => (
-              <div key={idx} style={{ background: '#0b2849', borderRadius: '16px', overflow: 'hidden', position: 'relative', border: '1px solid rgba(21, 180, 122, 0.3)' }}>
-                <img src={item.image_url} alt="" style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
-                <button 
-                  onClick={() => handleRemoveFromSlider(item.id)}
-                  style={{ position: 'absolute', top: '10px', right: '10px', background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}
-                >
-                  &times;
-                </button>
-                <div style={{ padding: '16px' }}>
-                  <div style={{ fontSize: '10px', background: 'rgba(255,255,255,0.1)', display: 'inline-block', padding: '4px 8px', borderRadius: '4px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                    {item.entity_type}
-                  </div>
-                  <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 'bold' }}>{lang === 'ar' ? item.title_ar : item.title_en}</h4>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Bottom Half: Database Inventory */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '20px' }}>
-          <h2 style={{ fontSize: '20px', margin: 0 }}>{lang === 'ar' ? 'مكتبة المحتوى (اختر للإضافة)' : 'Content Inventory (Click to add)'}</h2>
+      <div style={{ 
+        flexGrow: 1,
+        padding: '50px 20px 80px 20px',
+        position: 'relative',
+        zIndex: 1,
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: lang === 'ar' ? 'right' : 'left' }}>
           
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <input 
-              type="text" 
-              placeholder={lang === 'ar' ? 'بحث...' : 'Search...'} 
-              value={searchQuery}
-              onInput={e => setSearchQuery(e.target.value)}
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '10px 16px', borderRadius: '8px', color: '#fff', outline: 'none' }}
-            />
-            <select 
-              value={filterType} 
-              onChange={e => setFilterType(e.target.value)}
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '10px 16px', borderRadius: '8px', color: '#fff', outline: 'none' }}
-            >
-              <option value="all" style={{ color: '#000' }}>{lang === 'ar' ? 'الكل' : 'All Types'}</option>
-              <option value="course" style={{ color: '#000' }}>{lang === 'ar' ? 'المساقات' : 'Courses'}</option>
-              <option value="news" style={{ color: '#000' }}>{lang === 'ar' ? 'الأخبار' : 'News'}</option>
-              <option value="event" style={{ color: '#000' }}>{lang === 'ar' ? 'الفعاليات' : 'Events'}</option>
-              <option value="opportunity" style={{ color: '#000' }}>{lang === 'ar' ? 'الفرص' : 'Opportunities'}</option>
-            </select>
+          {/* Top Half: Active Slider Items */}
+          <div style={{ background: '#ffffff', border: '1px solid rgba(11, 40, 73, 0.1)', borderRadius: '24px', padding: '30px', marginBottom: '40px', boxShadow: '0 10px 30px rgba(11, 40, 73, 0.05)' }}>
+            <h2 style={{ fontSize: '20px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#0b2849' }}>
+              <span style={{ width: '12px', height: '12px', background: '#15b47a', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 10px rgba(21, 180, 122, 0.4)' }}></span>
+              {lang === 'ar' ? 'الشرائح النشطة حالياً' : 'Currently Active on Homepage'}
+            </h2>
+            
+            {sliderItems.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', background: 'rgba(11, 40, 73, 0.03)', borderRadius: '16px', color: 'rgba(11, 40, 73, 0.6)' }}>
+                {lang === 'ar' ? 'لا يوجد محتوى في واجهة الرئيسية حالياً.' : 'Slider is currently empty.'}
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                {sliderItems.map((item, idx) => (
+                  <div key={idx} style={{ background: '#ffffff', borderRadius: '16px', overflow: 'hidden', position: 'relative', border: '1px solid rgba(11, 40, 73, 0.1)', boxShadow: '0 4px 15px rgba(11, 40, 73, 0.05)' }}>
+                    <img src={item.image_url} alt="" style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
+                    <button 
+                      onClick={() => handleRemoveFromSlider(item.id)}
+                      style={{ position: 'absolute', top: '10px', right: '10px', background: '#ff4d4d', color: '#fff', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', boxShadow: '0 2px 8px rgba(255, 77, 77, 0.4)' }}
+                    >
+                      &times;
+                    </button>
+                    <div style={{ padding: '16px' }}>
+                      <div style={{ fontSize: '10px', background: 'rgba(21, 180, 122, 0.1)', color: '#15b47a', display: 'inline-block', padding: '4px 8px', borderRadius: '4px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
+                        {item.entity_type}
+                      </div>
+                      <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 'bold', color: '#0b2849' }}>{lang === 'ar' ? item.title_ar : item.title_en}</h4>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Half: Database Inventory */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '20px' }}>
+              <h2 style={{ fontSize: '20px', margin: 0, color: '#0b2849' }}>{lang === 'ar' ? 'مكتبة المحتوى (اختر للإضافة)' : 'Content Inventory (Click to add)'}</h2>
+              
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input 
+                  type="text" 
+                  placeholder={lang === 'ar' ? 'بحث...' : 'Search...'} 
+                  value={searchQuery}
+                  onInput={e => setSearchQuery(e.target.value)}
+                  style={{ background: '#ffffff', border: '1px solid rgba(11, 40, 73, 0.15)', padding: '10px 16px', borderRadius: '8px', color: '#0b2849', outline: 'none' }}
+                />
+                <select 
+                  value={filterType} 
+                  onChange={e => setFilterType(e.target.value)}
+                  style={{ background: '#ffffff', border: '1px solid rgba(11, 40, 73, 0.15)', padding: '10px 16px', borderRadius: '8px', color: '#0b2849', outline: 'none' }}
+                >
+                  <option value="all">{lang === 'ar' ? 'الكل' : 'All Types'}</option>
+                  <option value="course">{lang === 'ar' ? 'المساقات' : 'Courses'}</option>
+                  <option value="news">{lang === 'ar' ? 'الأخبار' : 'News'}</option>
+                  <option value="event">{lang === 'ar' ? 'الفعاليات' : 'Events'}</option>
+                  <option value="opportunity">{lang === 'ar' ? 'الفرص' : 'Opportunities'}</option>
+                </select>
+              </div>
+            </div>
+
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(11, 40, 73, 0.6)' }}>Loading Database...</div>
+            ) : (
+              <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid rgba(11, 40, 73, 0.1)', overflow: 'hidden', boxShadow: '0 10px 30px rgba(11, 40, 73, 0.05)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: lang === 'ar' ? 'right' : 'left' }}>
+                  <thead>
+                    <tr style={{ background: '#f8fafc', borderBottom: '1px solid rgba(11, 40, 73, 0.1)' }}>
+                      <th style={{ padding: '16px', fontWeight: 'bold', fontSize: '14px', color: '#0b2849' }}>Type</th>
+                      <th style={{ padding: '16px', fontWeight: 'bold', fontSize: '14px', color: '#0b2849' }}>Title</th>
+                      <th style={{ padding: '16px', fontWeight: 'bold', fontSize: '14px', color: '#0b2849' }}>Image Status</th>
+                      <th style={{ padding: '16px', fontWeight: 'bold', fontSize: '14px', color: '#0b2849', textAlign: 'center' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredContent.map((item, idx) => (
+                      <tr key={idx} style={{ borderBottom: '1px solid rgba(11, 40, 73, 0.05)' }}>
+                        <td style={{ padding: '16px' }}>
+                          <span style={{ background: 'rgba(21, 180, 122, 0.1)', color: '#15b47a', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                            {item.type}
+                          </span>
+                        </td>
+                        <td style={{ padding: '16px', fontWeight: 'bold', fontSize: '15px', color: '#0b2849' }}>{item.title}</td>
+                        <td style={{ padding: '16px' }}>
+                          {item.image ? (
+                            <img src={item.image} alt="" style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '6px' }} />
+                          ) : (
+                            <span style={{ fontSize: '12px', color: '#ffbd2e', background: 'rgba(255, 189, 46, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>
+                              No Cover Image
+                            </span>
+                          )}
+                        </td>
+                        <td style={{ padding: '16px', textAlign: 'center' }}>
+                          <button 
+                            onClick={() => handleAddToSlider(item)}
+                            style={{ background: '#15b47a', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+                            onMouseEnter={e => e.target.style.background = '#129a68'}
+                            onMouseLeave={e => e.target.style.background = '#15b47a'}
+                          >
+                            + Add to Slider
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
-
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px' }}>Loading Database...</div>
-        ) : (
-          <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: lang === 'ar' ? 'right' : 'left' }}>
-              <thead>
-                <tr style={{ background: 'rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <th style={{ padding: '16px', fontWeight: 'bold', fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>Type</th>
-                  <th style={{ padding: '16px', fontWeight: 'bold', fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>Title</th>
-                  <th style={{ padding: '16px', fontWeight: 'bold', fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>Image Status</th>
-                  <th style={{ padding: '16px', fontWeight: 'bold', fontSize: '14px', color: 'rgba(255,255,255,0.6)', textAlign: 'center' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredContent.map((item, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <td style={{ padding: '16px' }}>
-                      <span style={{ background: 'rgba(21, 180, 122, 0.1)', color: '#15b47a', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>
-                        {item.type}
-                      </span>
-                    </td>
-                    <td style={{ padding: '16px', fontWeight: 'bold', fontSize: '15px' }}>{item.title}</td>
-                    <td style={{ padding: '16px' }}>
-                      {item.image ? (
-                        <img src={item.image} alt="" style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '6px' }} />
-                      ) : (
-                        <span style={{ fontSize: '12px', color: '#ffbd2e', background: 'rgba(255, 189, 46, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>
-                          No Cover Image
-                        </span>
-                      )}
-                    </td>
-                    <td style={{ padding: '16px', textAlign: 'center' }}>
-                      <button 
-                        onClick={() => handleAddToSlider(item)}
-                        style={{ background: '#15b47a', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
-                        onMouseEnter={e => e.target.style.background = '#129a68'}
-                        onMouseLeave={e => e.target.style.background = '#15b47a'}
-                      >
-                        + Add to Slider
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
 
       {/* Modal for Missing Images */}
       {showModal && selectedContent && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div style={{ background: '#0b2849', padding: '30px', borderRadius: '24px', width: '90%', maxWidth: '500px', border: '1px solid #15b47a' }}>
-            <h3 style={{ marginTop: 0 }}>{lang === 'ar' ? 'تنبيه: الصورة مفقودة' : 'Notice: Missing Cover Image'}</h3>
-            <p style={{ opacity: 0.8, fontSize: '14px', lineHeight: '1.5' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(5, 12, 26, 0.65)', backdropFilter: 'blur(15px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ background: '#ffffff', padding: '30px', borderRadius: '24px', width: '90%', maxWidth: '500px', border: '1px solid rgba(11, 40, 73, 0.15)', boxShadow: '0 24px 60px rgba(0,0,0,0.3)', direction: lang === 'ar' ? 'rtl' : 'ltr', textAlign: lang === 'ar' ? 'right' : 'left' }}>
+            <h3 style={{ marginTop: 0, color: '#0b2849' }}>{lang === 'ar' ? 'تنبيه: الصورة مفقودة' : 'Notice: Missing Cover Image'}</h3>
+            <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '14px', lineHeight: '1.5' }}>
               {lang === 'ar' ? 'هذا المحتوى ليس له صورة غلاف افتراضية. لتتمكن من عرضه في الواجهة الرئيسية، يرجى إرفاق رابط صورة هنا:' : `This ${selectedContent.type} has no default cover image. To feature it on the homepage, please provide an image URL:`}
             </p>
             <input 
@@ -284,10 +336,10 @@ export function SliderManagerPage({ lang, onNavigate }) {
               placeholder="https://images.unsplash.com/photo-..."
               value={customImageUrl}
               onInput={e => setCustomImageUrl(e.target.value)}
-              style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', outline: 'none', marginBottom: '20px' }}
+              style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid rgba(11, 40, 73, 0.15)', color: '#0b2849', outline: 'none', marginBottom: '20px' }}
             />
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowModal(false)} style={{ padding: '10px 20px', borderRadius: '8px', background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={() => setShowModal(false)} style={{ padding: '10px 20px', borderRadius: '8px', background: '#f1f5f9', color: '#0b2849', border: '1px solid rgba(11, 40, 73, 0.1)', cursor: 'pointer', fontWeight: 'bold' }}>Cancel</button>
               <button onClick={() => handleAddToSlider(selectedContent, customImageUrl)} style={{ padding: '10px 20px', borderRadius: '8px', background: '#15b47a', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>Upload & Add</button>
             </div>
           </div>
@@ -296,24 +348,24 @@ export function SliderManagerPage({ lang, onNavigate }) {
 
       {/* Modal for Custom Announcements */}
       {showCustomModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div style={{ background: '#0b2849', padding: '30px', borderRadius: '24px', width: '90%', maxWidth: '500px', border: '1px solid #3b82f6' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(5, 12, 26, 0.65)', backdropFilter: 'blur(15px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ background: '#ffffff', padding: '30px', borderRadius: '24px', width: '90%', maxWidth: '500px', border: '1px solid rgba(11, 40, 73, 0.15)', boxShadow: '0 24px 60px rgba(0,0,0,0.3)', direction: lang === 'ar' ? 'rtl' : 'ltr', textAlign: lang === 'ar' ? 'right' : 'left' }}>
             <h3 style={{ marginTop: 0, color: '#3b82f6' }}>{lang === 'ar' ? 'إضافة إعلان مخصص' : 'Add Custom Announcement'}</h3>
-            <p style={{ opacity: 0.8, fontSize: '14px', lineHeight: '1.5', marginBottom: '20px' }}>
+            <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '14px', lineHeight: '1.5', marginBottom: '20px' }}>
               {lang === 'ar' ? 'قم بإضافة شريحة مخصصة للواجهة لا تنتمي لأي مساق أو خبر موجود.' : 'Create a completely custom slide that does not belong to any database entity.'}
             </p>
             
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 'bold', opacity: 0.7 }}>Title</label>
-            <input type="text" value={customTitle} onInput={e => setCustomTitle(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', outline: 'none', marginBottom: '15px' }} />
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 'bold', color: '#0b2849' }}>Title</label>
+            <input type="text" value={customTitle} onInput={e => setCustomTitle(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid rgba(11, 40, 73, 0.15)', color: '#0b2849', outline: 'none', marginBottom: '15px' }} />
             
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 'bold', opacity: 0.7 }}>Image URL</label>
-            <input type="text" value={customImage} onInput={e => setCustomImage(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', outline: 'none', marginBottom: '15px' }} />
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 'bold', color: '#0b2849' }}>Image URL</label>
+            <input type="text" value={customImage} onInput={e => setCustomImage(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid rgba(11, 40, 73, 0.15)', color: '#0b2849', outline: 'none', marginBottom: '15px' }} />
             
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 'bold', opacity: 0.7 }}>Target Link URL (Optional)</label>
-            <input type="text" value={customLink} onInput={e => setCustomLink(e.target.value)} placeholder="https://" style={{ width: '100%', padding: '12px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', outline: 'none', marginBottom: '20px' }} />
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 'bold', color: '#0b2849' }}>Target Link URL (Optional)</label>
+            <input type="text" value={customLink} onInput={e => setCustomLink(e.target.value)} placeholder="https://" style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid rgba(11, 40, 73, 0.15)', color: '#0b2849', outline: 'none', marginBottom: '20px' }} />
             
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowCustomModal(false)} style={{ padding: '10px 20px', borderRadius: '8px', background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={() => setShowCustomModal(false)} style={{ padding: '10px 20px', borderRadius: '8px', background: '#f1f5f9', color: '#0b2849', border: '1px solid rgba(11, 40, 73, 0.1)', cursor: 'pointer', fontWeight: 'bold' }}>Cancel</button>
               <button onClick={handleAddCustomAnnouncement} style={{ padding: '10px 20px', borderRadius: '8px', background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>Publish to Slider</button>
             </div>
           </div>

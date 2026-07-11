@@ -11,6 +11,7 @@ import { ArticleReaderPage } from './features/news-blog/components/ArticleReader
 import { ProfilePage } from './features/profile/components/ProfilePage';
 import { LearningHubPage } from './features/learning-hub/components/student/LearningHubPage';
 import { NewHomePage } from './features/main/components/NewHomePage';
+import { OldHomePage } from './features/main/components/OldHomePage';
 import { UserManagementDashboard } from './features/admin/components/UserManagementDashboard';
 import { UserStatsDashboard } from './features/admin/components/UserStatsDashboard';
 import { CourseBuilderPage } from './features/learning-hub/components/admin/CourseBuilderPage';
@@ -23,6 +24,7 @@ import { CertificateVerificationPage } from './features/learning-hub/components/
 const ROUTE_ALIASES = {
   // Public Pages
   'newhome': ['/newhome', '/home', '/index', '/main', '/'],
+  'oldhome': ['/oldhome', '/legacy'],
   'about': ['/about', '/about-us', '/info', '/who-we-are'],
   'auth': ['/auth', '/login', '/signin', '/register', '/signup'],
   'join': ['/join', '/apply', '/membership', '/register-network'],
@@ -134,11 +136,11 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
   return { navigate };
 }
 
-export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, navigate, homeComponent }) {
+export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, navigate }) {
   const simpleNav = (view) => navigate(view);
   const paramNav = (view, idName, id) => navigate(view, null, `${idName}=${id}`);
 
-  if (currentView === 'home') return homeComponent;
+  if (currentView === 'home' || currentView === 'newhome') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} />;
   if (currentView === 'about') return <AboutUsPage lang={lang} onJoinClick={() => navigate('join')} onNavigate={(view, sectionId) => navigate(view, sectionId)} />;
   if (currentView === 'debug') return <DebugUIPage />;
   if (currentView === 'auth') return <AuthPage lang={lang} onAuthSuccess={() => setCurrentView('newhome')} />;
@@ -166,10 +168,12 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
   if (currentView === 'research-upload') return <ResearchUploadPage lang={lang} onNavigate={simpleNav} />;
   if (currentView === 'research-detail') return <ResearchDetailPage lang={lang} onNavigate={simpleNav} />;
   
-  if (currentView === 'newhome') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} />;
+  if (currentView === 'newhome' || currentView === 'home') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} />;
+  
+  if (currentView === 'oldhome') return <OldHomePage lang={lang} setOpenedModal={setOpenedModal} setCurrentView={setCurrentView} />;
   
   if (currentView === 'verify') return <CertificateVerificationPage lang={lang} certId={window.location.pathname.split('/').pop()} />;
   
   
-  return homeComponent; // Default fallback if no view matched
+  return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} />; // Default fallback if no view matched
 }

@@ -3,6 +3,7 @@
 To keep track of the growing application surface area, here is a definitive list of all configured application routes. We use a centralized, multi-alias routing system via `src/AppRouter.jsx`, allowing multiple manual URLs to map to the same view (e.g., `/login` and `/auth` both point to Authentication).
 
 *   **`/` / `/newhome` / `/main`** - New Home Page (Premium Layout)
+*   **`/oldhome` / `/legacy`** - Old Home Page (Legacy Layout)
 *   **`/about` / `/about-us` / `/info`** - About Us Page
 *   **`/auth` / `/login` / `/register`** - Authentication & Registration
 *   **`/profile` / `/account` / `/settings`** - User Profile & Account Settings

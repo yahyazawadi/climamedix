@@ -1586,7 +1586,7 @@ export function DebugUIPage() {
           cursor: pointer;
           z-index: 10;
           transition: all 0.3s ease;
-          padding: 0 0 4px 0; /* subtle offset compensation for chevron alignment */
+          padding: 0;
         }
         .carousel-nav-btn:hover {
           background: #15b47a;

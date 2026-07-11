@@ -3172,7 +3172,8 @@ body.dark-mode .search-filter-tag.active {
   position: absolute;
   top: 0;
   right: 0;
-  width: 60%;
+  width: 35%;
+  min-width: 480px;
   height: 100%;
   background: linear-gradient(135deg, rgba(11, 40, 73, 0.98) 20%, rgba(21, 180, 122, 0.9) 100%);
   clip-path: polygon(12% 0%, 100% 0%, 100% 100%, 0% 100%);

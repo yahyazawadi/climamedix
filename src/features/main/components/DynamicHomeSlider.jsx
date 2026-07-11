@@ -67,7 +67,8 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
   const currentSlide = slides[activeIndex];
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '520px', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', overflow: 'hidden' }}>
+    <div style={{ maxWidth: '1440px', width: '100%', margin: '20px auto', padding: '0 30px' }}>
+    <div className="geometric-carousel" style={{ position: 'relative', height: '520px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
       
       {/* Background Image */}
       {slides.map((slide, idx) => (
@@ -86,7 +87,7 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
 
       {/* Triangular Geometric Overlay */}
       <div style={{
-        position: 'absolute', top: 0, right: 0, width: '60%', height: '100%',
+        position: 'absolute', top: 0, right: 0, width: '33.33%', minWidth: '380px', height: '100%',
         background: 'linear-gradient(135deg, rgba(11, 40, 73, 0.98) 20%, rgba(21, 180, 122, 0.9) 100%)',
         clipPath: 'polygon(12% 0%, 100% 0%, 100% 100%, 0% 100%)',
         display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start',
@@ -135,6 +136,7 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
           </button>
         </>
       )}
+    </div>
     </div>
   );
 }

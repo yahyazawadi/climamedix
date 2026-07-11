@@ -1,6 +1,7 @@
 import { useEffect } from 'preact/hooks';
 import { AboutUsPage } from './features/about-us/AboutUsPage';
 import { DebugUIPage } from './features/debug-ui/DebugUIPage';
+import { MockHeaderPage } from './features/debug-ui/MockHeaderPage';
 import { AuthPage } from './features/auth/AuthPage';
 import { JoinUsPage } from './features/join-us/JoinUsPage';
 import { OpportunitiesPage } from './features/opportunities/components/OpportunitiesPage';
@@ -50,7 +51,8 @@ const ROUTE_ALIASES = {
   'admin-certificates': ['/admin/certificates', '/admin/certs', '/admin/audit'],
   
   // Utilities
-  'debug': ['/debug', '/test', '/ui-test']
+  'debug': ['/debug', '/test', '/ui-test'],
+  'mockheader': ['/mockheader', '/mock-header']
 };
 
 export const getViewFromPath = (path) => {
@@ -143,6 +145,7 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
   if (currentView === 'home' || currentView === 'newhome') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} />;
   if (currentView === 'about') return <AboutUsPage lang={lang} onJoinClick={() => navigate('join')} onNavigate={(view, sectionId) => navigate(view, sectionId)} />;
   if (currentView === 'debug') return <DebugUIPage />;
+  if (currentView === 'mockheader') return <MockHeaderPage lang={lang} />;
   if (currentView === 'auth') return <AuthPage lang={lang} onAuthSuccess={() => setCurrentView('newhome')} />;
   if (currentView === 'opportunities') return <OpportunitiesPage lang={lang} onNavigate={simpleNav} />;
   if (currentView === 'join') return <JoinUsPage lang={lang} onNavigate={simpleNav} />;

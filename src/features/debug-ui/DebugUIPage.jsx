@@ -1140,6 +1140,9 @@ export function DebugUIPage() {
     }
   };
 
+  // Concept 33: Slide-out Calendar Sidebar
+  const [isCalendarSidebarOpen, setIsCalendarSidebarOpen] = useState(false);
+
   return (
     <main ref={containerRef} style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', padding: '160px 20px 80px', direction: 'rtl', fontFamily: "'Tajawal', sans-serif" }}>
 
@@ -3988,6 +3991,123 @@ export function DebugUIPage() {
           <NewsFeed articles={MOCK_ARTICLES} />
         </div>
 
+      </div>
+
+      {/* ===== Concept 33: Slide-out Calendar Sidebar ===== */}
+      <div 
+        style={{
+          position: 'fixed',
+          top: '50%',
+          right: 0,
+          transform: 'translateY(-50%)',
+          zIndex: 9999,
+          background: 'linear-gradient(135deg, #0b2849, #004c6d)',
+          color: '#fff',
+          padding: '12px 16px',
+          borderTopLeftRadius: '12px',
+          borderBottomLeftRadius: '12px',
+          cursor: 'pointer',
+          boxShadow: '-4px 0 15px rgba(0,0,0,0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontWeight: 'bold',
+          transition: 'all 0.3s ease'
+        }}
+        onClick={() => setIsCalendarSidebarOpen(true)}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </span>
+        <span style={{ writingMode: 'vertical-rl', padding: '10px 0', letterSpacing: '2px' }}>الفعاليات</span>
+      </div>
+
+      {/* Drawer Overlay */}
+      {isCalendarSidebarOpen && (
+        <div 
+          onClick={() => setIsCalendarSidebarOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(5, 12, 26, 0.6)',
+            backdropFilter: 'blur(3px)',
+            zIndex: 10000,
+            transition: 'opacity 0.3s ease'
+          }}
+        />
+      )}
+
+      {/* Drawer Content */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        right: isCalendarSidebarOpen ? 0 : '-450px',
+        width: '450px',
+        maxWidth: '90vw',
+        height: '100vh',
+        background: '#f8fafc',
+        zIndex: 10001,
+        boxShadow: '-5px 0 25px rgba(0,0,0,0.2)',
+        transition: 'right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1)',
+        display: 'flex',
+        flexDirection: 'column',
+        overflowY: 'auto',
+        overflowX: 'hidden'
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: '25px',
+          background: 'linear-gradient(135deg, #15b47a, #004c6d)',
+          color: '#fff',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            تقويم الفعاليات
+          </h3>
+          <button 
+            onClick={() => setIsCalendarSidebarOpen(false)}
+            style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', width: '35px', height: '35px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}
+          >
+            &times;
+          </button>
+        </div>
+
+        {/* Content */}
+        <div style={{ padding: '15px', flexGrow: 1, background: '#f8fafc', transform: 'scale(0.95)', transformOrigin: 'top center' }}>
+          <EventsCalendar 
+            events={MOCK_EVENTS.map(e => ({ ...e, date: e.date }))} 
+            isArabic={true} 
+            canManageEvents={false}
+          />
+        </div>
+
+        {/* Footer Link */}
+        <div style={{ padding: '20px', borderTop: '1px solid rgba(0,0,0,0.05)', textAlign: 'center', background: '#fff' }}>
+          <Button 
+            variant="outline" 
+            style={{ width: '100%', borderColor: '#004c6d', color: '#004c6d' }}
+            onClick={() => {
+              setIsCalendarSidebarOpen(false);
+              window.history.pushState({}, '', '/events');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }}
+          >
+            عرض صفحة الفعاليات الكاملة
+          </Button>
+        </div>
       </div>
     </main>
   );

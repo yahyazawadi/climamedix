@@ -213,12 +213,16 @@ export function NewsMap({ lang = 'ar' }) {
           .setLngLat([node.longitude, node.latitude])
           .addTo(map);
 
-        el.addEventListener('mouseenter', () => {
-          popup.addTo(map);
+        el.addEventListener('pointerenter', (e) => {
+          if (e.pointerType === 'mouse') {
+            popup.addTo(map);
+          }
         });
 
-        el.addEventListener('mouseleave', () => {
-          popup.remove();
+        el.addEventListener('pointerleave', (e) => {
+          if (e.pointerType === 'mouse') {
+            popup.remove();
+          }
         });
 
         el.addEventListener('click', (e) => {
@@ -236,6 +240,12 @@ export function NewsMap({ lang = 'ar' }) {
             setNewCoords({ lat: node.latitude, lng: node.longitude });
             setShowForm(true);
             setIsAddingMode(false);
+          } else {
+            if (popup.isOpen()) {
+              popup.remove();
+            } else {
+              popup.addTo(map);
+            }
           }
         });
 

@@ -47,7 +47,7 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
   };
 
   if (slides.length === 0) {
-    if (!userProfile || (!hasPermission('manage:slider') && userProfile.role !== 'superadmin')) {
+    if (!hasPermission('manage:slider')) {
       return null;
     }
     return (

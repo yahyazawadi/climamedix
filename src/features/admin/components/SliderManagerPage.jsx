@@ -136,7 +136,7 @@ export function SliderManagerPage({ lang, onNavigate }) {
     return true;
   });
 
-  if (!userProfile || (!hasPermission('manage:slider') && userProfile.role !== 'superadmin')) {
+  if (!hasPermission('manage:slider')) {
     return <div style={{ padding: '100px', textAlign: 'center', color: 'white' }}>Access Denied. You do not have the 'manage:slider' permission.</div>;
   }
 

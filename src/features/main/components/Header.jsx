@@ -21,7 +21,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
   const [showPermsList, setShowPermsList] = useState(false);
   const [permSearchQuery, setPermSearchQuery] = useState('');
 
-  const { disabledPermissions, togglePermission } = useAuth();
+  const { disabledPermissions, togglePermission, hasPermission } = useAuth();
   
   const t = translations[lang] || translations.ar;
 
@@ -553,6 +553,42 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                           }}
                         >
                           {lang === 'ar' ? 'منشئ المساقات' : 'Course Builder'}
+                        </a>
+                      )}
+
+                      {hasPermission('manage:slider') && (
+                        <a 
+                          href="#admin-slider"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onNavigate('admin-slider');
+                            setShowProfileDropdown(false);
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '10px 12px',
+                            borderRadius: '8px',
+                            color: '#ffffff',
+                            textDecoration: 'none',
+                            fontSize: '14px',
+                            fontWeight: 'bold',
+                            background: 'rgba(225, 239, 250, 0.05)',
+                            border: '1px solid rgba(225, 239, 250, 0.1)',
+                            transition: 'all 0.2s',
+                            marginTop: '4px'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = 'rgba(234, 179, 8, 0.15)';
+                            e.target.style.borderColor = 'rgba(234, 179, 8, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'rgba(225, 239, 250, 0.05)';
+                            e.target.style.borderColor = 'rgba(225, 239, 250, 0.1)';
+                          }}
+                        >
+                          {lang === 'ar' ? 'إدارة الرئيسية' : 'Slider Manager'}
                         </a>
                       )}
                       

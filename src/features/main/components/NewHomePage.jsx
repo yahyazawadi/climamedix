@@ -165,9 +165,9 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
     'slider',
     'news',
     'research',
-    'newsletter',
     'training',
     'upcoming',
+    'newsletter',
     'community',
     'about'
   ];

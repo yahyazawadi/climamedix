@@ -5,6 +5,7 @@ export function BaseMap({
   center = [35.0, 31.0], 
   zoom = 4, 
   interactive = true,
+  showScale = false,
   style = { width: '100%', height: '500px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(11, 40, 73, 0.08)' },
   children 
 }) {
@@ -122,8 +123,9 @@ export function BaseMap({
         });
       }
 
-      // Add a scale control to the map so users can verify distances accurately
-      map.addControl(new window.mapboxgl.ScaleControl({ maxWidth: 150, unit: 'metric' }), 'bottom-right');
+      if (showScale) {
+        map.addControl(new window.mapboxgl.ScaleControl({ maxWidth: 150, unit: 'metric' }), 'bottom-right');
+      }
 
       if (onMapLoad) {
         onMapLoad(map);

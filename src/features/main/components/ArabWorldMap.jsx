@@ -138,5 +138,5 @@ export function ArabWorldMap({ lang = 'ar' }) {
     };
   }, []);
 
-  return <BaseMap onMapLoad={handleMapLoad} center={[28.0, 26.0]} zoom={3.2} />;
+  return <BaseMap onMapLoad={handleMapLoad} center={[28.0, 26.0]} zoom={3.2} interactive={false} />;
 }

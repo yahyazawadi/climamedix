@@ -171,7 +171,7 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
   if (currentView === 'research-upload') return <ResearchUploadPage lang={lang} onNavigate={simpleNav} />;
   if (currentView === 'research-detail') return <ResearchDetailPage lang={lang} onNavigate={simpleNav} />;
   
-  if (currentView === 'newhome' || currentView === 'home') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} />;
+  if (currentView === 'newhome' || currentView === 'home') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} onNavigate={simpleNav} />;
   
   if (currentView === 'oldhome') return <OldHomePage lang={lang} setOpenedModal={setOpenedModal} setCurrentView={setCurrentView} />;
   

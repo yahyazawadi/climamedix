@@ -88,7 +88,7 @@ const DISCOVERY_ITEMS = [
   }
 ];
 
-export function NewHomePage({ lang, setCurrentView, setOpenedModal }) {
+export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }) {
   const t = translations[lang] || translations.ar;
   const [publications, setPublications] = useState([]);
   const [loadingPubs, setLoadingPubs] = useState(true);
@@ -140,10 +140,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal }) {
     <main className="figma-main-content">
         <CalendarSidebarWidget 
           lang={lang} 
-          onNavigate={(view) => { 
-            setCurrentView(view); 
-            window.history.pushState({}, '', '/' + view); 
-          }} 
+          onNavigate={onNavigate} 
         />
         <section id="home" className="figma-hero-section">
           <div className="figma-hero-container">
@@ -172,7 +169,10 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal }) {
         </section>
         
         {/* Dynamic Database-driven Slider (managed by Slider Manager) */}
-        <DynamicHomeSlider lang={lang} onNavigate={setCurrentView} />
+        <DynamicHomeSlider 
+          lang={lang} 
+          onNavigate={onNavigate} 
+        />
         
         {/* Home News Widget inserted right after Slider */}
         <HomeNewsWidget 

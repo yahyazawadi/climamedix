@@ -93,7 +93,8 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [x] **Hero Banner:**
     *   [x] Main title
     *   [x] Short description
-    *   [x] CTA Buttons: Explore Programs, Join Community
+    *   [x] Dynamic CTA Buttons (changes based on entity type: course, article, research, event)
+    *   [x] Geometric Carousel Navigation (glassmorphic left/right arrows & responsive width container)
 *   [x] **About ClimaMedix (Short Version):** Introduction section.
 *   [x] **Featured Programs:** Visual cards grid.
 *   [x] **Impact Statistics:**

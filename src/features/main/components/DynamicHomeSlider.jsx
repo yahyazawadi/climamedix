@@ -120,12 +120,28 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
             onMouseEnter={(e) => e.target.style.boxShadow = '0 0 15px #15b47a'}
             onMouseLeave={(e) => e.target.style.boxShadow = 'none'}
           >
-            {lang === 'ar' ? 'استعرض التفاصيل' : 'View Details'}
+            {(() => {
+              const type = currentSlide.entity_type ? currentSlide.entity_type.toLowerCase() : '';
+              if (lang === 'ar') {
+                if (type.includes('course') || type.includes('training')) return 'انضم للدورة التدريبية';
+                if (type.includes('article') || type.includes('news')) return 'اقرأ المقال';
+                if (type.includes('research')) return 'اقرأ البحث';
+                if (type.includes('event')) return 'سجل في الفعالية';
+                return 'استعرض التفاصيل';
+              } else {
+                if (type.includes('course') || type.includes('training')) return 'Join the Course';
+                if (type.includes('article') || type.includes('news')) return 'Read Article';
+                if (type.includes('research')) return 'Read Research';
+                if (type.includes('event')) return 'Register for Event';
+                return 'View Details';
+              }
+            })()}
           </button>
         )}
       </div>
 
       {/* Navigation Arrows — Left & Right */}
+      {/* if you change the arrows position i will kill you */}
       {slides.length > 1 && (
         <>
           <button className="carousel-nav-btn prev" onClick={handlePrev}>

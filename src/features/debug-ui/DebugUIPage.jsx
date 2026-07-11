@@ -1142,6 +1142,37 @@ export function DebugUIPage() {
 
   // Concept 33: Slide-out Calendar Sidebar
   const [isCalendarSidebarOpen, setIsCalendarSidebarOpen] = useState(false);
+  const [sidebarEvents, setSidebarEvents] = useState([]);
+  const [isLoadingSidebarEvents, setIsLoadingSidebarEvents] = useState(false);
+
+  useEffect(() => {
+    const fetchRealEvents = async () => {
+      setIsLoadingSidebarEvents(true);
+      try {
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .order('event_date', { ascending: true });
+          
+        if (data && !error) {
+          const mapped = data.map(db => ({
+            id: db.id,
+            title: db.title_ar || db.title_en || 'بدون عنوان',
+            date: db.event_date ? db.event_date.split('T')[0] : '', 
+            time: db.time,
+            type: db.type_ar || db.type_en || db.type || 'فعالية',
+            desc: db.description_ar || db.description_en || '',
+            link: db.registration_link || '#'
+          }));
+          setSidebarEvents(mapped);
+        }
+      } catch (e) {
+        console.warn('Failed to fetch events:', e);
+      }
+      setIsLoadingSidebarEvents(false);
+    };
+    fetchRealEvents();
+  }, []);
 
   return (
     <main ref={containerRef} style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', padding: '160px 20px 80px', direction: 'rtl', fontFamily: "'Tajawal', sans-serif" }}>
@@ -4087,11 +4118,17 @@ export function DebugUIPage() {
 
         {/* Content */}
         <div style={{ padding: '15px', flexGrow: 1, background: '#f8fafc', transform: 'scale(0.95)', transformOrigin: 'top center' }}>
-          <EventsCalendar 
-            events={MOCK_EVENTS.map(e => ({ ...e, date: e.date }))} 
-            isArabic={true} 
-            canManageEvents={false}
-          />
+          {isLoadingSidebarEvents ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#0b2849' }}>
+              جاري تحميل الفعاليات...
+            </div>
+          ) : (
+            <EventsCalendar 
+              events={sidebarEvents} 
+              isArabic={true} 
+              canManageEvents={false}
+            />
+          )}
         </div>
 
         {/* Footer Link */}

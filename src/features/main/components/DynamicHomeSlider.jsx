@@ -124,52 +124,50 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
         )}
       </div>
 
-      {/* Navigation Buttons (Neat Box) */}
-      <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: lang === 'ar' ? '0' : 'auto',
-        right: lang === 'ar' ? 'auto' : '0',
-        display: 'flex',
-        background: '#ffffff',
-        zIndex: 10
-      }}>
-        <button 
-          onClick={handlePrev} 
-          disabled={slides.length <= 1}
-          style={{ 
-            width: '64px', height: '64px',
-            border: 'none', background: 'transparent',
-            borderRight: lang === 'ar' ? '1px solid rgba(11,40,73,0.1)' : 'none',
-            borderLeft: lang === 'ar' ? 'none' : '1px solid rgba(11,40,73,0.1)',
-            color: slides.length <= 1 ? '#ccc' : '#0b2849',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: slides.length <= 1 ? 'default' : 'pointer',
-            transition: 'background 0.3s ease', padding: 0
-          }}
-          onMouseEnter={e => { if(slides.length > 1) e.currentTarget.style.background = '#f8fafc'; }}
-          onMouseLeave={e => { if(slides.length > 1) e.currentTarget.style.background = 'transparent'; }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points={lang === 'ar' ? "9 18 15 12 9 6" : "15 18 9 12 15 6"}></polyline></svg>
-        </button>
-        
-        <button 
-          onClick={handleNext} 
-          disabled={slides.length <= 1}
-          style={{ 
-            width: '64px', height: '64px',
-            border: 'none', background: 'transparent',
-            color: slides.length <= 1 ? '#ccc' : '#0b2849',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: slides.length <= 1 ? 'default' : 'pointer',
-            transition: 'background 0.3s ease', padding: 0
-          }}
-          onMouseEnter={e => { if(slides.length > 1) e.currentTarget.style.background = '#f8fafc'; }}
-          onMouseLeave={e => { if(slides.length > 1) e.currentTarget.style.background = 'transparent'; }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points={lang === 'ar' ? "15 18 9 12 15 6" : "9 18 15 12 9 6"}></polyline></svg>
-        </button>
-      </div>
+      {/* Navigation Box */}
+      {slides.length > 1 && (
+        <div style={{
+          position: 'absolute',
+          bottom: '40px',
+          left: lang === 'ar' ? '40px' : 'auto',
+          right: lang === 'ar' ? 'auto' : '40px',
+          display: 'flex',
+          background: 'rgba(255, 255, 255, 0.15)',
+          backdropFilter: 'blur(12px)',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          zIndex: 10,
+          overflow: 'hidden',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+        }}>
+          <button 
+            onClick={handlePrev} 
+            style={{ 
+              width: '56px', height: '56px', background: 'transparent', color: '#fff', border: 'none', 
+              borderRight: lang === 'ar' ? 'none' : '1px solid rgba(255,255,255,0.1)', 
+              borderLeft: lang === 'ar' ? '1px solid rgba(255,255,255,0.1)' : 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+              transition: 'background 0.3s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(21, 180, 122, 0.8)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button 
+            onClick={handleNext} 
+            style={{ 
+              width: '56px', height: '56px', background: 'transparent', color: '#fff', border: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+              transition: 'background 0.3s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(21, 180, 122, 0.8)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

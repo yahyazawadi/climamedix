@@ -5,6 +5,7 @@ import { GlassCard } from '../../shared/components/GlassCard'
 import { ArabWorldMap } from './ArabWorldMap'
 import { HomeNewsWidget } from '../../news-blog/components/HomeNewsWidget'
 import { translations } from '../../../i18n/translations'
+import { CalendarSidebarWidget } from '../../events/components/CalendarSidebarWidget'
 import doctorImg from '../../../assets/bg_3.png'
 import whiteLogo from '../../../assets/footer_logo.svg'
 import research1 from '../../../assets/research_1.png'
@@ -136,6 +137,13 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal }) {
 
   return (
     <main className="figma-main-content">
+        <CalendarSidebarWidget 
+          lang={lang} 
+          onNavigate={(view) => { 
+            setCurrentView(view); 
+            window.history.pushState({}, '', '/' + view); 
+          }} 
+        />
         <section id="home" className="figma-hero-section">
           <div className="figma-hero-container">
             {/* Frame 43 */}

@@ -211,6 +211,7 @@ export function NewsMap({ lang = 'ar' }) {
 
         const marker = new window.mapboxgl.Marker(el)
           .setLngLat([node.longitude, node.latitude])
+          .setPopup(popup)
           .addTo(map);
 
         el.addEventListener('pointerenter', (e) => {
@@ -226,9 +227,9 @@ export function NewsMap({ lang = 'ar' }) {
         });
 
         el.addEventListener('click', (e) => {
-          e.stopPropagation();
-          e.preventDefault();
           if (canEdit && node.id !== 'draft') {
+            e.stopPropagation();
+            popup.remove(); // Close the native popup if we are an admin opening the edit form
             setFormData({
               radius_km: node.radius_km,
               icon_type: node.icon_type,
@@ -240,12 +241,6 @@ export function NewsMap({ lang = 'ar' }) {
             setNewCoords({ lat: node.latitude, lng: node.longitude });
             setShowForm(true);
             setIsAddingMode(false);
-          } else {
-            if (popup.isOpen()) {
-              popup.remove();
-            } else {
-              popup.addTo(map);
-            }
           }
         });
 

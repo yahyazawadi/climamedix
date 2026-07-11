@@ -707,72 +707,19 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               </a>
             )}
 
-            {/* 7. Community / Join Us */}
-            <a 
-              href="#join-us" 
-              onClick={(e) => {
-                e.preventDefault();
-                onNavigate('join');
-              }}
-              class={`figma-nav-item ${currentView === 'join' ? 'active' : ''}`}
-            >
-              <img src={iconCommunity} class="figma-nav-icon" alt="انضم إلينا" />
-              <span class="figma-nav-text">{t.joinUs}</span>
-            </a>
+            {/* Search Input Container */}
+            <div class="figma-search-container">
+              <input 
+                type="text" 
+                placeholder={t.search}
+                value={searchQuery}
+                onInput={(e) => setSearchQuery(e.target.value)}
+                class="figma-search-input"
+              />
+              <img src={iconSearch} class="figma-search-icon" alt="بحث" />
+            </div>
 
-            {/* 6. News */}
-            <a 
-              href="#news" 
-              onClick={(e) => {
-                e.preventDefault();
-                onNavigate('news');
-              }}
-              class={`figma-nav-item ${currentView === 'news' ? 'active' : ''}`}
-            >
-              <img src={iconNews} class="figma-nav-icon" alt="الأخبار" />
-              <span class="figma-nav-text">{t.newsBlog}</span>
-            </a>
-
-            {/* 5. Opportunities */}
-            <a 
-              href="#opportunities" 
-              onClick={(e) => {
-                e.preventDefault();
-                onNavigate('opportunities');
-              }}
-              class={`figma-nav-item ${currentView === 'opportunities' ? 'active' : ''}`}
-            >
-              <img src={iconOpportunities} class="figma-nav-icon" alt="الفرص" />
-              <span class="figma-nav-text">{t.opportunities}</span>
-            </a>
-
-            {/* 4. Research */}
-            <a 
-              href="#research" 
-              onClick={(e) => {
-                e.preventDefault();
-                onNavigate('research');
-              }}
-              class={`figma-nav-item ${currentView === 'research' ? 'active' : ''}`}
-            >
-              <img src={iconResearch} class="figma-nav-icon" alt="أبحاث" />
-              <span class="figma-nav-text">{t.research}</span>
-            </a>
-
-            {/* 3. Learning Hub */}
-            <a 
-              href="#courses" 
-              onClick={(e) => {
-                e.preventDefault();
-                onNavigate('courses');
-              }}
-              class={`figma-nav-item ${currentView === 'courses' ? 'active' : ''}`}
-            >
-              <img src={iconTraining} class="figma-nav-icon" alt="المركز التعليمي" />
-              <span class="figma-nav-text">{lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}</span>
-            </a>
-
-            {/* 2. About Us */}
+            {/* About Us */}
             <a 
               href="#about" 
               onClick={(e) => {
@@ -785,19 +732,72 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               <span class="figma-nav-text">{t.about}</span>
             </a>
 
-            {/* Middle Search Input Container (Kept for layout stability) */}
-            <div class="figma-search-container">
-              <input 
-                type="text" 
-                placeholder={t.search}
-                value={searchQuery}
-                onInput={(e) => setSearchQuery(e.target.value)}
-                class="figma-search-input"
-              />
-              <img src={iconSearch} class="figma-search-icon" alt="بحث" />
-            </div>
+            {/* Community / Join Us */}
+            <a 
+              href="#join-us" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('join');
+              }}
+              class={`figma-nav-item ${currentView === 'join' ? 'active' : ''}`}
+            >
+              <img src={iconCommunity} class="figma-nav-icon" alt="انضم إلينا" />
+              <span class="figma-nav-text">{t.joinUs}</span>
+            </a>
 
-            {/* 1. Home */}
+            {/* Research */}
+            <a 
+              href="#research" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('research');
+              }}
+              class={`figma-nav-item ${currentView === 'research' ? 'active' : ''}`}
+            >
+              <img src={iconResearch} class="figma-nav-icon" alt="أبحاث" />
+              <span class="figma-nav-text">{t.research}</span>
+            </a>
+
+            {/* Opportunities */}
+            <a 
+              href="#opportunities" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('opportunities');
+              }}
+              class={`figma-nav-item ${currentView === 'opportunities' ? 'active' : ''}`}
+            >
+              <img src={iconOpportunities} class="figma-nav-icon" alt="الفرص" />
+              <span class="figma-nav-text">{t.opportunities}</span>
+            </a>
+
+            {/* News */}
+            <a 
+              href="#news" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('news');
+              }}
+              class={`figma-nav-item ${currentView === 'news' ? 'active' : ''}`}
+            >
+              <img src={iconNews} class="figma-nav-icon" alt="الأخبار" />
+              <span class="figma-nav-text">{t.newsBlog}</span>
+            </a>
+
+            {/* Learning Hub / Training */}
+            <a 
+              href="#courses" 
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('courses');
+              }}
+              class={`figma-nav-item ${currentView === 'courses' ? 'active' : ''}`}
+            >
+              <img src={iconTraining} class="figma-nav-icon" alt="المركز التعليمي" />
+              <span class="figma-nav-text">{lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}</span>
+            </a>
+
+            {/* Home */}
             <a 
               href="#home" 
               onClick={(e) => {

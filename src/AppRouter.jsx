@@ -142,7 +142,7 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
   const simpleNav = (view) => navigate(view);
   const paramNav = (view, idName, id) => navigate(view, null, `${idName}=${id}`);
 
-  if (currentView === 'home' || currentView === 'newhome') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} />;
+  if (currentView === 'home' || currentView === 'newhome') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} onNavigate={simpleNav} />;
   if (currentView === 'about') return <AboutUsPage lang={lang} onJoinClick={() => navigate('join')} onNavigate={(view, sectionId) => navigate(view, sectionId)} />;
   if (currentView === 'debug') return <DebugUIPage />;
   if (currentView === 'auth') return <AuthPage lang={lang} onAuthSuccess={() => setCurrentView('newhome')} />;

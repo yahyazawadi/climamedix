@@ -1,10 +1,9 @@
 import { Button } from '../../shared/components/Button';
-import { GlassCard } from '../../shared/components/GlassCard';
 
 export function ArticleCard({ title, category, date, author, summary, image, onClick, views_count = 0, likes_count = 0, lang = 'ar' }) {
   return (
-    <GlassCard 
-      className="article-card" 
+    <div 
+      className="figma-item-card article-card" 
       onClick={onClick}
       style={{ 
         padding: '20px', 
@@ -21,7 +20,7 @@ export function ArticleCard({ title, category, date, author, summary, image, onC
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'none'; // GlassCard default
+        e.currentTarget.style.boxShadow = '0 10px 30px rgba(11, 40, 73, 0.03)';
       }}
     >
       {image && (
@@ -71,6 +70,6 @@ export function ArticleCard({ title, category, date, author, summary, image, onC
           {lang === 'ar' ? 'اقرأ المزيد' : 'Read More'}
         </Button>
       </div>
-    </GlassCard>
+    </div>
   );
 }

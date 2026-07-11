@@ -3,7 +3,7 @@ import { useAuth } from '../../auth/hooks/useAuth';
 import { supabase } from '../../../utils/supabaseClient';
 
 export function SliderManagerPage({ lang, onNavigate }) {
-  const { userProfile } = useAuth();
+  const { userProfile, hasPermission } = useAuth();
   
   const [loading, setLoading] = useState(true);
   const [contentList, setContentList] = useState([]);
@@ -136,8 +136,8 @@ export function SliderManagerPage({ lang, onNavigate }) {
     return true;
   });
 
-  if (!userProfile || (userProfile.role !== 'admin' && userProfile.role !== 'superadmin')) {
-    return <div style={{ padding: '100px', textAlign: 'center', color: 'white' }}>Access Denied</div>;
+  if (!userProfile || (!hasPermission('manage:slider') && userProfile.role !== 'superadmin')) {
+    return <div style={{ padding: '100px', textAlign: 'center', color: 'white' }}>Access Denied. You do not have the 'manage:slider' permission.</div>;
   }
 
   return (

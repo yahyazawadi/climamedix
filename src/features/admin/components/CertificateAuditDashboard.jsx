@@ -2,8 +2,11 @@ import { useState, useEffect } from 'preact/hooks';
 import { supabase } from '../../../utils/supabaseClient';
 import { GlassCard } from '../../shared/components/GlassCard';
 import { Button } from '../../shared/components/Button';
+import { useAuth } from '../../auth/hooks/useAuth';
 
 export function CertificateAuditDashboard({ lang = 'ar' }) {
+  const { hasPermission, loading: authLoading } = useAuth();
+  const canAudit = hasPermission('issue:certs') || hasPermission('manage:system');
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -96,6 +99,25 @@ export function CertificateAuditDashboard({ lang = 'ar' }) {
       setSelectedRequest(null);
     }
     setActionLoading(false);
+  }
+
+  if (authLoading) {
+    return (
+      <div style={{ padding: '120px 20px', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+        <h2 style={{ color: '#0b2849' }}>{lang === 'ar' ? 'جاري التحقق من الصلاحيات...' : 'Checking Permissions...'}</h2>
+      </div>
+    );
+  }
+
+  if (!canAudit) {
+    return (
+      <div style={{ padding: '120px 20px', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+        <GlassCard style={{ padding: '40px', textAlign: 'center', color: '#0b2849' }}>
+          <h2>{lang === 'ar' ? 'غير مصرح بالدخول' : 'Access Denied'}</h2>
+          <p>{lang === 'ar' ? 'ليس لديك صلاحيات لتدقيق الشهادات.' : 'You do not have permissions to audit certificates.'}</p>
+        </GlassCard>
+      </div>
+    );
   }
 
   return (

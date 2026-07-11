@@ -17,7 +17,7 @@ const ROLE_COLORS = {
 const BRAND_COLORS = ['#15b47a', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#10b981', '#f43f5e', '#6366f1', '#14b8a6'];
 
 export function UserStatsDashboard({ lang = 'ar' }) {
-  const { hasPermission } = useAuth();
+  const { hasPermission, loading: authLoading } = useAuth();
   const canViewStats = hasPermission('view:user_stats');
 
   const [profiles, setProfiles] = useState([]);
@@ -112,6 +112,14 @@ export function UserStatsDashboard({ lang = 'ar' }) {
       return false;
     });
   }, [selectedCategory, profiles, lang]);
+
+  if (authLoading) {
+    return (
+      <div className="admin-unauthorized">
+        <div style={{ fontSize: '14px', opacity: 0.6 }}>{lang === 'ar' ? 'جاري التحقق من الصلاحيات...' : 'Verifying permissions...'}</div>
+      </div>
+    );
+  }
 
   if (!canViewStats) {
     return (

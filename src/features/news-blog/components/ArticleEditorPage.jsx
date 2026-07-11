@@ -41,7 +41,7 @@ const convertToWebP = (file) => {
 };
 
 export function ArticleEditorPage({ lang, onNavigate }) {
-  const { user, userProfile, hasPermission } = useAuth();
+  const { user, userProfile, hasPermission, authLoading } = useAuth();
   const thumbnailInputRef = useRef(null);
 
   const [form, setForm] = useState({
@@ -161,6 +161,14 @@ export function ArticleEditorPage({ lang, onNavigate }) {
       setSaving(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div style={{ padding: '120px 20px', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+        <h2 style={{ color: '#0b2849' }}>{isRtl ? 'جاري التحقق من الصلاحيات...' : 'Checking Permissions...'}</h2>
+      </div>
+    );
+  }
 
   if (!canWrite) {
     return (

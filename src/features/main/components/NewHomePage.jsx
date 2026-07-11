@@ -128,7 +128,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
         .from('courses')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(4);
+        .limit(3);
       if (error) throw error;
       setCourses(data || []);
     } catch (err) {
@@ -349,7 +349,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
           <div className="figma-section-container">
             <h2 className="figma-section-title-main">{t.trainingCourses}</h2>
             
-            <div className="figma-cards-grid-4">
+            <div className="figma-cards-grid-3">
               {loadingCourses ? (
                 <div style={{ textAlign: 'center', width: '100%', padding: '40px', color: '#64748b' }}>
                   {lang === 'ar' ? 'جاري تحميل الدورات...' : 'Loading courses...'}

@@ -163,9 +163,9 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
   const PAGE_LAYOUT = [
     'hero',
     'slider',
+    'training',
     'news',
     'research',
-    'training',
     'upcoming',
     'community',
     'about',

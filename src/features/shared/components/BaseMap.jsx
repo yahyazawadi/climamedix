@@ -122,6 +122,9 @@ export function BaseMap({
         });
       }
 
+      // Add a scale control to the map so users can verify distances accurately
+      map.addControl(new window.mapboxgl.ScaleControl({ maxWidth: 150, unit: 'metric' }), 'bottom-right');
+
       if (onMapLoad) {
         onMapLoad(map);
       }

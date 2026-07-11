@@ -6,6 +6,7 @@ import { ArabWorldMap } from './ArabWorldMap'
 import { HomeNewsWidget } from '../../news-blog/components/HomeNewsWidget'
 import { translations } from '../../../i18n/translations'
 import { CalendarSidebarWidget } from '../../events/components/CalendarSidebarWidget'
+import { DynamicHomeSlider } from './DynamicHomeSlider'
 import doctorImg from '../../../assets/bg_3.png'
 import whiteLogo from '../../../assets/footer_logo.svg'
 import research1 from '../../../assets/research_1.png'
@@ -144,6 +145,10 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal }) {
             window.history.pushState({}, '', '/' + view); 
           }} 
         />
+        
+        {/* Dynamic Database-driven Slider (managed by Slider Manager) */}
+        <DynamicHomeSlider lang={lang} onNavigate={setCurrentView} />
+
         <section id="home" className="figma-hero-section">
           <div className="figma-hero-container">
             {/* Frame 43 */}

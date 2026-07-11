@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { supabase } from '../../../utils/supabaseClient';
+import { useAuth } from '../../auth/hooks/useAuth';
 
 export function DynamicHomeSlider({ lang, onNavigate }) {
+  const { hasPermission, userProfile } = useAuth();
   const [slides, setSlides] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const slideContainerRef = useRef(null);
@@ -45,6 +47,9 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
   };
 
   if (slides.length === 0) {
+    if (!userProfile || (!hasPermission('manage:slider') && userProfile.role !== 'superadmin')) {
+      return null;
+    }
     return (
       <div style={{ width: '100%', height: '300px', background: 'rgba(11, 40, 73, 0.05)', border: '2px dashed rgba(21, 180, 122, 0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: '20px 0' }}>
         <h3 style={{ color: '#0b2849', marginBottom: '10px' }}>{lang === 'ar' ? 'شريط العرض (Slider) فارغ حالياً' : 'Homepage Slider is currently empty'}</h3>

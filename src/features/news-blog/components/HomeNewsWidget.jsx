@@ -68,9 +68,6 @@ export function HomeNewsWidget({ lang, onNavigate }) {
         <h2 className="figma-section-title-main">
           {lang === 'ar' ? 'أحدث الأخبار والمقالات' : 'Latest News & Articles'}
         </h2>
-        <p style={{ textAlign: 'center', marginBottom: '30px', color: '#64748b' }}>
-          {lang === 'ar' ? 'ابق على اطلاع بآخر التطورات في مجال المناخ والصحة' : 'Stay informed with the latest developments in climate and health'}
-        </p>
         <NewsFeed 
           articles={articles} 
           lang={lang}

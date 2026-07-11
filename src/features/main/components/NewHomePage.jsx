@@ -111,7 +111,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
         .select('*')
         .order('event_date', { ascending: true })
         .gte('event_date', new Date().toISOString().split('T')[0])
-        .limit(6);
+        .limit(2);
       if (error) throw error;
       setEvents(data || []);
     } catch (err) {
@@ -435,6 +435,12 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
                   );
                 })
               )}
+            </div>
+            
+            <div style={{ textAlign: 'center', marginTop: '30px' }}>
+              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => { setCurrentView('events'); window.history.pushState({}, '', '/events'); }}>
+                {lang === 'ar' ? 'استعرض جميع الفعاليات' : 'Browse All Activities'}
+              </Button>
             </div>
           </div>
         </section>

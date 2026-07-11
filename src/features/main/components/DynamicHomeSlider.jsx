@@ -44,7 +44,20 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
     setActiveIndex(prev => (prev + 1) % slides.length);
   };
 
-  if (slides.length === 0) return null;
+  if (slides.length === 0) {
+    return (
+      <div style={{ width: '100%', height: '300px', background: 'rgba(11, 40, 73, 0.05)', border: '2px dashed rgba(21, 180, 122, 0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: '20px 0' }}>
+        <h3 style={{ color: '#0b2849', marginBottom: '10px' }}>{lang === 'ar' ? 'شريط العرض (Slider) فارغ حالياً' : 'Homepage Slider is currently empty'}</h3>
+        <p style={{ color: 'rgba(11, 40, 73, 0.7)' }}>{lang === 'ar' ? 'اذهب إلى (إدارة الرئيسية) من القائمة العلوية لإضافة محتوى هنا.' : 'Go to (Slider Manager) in the top menu to add content here.'}</p>
+        <button 
+          onClick={() => onNavigate('admin-slider')}
+          style={{ background: '#15b47a', color: '#fff', border: 'none', padding: '8px 20px', borderRadius: '8px', marginTop: '15px', cursor: 'pointer', fontWeight: 'bold' }}
+        >
+          {lang === 'ar' ? 'إضافة محتوى الآن' : 'Add Content Now'}
+        </button>
+      </div>
+    );
+  }
 
   const currentSlide = slides[activeIndex];
 

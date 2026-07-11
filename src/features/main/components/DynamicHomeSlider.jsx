@@ -124,49 +124,16 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
         )}
       </div>
 
-      {/* Navigation Box */}
+      {/* Navigation Arrows — Left & Right */}
       {slides.length > 1 && (
-        <div style={{
-          position: 'absolute',
-          bottom: '40px',
-          left: lang === 'ar' ? '40px' : 'auto',
-          right: lang === 'ar' ? 'auto' : '40px',
-          display: 'flex',
-          background: 'rgba(255, 255, 255, 0.15)',
-          backdropFilter: 'blur(12px)',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          zIndex: 10,
-          overflow: 'hidden',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
-        }}>
-          <button 
-            onClick={handlePrev} 
-            style={{ 
-              width: '56px', height: '56px', background: 'transparent', color: '#fff', border: 'none', 
-              borderRight: lang === 'ar' ? 'none' : '1px solid rgba(255,255,255,0.1)', 
-              borderLeft: lang === 'ar' ? '1px solid rgba(255,255,255,0.1)' : 'none',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-              transition: 'background 0.3s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(21, 180, 122, 0.8)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-          >
+        <>
+          <button className="carousel-nav-btn prev" onClick={handlePrev}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
           </button>
-          <button 
-            onClick={handleNext} 
-            style={{ 
-              width: '56px', height: '56px', background: 'transparent', color: '#fff', border: 'none',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-              transition: 'background 0.3s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(21, 180, 122, 0.8)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-          >
+          <button className="carousel-nav-btn next" onClick={handleNext}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
-        </div>
+        </>
       )}
     </div>
   );

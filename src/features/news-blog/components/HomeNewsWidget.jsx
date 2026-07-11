@@ -14,7 +14,7 @@ export function HomeNewsWidget({ lang, onNavigate }) {
           .from('news_articles_accessible')
           .select('*')
           .order('published_at', { ascending: false })
-          .limit(4);
+          .limit(3);
 
         if (error) throw error;
         

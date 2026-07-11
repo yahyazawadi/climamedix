@@ -145,7 +145,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
         .from('publications')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(4);
+        .limit(3);
       if (error) throw error;
       setPublications(data || []);
     } catch (err) {
@@ -258,7 +258,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
           <div className="figma-section-container">
             <h2 className="figma-section-title-main">{t.latestResearch}</h2>
             
-            <div className="figma-cards-grid-4">
+            <div className="figma-cards-grid-3">
               {loadingPubs ? (
                 <div style={{ textAlign: 'center', width: '100%', padding: '40px', color: '#64748b' }}>
                   {lang === 'ar' ? 'جاري تحميل الأبحاث...' : 'Loading research...'}

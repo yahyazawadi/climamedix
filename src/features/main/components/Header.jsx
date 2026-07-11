@@ -707,17 +707,6 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               </a>
             )}
 
-            {/* Search Input Container */}
-            <div class="figma-search-container">
-              <input 
-                type="text" 
-                placeholder={t.search}
-                value={searchQuery}
-                onInput={(e) => setSearchQuery(e.target.value)}
-                class="figma-search-input"
-              />
-              <img src={iconSearch} class="figma-search-icon" alt="بحث" />
-            </div>
 
             {/* About Us */}
             <a 
@@ -796,6 +785,18 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               <img src={iconTraining} class="figma-nav-icon" alt="المركز التعليمي" />
               <span class="figma-nav-text">{lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}</span>
             </a>
+
+            {/* Search Input Container */}
+            <div class="figma-search-container">
+              <input 
+                type="text" 
+                placeholder={t.search}
+                value={searchQuery}
+                onInput={(e) => setSearchQuery(e.target.value)}
+                class="figma-search-input"
+              />
+              <img src={iconSearch} class="figma-search-icon" alt="بحث" />
+            </div>
 
             {/* Home */}
             <a 

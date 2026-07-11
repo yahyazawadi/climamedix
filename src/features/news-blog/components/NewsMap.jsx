@@ -137,12 +137,13 @@ export function NewsMap({ lang = 'ar' }) {
             type: 'circle',
             source: 'news-nodes',
             paint: {
-              // Rough approximation: scale radius visually
+              // Accurate radius calculation in meters mapped to pixels based on Web Mercator projection (512px tile at zoom 0)
               'circle-radius': [
-                'interpolate', ['linear'], ['zoom'],
-                2, ['/', ['get', 'radius_km'], 10],
-                6, ['*', ['get', 'radius_km'], 1],
-                10, ['*', ['get', 'radius_km'], 5]
+                'interpolate',
+                ['exponential', 2],
+                ['zoom'],
+                0, ['/', ['*', ['get', 'radius_km'], 1000], ['*', 78271.51696, ['cos', ['*', ['get', 'latitude'], Math.PI / 180]]]],
+                22, ['*', ['/', ['*', ['get', 'radius_km'], 1000], ['*', 78271.51696, ['cos', ['*', ['get', 'latitude'], Math.PI / 180]]]], Math.pow(2, 22)]
               ],
               'circle-color': [
                 'match', ['get', 'icon_type'],
@@ -210,10 +211,19 @@ export function NewsMap({ lang = 'ar' }) {
 
         const marker = new window.mapboxgl.Marker(el)
           .setLngLat([node.longitude, node.latitude])
-          .setPopup(popup)
           .addTo(map);
 
+        el.addEventListener('mouseenter', () => {
+          popup.addTo(map);
+        });
+
+        el.addEventListener('mouseleave', () => {
+          popup.remove();
+        });
+
         el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
           if (canEdit && node.id !== 'draft') {
             setFormData({
               radius_km: node.radius_km,

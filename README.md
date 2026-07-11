@@ -207,7 +207,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [ ] **LMS Progression:** In courses, automatically open the next lesson upon completion.
 *   [ ] **Quiz Review Enhancements:** Add a reason/explanation for why an answer is right or wrong, including a reference/source for the question in the quiz JSON schema.
 *   [ ] **Research Upload Links:** In the research page, allow uploading a link to an external website hosting the file instead of just direct file uploads.
-*   [ ] **News Map Accuracy:** Verify and ensure the radius calculation logic on the News Map is accurate.
+*   [x] **News Map Accuracy:** Verify and ensure the radius calculation logic on the News Map is accurate.
 *   [ ] **Activity Notifications:** Send an automated email to users upon specific activities.
 *   [ ] **LMS Final Exam & Certification:** Implement a final exam for courses to ensure certificates are not rejected or issued prematurely.
 *   [ ] **Lesson Resources:** Ensure there is a dedicated file resource for every lesson; remove the native slider if unnecessary.

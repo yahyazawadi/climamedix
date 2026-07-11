@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { supabase } from '../../../utils/supabaseClient';
+import { uploadFileToR2 } from '../../../utils/s3Client';
 
 export function SliderManagerPage({ lang, onNavigate }) {
   const { userProfile, hasPermission } = useAuth();
@@ -16,6 +17,8 @@ export function SliderManagerPage({ lang, onNavigate }) {
   const [showModal, setShowModal] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);
   const [customImageUrl, setCustomImageUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
   
   // Custom Announcement Modal
   const [showCustomModal, setShowCustomModal] = useState(false);
@@ -144,6 +147,45 @@ export function SliderManagerPage({ lang, onNavigate }) {
     if (searchQuery && !item.title?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setUploadingImage(true);
+      const url = await uploadFileToR2(file, 'slider');
+      if (url) {
+        setCustomImageUrl(url);
+      }
+    } catch (err) {
+      console.error('Failed to upload image:', err);
+      alert(lang === 'ar' ? 'فشل رفع الصورة.' : 'Failed to upload image.');
+    } finally {
+      setUploadingImage(false);
+      // reset file input
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCustomImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setUploadingImage(true);
+      const url = await uploadFileToR2(file, 'slider');
+      if (url) {
+        setCustomImage(url);
+      }
+    } catch (err) {
+      console.error('Failed to upload image:', err);
+      alert(lang === 'ar' ? 'فشل رفع الصورة.' : 'Failed to upload image.');
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   if (!hasPermission('manage:slider')) {
     return <div style={{ padding: '100px', textAlign: 'center', color: 'white' }}>Access Denied. You do not have the 'manage:slider' permission.</div>;
@@ -341,13 +383,30 @@ export function SliderManagerPage({ lang, onNavigate }) {
             <p style={{ color: 'rgba(11, 40, 73, 0.7)', fontSize: '14px', lineHeight: '1.5' }}>
               {lang === 'ar' ? 'يمكنك استخدام الصورة الحالية أو إرفاق رابط صورة مخصصة تتناسب مع أبعاد الواجهة الرئيسية (يفضل 16:9):' : `You can use the default image or provide a custom image URL that fits the homepage slider layout (16:9 recommended):`}
             </p>
-            <input 
-              type="text" 
-              placeholder="https://images.unsplash.com/photo-..."
-              value={customImageUrl}
-              onInput={e => setCustomImageUrl(e.target.value)}
-              style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid rgba(11, 40, 73, 0.15)', color: '#0b2849', outline: 'none', marginBottom: '15px' }}
-            />
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+              <input 
+                type="text" 
+                placeholder="https://images.unsplash.com/photo-..."
+                value={customImageUrl}
+                onInput={e => setCustomImageUrl(e.target.value)}
+                style={{ flexGrow: 1, padding: '12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid rgba(11, 40, 73, 0.15)', color: '#0b2849', outline: 'none' }}
+              />
+              <button 
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                style={{ padding: '0 20px', borderRadius: '8px', background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer', opacity: uploadingImage ? 0.7 : 1 }}
+              >
+                {uploadingImage ? (lang === 'ar' ? 'جاري الرفع...' : 'Uploading...') : (lang === 'ar' ? 'رفع صورة' : 'Upload File')}
+              </button>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleImageUpload} 
+                accept="image/*" 
+                style={{ display: 'none' }} 
+              />
+            </div>
             {customImageUrl && (
               <img src={customImageUrl} alt="Preview" style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px', marginBottom: '20px', border: '1px solid rgba(11, 40, 73, 0.1)' }} />
             )}
@@ -372,7 +431,24 @@ export function SliderManagerPage({ lang, onNavigate }) {
             <input type="text" value={customTitle} onInput={e => setCustomTitle(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid rgba(11, 40, 73, 0.15)', color: '#0b2849', outline: 'none', marginBottom: '15px' }} />
             
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 'bold', color: '#0b2849' }}>Image URL</label>
-            <input type="text" value={customImage} onInput={e => setCustomImage(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid rgba(11, 40, 73, 0.15)', color: '#0b2849', outline: 'none', marginBottom: '15px' }} />
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+              <input type="text" value={customImage} onInput={e => setCustomImage(e.target.value)} style={{ flexGrow: 1, padding: '12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid rgba(11, 40, 73, 0.15)', color: '#0b2849', outline: 'none' }} />
+              <button 
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                style={{ padding: '0 20px', borderRadius: '8px', background: '#3b82f6', color: '#fff', border: 'none', fontWeight: 'bold', cursor: 'pointer', opacity: uploadingImage ? 0.7 : 1 }}
+              >
+                {uploadingImage ? (lang === 'ar' ? 'جاري الرفع...' : 'Uploading...') : (lang === 'ar' ? 'رفع صورة' : 'Upload File')}
+              </button>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleCustomImageUpload} 
+                accept="image/*" 
+                style={{ display: 'none' }} 
+              />
+            </div>
             
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: 'bold', color: '#0b2849' }}>Target Link URL (Optional)</label>
             <input type="text" value={customLink} onInput={e => setCustomLink(e.target.value)} placeholder="https://" style={{ width: '100%', padding: '12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid rgba(11, 40, 73, 0.15)', color: '#0b2849', outline: 'none', marginBottom: '20px' }} />

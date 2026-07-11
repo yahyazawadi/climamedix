@@ -167,9 +167,9 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
     'research',
     'training',
     'upcoming',
-    'newsletter',
     'community',
-    'about'
+    'about',
+    'newsletter'
   ];
 
   const renderSection = (sectionId) => {

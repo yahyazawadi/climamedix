@@ -27,7 +27,8 @@ export function ColoredBackground() {
             height: 'auto', 
             display: 'block',
             transform: i % 2 !== 0 ? 'scaleY(-1)' : 'none',
-            flexShrink: 0
+            flexShrink: 0,
+            marginTop: i > 0 ? '-1px' : '0'
           }} 
         />
       ))}

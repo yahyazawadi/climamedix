@@ -136,13 +136,25 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
 
 
 
-  return (
-    <main className="figma-main-content">
-        <CalendarSidebarWidget 
-          lang={lang} 
-          onNavigate={onNavigate} 
-        />
-        <section id="home" className="figma-hero-section">
+  // ==========================================
+  // PAGE LAYOUT - Reorder these to change layout
+  // ==========================================
+  const PAGE_LAYOUT = [
+    'hero',
+    'slider',
+    'news',
+    'research',
+    'newsletter',
+    'community',
+    'training',
+    'upcoming',
+    'about'
+  ];
+
+  const renderSection = (sectionId) => {
+    switch(sectionId) {
+      case 'hero': return (
+        <section key="hero" id="home" className="figma-hero-section">
           <div className="figma-hero-container">
             {/* Frame 43 */}
             <div className="figma-frame-43">
@@ -167,15 +179,15 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
             </div>
           </div>
         </section>
-        
-        {/* Dynamic Database-driven Slider (managed by Slider Manager) */}
-        <DynamicHomeSlider 
+      );
+      case 'slider': return (
+        <DynamicHomeSlider key="slider"
           lang={lang} 
           onNavigate={onNavigate} 
         />
-        
-        {/* Home News Widget inserted right after Slider */}
-        <HomeNewsWidget 
+      );
+      case 'news': return (
+        <HomeNewsWidget key="news"
           lang={lang} 
           onNavigate={(view, articleId) => {
             if (view === 'article') {
@@ -187,9 +199,9 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
             }
           }} 
         />
-        
-        {/* About Section */}
-        <section id="about" className="figma-about-section">
+      );
+      case 'about': return (
+        <section key="about" id="about" className="figma-about-section">
           <div className="figma-section-container">
             <GlassCard className="figma-about-intro-box">
               <h2 className="figma-about-box-title">{t.whoWeAre}</h2>
@@ -219,9 +231,9 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
             </div>
           </div>
         </section>
-        
-        {/* Research Section */}
-        <section id="research" className="figma-research-section">
+      );
+      case 'research': return (
+        <section key="research" id="research" className="figma-research-section">
           <div className="figma-section-container">
             <h2 className="figma-section-title-main">{t.latestResearch}</h2>
             
@@ -273,9 +285,9 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
             </div>
           </div>
         </section>
-        
-        {/* Newsletter/Join CTA Block (Frame 45) */}
-        <section className="figma-newsletter-cta-section">
+      );
+      case 'newsletter': return (
+        <section key="newsletter" className="figma-newsletter-cta-section">
           <div className="figma-cta-section-wrap">
             <h3 className="figma-cta-title">{lang === 'ar' ? 'ابقَ على اطلاع بأحدث الأبحاث!' : 'Stay updated with the latest research!'}</h3>
             <p className="figma-cta-description">
@@ -286,9 +298,9 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
             </Button>
           </div>
         </section>
-        
-        {/* Community Network Map Section */}
-        <section id="community" className="figma-training-section" style={{ position: 'relative', zIndex: 5 }}>
+      );
+      case 'community': return (
+        <section key="community" id="community" className="figma-training-section" style={{ position: 'relative', zIndex: 5 }}>
           <div className="figma-section-container">
             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
               <h2 className="figma-section-title-main" style={{ color: '#0b2849', marginBottom: '10px' }}>
@@ -310,9 +322,9 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
             </div>
           </div>
         </section>
-        
-        {/* Training Section */}
-        <section id="training" className="figma-training-section">
+      );
+      case 'training': return (
+        <section key="training" id="training" className="figma-training-section">
           <div className="figma-section-container">
             <h2 className="figma-section-title-main">{t.trainingCourses}</h2>
             
@@ -363,9 +375,9 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
             </div>
           </div>
         </section>
-        
-        {/* Upcoming Section */}
-        <section id="upcoming" className="figma-upcoming-section">
+      );
+      case 'upcoming': return (
+        <section key="upcoming" id="upcoming" className="figma-upcoming-section">
           <div className="figma-section-container">
             <h2 className="figma-section-title-main">{lang === 'ar' ? 'الأنشطة القادمة' : 'UPCOMING ACTIVITIES'}</h2>
             
@@ -393,6 +405,19 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
             </div>
           </div>
         </section>
-      </main>
+      );
+      default: return null;
+    }
+  };
+
+  return (
+    <main className="figma-main-content">
+        <CalendarSidebarWidget 
+          lang={lang} 
+          onNavigate={onNavigate} 
+        />
+      {PAGE_LAYOUT.map(id => renderSection(id))}
+    </main>
+
   );
 }

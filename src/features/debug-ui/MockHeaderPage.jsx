@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { Button } from '../../shared/components/Button';
+import { Button } from '../shared/components/Button';
 
 export function MockHeaderPage({ lang = 'ar' }) {
   const [activeRoute, setActiveRoute] = useState('/');

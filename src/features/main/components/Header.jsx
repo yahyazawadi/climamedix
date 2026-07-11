@@ -673,12 +673,12 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
 
             {/* 6. الأخبار */}
             <a 
-              href="#upcoming" 
+              href="#news" 
               onClick={(e) => {
                 e.preventDefault();
-                onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'upcoming');
+                onNavigate('news');
               }}
-              class={`figma-nav-item ${activeSection === 'upcoming' && (currentView === 'home' || currentView === 'newhome') ? 'active' : ''}`}
+              class={`figma-nav-item ${currentView === 'news' ? 'active' : ''}`}
             >
               <img src={iconNews} class="figma-nav-icon" alt="الأخبار" />
               <span class="figma-nav-text">{t.newsBlog}</span>
@@ -943,6 +943,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
           <a href="#research" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'research'); setDrawerOpen(false); }} class="drawer-link">{t.research}</a>
           <a href="#training" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'training'); setDrawerOpen(false); }} class="drawer-link">{t.training}</a>
           <a href="#learning-hub" onClick={(e) => { e.preventDefault(); onNavigate('courses'); setDrawerOpen(false); }} class="drawer-link">{lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}</a>
+          <a href="#news" onClick={(e) => { e.preventDefault(); onNavigate('news'); setDrawerOpen(false); }} class="drawer-link">{t.newsBlog}</a>
           <a href="#opportunities" onClick={(e) => { e.preventDefault(); onNavigate('opportunities'); setDrawerOpen(false); }} class="drawer-link">{t.opportunities}</a>
           <a href="#join-us" onClick={(e) => { e.preventDefault(); onNavigate('join'); setDrawerOpen(false); }} class="drawer-link">{t.joinUs}</a>
           <a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'contact'); setDrawerOpen(false); }} class="drawer-link">{t.contact}</a>

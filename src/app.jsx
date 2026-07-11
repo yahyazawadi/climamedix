@@ -8,28 +8,9 @@ import { NeatScripples } from './features/main/components/NeatScripples'
 import { ColoredBackground } from './features/main/components/ColoredBackground'
 import { Button } from './features/shared/components/Button'
 import { GlassCard } from './features/shared/components/GlassCard'
-import { AboutUsPage } from './features/about-us/AboutUsPage'
-import { DebugUIPage } from './features/debug-ui/DebugUIPage'
-import { AuthPage } from './features/auth/AuthPage'
-import { JoinUsPage } from './features/join-us/JoinUsPage'
-import { OpportunitiesPage } from './features/opportunities/components/OpportunitiesPage'
-import { EventsPage } from './features/events/EventsPage'
-import { ArticleEditorPage } from './features/news-blog/components/ArticleEditorPage'
-import { NewsPage } from './features/news-blog/components/NewsPage'
-import { ArticleReaderPage } from './features/news-blog/components/ArticleReaderPage'
 import { HomeNewsWidget } from './features/news-blog/components/HomeNewsWidget'
 import { ArabWorldMap } from './features/main/components/ArabWorldMap'
-import { ProfilePage } from './features/profile/components/ProfilePage'
-import { LearningHubPage } from './features/learning-hub/components/student/LearningHubPage'
-import { NewHomePage } from './features/main/components/NewHomePage'
-import { UserManagementDashboard } from './features/admin/components/UserManagementDashboard'
-import { UserStatsDashboard } from './features/admin/components/UserStatsDashboard'
-import { CourseBuilderPage } from './features/learning-hub/components/admin/CourseBuilderPage'
-import { CertificateAuditDashboard } from './features/admin/components/CertificateAuditDashboard'
-import { ResearchHubPage } from './features/research-center/components/ResearchHubPage'
-import { ResearchUploadPage } from './features/research-center/components/ResearchUploadPage'
-import { ResearchDetailPage } from './features/research-center/components/ResearchDetailPage'
-import { CertificateVerificationPage } from './features/learning-hub/components/certificates/CertificateVerificationPage'
+import { AppRouter, useAppRouting } from './AppRouter'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import doctorImg from './assets/bg_3.png'
@@ -132,7 +113,7 @@ function AppContent() {
   });
   const [activeSection, setActiveSection] = useState('home');
   const [openedModal, setOpenedModal] = useState(null); // 'join', 'policy'
-  const [currentView, setCurrentView] = useState('home'); // 'home' or 'about'
+  const [currentView, setCurrentView] = useState('newhome'); // 'newhome', 'home', or others
   const { user, userProfile, signOut } = useAuth();
   const [discoveryIndex, setDiscoveryIndex] = useState(0);
   const [likedItems, setLikedItems] = useState({});
@@ -172,115 +153,9 @@ function AppContent() {
     // Force light theme
     setTheme('light');
     document.body.classList.remove('dark-mode');
-    // Set initial view from URL path
-    const path = window.location.pathname.replace(/\/$/, "");
-    if (path === '/about') {
-      setCurrentView('about');
-    } else if (path === '/debug') {
-      setCurrentView('debug');
-    } else if (path === '/auth') {
-      setCurrentView('auth');
-    } else if (path === '/opportunities') {
-      setCurrentView('opportunities');
-    } else if (path === '/join') {
-      setOpenedModal('join');
-    } else if (path === '/events') {
-      setCurrentView('events');
-    } else if (path === '/write-article') {
-      setCurrentView('write-article');
-    } else if (path === '/profile') {
-      setCurrentView('profile');
-    } else if (path === '/news') {
-      setCurrentView('news');
-    } else if (path === '/article') {
-      setCurrentView('article');
-    } else if (path === '/courses') {
-      setCurrentView('courses');
-    } else if (path === '/admin/users') {
-      setCurrentView('admin-users');
-    } else if (path === '/admin/stats') {
-      setCurrentView('admin-stats');
-    } else if (path === '/admin/courses') {
-      setCurrentView('admin-courses');
-    } else if (path === '/admin/certificates') {
-      setCurrentView('admin-certificates');
-    } else if (path === '/research') {
-      setCurrentView('research');
-    } else if (path === '/research-upload') {
-      setCurrentView('research-upload');
-    } else if (path === '/research-detail') {
-      setCurrentView('research-detail');
-    } else if (path.startsWith('/verify/')) {
-      setCurrentView('verify');
-    } else if (path === '/newhome') {
-      setCurrentView('newhome');
-    } else {
-      setCurrentView('home');
-      // Scroll to segment if matching home section
-      const segment = window.location.pathname.substring(1);
-      if (['about', 'research', 'training', 'upcoming'].includes(segment)) {
-        setTimeout(() => {
-          const el = document.getElementById(segment);
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 150);
-      }
-    }
-    // Listen for path changes (browser back/forward)
-    const handlePopState = () => {
-      const p = window.location.pathname.replace(/\/$/, "");
-      if (p === '/about') {
-        setCurrentView('about');
-      } else if (p === '/debug') {
-        setCurrentView('debug');
-      } else if (p === '/auth') {
-        setCurrentView('auth');
-      } else if (p === '/opportunities') {
-        setCurrentView('opportunities');
-      } else if (p === '/join') {
-        setOpenedModal('join');
-      } else if (p === '/events') {
-        setCurrentView('events');
-      } else if (p === '/write-article') {
-        setCurrentView('write-article');
-      } else if (p === '/profile') {
-        setCurrentView('profile');
-      } else if (p === '/news') {
-        setCurrentView('news');
-      } else if (p === '/article') {
-        setCurrentView('article');
-      } else if (p === '/courses') {
-        setCurrentView('courses');
-      } else if (p === '/admin/users') {
-        setCurrentView('admin-users');
-      } else if (p === '/admin/stats') {
-        setCurrentView('admin-stats');
-      } else if (p === '/admin/courses') {
-        setCurrentView('admin-courses');
-      } else if (p === '/admin/certificates') {
-        setCurrentView('admin-certificates');
-      } else if (p === '/research') {
-        setCurrentView('research');
-      } else if (p === '/research-upload') {
-        setCurrentView('research-upload');
-      } else if (p === '/research-detail') {
-        setCurrentView('research-detail');
-      } else if (p.startsWith('/verify/')) {
-        setCurrentView('verify');
-      } else if (p === '/newhome') {
-        setCurrentView('newhome');
-      } else {
-        setCurrentView('home');
-      }
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
-  // Scroll to top when navigating to auth view
-  useEffect(() => {
-    if (currentView === 'auth') {
-      window.scrollTo(0, 0);
-    }
-  }, [currentView]);
+
+  const { navigate } = useAppRouting(currentView, setCurrentView, setOpenedModal);
   // Theme Switch handler
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -346,53 +221,17 @@ function AppContent() {
         onLogout={handleLogout}
         lang={lang}
         toggleLanguage={toggleLanguage}
-        onNavigate={(view, sectionId) => {
-          if (view !== 'join') setCurrentView(view);
-          if (view === 'about') {
-            window.history.pushState({}, '', '/about');
-          } else if (view === 'debug') {
-            window.history.pushState({}, '', '/debug');
-          } else if (view === 'auth') {
-            window.history.pushState({}, '', '/auth');
-          } else if (view === 'opportunities') {
-            window.history.pushState({}, '', '/opportunities');
-          } else if (view === 'join') {
-            setOpenedModal('join');
-            window.history.pushState({}, '', '/join');
-          } else if (view === 'events') {
-            window.history.pushState({}, '', '/events');
-          } else if (view === 'news') {
-            window.history.pushState({}, '', '/news');
-          } else if (view === 'courses') {
-            window.history.pushState({}, '', '/courses');
-          } else if (view === 'admin-users') {
-            window.history.pushState({}, '', '/admin/users');
-          } else if (view === 'admin-stats') {
-            window.history.pushState({}, '', '/admin/stats');
-          } else if (view === 'admin-courses') {
-            window.history.pushState({}, '', '/admin/courses');
-          } else if (view === 'admin-certificates') {
-            window.history.pushState({}, '', '/admin/certificates');
-          } else if (view === 'research') {
-            window.history.pushState({}, '', '/research');
-          } else if (view === 'research-upload') {
-            window.history.pushState({}, '', '/research-upload');
-          } else if (view === 'newhome') {
-            window.history.pushState({}, '', '/newhome');
-          } else if (sectionId) {
-            window.history.pushState({}, '', '/' + sectionId);
-            setTimeout(() => {
-              const el = document.getElementById(sectionId);
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-          } else {
-            window.history.pushState({}, '', '/');
-          }
-        }}
-        onJoinClick={() => { setOpenedModal('join'); window.history.pushState({}, '', '/join'); }} 
+        onNavigate={navigate}
+        onJoinClick={() => navigate('join')} 
       />
-      {currentView === 'home' ? (
-        <main className="figma-main-content">
+      <AppRouter 
+        currentView={currentView}
+        setCurrentView={setCurrentView}
+        lang={lang}
+        setOpenedModal={setOpenedModal}
+        navigate={navigate}
+        homeComponent={
+          <main className="figma-main-content">
         <section id="home" className="figma-hero-section">
           <div className="figma-hero-container">
             {/* Frame 43 */}
@@ -726,162 +565,16 @@ function AppContent() {
           </div>
         </section>
       </main>
-      ) : currentView === 'debug' ? (
-        <DebugUIPage />
-      ) : currentView === 'auth' ? (
-        <AuthPage lang={lang} onAuthSuccess={() => { setCurrentView('home'); }} />
-      ) : currentView === 'opportunities' ? (
-        <OpportunitiesPage lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'join' ? (
-        <JoinUsPage lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'write-article' ? (
-        <ArticleEditorPage lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'profile' ? (
-        <ProfilePage lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'events' ? (
-        <EventsPage lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'news' ? (
-        <NewsPage lang={lang} onNavigate={(view, articleId) => {
-          if (view === 'article') {
-            setCurrentView('article');
-            window.history.pushState({}, '', '/article?id=' + articleId);
-          } else {
-            setCurrentView(view);
-            window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-          }
-        }} />
-      ) : currentView === 'article' ? (
-        <ArticleReaderPage lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'courses' ? (
-        <LearningHubPage lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'admin-users' ? (
-        <UserManagementDashboard lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'admin-stats' ? (
-        <UserStatsDashboard lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'admin-courses' ? (
-        <CourseBuilderPage lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'admin-certificates' ? (
-        <CertificateAuditDashboard lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'research' ? (
-        <ResearchHubPage lang={lang} onNavigate={(view, pubId) => {
-          if (view === 'research-detail') {
-            setCurrentView('research-detail');
-            window.history.pushState({}, '', '/research-detail?id=' + pubId);
-          } else {
-            setCurrentView(view);
-            window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-          }
-        }} />
-      ) : currentView === 'research-upload' ? (
-        <ResearchUploadPage lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'research-detail' ? (
-        <ResearchDetailPage lang={lang} onNavigate={(view) => {
-          setCurrentView(view);
-          window.history.pushState({}, '', '/' + (view === 'home' ? '' : view));
-        }} />
-      ) : currentView === 'newhome' ? (
-        <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} />
-      ) : currentView === 'verify' ? (
-        <CertificateVerificationPage 
-          lang={lang} 
-          certId={window.location.pathname.split('/').pop()} 
-        />
-      ) : (
-        <AboutUsPage
-          lang={lang}
-          onJoinClick={() => { setOpenedModal('join'); window.history.pushState({}, '', '/join'); }}
-          onNavigate={(view, sectionId) => {
-            if (view !== 'join') setCurrentView(view);
-            if (view === 'about') {
-              window.history.pushState({}, '', '/about');
-            } else if (view === 'debug') {
-              window.history.pushState({}, '', '/debug');
-            } else if (view === 'opportunities') {
-              window.history.pushState({}, '', '/opportunities');
-            } else if (view === 'join') {
-              setOpenedModal('join');
-              window.history.pushState({}, '', '/join');
-            } else if (view === 'events') {
-              window.history.pushState({}, '', '/events');
-            } else if (view === 'news') {
-              window.history.pushState({}, '', '/news');
-            } else if (sectionId) {
-              window.history.pushState({}, '', '/' + sectionId);
-              setTimeout(() => {
-                const el = document.getElementById(sectionId);
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }, 100);
-            } else {
-              window.history.pushState({}, '', '/');
-            }
-          }}
-        />
-      )}
+          </main>
+        }
+      />
       {/* Footer component */}
       <Footer 
         lang={lang}
         currentView={currentView}
         onJoinClick={() => { setOpenedModal('join'); window.history.pushState({}, '', '/join'); }} 
         onPolicyClick={() => setOpenedModal('policy')} 
-        onNavigate={(view, sectionId) => {
-            if (view !== 'join') setCurrentView(view);
-            if (view === 'about-us') {
-              window.history.pushState({}, '', '/about-us');
-            } else if (view === 'opportunities') {
-              window.history.pushState({}, '', '/opportunities');
-            } else if (view === 'join') {
-              setOpenedModal('join');
-              window.history.pushState({}, '', '/join');
-            } else if (view === 'events') {
-              window.history.pushState({}, '', '/events');
-            } else if (view === 'news') {
-              window.history.pushState({}, '', '/news');
-            } else if (sectionId) {
-              window.history.pushState({}, '', '/' + sectionId);
-              setTimeout(() => {
-                const el = document.getElementById(sectionId);
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }, 100);
-            } else {
-              window.history.pushState({}, '', '/');
-            }
-          }}
+        onNavigate={navigate}
       />
       {/* ==========================================================================
          MODALS

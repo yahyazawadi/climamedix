@@ -32,11 +32,14 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
 
   useEffect(() => {
     if (slides.length <= 1) return;
+    
+    // Clear existing timer and start a new 7-second timer whenever slide changes (manually or automatically)
     const interval = setInterval(() => {
       setActiveIndex(prev => (prev + 1) % slides.length);
-    }, 5000);
+    }, 7000);
+    
     return () => clearInterval(interval);
-  }, [slides]);
+  }, [slides.length, activeIndex]);
 
   const handlePrev = () => {
     setActiveIndex(prev => (prev - 1 + slides.length) % slides.length);

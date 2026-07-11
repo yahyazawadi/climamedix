@@ -142,8 +142,9 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal }) {
           lang={lang} 
           onNavigate={(view) => { 
             setCurrentView(view); 
+            window.history.pushState({}, '', '/' + view); 
+          }} 
         />
-
         <section id="home" className="figma-hero-section">
           <div className="figma-hero-container">
             {/* Frame 43 */}

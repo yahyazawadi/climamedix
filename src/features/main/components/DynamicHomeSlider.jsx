@@ -70,8 +70,8 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
   const currentSlide = slides[activeIndex];
 
   return (
-    <div style={{ maxWidth: '1440px', width: '100%', margin: '20px auto', padding: '0 30px' }}>
-    <div className="geometric-carousel" style={{ position: 'relative', height: '520px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+    <div style={{ maxWidth: '1700px', width: '100%', margin: '20px auto', padding: '0 30px' }}>
+    <div className="geometric-carousel" style={{ position: 'relative', height: '750px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
       
       {/* Background Image */}
       {slides.map((slide, idx) => (

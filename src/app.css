@@ -87,7 +87,7 @@ html[lang="en"] .figma-nav-text {
   align-items: center;
   justify-content: space-between;
   padding: 0 48px;
-  direction: ltr;
+  
   /* Force Left-to-Right order: Logo -> Nav -> Hamburger */
 }
 
@@ -114,7 +114,7 @@ html[lang="en"] .figma-nav-text {
   align-items: center;
   gap: 43px;
   /* Exact Figma gap */
-  direction: ltr;
+  
 }
 
 .figma-nav-item {
@@ -181,7 +181,7 @@ a[href="#about"] .figma-nav-icon {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: inset 0 2px 6px rgba(11, 40, 73, 0.08);
-  direction: rtl;
+  
   /* RTL input flow inside LTR container */
 }
 
@@ -191,9 +191,9 @@ a[href="#about"] .figma-nav-icon {
   background: transparent;
   border: none;
   outline: none;
-  padding-right: 48px;
+  padding-inline-end: 48px;
   /* space for icon on the right */
-  padding-left: 15px;
+  padding-inline-start: 15px;
   font-family: 'Tajawal', sans-serif;
   color: #0b2849;
   font-size: 15px;
@@ -306,7 +306,7 @@ a[href="#about"] .figma-nav-icon {
   z-index: 200;
   display: flex;
   flex-direction: column;
-  direction: rtl;
+  
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
   transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
@@ -362,14 +362,14 @@ a[href="#about"] .figma-nav-icon {
   text-decoration: none;
   padding: 16px 24px;
   border-bottom: 1px solid rgba(225, 239, 250, 0.07);
-  transition: background 0.2s ease, color 0.2s ease, padding-right 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, padding-inline-end 0.2s ease;
 }
 
 .drawer-link:hover {
   background: rgba(21, 180, 122, 0.08);
   color: #ffffff;
-  padding-right: 32px;
-  border-right: 3px solid #15b47a;
+  padding-inline-end: 32px;
+  border-inline-end: 3px solid #15b47a;
 }
 
 /* ==========================================================================
@@ -385,7 +385,7 @@ a[href="#about"] .figma-nav-icon {
   color: #e2effa;
   padding: 80px 0 0;
   font-family: 'Tajawal', sans-serif;
-  direction: rtl;
+  
   /* RTL aligned footer content */
 }
 
@@ -518,12 +518,12 @@ a[href="#about"] .figma-nav-icon {
   font-size: 17px;
   font-weight: 500;
   text-decoration: none;
-  transition: color 0.2s ease, padding-right 0.2s ease;
+  transition: color 0.2s ease, padding-inline-end 0.2s ease;
 }
 
 .figma-col a:hover {
   color: #ffffff;
-  padding-right: 4px;
+  padding-inline-end: 4px;
 }
 
 /* Footer CTA Block */
@@ -649,7 +649,7 @@ a[href="#about"] .figma-nav-icon {
   flex-direction: column;
   align-items: flex-start;
   /* In RTL, flex-start = RIGHT edge — aligns logo with the text */
-  text-align: right;
+  text-align: start;
   gap: 0;
 }
 
@@ -669,7 +669,7 @@ a[href="#about"] .figma-nav-icon {
   line-height: 1.4;
   text-shadow: 0 2px 4px rgba(11, 40, 73, 0.25);
   width: 100%;
-  text-align: right;
+  text-align: start;
 }
 
 .figma-hero-description {
@@ -680,7 +680,7 @@ a[href="#about"] .figma-nav-icon {
   margin: 66px 0 0 0;
   line-height: 1.5;
   width: 100%;
-  text-align: right;
+  text-align: start;
 }
 
 /* ==========================================================================
@@ -762,7 +762,7 @@ a[href="#about"] .figma-nav-icon {
     flex: 1;
     min-width: 0;
     align-items: flex-start;
-    text-align: right;
+    text-align: start;
   }
 
   .figma-hero-doctor-wrap {
@@ -781,7 +781,7 @@ a[href="#about"] .figma-nav-icon {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    text-align: right;
+    text-align: start;
     width: 100%;
   }
 
@@ -795,17 +795,17 @@ a[href="#about"] .figma-nav-icon {
     font-size: 14px;
     color: #ffffff;
     margin: 12px 0 0 0;
-    text-align: right;
+    text-align: start;
     line-height: 1.35;
     text-shadow: 0 1px 3px rgba(11, 40, 73, 0.2);
   }
 
   .figma-hero-description {
     width: 100%;
-    margin-left: 0;
-    padding-left: 0;
+    margin-inline-start: 0;
+    padding-inline-start: 0;
     margin-top: 0;
-    text-align: right;
+    text-align: start;
     font-size: 15px;
     line-height: 1.4;
     color: #0b2849;
@@ -824,7 +824,7 @@ a[href="#about"] .figma-nav-icon {
   .figma-hero-desc-bottom {
     display: block;
     width: calc(100% + 120px);
-    margin-left: -120px;
+    margin-inline-start: -120px;
     margin-top: 10px;
   }
 
@@ -928,15 +928,15 @@ a[href="#about"] .figma-nav-icon {
 
   .figma-hero-description {
     width: 100%;
-    margin-left: 0;
-    padding-left: 0;
+    margin-inline-start: 0;
+    padding-inline-start: 0;
     font-size: 13.5px;
     margin-top: 40px;
   }
 
   .figma-hero-desc-bottom {
     width: calc(100% + 100px);
-    margin-left: -100px;
+    margin-inline-start: -100px;
   }
 }
 
@@ -980,7 +980,7 @@ a[href="#about"] .figma-nav-icon {
   max-width: 1700px;
   margin: 0 auto;
   padding: 0 30px;
-  direction: rtl;
+  
   /* RTL direction for Arabic */
 }
 
@@ -1042,7 +1042,7 @@ a[href="#about"] .figma-nav-icon {
   font-weight: 700;
   margin-top: 0;
   margin-bottom: 16px;
-  text-align: right;
+  text-align: start;
 }
 
 
@@ -1241,7 +1241,7 @@ a[href="#about"] .figma-nav-icon {
   flex-direction: column;
   gap: 12px;
   flex: 1;
-  text-align: right;
+  text-align: start;
   justify-content: space-between;
 }
 
@@ -1719,7 +1719,7 @@ a[href="#about"] .figma-nav-icon {
    ========================================================================== */
 
 .au-page {
-  direction: rtl;
+  
   padding-top: 129px;
   font-family: 'Tajawal', sans-serif;
   min-height: 100vh;
@@ -1782,7 +1782,7 @@ a[href="#about"] .figma-nav-icon {
   font-weight: 700;
   color: #016c7f;
   margin: 0 0 24px 0;
-  text-align: right;
+  text-align: start;
   position: relative;
   padding-bottom: 12px;
 }
@@ -1813,7 +1813,7 @@ a[href="#about"] .figma-nav-icon {
   color: #0b2849;
   line-height: 2;
   margin: 0;
-  text-align: right;
+  text-align: start;
 }
 
 /* ── Values grid ── */
@@ -1903,8 +1903,8 @@ a[href="#about"] .figma-nav-icon {
   font-weight: 500;
   color: #0b2849;
   line-height: 1.7;
-  text-align: right;
-  padding-right: 28px;
+  text-align: start;
+  padding-inline-end: 28px;
   position: relative;
 }
 
@@ -2006,7 +2006,7 @@ a[href="#about"] .figma-nav-icon {
 
   .au-checklist li {
     font-size: 14px;
-    padding-right: 22px;
+    padding-inline-end: 22px;
   }
 
   .au-checklist li::before {
@@ -2029,7 +2029,7 @@ a[href="#about"] .figma-nav-icon {
   position: relative;
   min-height: 100vh;
   padding-top: 129px;
-  direction: rtl;
+  
   background-color: #ffffff;
   overflow-x: hidden;
   font-family: 'Tajawal', sans-serif;
@@ -2085,7 +2085,7 @@ a[href="#about"] .figma-nav-icon {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  text-align: right;
+  text-align: start;
 }
 
 .au-mission-statement {
@@ -2163,7 +2163,7 @@ a[href="#about"] .figma-nav-icon {
   font-size: 32px;
   font-weight: 700;
   margin: 0 0 40px 0;
-  text-align: right;
+  text-align: start;
 }
 
 .au-heading-teal {
@@ -2223,7 +2223,7 @@ a[href="#about"] .figma-nav-icon {
   flex-direction: column;
   gap: 10px;
   flex: 1;
-  text-align: right;
+  text-align: start;
 }
 
 .au-card-location {
@@ -2337,7 +2337,7 @@ a[href="#about"] .figma-nav-icon {
 
 .au-cta-banner-text {
   flex: 1;
-  text-align: right;
+  text-align: start;
 }
 
 .au-cta-banner-title {
@@ -2402,7 +2402,7 @@ a[href="#about"] .figma-nav-icon {
   font-weight: 700;
   color: rgba(225, 239, 250, 0.6);
   margin: 0 0 40px 0;
-  text-align: right;
+  text-align: start;
   letter-spacing: 3px;
 }
 
@@ -2449,7 +2449,7 @@ a[href="#about"] .figma-nav-icon {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  text-align: right;
+  text-align: start;
 }
 
 .au-upcoming-badge {
@@ -2499,7 +2499,7 @@ a[href="#about"] .figma-nav-icon {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  text-align: right;
+  text-align: start;
   min-width: 280px;
 }
 
@@ -2553,7 +2553,7 @@ a[href="#about"] .figma-nav-icon {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  text-align: right;
+  text-align: start;
   padding-top: 12px;
 }
 
@@ -2630,7 +2630,7 @@ a[href="#about"] .figma-nav-icon {
   .au-cta-banner-inner {
     flex-direction: column;
     gap: 28px;
-    text-align: right;
+    text-align: start;
   }
 }
 
@@ -2675,7 +2675,7 @@ a[href="#about"] .figma-nav-icon {
    ========================================================================== */
 .auth-page-container {
   font-family: 'Tajawal', sans-serif;
-  direction: rtl;
+  
 }
 
 .auth-card input {
@@ -2824,7 +2824,7 @@ a[href="#about"] .figma-nav-icon {
   padding: 60px 0;
   background: transparent;
   position: relative;
-  direction: rtl;
+  
 }
 
 .discovery-container {
@@ -2929,7 +2929,7 @@ a[href="#about"] .figma-nav-icon {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  text-align: right;
+  text-align: start;
 }
 
 .discovery-card-title {
@@ -2955,7 +2955,7 @@ a[href="#about"] .figma-nav-icon {
   font-size: 12px;
   color: rgba(11, 40, 73, 0.6);
   justify-content: flex-start;
-  direction: rtl;
+  
 }
 
 .discovery-metric-item {
@@ -3182,7 +3182,7 @@ body.dark-mode .search-filter-tag.active {
   padding: 40px 80px 40px 40px;
   color: #fff;
   z-index: 2;
-  direction: rtl;
+  
 }
 
 /* Navigation Arrow Buttons — Neat Glassmorphic Box */
@@ -3256,7 +3256,7 @@ body.dark-mode .search-filter-tag.active {
 }
 
 .slider-nav-box .slider-nav-arrow:first-child {
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .slider-nav-box .slider-nav-arrow:hover {
@@ -3269,8 +3269,8 @@ body.dark-mode .search-filter-tag.active {
 
 /* RTL support — swap border side */
 [dir="rtl"] .slider-nav-box .slider-nav-arrow:first-child {
-  border-right: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-inline-end: none;
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Responsive adjustments */

@@ -252,7 +252,16 @@ export function ArticleReaderPage({ lang, onNavigate }) {
                 </span>
               </div>
               
-              <ShareActionButtons lang={lang} title={title} />
+              <ShareActionButtons 
+                lang={lang} 
+                title={title}
+                onEdit={
+                  (hasPermission?.('manage:any_article') ||
+                  (hasPermission?.('write:articles') && user?.id === article.created_by))
+                    ? () => onNavigate('write-article', `id=${article.id}`)
+                    : undefined
+                }
+              />
             </div>
 
             <div 

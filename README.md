@@ -182,18 +182,26 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [x] **Interactive News & Alert Map:** Admin-driven Mapbox integration (`NewsMap`) allowing authorized users to drop geospatial alert nodes with custom radii, priority icons (Danger/Warning/Info), bilingual descriptions, and URL links securely stored in Supabase with strict RLS permissions.
 ### 10. 📞 Contact Us
 *   [x] **Contact Details:** Form submission panel, email links, and social media handles.
-### 11. 🛡️ Admin Panel
+### 11. 🚀 Membership & Join Network (Join Us)
+*   [x] **Dynamic Track Selection:** Visual cards to choose between the **Research Track** or **Community Health Educator** track.
+*   [x] **Comprehensive Application Form:** Collects detailed information including Profession, University/Org, Activist/Researcher status with conditional fields, and Bio.
+*   [x] **Smart Location Detection:** Automatically fetches the user's City and Country via IP geolocation on mount.
+*   [x] **Cloudflare R2 CV Upload:** Securely uploads candidate Resumes/CVs directly to R2 storage before inserting the record.
+*   [x] **Admin Approval Dashboard (In-Page):** Users with the `approve:users` permission can view pending requests directly on the page, with one-click buttons to **Approve & Promote** (copies data to profiles, upgrades role) or **Delete Request**.
+
+### 12. 🛡️ Admin Panel
 *   [x] **Admin Dashboards:**
     *   [x] Create/Edit/Delete Courses
     *   [x] Upload Videos, Audio & Resources (Multi-file batch uploads with real-time byte-level progress tracking directly to Cloudflare R2 via intercepting Rich Text Editors)
     *   [x] Manage Users & Certificates (Completed: Role & Permission Assignment)
     *   [x] Publish Opportunities, Events, and News (Completed via in-page authorized modals)
     *   [x] View Analytics (Completed: User Stats Dashboard with Interactive Charts)
-### 12. 👤 User Accounts
+
+### 13. 👤 User Accounts
 *   [x] **Register/Login:** Supabase Auth Integration (Email sign-in/sign-up & Google OAuth) with beautiful Mitchell's best-candidate particle canvas background, layout swaps, and Outfit/Tajawal font custom settings.
 *   [x] **User Profiles Section:** Setting up profile management, displaying role capabilities, and managing account information.
 *   [x] **LMS Interactions:** Enroll in courses, take quizzes, download certificates, and track progress.
-### 13. ⚙️ Technical Requirements
+### 14. ⚙️ Technical Requirements
 *   [x] Mobile Responsive Layouts
 *   [x] SEO Friendly Structure
 *   [x] Fast Loading (Vite/Preact build)
@@ -206,7 +214,8 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [x] Certificate Generation System
 *   [x] LMS Integration
 *   [x] Analytics Dashboard
-### 14. 📌 Upcoming User-Requested Features
+
+### 15. 📌 Upcoming User-Requested Features
 *   [ ] **LMS Progression:** In courses, automatically open the next lesson upon completion.
 *   [ ] **Quiz Review Enhancements:** Add a reason/explanation for why an answer is right or wrong, including a reference/source for the question in the quiz JSON schema.
 *   [ ] **Research Upload Links:** In the research page, allow uploading a link to an external website hosting the file instead of just direct file uploads.

@@ -81,12 +81,8 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
   useEffect(() => {
     const handlePopState = () => {
       const p = window.location.pathname.replace(/\/$/, "");
-      if (p === '/join' || p === '/apply' || p === '/membership' || p === '/register-network') {
-        setOpenedModal('join');
-      } else {
-        setOpenedModal(null);
-        setCurrentView(getViewFromPath(p));
-      }
+      setOpenedModal(null);
+      setCurrentView(getViewFromPath(p));
     };
     
     // Initial load
@@ -112,12 +108,6 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
   }, [currentView]);
 
   const navigate = (view, sectionId, extraParam = '') => {
-    if (view === 'join') {
-      setOpenedModal('join');
-      window.history.pushState({}, '', '/join');
-      return;
-    }
-
     if (view) {
       setCurrentView(view);
     }

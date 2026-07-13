@@ -152,7 +152,7 @@ function AppContent() {
       <Footer 
         lang={lang}
         currentView={currentView}
-        onJoinClick={() => { setOpenedModal('join'); window.history.pushState({}, '', '/join'); }} 
+        onJoinClick={() => navigate('join')} 
         onPolicyClick={() => setOpenedModal('policy')} 
         onNavigate={navigate}
       />
@@ -160,64 +160,6 @@ function AppContent() {
          MODALS
          ========================================================================== */}
       
-      {/* Join Modal */}
-      <div class={`modal-overlay ${openedModal === 'join' ? 'open' : ''}`}>
-        <div class="modal-card">
-          <div class="modal-header">
-            <h3>{lang === 'ar' ? 'الانضمام لفريق ClimaMedix' : 'Join the ClimaMedix Team'}</h3>
-            <button onClick={() => setOpenedModal(null)} class="close-modal-btn">&times;</button>
-          </div>
-          {joinSuccess ? (
-            <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
-              <h4 style={{ color: 'var(--success)', marginBottom: '0.5rem' }}>{lang === 'ar' ? 'تم إرسال طلبك بنجاح!' : 'Your request was sent successfully!'}</h4>
-              <p style={{ color: 'var(--text-secondary)' }}>{lang === 'ar' ? 'سيتواصل معك منسق الفريق عبر البريد الإلكتروني في غضون 48 ساعة.' : 'The team coordinator will contact you via email within 48 hours.'}</p>
-            </div>
-          ) : (
-            <form class="modal-form" onSubmit={handleJoinSubmit}>
-              <p class="form-intro">{lang === 'ar' ? 'سجل بياناتك للانضمام إلى قائمة الباحثين والمسعفين المتطوعين في دراسات المناخ والصحة.' : 'Register your details to join the team of volunteer researchers and medical staff.'}</p>
-              
-              <div class="form-group">
-                <label>{lang === 'ar' ? 'الاسم الكامل *' : 'Full Name *'}</label>
-                <input 
-                  type="text" 
-                  required 
-                  placeholder={lang === 'ar' ? 'أدخل اسمك الكامل' : 'Enter your full name'}
-                  value={joinForm.name} 
-                  onInput={(e) => setJoinForm({ ...joinForm, name: e.target.value })}
-                />
-              </div>
-              <div class="form-group">
-                <label>{lang === 'ar' ? 'البريد الإلكتروني *' : 'Email *'}</label>
-                <input 
-                  type="email" 
-                  required 
-                  placeholder="name@example.com" 
-                  value={joinForm.email}
-                  onInput={(e) => setJoinForm({ ...joinForm, email: e.target.value })}
-                />
-              </div>
-              <div class="form-group">
-                <label>{lang === 'ar' ? 'التخصص المهني *' : 'Professional Specialty *'}</label>
-                <select 
-                  required 
-                  value={joinForm.profession}
-                  onChange={(e) => setJoinForm({ ...joinForm, profession: e.target.value })}
-                >
-                  <option value="" disabled selected>{lang === 'ar' ? 'اختر تخصصك' : 'Select your specialty'}</option>
-                  <option value="doctor">{lang === 'ar' ? 'طبيب / ممارس صحي' : 'Doctor / Health Practitioner'}</option>
-                  <option value="researcher">{lang === 'ar' ? 'باحث بيئي / علمي' : 'Environmental / Scientific Researcher'}</option>
-                  <option value="student">{lang === 'ar' ? 'طالب علوم صحية' : 'Health Sciences Student'}</option>
-                  <option value="other">{lang === 'ar' ? 'أخرى' : 'Other'}</option>
-                </select>
-              </div>
-              <button type="submit" disabled={joinSubmitting} class="btn btn-primary btn-full">
-                {joinSubmitting ? (lang === 'ar' ? 'جاري إرسال طلبك...' : 'Submitting your request...') : (lang === 'ar' ? 'إرسال طلب الانضمام' : 'Submit Join Request')}
-              </button>
-            </form>
-          )}
-        </div>
-      </div>
       {/* Use Policy Modal */}
       <div class={`modal-overlay ${openedModal === 'policy' ? 'open' : ''}`}>
         <div class="modal-card">

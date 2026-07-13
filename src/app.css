@@ -80,6 +80,7 @@ html[lang="en"] .figma-nav-text {
 }
 
 .figma-header-container {
+  direction: ltr;
   width: 100%;
   max-width: 100%;
   height: 100%;

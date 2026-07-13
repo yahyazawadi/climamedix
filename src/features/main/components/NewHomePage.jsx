@@ -314,7 +314,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
             <p className="figma-cta-description">
               {lang === 'ar' ? 'نحن نخطط لإطلاق عدد من المشاريع البحثية الجديدة قريبًا. إذا كنت مهتمًا بالمشاركة، يمكنك التقديم عبر نموذج التسجيل أدناه.' : 'We plan to launch several new research projects soon. If you are interested in participating, you can apply via the registration form below.'}
             </p>
-            <Button variant="gradient" onClick={() => setOpenedModal('join')}>
+            <Button variant="gradient" onClick={() => onNavigate('join')}>
               {lang === 'ar' ? 'انضم لفريق البحث' : 'Join the Research Team'}
             </Button>
           </div>
@@ -337,7 +337,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
             <ArabWorldMap lang={lang} />
             
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
-              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => setOpenedModal('join')}>
+              <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => onNavigate('join')}>
                 {lang === 'ar' ? 'استعرض دليل السفراء والأعضاء' : 'Browse Network Directory'}
               </Button>
             </div>

@@ -118,15 +118,15 @@ export function JoinUsPage({ lang, onNavigate }) {
           .order('created_at', { ascending: false });
         
         if (!error && data) {
-          const { data: profiles } = await supabase.from('profiles').select('email, role');
+          const { data: profiles } = await supabase.from('profiles').select('email, role, id');
           const profilesByEmail = {};
           if (profiles) {
-            profiles.forEach(p => profilesByEmail[p.email] = p.role);
+            profiles.forEach(p => profilesByEmail[p.email] = { role: p.role, id: p.id });
           }
           const requestsWithStatus = data.map(req => {
-            const role = profilesByEmail[req.email];
-            const isApproved = role === 'researcher' || role === 'educator';
-            return { ...req, isApproved };
+            const profile = profilesByEmail[req.email];
+            const isApproved = profile && (profile.role === 'researcher' || profile.role === 'educator');
+            return { ...req, isApproved, profileId: profile ? profile.id : null };
           });
           setRequests(requestsWithStatus);
         }
@@ -705,9 +705,20 @@ export function JoinUsPage({ lang, onNavigate }) {
                       
                       <div style={{ display: 'flex', gap: '10px', marginTop: '15px', borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '12px', width: '100%', alignItems: 'center' }}>
                         {item.isApproved ? (
-                          <div style={{ padding: '6px 14px', borderRadius: '8px', background: 'rgba(21,180,122,0.1)', color: '#15b47a', fontWeight: 'bold', fontSize: '13px' }}>
+                          <button 
+                            onClick={() => {
+                              if (item.profileId) {
+                                window.history.pushState({}, '', `/admin/users?id=${item.profileId}`);
+                                onNavigate('admin-users');
+                              }
+                            }}
+                            style={{ padding: '6px 14px', borderRadius: '8px', background: 'rgba(21,180,122,0.1)', color: '#15b47a', fontWeight: 'bold', fontSize: '13px', border: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                            onMouseOver={(e) => e.target.style.background = 'rgba(21,180,122,0.2)'}
+                            onMouseOut={(e) => e.target.style.background = 'rgba(21,180,122,0.1)'}
+                            title={isArabic ? 'انتقل إلى صفحة صلاحيات المستخدم' : 'Go to User Permissions Page'}
+                          >
                             ✓ {isArabic ? 'موافق عليه ومسجل' : 'Approved & Registered'}
-                          </div>
+                          </button>
                         ) : (
                           <>
                             <Button 

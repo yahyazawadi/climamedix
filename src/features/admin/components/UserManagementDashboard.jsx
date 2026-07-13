@@ -64,6 +64,22 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
     fetchData();
   }, [isSuperAdmin]);
 
+  // Auto-select user from URL if provided
+  useEffect(() => {
+    if (!loading && profiles.length > 0 && allPermissions.length > 0) {
+      const params = new URLSearchParams(window.location.search);
+      const targetId = params.get('id');
+      if (targetId && !selectedUser) {
+        const targetProfile = profiles.find(p => p.id === targetId);
+        if (targetProfile) {
+          handleManageClick(targetProfile);
+          // Optional: clear the url to avoid re-selecting on refresh
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      }
+    }
+  }, [loading, profiles, allPermissions, selectedUser]);
+
   const filteredProfiles = useMemo(() => {
     return profiles.filter(p => {
       const s = searchTerm.toLowerCase();

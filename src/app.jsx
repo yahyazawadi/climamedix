@@ -60,10 +60,6 @@ function AppContent() {
     document.documentElement.setAttribute('lang', newLang);
     document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
   };
-  // Form States for Header/Footer modal triggers
-  const [joinForm, setJoinForm] = useState({ name: '', email: '', profession: '' });
-  const [joinSuccess, setJoinSuccess] = useState(false);
-  const [joinSubmitting, setJoinSubmitting] = useState(false);
   const t = translations[lang] || translations.ar;
   // Theme Sync on Mount + Path Routing
   useEffect(() => {
@@ -103,20 +99,6 @@ function AppContent() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  // Join form submission
-  const handleJoinSubmit = (e) => {
-    e.preventDefault();
-    setJoinSubmitting(true);
-    setTimeout(() => {
-      setJoinSubmitting(false);
-      setJoinSuccess(true);
-      setTimeout(() => {
-        setJoinForm({ name: '', email: '', profession: '' });
-        setJoinSuccess(false);
-        setOpenedModal(null);
-      }, 2000);
-    }, 1000);
-  };
   return (
     <div style={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh' }}>
       {/* Background components */}

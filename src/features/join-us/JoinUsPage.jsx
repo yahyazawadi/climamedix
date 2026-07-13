@@ -8,7 +8,7 @@ import { GlassCard } from '../shared/components/GlassCard';
 
 export function JoinUsPage({ lang, onNavigate }) {
   const { hasPermission } = useAuth();
-  const canViewRequests = hasPermission('approve:users');
+  const canViewRequests = hasPermission('view:join_requests');
   
   const t = translations[lang] || translations.ar;
   const isArabic = lang === 'ar';
@@ -304,87 +304,7 @@ export function JoinUsPage({ lang, onNavigate }) {
               background: 'linear-gradient(90deg, #15b47a, #004c6d)'
             }}></div>
 
-            {canViewRequests ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <h3 style={{ color: '#0b2849', fontSize: '20px', fontWeight: 'bold', marginBottom: '15px' }}>
-                  {isArabic ? 'طلبات الانضمام' : 'Join Requests'}
-                  {loadingRequests && <span style={{ fontSize: '14px', fontWeight: 'normal', margin: '0 10px', color: '#15b47a' }}>{isArabic ? 'جاري التحميل...' : 'Loading...'}</span>}
-                </h3>
-                {requests.map(item => (
-                  <GlassCard 
-                    key={item.id} 
-                    style={{ 
-                      padding: '16px 20px', 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'flex-start',
-                      border: '1px solid rgba(11, 40, 73, 0.1)',
-                      flexDirection: 'column'
-                    }}
-                  >
-                    <h4 style={{ margin: 0, color: '#0b2849', fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>{item.full_name}</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '13px', color: 'rgba(11,40,73,0.7)', width: '100%' }}>
-                      <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                        <span><strong>{isArabic ? 'البريد:' : 'Email:'}</strong> {item.email}</span>
-                        <span><strong>{isArabic ? 'التخصص:' : 'Profession:'}</strong> {item.profession}</span>
-                        <span><strong>{isArabic ? 'التاريخ:' : 'Date:'}</strong> {new Date(item.created_at).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US')}</span>
-                        {item.track && <span><strong>{t.trackLabel}:</strong> {item.track === 'research' ? t.trackResearch : t.trackEducator}</span>}
-                        {item.city && item.country && <span><strong>{isArabic ? 'الموقع:' : 'Location:'}</strong> {item.city}, {item.country}</span>}
-                      </div>
-                      <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                        {item.birth_date && <span><strong>{isArabic ? 'الميلاد:' : 'Birth:'}</strong> {new Date(item.birth_date).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US')}</span>}
-                        {item.university_org && <span><strong>{isArabic ? 'الجامعة/المنظمة:' : 'Org:'}</strong> {item.university_org}</span>}
-                        {item.work && <span><strong>{isArabic ? 'العمل:' : 'Work:'}</strong> {item.work}</span>}
-                        {item.is_activist && <span><strong>{isArabic ? 'ناشط:' : 'Activist:'}</strong> {isArabic ? 'نعم' : 'Yes'} ({item.activist_field || (isArabic ? 'غير محدد' : 'Unspecified')})</span>}
-                        {item.is_researcher && <span><strong>{isArabic ? 'باحث:' : 'Researcher:'}</strong> {isArabic ? 'نعم' : 'Yes'} ({item.researcher_field || (isArabic ? 'غير محدد' : 'Unspecified')})</span>}
-                      </div>
-                      {item.bio && (
-                        <div style={{ marginTop: '8px', fontStyle: 'italic', background: 'rgba(11,40,73,0.03)', padding: '10px', borderRadius: '8px' }}>
-                          "{item.bio}"
-                        </div>
-                      )}
-                      {item.cv_url && (
-                        <div style={{ marginTop: '8px' }}>
-                          <a href={item.cv_url} target="_blank" rel="noreferrer" style={{ color: '#15b47a', textDecoration: 'underline', fontWeight: 'bold' }}>
-                            {isArabic ? 'عرض السيرة الذاتية (CV)' : 'View Resume (CV)'}
-                          </a>
-                        </div>
-                      )}
-                      
-                      <div style={{ display: 'flex', gap: '10px', marginTop: '15px', borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '12px', width: '100%' }}>
-                        <Button 
-                          variant="gradient" 
-                          disabled={processingId !== null}
-                          onClick={() => handleApproveRequest(item)}
-                          style={{ fontSize: '12px', padding: '6px 14px' }}
-                        >
-                          {processingId === item.id ? (isArabic ? 'جاري الترقية...' : 'Promoting...') : (isArabic ? 'قبول وترقية العضو' : 'Approve & Promote')}
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          disabled={processingId !== null}
-                          onClick={() => handleRejectRequest(item)}
-                          style={{ 
-                            fontSize: '12px', 
-                            padding: '6px 14px', 
-                            color: '#ff4d4d', 
-                            borderColor: 'rgba(255,77,77,0.3)',
-                            background: 'transparent'
-                          }}
-                        >
-                          {isArabic ? 'حذف الطلب' : 'Delete Request'}
-                        </Button>
-                      </div>
-                    </div>
-                  </GlassCard>
-                ))}
-                {requests.length === 0 && !loadingRequests && (
-                  <p style={{ textAlign: 'center', color: 'rgba(11, 40, 73, 0.5)', padding: '20px' }}>
-                    {isArabic ? 'لا توجد طلبات انضمام حالياً.' : 'No join requests yet.'}
-                  </p>
-                )}
-              </div>
-            ) : success ? (
+            {success ? (
               <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
                 <div style={{ 
                   marginBottom: '20px',
@@ -721,6 +641,111 @@ export function JoinUsPage({ lang, onNavigate }) {
               </form>
             )}
           </div>
+
+          {/* Admin: Pending Join Requests (separate section below the form) */}
+          {canViewRequests && (
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '24px',
+              boxShadow: '0 10px 30px rgba(11, 40, 73, 0.06)',
+              border: '1px solid rgba(11, 40, 73, 0.08)',
+              padding: '40px 35px',
+              position: 'relative',
+              overflow: 'hidden',
+              marginTop: '30px'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '5px',
+                background: 'linear-gradient(90deg, #f0a841, #ea4335)'
+              }}></div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <h3 style={{ color: '#0b2849', fontSize: '20px', fontWeight: 'bold', marginBottom: '15px' }}>
+                  {isArabic ? 'طلبات الانضمام' : 'Pending Join Requests'}
+                  {loadingRequests && <span style={{ fontSize: '14px', fontWeight: 'normal', margin: '0 10px', color: '#15b47a' }}>{isArabic ? 'جاري التحميل...' : 'Loading...'}</span>}
+                  {!loadingRequests && <span style={{ fontSize: '14px', fontWeight: 'normal', margin: '0 10px', color: 'rgba(11,40,73,0.5)' }}>({requests.length})</span>}
+                </h3>
+                {requests.map(item => (
+                  <GlassCard 
+                    key={item.id} 
+                    style={{ 
+                      padding: '16px 20px', 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'flex-start',
+                      border: '1px solid rgba(11, 40, 73, 0.1)',
+                      flexDirection: 'column'
+                    }}
+                  >
+                    <h4 style={{ margin: 0, color: '#0b2849', fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>{item.full_name}</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '13px', color: 'rgba(11,40,73,0.7)', width: '100%' }}>
+                      <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                        <span><strong>{isArabic ? 'البريد:' : 'Email:'}</strong> {item.email}</span>
+                        <span><strong>{isArabic ? 'التخصص:' : 'Profession:'}</strong> {item.profession}</span>
+                        <span><strong>{isArabic ? 'التاريخ:' : 'Date:'}</strong> {new Date(item.created_at).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US')}</span>
+                        {item.track && <span><strong>{t.trackLabel}:</strong> {item.track === 'research' ? t.trackResearch : t.trackEducator}</span>}
+                        {item.city && item.country && <span><strong>{isArabic ? 'الموقع:' : 'Location:'}</strong> {item.city}, {item.country}</span>}
+                      </div>
+                      <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                        {item.birth_date && <span><strong>{isArabic ? 'الميلاد:' : 'Birth:'}</strong> {new Date(item.birth_date).toLocaleDateString(isArabic ? 'ar-EG' : 'en-US')}</span>}
+                        {item.university_org && <span><strong>{isArabic ? 'الجامعة/المنظمة:' : 'Org:'}</strong> {item.university_org}</span>}
+                        {item.work && <span><strong>{isArabic ? 'العمل:' : 'Work:'}</strong> {item.work}</span>}
+                        {item.is_activist && <span><strong>{isArabic ? 'ناشط:' : 'Activist:'}</strong> {isArabic ? 'نعم' : 'Yes'} ({item.activist_field || (isArabic ? 'غير محدد' : 'Unspecified')})</span>}
+                        {item.is_researcher && <span><strong>{isArabic ? 'باحث:' : 'Researcher:'}</strong> {isArabic ? 'نعم' : 'Yes'} ({item.researcher_field || (isArabic ? 'غير محدد' : 'Unspecified')})</span>}
+                      </div>
+                      {item.bio && (
+                        <div style={{ marginTop: '8px', fontStyle: 'italic', background: 'rgba(11,40,73,0.03)', padding: '10px', borderRadius: '8px' }}>
+                          "{item.bio}"
+                        </div>
+                      )}
+                      {item.cv_url && (
+                        <div style={{ marginTop: '8px' }}>
+                          <a href={item.cv_url} target="_blank" rel="noreferrer" style={{ color: '#15b47a', textDecoration: 'underline', fontWeight: 'bold' }}>
+                            {isArabic ? 'عرض السيرة الذاتية (CV)' : 'View Resume (CV)'}
+                          </a>
+                        </div>
+                      )}
+                      
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '15px', borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '12px', width: '100%' }}>
+                        <Button 
+                          variant="gradient" 
+                          disabled={processingId !== null}
+                          onClick={() => handleApproveRequest(item)}
+                          style={{ fontSize: '12px', padding: '6px 14px' }}
+                        >
+                          {processingId === item.id ? (isArabic ? 'جاري الترقية...' : 'Promoting...') : (isArabic ? 'قبول وترقية العضو' : 'Approve & Promote')}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          disabled={processingId !== null}
+                          onClick={() => handleRejectRequest(item)}
+                          style={{ 
+                            fontSize: '12px', 
+                            padding: '6px 14px', 
+                            color: '#ff4d4d', 
+                            borderColor: 'rgba(255,77,77,0.3)',
+                            background: 'transparent'
+                          }}
+                        >
+                          {isArabic ? 'حذف الطلب' : 'Delete Request'}
+                        </Button>
+                      </div>
+                    </div>
+                  </GlassCard>
+                ))}
+                {requests.length === 0 && !loadingRequests && (
+                  <p style={{ textAlign: 'center', color: 'rgba(11, 40, 73, 0.5)', padding: '20px' }}>
+                    {isArabic ? 'لا توجد طلبات انضمام حالياً.' : 'No join requests yet.'}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </div>

@@ -76,16 +76,8 @@ export function JoinUsPage({ lang, onNavigate }) {
 
       if (updateError) throw updateError;
 
-      // 3. Remove request from join_requests
-      const { error: deleteError } = await supabase
-        .from('join_requests')
-        .delete()
-        .eq('id', item.id);
-
-      if (deleteError) throw deleteError;
-
-      // 4. Update local state
-      setRequests(prev => prev.filter(r => r.id !== item.id));
+      // 3. Keep the request for history, just update local state
+      setRequests(prev => prev.map(r => r.id === item.id ? { ...r, isApproved: true } : r));
       alert(isArabic ? 'تمت الموافقة وترقية المستخدم بنجاح!' : 'User approved and promoted successfully!');
     } catch (err) {
       console.error(err);
@@ -126,7 +118,17 @@ export function JoinUsPage({ lang, onNavigate }) {
           .order('created_at', { ascending: false });
         
         if (!error && data) {
-          setRequests(data);
+          const { data: profiles } = await supabase.from('profiles').select('email, role');
+          const profilesByEmail = {};
+          if (profiles) {
+            profiles.forEach(p => profilesByEmail[p.email] = p.role);
+          }
+          const requestsWithStatus = data.map(req => {
+            const role = profilesByEmail[req.email];
+            const isApproved = role === 'researcher' || role === 'educator';
+            return { ...req, isApproved };
+          });
+          setRequests(requestsWithStatus);
         }
         setLoadingRequests(false);
       };
@@ -701,29 +703,37 @@ export function JoinUsPage({ lang, onNavigate }) {
                         </div>
                       )}
                       
-                      <div style={{ display: 'flex', gap: '10px', marginTop: '15px', borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '12px', width: '100%' }}>
-                        <Button 
-                          variant="gradient" 
-                          disabled={processingId !== null}
-                          onClick={() => handleApproveRequest(item)}
-                          style={{ fontSize: '12px', padding: '6px 14px' }}
-                        >
-                          {processingId === item.id ? (isArabic ? 'جاري الترقية...' : 'Promoting...') : (isArabic ? 'قبول وترقية العضو' : 'Approve & Promote')}
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          disabled={processingId !== null}
-                          onClick={() => handleRejectRequest(item)}
-                          style={{ 
-                            fontSize: '12px', 
-                            padding: '6px 14px', 
-                            color: '#ff4d4d', 
-                            borderColor: 'rgba(255,77,77,0.3)',
-                            background: 'transparent'
-                          }}
-                        >
-                          {isArabic ? 'حذف الطلب' : 'Delete Request'}
-                        </Button>
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '15px', borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '12px', width: '100%', alignItems: 'center' }}>
+                        {item.isApproved ? (
+                          <div style={{ padding: '6px 14px', borderRadius: '8px', background: 'rgba(21,180,122,0.1)', color: '#15b47a', fontWeight: 'bold', fontSize: '13px' }}>
+                            ✓ {isArabic ? 'موافق عليه ومسجل' : 'Approved & Registered'}
+                          </div>
+                        ) : (
+                          <>
+                            <Button 
+                              variant="gradient" 
+                              disabled={processingId !== null}
+                              onClick={() => handleApproveRequest(item)}
+                              style={{ fontSize: '12px', padding: '6px 14px' }}
+                            >
+                              {processingId === item.id ? (isArabic ? 'جاري الترقية...' : 'Promoting...') : (isArabic ? 'قبول وترقية العضو' : 'Approve & Promote')}
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              disabled={processingId !== null}
+                              onClick={() => handleRejectRequest(item)}
+                              style={{ 
+                                fontSize: '12px', 
+                                padding: '6px 14px', 
+                                color: '#ff4d4d', 
+                                borderColor: 'rgba(255,77,77,0.3)',
+                                background: 'transparent'
+                              }}
+                            >
+                              {isArabic ? 'حذف الطلب' : 'Delete Request'}
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </GlassCard>

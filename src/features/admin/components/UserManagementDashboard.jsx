@@ -64,17 +64,25 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
     fetchData();
   }, [isSuperAdmin]);
 
-  // Auto-select user from URL if provided
+  // Auto-select user from URL or Session Storage
   useEffect(() => {
     if (!loading && profiles.length > 0 && allPermissions.length > 0) {
       const params = new URLSearchParams(window.location.search);
-      const targetId = params.get('id');
+      let targetId = params.get('id');
+      
+      const sessionTarget = sessionStorage.getItem('admin_target_user');
+      if (sessionTarget) {
+        targetId = sessionTarget;
+      }
+      
       if (targetId && !selectedUser) {
         const targetProfile = profiles.find(p => p.id === targetId);
         if (targetProfile) {
           setSearchTerm(targetProfile.email); // Auto-filter table to this user
           handleManageClick(targetProfile);
-          // Optional: clear the url to avoid re-selecting on refresh
+          
+          // Clear it so it doesn't auto-trigger on refresh
+          sessionStorage.removeItem('admin_target_user');
           window.history.replaceState({}, '', window.location.pathname);
         }
       }

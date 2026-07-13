@@ -665,7 +665,7 @@ a[href="#about"] .figma-nav-icon {
   font-size: 22px;
   font-weight: 500;
   color: #ffffff;
-  margin: -10px 0 0 0;
+  margin: -25px 0 0 0;
   line-height: 1.4;
   text-shadow: 0 2px 4px rgba(11, 40, 73, 0.25);
   width: 100%;
@@ -977,7 +977,7 @@ a[href="#about"] .figma-nav-icon {
 
 .figma-section-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1700px;
   margin: 0 auto;
   padding: 0 30px;
   direction: rtl;
@@ -1218,7 +1218,7 @@ a[href="#about"] .figma-nav-icon {
 
 .figma-item-card-image-wrap {
   width: 100%;
-  height: 140px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   position: relative;
   background-color: #e2effa;

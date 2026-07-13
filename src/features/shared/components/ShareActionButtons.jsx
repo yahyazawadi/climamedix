@@ -50,10 +50,10 @@ export function ShareActionButtons({ lang = 'ar', title = '', url = '', onEdit }
       {onEdit && (
         <button
           onClick={onEdit}
-          style={{ ...btnStyle, color: '#0ea5e9', background: 'rgba(14,165,233,0.08)' }}
+          style={{ ...btnStyle }}
           title={lang === 'ar' ? 'تعديل المقال' : 'Edit Article'}
-          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(14,165,233,0.18)'; }}
-          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(14,165,233,0.08)'; }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(11, 40, 73, 0.1)'; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(11, 40, 73, 0.06)'; }}
         >
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>

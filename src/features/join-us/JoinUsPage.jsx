@@ -77,8 +77,11 @@ export function JoinUsPage({ lang, onNavigate }) {
       if (updateError) throw updateError;
 
       // 3. Keep the request for history, just update local state
-      setRequests(prev => prev.map(r => r.id === item.id ? { ...r, isApproved: true } : r));
-      alert(isArabic ? 'تمت الموافقة وترقية المستخدم بنجاح!' : 'User approved and promoted successfully!');
+      setRequests(prev => prev.map(r => r.id === item.id ? { ...r, isApproved: true, profileId: profile.id } : r));
+      alert(isArabic ? 'تمت الموافقة بنجاح! سيتم تحويلك لصفحة الصلاحيات لتعيين الأذونات.' : 'Approved successfully! Redirecting to permissions page.');
+      
+      window.history.pushState({}, '', `/admin/users?id=${profile.id}`);
+      onNavigate('admin-users');
     } catch (err) {
       console.error(err);
       alert(isArabic ? `حدث خطأ: ${err.message}` : `Error: ${err.message}`);

@@ -198,8 +198,11 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [x] SEO Friendly Structure
 *   [x] Fast Loading (Vite/Preact build)
 *   [x] Secure Authentication (Supabase)
-*   [x] Arabic RTL Support (Default)
-*   [x] English LTR Support
+*   [x] Arabic RTL Support (Default): Full native support without hardcoded `direction: rtl` overrides, ensuring clean inheritance.
+*   [x] English LTR Support: Dynamic mirroring using logical CSS properties (`margin-inline`, `padding-inline`, `text-align: start/end`) and responsive flexbox layouts.
+    *   **Fixed English Slider**: Left-aligned text blocks with dynamically mirrored geometric overlays.
+    *   **Fixed Sidebar Widgets**: Calendar tabs dynamically align to the right edge in LTR and left edge in RTL.
+    *   **Fixed Topbar Orientation**: Header layout is securely anchored to a strict LTR visual order (Logo on left) to preserve branding regardless of language, while internal dropdown menus dynamically adapt text direction.
 *   [x] Certificate Generation System
 *   [x] LMS Integration
 *   [x] Analytics Dashboard

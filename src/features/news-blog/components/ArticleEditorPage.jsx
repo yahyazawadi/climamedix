@@ -108,7 +108,10 @@ export function ArticleEditorPage({ lang, onNavigate }) {
   const canManageAny = hasPermission && hasPermission('manage:any_article');
   
   const canEditThis = articleId 
-    ? (canManageAny || (existingArticle && user && existingArticle.created_by === user.id))
+    // manage:any_article = edit anything
+    ? (canManageAny || 
+      // write:articles + own article = edit own only
+      (canWrite && existingArticle && user && existingArticle.created_by === user.id))
     : canWrite;
 
   const applyThumbnailFile = async (file) => {

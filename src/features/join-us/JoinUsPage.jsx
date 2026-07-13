@@ -483,22 +483,13 @@ export function JoinUsPage({ lang, onNavigate }) {
                   </div>
                   <div>
                     <label style={labelStyle}>{t.professionLabel}</label>
-                    <div style={{ position: 'relative' }}>
-                      <select 
-                        required value={form.profession}
-                        onChange={(e) => setForm({ ...form, profession: e.target.value })}
-                        style={{ ...inputStyle, appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer' }}
-                        onFocus={(e) => e.target.style.borderColor = '#15b47a'}
-                        onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
-                      >
-                        <option value="" disabled selected style={{ color: 'rgba(11, 40, 73, 0.4)' }}>{t.professionPlaceholder}</option>
-                        <option value="doctor">{t.professionDoctor}</option>
-                        <option value="researcher">{t.professionResearcher}</option>
-                        <option value="student">{t.professionStudent}</option>
-                        <option value="other">{t.professionOther}</option>
-                      </select>
-                      <div style={{ position: 'absolute', top: '50%', [isArabic ? 'left' : 'right']: '16px', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#0b2849', opacity: 0.6, fontSize: '12px' }}>▼</div>
-                    </div>
+                    <input 
+                      type="text" required placeholder={t.professionPlaceholder}
+                      value={form.profession} onInput={(e) => setForm({ ...form, profession: e.target.value })}
+                      style={inputStyle}
+                      onFocus={(e) => e.target.style.borderColor = '#15b47a'}
+                      onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
+                    />
                   </div>
                 </div>
                 

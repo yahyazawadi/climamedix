@@ -125,7 +125,7 @@ export function NewsPage({ lang, onNavigate }) {
             articles={articles} 
             lang={lang}
             onReadArticle={(article) => onNavigate('article', article.id)} 
-            onEditArticle={(article) => onNavigate('write-article', null, `id=${article.id}`)}
+            onEditArticle={(article) => onNavigate('write-article', `id=${article.id}`)}
             user={user}
             hasPermission={hasPermission}
           />

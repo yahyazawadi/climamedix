@@ -143,7 +143,9 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
   if (currentView === 'events') return <EventsPage lang={lang} onNavigate={simpleNav} />;
   
   if (currentView === 'news') return <NewsPage lang={lang} onNavigate={(v, id) => {
-    if (v === 'article') paramNav('article', 'id', id); else simpleNav(v);
+    if (v === 'article') paramNav('article', 'id', id); 
+    else if (v === 'write-article' && id) navigate('write-article', null, id);
+    else simpleNav(v);
   }} />;
   
   if (currentView === 'article') return <ArticleReaderPage lang={lang} onNavigate={simpleNav} />;

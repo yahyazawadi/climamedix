@@ -90,11 +90,11 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
 
       {/* Triangular Geometric Overlay */}
       <div style={{
-        position: 'absolute', top: 0, right: 0, width: '33.33%', minWidth: '380px', height: '100%',
+        position: 'absolute', top: 0, [lang === 'ar' ? 'right' : 'left']: 0, width: '33.33%', minWidth: '380px', height: '100%',
         background: 'linear-gradient(135deg, rgba(11, 40, 73, 0.98) 20%, rgba(21, 180, 122, 0.9) 100%)',
-        clipPath: 'polygon(12% 0%, 100% 0%, 100% 100%, 0% 100%)',
+        clipPath: lang === 'ar' ? 'polygon(12% 0%, 100% 0%, 100% 100%, 0% 100%)' : 'polygon(0% 0%, 88% 0%, 100% 100%, 0% 100%)',
         display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start',
-        padding: '40px 80px 40px 40px', color: '#fff', zIndex: 2, direction: lang === 'ar' ? 'rtl' : 'ltr'
+        padding: lang === 'ar' ? '40px 80px 40px 40px' : '40px 40px 40px 80px', color: '#fff', zIndex: 2, direction: lang === 'ar' ? 'rtl' : 'ltr'
       }}>
         
         {/* Type Badge */}

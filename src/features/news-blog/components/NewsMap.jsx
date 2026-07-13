@@ -218,15 +218,29 @@ export function NewsMap({ lang = 'ar' }) {
           .setPopup(popup)
           .addTo(map);
 
+        let hideTimeout;
+
         el.addEventListener('pointerenter', (e) => {
           if (e.pointerType === 'mouse') {
+            clearTimeout(hideTimeout);
             popup.addTo(map);
+            
+            // Allow user to move mouse into the popup without it closing
+            const popupNode = popup.getElement();
+            if (popupNode) {
+              popupNode.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+              popupNode.addEventListener('mouseleave', () => {
+                hideTimeout = setTimeout(() => popup.remove(), 150);
+              });
+            }
           }
         });
 
         el.addEventListener('pointerleave', (e) => {
           if (e.pointerType === 'mouse') {
-            popup.remove();
+            hideTimeout = setTimeout(() => {
+              popup.remove();
+            }, 150);
           }
         });
 

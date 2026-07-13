@@ -72,6 +72,7 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
       if (targetId && !selectedUser) {
         const targetProfile = profiles.find(p => p.id === targetId);
         if (targetProfile) {
+          setSearchTerm(targetProfile.email); // Auto-filter table to this user
           handleManageClick(targetProfile);
           // Optional: clear the url to avoid re-selecting on refresh
           window.history.replaceState({}, '', window.location.pathname);

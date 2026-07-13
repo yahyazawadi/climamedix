@@ -419,7 +419,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
                   const month = eventDate.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US', { month: 'long', year: 'numeric' });
                   
                   return (
-                    <div key={event.id} className="figma-item-card" style={{ flexDirection: 'row-reverse', height: '180px', cursor: 'pointer' }} onClick={() => onNavigate('events')}>
+                    <div key={event.id} className="figma-item-card" style={{ flexDirection: lang === 'ar' ? 'row-reverse' : 'row', height: '180px', cursor: 'pointer' }} onClick={() => onNavigate('events')}>
                       <div className="figma-item-card-image-wrap" style={{ width: '40%', height: '100%', borderRadius: lang === 'ar' ? '0 18px 18px 0' : '18px 0 0 18px' }}>
                         <img src={eventImage} alt={event.title_ar || event.title} style={{ height: '100%', objectFit: 'cover' }} />
                       </div>

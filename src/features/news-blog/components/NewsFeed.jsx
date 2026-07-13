@@ -31,7 +31,7 @@ export function NewsFeed({ articles = [], onReadArticle, lang = 'ar', hideFilter
   }, [activeCategory, articles.length]);
 
   return (
-    <div ref={feedRef} className="news-feed-component" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
+    <div ref={feedRef} className="news-feed-component" style={{ width: '100%', maxWidth: '1700px', margin: '0 auto' }}>
       
       {!hideFilters && (
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '35px', justifyContent: 'center' }}>
@@ -48,7 +48,7 @@ export function NewsFeed({ articles = [], onReadArticle, lang = 'ar', hideFilter
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '25px' }}>
+      <div className="figma-cards-grid-3">
         {filteredArticles.map((art, idx) => (
           <div key={`${art.title}-${idx}`}>
             <ArticleCard

@@ -183,47 +183,19 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
 
     setSaving(true);
     try {
-      // 1. Update Profile Role
-      if (draftRole !== selectedUser.role) {
-        // Warning: This requires an RPC or backend function in Supabase if RLS prevents admins from updating roles.
-        // Assuming we have an RPC `update_user_role` or can update directly.
-        const { error: roleError } = await supabase
-          .from('profiles')
-          .update({ role: draftRole })
-          .eq('id', selectedUser.id);
-          
-        if (roleError) throw roleError;
-      }
+      // Use an RPC to bypass RLS securely
+      const permissionIds = draftCustomPerms.map(permKey => {
+        const perm = allPermissions.find(p => p.perm_key === permKey);
+        return perm ? perm.id : null;
+      }).filter(Boolean);
 
-      // 2. Update Custom Permissions (Simplify: Delete old, insert new)
-      // Delete existing custom permissions for this user
-      const { error: delError } = await supabase
-        .from('user_permissions')
-        .delete()
-        .eq('user_id', selectedUser.id);
-      
-      if (delError) throw delError;
+      const { error: rpcError } = await supabase.rpc('admin_update_user_access', {
+        p_target_user_id: selectedUser.id,
+        p_new_role: draftRole,
+        p_permission_ids: permissionIds
+      });
 
-      // Insert new custom permissions
-      if (draftCustomPerms.length > 0) {
-        const inserts = draftCustomPerms.map(permKey => {
-          const perm = allPermissions.find(p => p.perm_key === permKey);
-          if (!perm) return null;
-          return {
-            user_id: selectedUser.id,
-            permission_id: perm.id,
-            is_granted: true
-          };
-        }).filter(Boolean);
-
-        if (inserts.length > 0) {
-          const { error: insError } = await supabase
-            .from('user_permissions')
-            .insert(inserts);
-            
-          if (insError) throw insError;
-        }
-      }
+      if (rpcError) throw rpcError;
 
       // Update local state
       setProfiles(prev => prev.map(p => p.id === selectedUser.id ? { ...p, role: draftRole } : p));

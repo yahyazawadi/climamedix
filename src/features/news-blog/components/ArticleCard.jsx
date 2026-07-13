@@ -24,7 +24,7 @@ export function ArticleCard({ title, category, date, author, summary, image, onC
       }}
     >
       {image && (
-        <div style={{ width: '100%', height: '180px', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(11, 40, 73, 0.1)' }}>
+        <div style={{ width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(11, 40, 73, 0.1)' }}>
           <img src={image} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
       )}

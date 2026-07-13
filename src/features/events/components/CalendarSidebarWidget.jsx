@@ -51,16 +51,15 @@ export function CalendarSidebarWidget({ lang = 'ar', onNavigate }) {
         style={{
           position: 'fixed',
           top: '50%',
-          left: 0,
+          [isArabic ? 'left' : 'right']: 0,
           transform: 'translateY(-50%)',
           zIndex: 9999,
           background: 'linear-gradient(135deg, #0b2849, #004c6d)',
           color: '#fff',
           padding: '12px 16px',
-          borderTopRightRadius: '12px',
-          borderBottomRightRadius: '12px',
+          borderRadius: isArabic ? '0 12px 12px 0' : '12px 0 0 12px',
           cursor: 'pointer',
-          boxShadow: '4px 0 15px rgba(0,0,0,0.1)',
+          boxShadow: isArabic ? '4px 0 15px rgba(0,0,0,0.1)' : '-4px 0 15px rgba(0,0,0,0.1)',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
@@ -77,7 +76,7 @@ export function CalendarSidebarWidget({ lang = 'ar', onNavigate }) {
             <line x1="3" y1="10" x2="21" y2="10"></line>
           </svg>
         </span>
-        <span style={{ writingMode: 'vertical-rl', padding: '10px 0', letterSpacing: '2px', transform: 'rotate(180deg)' }}>
+        <span style={{ writingMode: 'vertical-rl', padding: '10px 0', letterSpacing: '2px', transform: isArabic ? 'rotate(180deg)' : 'rotate(0deg)' }}>
           {isArabic ? 'الفعاليات' : 'Events'}
         </span>
       </div>
@@ -101,14 +100,14 @@ export function CalendarSidebarWidget({ lang = 'ar', onNavigate }) {
       <div style={{
         position: 'fixed',
         top: 0,
-        left: isOpen ? 0 : '-450px',
+        [isArabic ? 'left' : 'right']: isOpen ? 0 : '-450px',
         width: '450px',
         maxWidth: '90vw',
         height: '100vh',
         background: '#f8fafc',
         zIndex: 10001,
-        boxShadow: '5px 0 25px rgba(0,0,0,0.2)',
-        transition: 'left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1)',
+        boxShadow: isArabic ? '5px 0 25px rgba(0,0,0,0.2)' : '-5px 0 25px rgba(0,0,0,0.2)',
+        transition: isArabic ? 'left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1)' : 'right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1)',
         display: 'flex',
         flexDirection: 'column',
         overflowY: 'auto',

@@ -176,6 +176,7 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [x] **Event Detail Fields:** Title, Date, Description, and Registration Link.
 ### 9. 📰 News & Blog
 *   [x] **News Publishing System (Article Editor):** Rich-text editor integrated with Quill, responsive layout, Cloudflare R2 file uploads (PDF/Docs), cover image handling, and dynamic SVG icons.
+*   [x] **Bug-Free Article Editing Workflow:** Secure edit functionality directly embedded in the news feed and reader pages. Fully respects Row Level Security (RLS) and custom granular permissions (`write:articles` for own posts vs `manage:any_article` for all posts) synchronized with the admin dashboard.
 *   [x] **News Reader & Feed UI:** Beautiful reader page with properly aligned Quill text (RTL/LTR), glassmorphic design, and custom Share / Copy Link functionality.
 *   [x] **Live Engagement Tracking:** Securely tracks view counts (via RPC functions) and user likes (`article_reactions` table) linked strictly to their `user_id`.
 *   [x] **News Categories:** Fully functional frontend filtering for Climate Health, Research, Opportunities, and Events with automatic bilingual translation.

@@ -70,6 +70,10 @@ export function AuthProvider({ children }) {
     const role = devAdminMode ? 'superadmin' : userProfile?.role;
     if (!role) return false;
     if (role === 'superadmin') return true;
+
+    // Check custom specific permissions granted to the user via admin dashboard
+    if (userProfile?.custom_permissions?.includes(perm)) return true;
+
     const rolePerms = ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.user;
     return rolePerms.includes(perm);
   };

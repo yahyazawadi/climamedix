@@ -98,6 +98,27 @@ export const authService = {
       .single();
     
     if (error) throw error;
+
+    // Fetch custom permissions for this user
+    try {
+      const { data: permsData } = await supabase
+        .from('user_permissions')
+        .select('permissions(perm_key)')
+        .eq('user_id', userId)
+        .eq('is_granted', true);
+        
+      if (permsData) {
+        data.custom_permissions = permsData
+          .map(row => row.permissions?.perm_key)
+          .filter(Boolean);
+      } else {
+        data.custom_permissions = [];
+      }
+    } catch (err) {
+      console.error('Error fetching custom permissions:', err);
+      data.custom_permissions = [];
+    }
+
     return data;
   }
 };

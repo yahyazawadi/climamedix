@@ -2,8 +2,10 @@ import { useState, useEffect } from 'preact/hooks';
 import { supabase } from '../../../utils/supabaseClient';
 import { NewsFeed } from './NewsFeed';
 import { NewsMap } from './NewsMap';
+import { useAuth } from '../../auth/hooks/useAuth';
 
 export function NewsPage({ lang, onNavigate }) {
+  const { user, hasPermission } = useAuth();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +49,8 @@ export function NewsPage({ lang, onNavigate }) {
               year: 'numeric', month: 'long', day: 'numeric'
             }),
             views_count: article.views_count || 0,
-            likes_count: article.likes_count || 0
+            likes_count: article.likes_count || 0,
+            created_by: article.created_by
           };
         });
 
@@ -122,6 +125,9 @@ export function NewsPage({ lang, onNavigate }) {
             articles={articles} 
             lang={lang}
             onReadArticle={(article) => onNavigate('article', article.id)} 
+            onEditArticle={(article) => onNavigate('write-article', null, `id=${article.id}`)}
+            user={user}
+            hasPermission={hasPermission}
           />
         )}
       </div>

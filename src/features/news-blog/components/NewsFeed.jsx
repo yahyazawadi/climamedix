@@ -12,7 +12,7 @@ const CATEGORIES_MAP = {
 
 const CATEGORY_KEYS = Object.keys(CATEGORIES_MAP);
 
-export function NewsFeed({ articles = [], onReadArticle, lang = 'ar', hideFilters = false }) {
+export function NewsFeed({ articles = [], onReadArticle, onEditArticle, user, hasPermission, lang = 'ar', hideFilters = false }) {
   const [activeCategory, setActiveCategory] = useState('الكل');
   const feedRef = useRef(null);
 
@@ -55,6 +55,8 @@ export function NewsFeed({ articles = [], onReadArticle, lang = 'ar', hideFilter
               {...art}
               lang={lang}
               onClick={() => onReadArticle(art)}
+              onEdit={() => onEditArticle?.(art)}
+              canEdit={hasPermission?.('manage:any_article') || (user && user.id === art.created_by)}
             />
           </div>
         ))}

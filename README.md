@@ -187,8 +187,8 @@ This plan tracks the implementation progress of ClimaMedix against the official 
 *   [x] **Comprehensive Application Form:** Collects detailed information including Profession, University/Org, Activist/Researcher status with conditional fields, and Bio.
 *   [x] **Smart Location Detection:** Automatically fetches the user's City and Country via IP geolocation on mount.
 *   [x] **Cloudflare R2 CV Upload:** Securely uploads candidate Resumes/CVs directly to R2 storage before inserting the record.
-*   [x] **Admin Approval Dashboard (In-Page):** Users with the `approve:users` permission can view pending requests directly on the page, with one-click buttons to **Approve & Promote** (copies data to profiles, upgrades role) or **Delete Request**.
-
+*   [x] **Admin Approval Dashboard (In-Page):** Users with the `view:join_requests` permission can view pending and approved requests directly on the page. Includes one-click buttons to **Approve & Promote** (upgrades role and keeps historical record).
+*   [x] **Seamless IAM Routing:** Approved requests display an interactive badge that automatically redirects the admin to the User Management Dashboard, pre-searching the specific user to instantly grant granular RBAC permissions.
 ### 12. 🛡️ Admin Panel
 *   [x] **Admin Dashboards:**
     *   [x] Create/Edit/Delete Courses

@@ -70,9 +70,46 @@ export function ArticleEditorPage({ lang, onNavigate }) {
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  const [articleId, setArticleId] = useState(null);
+  const [existingArticle, setExistingArticle] = useState(null);
+  const [isLoadingArticle, setIsLoadingArticle] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (id) {
+      setArticleId(id);
+      setIsLoadingArticle(true);
+      supabase.from('news_articles').select('*').eq('id', id).single()
+        .then(({ data, error }) => {
+          if (!error && data) {
+            setExistingArticle(data);
+            setForm({
+              title_ar: data.title_ar || '',
+              title_en: data.title_en || '',
+              category: data.category || 'climate_health',
+              author_name: data.author_name || '',
+              teaser_permission_key: data.teaser_permission_key || 'view:public_content',
+              full_access_permission_key: data.full_access_permission_key || 'view:free_content',
+            });
+            setContent(data.content_ar || data.content_en || '');
+            if (data.cover_image) {
+              setThumbnailPreview(data.cover_image);
+            }
+          }
+          setIsLoadingArticle(false);
+        });
+    }
+  }, []);
+
   const isRtl = lang === 'ar';
 
   const canWrite = hasPermission && hasPermission('write:articles');
+  const canManageAny = hasPermission && hasPermission('manage:any_article');
+  
+  const canEditThis = articleId 
+    ? (canManageAny || (existingArticle && user && existingArticle.created_by === user.id))
+    : canWrite;
 
   const applyThumbnailFile = async (file) => {
     if (!file || !file.type.startsWith('image/')) return;
@@ -138,7 +175,7 @@ export function ArticleEditorPage({ lang, onNavigate }) {
 
     setSaveError('');
     try {
-      let coverImageUrl = null;
+      let coverImageUrl = existingArticle ? existingArticle.cover_image : null;
       if (thumbnailFile) {
          coverImageUrl = await uploadFileToR2(thumbnailFile, 'article_thumbnails');
       }
@@ -148,13 +185,21 @@ export function ArticleEditorPage({ lang, onNavigate }) {
         content_ar: finalContent,
         content_en: finalContent,
         cover_image: coverImageUrl,
-        created_by: user?.id,
+        ...(articleId ? {} : { created_by: user?.id })
       };
       
-      const { error } = await supabase.from('news_articles').insert([payload]);
+      let error;
+      if (articleId) {
+        const { error: updateError } = await supabase.from('news_articles').update(payload).eq('id', articleId);
+        error = updateError;
+      } else {
+        const { error: insertError } = await supabase.from('news_articles').insert([payload]);
+        error = insertError;
+      }
+      
       if (error) throw error;
       setSaveSuccess(true);
-      setTimeout(() => { setSaveSuccess(false); onNavigate?.('news-blog'); }, 2000);
+      setTimeout(() => { setSaveSuccess(false); onNavigate?.('news'); }, 2000);
     } catch (err) {
       setSaveError(err.message || 'Save failed');
     } finally {
@@ -162,21 +207,21 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     }
   };
 
-  if (authLoading) {
+  if (authLoading || isLoadingArticle) {
     return (
       <div style={{ padding: '120px 20px', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
-        <h2 style={{ color: '#0b2849' }}>{isRtl ? 'جاري التحقق من الصلاحيات...' : 'Checking Permissions...'}</h2>
+        <h2 style={{ color: '#0b2849' }}>{isRtl ? 'جاري التحميل...' : 'Loading...'}</h2>
       </div>
     );
   }
 
-  if (!canWrite) {
+  if (!canEditThis) {
     return (
       <div className="aep-no-access" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="aep-no-access-card">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <h2>{isRtl ? 'غير مصرح بالوصول' : 'Access Denied'}</h2>
-          <p>{isRtl ? 'تحتاج إلى صلاحية write:articles لكتابة المقالات.' : 'You need the write:articles permission to create articles.'}</p>
+          <p>{isRtl ? 'ليس لديك صلاحية لتعديل أو كتابة هذا المقال.' : 'You do not have permission to edit or write this article.'}</p>
           <button className="aep-btn-primary" onClick={() => onNavigate?.('home')}>
             {isRtl ? 'العودة للرئيسية' : 'Back to Home'}
           </button>
@@ -189,8 +234,8 @@ export function ArticleEditorPage({ lang, onNavigate }) {
     <div className="aep-root" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="aep-banner">
         <div className="aep-banner-inner">
-          <h1>{isRtl ? 'كتابة مقال جديد' : 'Write New Article'}</h1>
-          <p>{isRtl ? 'قم بإنشاء مقال منسق مع الصور والملفات' : 'Create a richly formatted article with images and files'}</p>
+          <h1>{articleId ? (isRtl ? 'تعديل المقال' : 'Edit Article') : (isRtl ? 'كتابة مقال جديد' : 'Write New Article')}</h1>
+          <p>{isRtl ? 'قم بتعديل محتوى المقال وتحديثه' : 'Edit and update your article content'}</p>
         </div>
       </div>
 
@@ -291,11 +336,11 @@ export function ArticleEditorPage({ lang, onNavigate }) {
           </div>
 
           {saveError && <div className="aep-error">{saveError}</div>}
-          {saveSuccess && <div className="aep-success">{isRtl ? 'تم نشر المقال بنجاح!' : 'Article published successfully!'}</div>}
+          {saveSuccess && <div className="aep-success">{articleId ? (isRtl ? 'تم تحديث المقال بنجاح!' : 'Article updated successfully!') : (isRtl ? 'تم نشر المقال بنجاح!' : 'Article published successfully!')}</div>}
 
           <button className="aep-btn-publish" disabled={saving || uploadingMedia} onClick={handleSave}>
             {(saving || uploadingMedia) ? <span className="aep-spinner" /> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>}
-            {isRtl ? 'نشر المقال' : 'Publish Article'}
+            {articleId ? (isRtl ? 'حفظ التعديلات' : 'Save Changes') : (isRtl ? 'نشر المقال' : 'Publish Article')}
           </button>
           <button className="aep-btn-secondary" disabled={saving || uploadingMedia} onClick={() => onNavigate?.('news-blog')}>
             {isRtl ? 'إلغاء' : 'Cancel'}

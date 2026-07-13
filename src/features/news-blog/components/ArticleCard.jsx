@@ -1,6 +1,6 @@
 import { Button } from '../../shared/components/Button';
 
-export function ArticleCard({ title, category, date, author, summary, image, onClick, views_count = 0, likes_count = 0, lang = 'ar' }) {
+export function ArticleCard({ title, category, date, author, summary, image, onClick, onEdit, canEdit, views_count = 0, likes_count = 0, lang = 'ar' }) {
   return (
     <div 
       className="figma-item-card article-card" 
@@ -30,17 +30,44 @@ export function ArticleCard({ title, category, date, author, summary, image, onC
       )}
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ 
-          background: 'rgba(21, 180, 122, 0.1)', 
-          color: '#15b47a', 
-          padding: '3px 10px', 
-          borderRadius: '20px', 
-          fontSize: '11px', 
-          fontWeight: 'bold',
-          whiteSpace: 'nowrap'
-        }}>
-          {category}
-        </span>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <span style={{ 
+            background: 'rgba(21, 180, 122, 0.1)', 
+            color: '#15b47a', 
+            padding: '3px 10px', 
+            borderRadius: '20px', 
+            fontSize: '11px', 
+            fontWeight: 'bold',
+            whiteSpace: 'nowrap'
+          }}>
+            {category}
+          </span>
+          {canEdit && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onEdit(); }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#0ea5e9',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                transition: 'background 0.2s',
+              }}
+              title={lang === 'ar' ? 'تعديل المقال' : 'Edit Article'}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(14, 165, 233, 0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+          )}
+        </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: 'rgba(11, 40, 73, 0.5)', fontSize: '11.5px' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title={lang === 'ar' ? 'المشاهدات' : 'Views'}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

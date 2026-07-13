@@ -137,7 +137,7 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
   if (currentView === 'debug') return <DebugUIPage />;
   if (currentView === 'auth') return <AuthPage lang={lang} onAuthSuccess={() => setCurrentView('newhome')} />;
   if (currentView === 'opportunities') return <OpportunitiesPage lang={lang} onNavigate={simpleNav} />;
-  if (currentView === 'join') return <JoinUsPage lang={lang} onNavigate={simpleNav} />;
+  if (currentView === 'join') return <JoinUsPage lang={lang} onNavigate={navigate} />;
   if (currentView === 'write-article') return <ArticleEditorPage lang={lang} onNavigate={simpleNav} />;
   if (currentView === 'profile') return <ProfilePage lang={lang} onNavigate={simpleNav} />;
   if (currentView === 'events') return <EventsPage lang={lang} onNavigate={simpleNav} />;

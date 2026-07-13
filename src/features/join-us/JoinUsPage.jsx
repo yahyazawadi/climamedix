@@ -80,8 +80,7 @@ export function JoinUsPage({ lang, onNavigate }) {
       setRequests(prev => prev.map(r => r.id === item.id ? { ...r, isApproved: true, profileId: profile.id } : r));
       alert(isArabic ? 'تمت الموافقة بنجاح! سيتم تحويلك لصفحة الصلاحيات لتعيين الأذونات.' : 'Approved successfully! Redirecting to permissions page.');
       
-      window.history.pushState({}, '', `/admin/users?id=${profile.id}`);
-      onNavigate('admin-users');
+      onNavigate('admin-users', null, `id=${profile.id}`);
     } catch (err) {
       console.error(err);
       alert(isArabic ? `حدث خطأ: ${err.message}` : `Error: ${err.message}`);
@@ -711,8 +710,7 @@ export function JoinUsPage({ lang, onNavigate }) {
                           <button 
                             onClick={() => {
                               if (item.profileId) {
-                                window.history.pushState({}, '', `/admin/users?id=${item.profileId}`);
-                                onNavigate('admin-users');
+                                onNavigate('admin-users', null, `id=${item.profileId}`);
                               }
                             }}
                             style={{ padding: '6px 14px', borderRadius: '8px', background: 'rgba(21,180,122,0.1)', color: '#15b47a', fontWeight: 'bold', fontSize: '13px', border: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }}

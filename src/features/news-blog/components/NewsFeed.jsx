@@ -56,7 +56,12 @@ export function NewsFeed({ articles = [], onReadArticle, onEditArticle, user, ha
               lang={lang}
               onClick={() => onReadArticle(art)}
               onEdit={() => onEditArticle?.(art)}
-              canEdit={hasPermission?.('manage:any_article') || (user && user.id === art.created_by)}
+              canEdit={
+                // manage:any_article = can edit ALL articles
+                hasPermission?.('manage:any_article') ||
+                // write:articles = can only edit OWN articles
+                (hasPermission?.('write:articles') && user && user.id === art.created_by)
+              }
             />
           </div>
         ))}

@@ -148,7 +148,10 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
     else simpleNav(v);
   }} />;
   
-  if (currentView === 'article') return <ArticleReaderPage lang={lang} onNavigate={simpleNav} />;
+  if (currentView === 'article') return <ArticleReaderPage lang={lang} onNavigate={(v, id) => {
+    if (v === 'write-article' && id) navigate('write-article', null, id);
+    else simpleNav(v);
+  }} />;
   if (currentView === 'courses') return <LearningHubPage lang={lang} onNavigate={simpleNav} />;
   if (currentView === 'admin-users') return <UserManagementDashboard lang={lang} onNavigate={simpleNav} />;
   if (currentView === 'admin-stats') return <UserStatsDashboard lang={lang} onNavigate={simpleNav} />;

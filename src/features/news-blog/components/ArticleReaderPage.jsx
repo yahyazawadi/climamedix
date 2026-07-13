@@ -4,9 +4,11 @@ import { Button } from '../../shared/components/Button';
 import { GlassCard } from '../../shared/components/GlassCard';
 import { AmbientParticles } from '../../shared/components/AmbientParticles';
 import { ShareActionButtons } from '../../shared/components/ShareActionButtons';
+import { useAuth } from '../../auth/hooks/useAuth';
 import 'react-quill/dist/quill.snow.css';
 
 export function ArticleReaderPage({ lang, onNavigate }) {
+  const { user, hasPermission } = useAuth();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -154,10 +156,35 @@ export function ArticleReaderPage({ lang, onNavigate }) {
       <div style={{ paddingTop: '100px', paddingBottom: '80px', minHeight: '100vh', position: 'relative', zIndex: 10 }}>
         <div style={{ maxWidth: '1250px', margin: '0 auto', padding: '0 20px' }}>
         
-        <div style={{ marginBottom: '20px' }}>
-          <Button variant="text" onClick={() => onNavigate('news-blog')} style={{ padding: 0, color: '#4a6b8c' }}>
-            {lang === 'ar' ? '← العودة للأخبار' : '→ Back to News'}
+        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Button variant="text" onClick={() => onNavigate('news')} style={{ padding: 0, color: '#4a6b8c' }}>
+            {lang === 'ar' ? '← العودة للأخبار' : '← Back to News'}
           </Button>
+          {/* Edit button — shown if user has manage:any_article OR if it's their own article and has write:articles */}
+          {article && (
+            (hasPermission?.('manage:any_article') ||
+            (hasPermission?.('write:articles') && user?.id === article.created_by)) && (
+              <button
+                onClick={() => onNavigate('write-article', `id=${article.id}`)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.3)',
+                  color: '#0ea5e9', padding: '8px 16px', borderRadius: '10px',
+                  cursor: 'pointer', fontSize: '13px', fontWeight: '600',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(14, 165, 233, 0.2)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(14, 165, 233, 0.1)'; }}
+                title={lang === 'ar' ? 'تعديل المقال' : 'Edit Article'}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                {lang === 'ar' ? 'تعديل' : 'Edit'}
+              </button>
+            )
+          )}
         </div>
 
         <GlassCard style={{ padding: '0', overflow: 'hidden', borderRadius: '24px' }}>

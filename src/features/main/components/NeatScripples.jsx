@@ -12,7 +12,8 @@ export function NeatScripples() {
       height: '100%',
       pointerEvents: 'none',
       zIndex: -1,
-      overflow: 'hidden'
+      overflow: 'hidden',
+      opacity: 0.15
     }}>
       <div 
         className="neat-scribble-left"

@@ -64,7 +64,7 @@ export function HomeNewsWidget({ lang, onNavigate }) {
 
   return (
     <section className="figma-discovery-section" style={{ padding: '60px 20px', position: 'relative', zIndex: 10 }}>
-      <div className="discovery-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <div className="discovery-container" style={{ maxWidth: '1700px', margin: '0 auto' }}>
         <h2 className="figma-section-title-main">
           {lang === 'ar' ? 'أحدث الأخبار والمقالات' : 'Latest News & Articles'}
         </h2>

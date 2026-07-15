@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'preact/hooks'
 import logo from '../../../assets/logo.svg'
+import logoEn from '../../../assets/logo_en.svg'
 import { useAuth, ROLE_PERMISSIONS } from '../../auth/hooks/useAuth'
 import iconHome from '../../../assets/icon_home.svg'
-import iconNews from '../../../assets/icon_news.svg'
+import iconNews from '../../../assets/asset_3_news.svg'
 import iconTraining from '../../../assets/icon_training.svg'
 import iconResearch from '../../../assets/icon_research.svg'
 import iconAbout from '../../../assets/icon_about.svg'
-import iconOpportunities from '../../../assets/icon_opportunities.svg'
+import iconOpportunities from '../../../assets/asset_2_opportunities.svg'
 import iconSearch from '../../../assets/icon_search.svg'
 import iconProfile from '../../../assets/icon_profile.svg'
-import iconGlobe from '../../../assets/icon_globe.svg'
+import iconGlobe from '../../../assets/asset_1_globe.svg'
 import iconCommunity from '../../../assets/icon_community.svg'
 import { translations } from '../../../i18n/translations'
 
@@ -53,7 +54,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
             }}
             class="figma-logo-link"
           >
-            <img src={logo} class="figma-logo-img" alt="كلايما ميدكس" />
+            <img src={lang === 'en' ? logoEn : logo} class="figma-logo-img" alt="كلايما ميدكس" />
           </a>
 
           {/* Center-Right: Navigation Items (RTL order) */}
@@ -64,7 +65,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               <button 
                 onClick={() => setShowLangDropdown(!showLangDropdown)}
                 class={`figma-nav-item language-toggle-btn ${showLangDropdown ? 'active' : ''}`}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0 8px', outline: 'none' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px', outline: 'none' }}
                 title="Select Language / اختيار اللغة"
               >
                 <img src={iconGlobe} class="figma-nav-icon" alt="Language" />
@@ -170,8 +171,8 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                       objectFit: 'cover', 
                       border: '2px solid rgba(21, 180, 122, 0.4)' 
                     } : {
-                      width: '34px', 
-                      height: '34px',
+                      width: '32px', 
+                      height: '32px',
                       objectFit: 'contain'
                     }}
                   />
@@ -702,7 +703,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                 }}
                 class={`figma-nav-item ${currentView === 'auth' ? 'active' : ''}`}
               >
-                <img src={iconProfile} class="figma-nav-icon" alt="دخول / Login" />
+                <img src={iconProfile} class="figma-nav-icon" alt="دخول / Login" style={{ height: '32px', width: 'auto' }} />
                 <span class="figma-nav-text">{t.login}</span>
               </a>
             )}
@@ -756,7 +757,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               }}
               class={`figma-nav-item ${currentView === 'opportunities' ? 'active' : ''}`}
             >
-              <img src={iconOpportunities} class="figma-nav-icon" alt="الفرص" />
+              <img src={iconOpportunities} class="figma-nav-icon" alt="الفرص" style={{ height: '26px', width: 'auto' }} />
               <span class="figma-nav-text">{t.opportunities}</span>
             </a>
 
@@ -782,7 +783,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               }}
               class={`figma-nav-item ${currentView === 'courses' ? 'active' : ''}`}
             >
-              <img src={iconTraining} class="figma-nav-icon" alt="المركز التعليمي" />
+              <img src={iconTraining} class="figma-nav-icon" alt="المركز التعليمي" style={{ height: '30px', width: 'auto' }} />
               <span class="figma-nav-text">{lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}</span>
             </a>
 

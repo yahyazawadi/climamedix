@@ -178,8 +178,8 @@ export function LearningHubPage({ lang, onNavigate }) {
   // ─── Access Logic ─────────────────────────────────────────────────────────
   function getCourseAccess(course) {
     if (!user) return 'locked';
-    if (hasPermission(course.full_access_permission_key)) return 'full';
-    if (hasPermission(course.teaser_permission_key)) return 'teaser';
+    if (course.full_access_permission_key && hasPermission(course.full_access_permission_key)) return 'full';
+    if (!course.teaser_permission_key || course.teaser_permission_key === 'view:public_content' || hasPermission(course.teaser_permission_key)) return 'teaser';
     return 'locked';
   }
 

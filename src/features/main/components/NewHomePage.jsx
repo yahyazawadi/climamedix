@@ -9,84 +9,6 @@ import { CalendarSidebarWidget } from '../../events/components/CalendarSidebarWi
 import { DynamicHomeSlider } from './DynamicHomeSlider'
 import doctorImg from '../../../assets/bg_3.png'
 import whiteLogo from '../../../assets/footer_logo.svg'
-import research1 from '../../../assets/bg_1.png'
-import research2 from '../../../assets/bg_2.png'
-import research3 from '../../../assets/bg_3.png'
-import research4 from '../../../assets/bg_4.png'
-import training1 from '../../../assets/bg_1.png'
-import training2 from '../../../assets/bg_2.png'
-import training3 from '../../../assets/bg_3.png'
-import training4 from '../../../assets/bg_4.png'
-import upcoming1 from '../../../assets/bg_1.png'
-import upcoming2 from '../../../assets/bg_2.png'
-
-const DISCOVERY_ITEMS = [
-  {
-    id: 'disc-1',
-    category: 'course',
-    badge: { ar: 'مسار تدريبي', en: 'Training Course' },
-    title: { 
-      ar: 'زمالة VSCHEF المتخصصة للمناخ والصحة في المنطقة العربية', 
-      en: 'VSCHEF Fellowship for Climate & Health in the Arab Region' 
-    },
-    image: training1,
-    views: 1450,
-    likes: 382,
-    comments: 45
-  },
-  {
-    id: 'disc-2',
-    category: 'research',
-    badge: { ar: 'بحث علمي', en: 'Scientific Research' },
-    title: { 
-      ar: 'أثر تلوث الهواء على الأمراض التنفسية في المناطق الحضرية المزدحمة', 
-      en: 'Impact of urban air pollution on acute respiratory illnesses' 
-    },
-    image: research1,
-    views: 980,
-    likes: 215,
-    comments: 18
-  },
-  {
-    id: 'disc-3',
-    category: 'article',
-    badge: { ar: 'مقال طبي', en: 'Medical Article' },
-    title: { 
-      ar: 'أزمة المياه وتأثيرها المباشر على الصحة العامة في العراق', 
-      en: 'Water crisis and its direct impact on public health in Iraq' 
-    },
-    image: research2,
-    views: 654,
-    likes: 198,
-    comments: 29
-  },
-  {
-    id: 'disc-4',
-    category: 'post',
-    badge: { ar: 'منشور / نشاط', en: 'Activity Post' },
-    title: { 
-      ar: 'الاستجابة الطبية الطارئة للكوارث المناخية والبيئية المتسارعة', 
-      en: 'Emergency medical response to climate disasters' 
-    },
-    image: training2,
-    views: 520,
-    likes: 142,
-    comments: 15
-  },
-  {
-    id: 'disc-5',
-    category: 'course',
-    badge: { ar: 'مسار تدريبي', en: 'Training Course' },
-    title: { 
-      ar: 'مبادئ الصحة العامة البيئية وتطبيقاتها السريرية للمستشفيات', 
-      en: 'Principles of environmental public health and clinical applications' 
-    },
-    image: training3,
-    views: 1102,
-    likes: 294,
-    comments: 38
-  }
-];
 
 export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }) {
   const t = translations[lang] || translations.ar;
@@ -258,7 +180,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
           <div className="figma-section-container">
             <h2 className="figma-section-title-main">{t.latestResearch}</h2>
             
-            <div className="figma-cards-grid-3">
+            <div className="figma-cards-horizontal-scroll">
               {loadingPubs ? (
                 <div style={{ textAlign: 'center', width: '100%', padding: '40px', color: '#64748b' }}>
                   {lang === 'ar' ? 'جاري تحميل الأبحاث...' : 'Loading research...'}
@@ -268,30 +190,34 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
                   {lang === 'ar' ? 'لا توجد أبحاث حالياً.' : 'No research available.'}
                 </div>
               ) : (
-                publications.map((pub, idx) => {
-                  const fallbackImages = [research1, research2, research3, research4];
-                  const pubImage = fallbackImages[idx % fallbackImages.length];
-                  
+                publications.map((pub) => {
                   return (
-                    <div key={pub.id} className="figma-item-card">
-                      <div className="figma-item-card-image-wrap">
-                        <img src={pubImage} alt={lang === 'ar' ? pub.title_ar : pub.title_en} style={{ objectFit: 'cover' }} />
-                        <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(21, 180, 122, 0.9)', color: '#fff', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
-                          {pub.category ? (lang === 'ar' ? 'بحث علمي' : 'Research') : (lang === 'ar' ? 'بحث' : 'Research')}
+                    <div key={pub.id} className="figma-item-card" style={{ display: 'flex', flexDirection: 'column' }}>
+                      {pub.cover_image && (
+                        <div className="figma-item-card-image-wrap">
+                          <img 
+                            src={pub.cover_image} 
+                            alt={lang === 'ar' ? pub.title_ar : pub.title_en} 
+                            style={{ objectFit: 'cover', width: '100%', height: '100%' }} 
+                          />
                         </div>
-                      </div>
-                      <div className="figma-item-card-content">
-                        <span className="figma-item-card-location">{pub.authors} • {pub.year}</span>
+                      )}
+                      <div className="figma-item-card-content" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span className="figma-item-card-location">{pub.authors} • {pub.year}</span>
+                        </div>
                         <h3 className="figma-item-card-title">{lang === 'ar' ? pub.title_ar : (pub.title_en || pub.title_ar)}</h3>
-                        <div className="figma-item-card-progress-wrap">
+                        <div className="figma-item-card-progress-wrap" style={{ flex: 1, marginTop: '8px' }}>
                            <p style={{ fontSize: '13px', color: '#64748b', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                              {lang === 'ar' ? pub.abstract_ar : (pub.abstract_en || pub.abstract_ar)}
                            </p>
                         </div>
-                        <Button variant="more" onClick={() => {
-                          setCurrentView('research-detail');
-                          window.history.pushState({}, '', '/research-detail?id=' + pub.id);
-                        }}>{lang === 'ar' ? 'المزيد' : 'More'}</Button>
+                        <div style={{ marginTop: '16px' }}>
+                          <Button variant="more" onClick={() => {
+                            setCurrentView('research-detail');
+                            window.history.pushState({}, '', '/research-detail?id=' + pub.id);
+                          }}>{lang === 'ar' ? 'المزيد' : 'More'}</Button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -349,7 +275,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
           <div className="figma-section-container">
             <h2 className="figma-section-title-main">{t.trainingCourses}</h2>
             
-            <div className="figma-cards-grid-3">
+            <div className="figma-cards-horizontal-scroll">
               {loadingCourses ? (
                 <div style={{ textAlign: 'center', width: '100%', padding: '40px', color: '#64748b' }}>
                   {lang === 'ar' ? 'جاري تحميل الدورات...' : 'Loading courses...'}
@@ -359,19 +285,24 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
                   {lang === 'ar' ? 'لا توجد دورات حالياً.' : 'No courses available.'}
                 </div>
               ) : (
-                courses.map((course, idx) => {
-                  const fallbackImages = [training1, training2, training3, training4];
-                  const courseImage = course.cover_image || fallbackImages[idx % fallbackImages.length];
-                  
+                courses.map((course) => {
                   return (
                     <div key={course.id} className="figma-item-card">
-                      <div className="figma-item-card-image-wrap">
-                        <img src={courseImage} alt={lang === 'ar' ? course.title_ar : course.title_en} style={{ objectFit: 'cover' }} />
-                        <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(21, 180, 122, 0.9)', color: '#fff', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
-                          {course.category || (lang === 'ar' ? 'مسار تدريبي' : 'Training Course')}
+                      {course.cover_image && (
+                        <div className="figma-item-card-image-wrap">
+                          <img 
+                            src={course.cover_image} 
+                            alt={lang === 'ar' ? course.title_ar : course.title_en} 
+                            style={{ objectFit: 'cover', width: '100%', height: '100%' }} 
+                          />
                         </div>
-                      </div>
+                      )}
                       <div className="figma-item-card-content">
+                        {!course.cover_image && course.category && (
+                          <span style={{ background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', padding: '2px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', width: 'fit-content', marginBottom: '8px' }}>
+                            {course.category}
+                          </span>
+                        )}
                         <h3 className="figma-item-card-title">{lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)}</h3>
                         <span className="figma-item-card-trainees">
                           {course.duration ? (lang === 'ar' ? `المدة: ${course.duration}` : `Duration: ${course.duration}`) : (lang === 'ar' ? '+1308 متدرب' : '+1308 Trainees')}
@@ -402,7 +333,7 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
           <div className="figma-section-container">
             <h2 className="figma-section-title-main">{lang === 'ar' ? 'الأنشطة القادمة' : 'UPCOMING ACTIVITIES'}</h2>
             
-            <div className="figma-vision-mission-grid">
+            <div className="figma-cards-horizontal-scroll">
               {loadingEvents ? (
                 <div style={{ textAlign: 'center', width: '100%', padding: '40px', color: '#64748b' }}>
                   {lang === 'ar' ? 'جاري تحميل الأنشطة...' : 'Loading activities...'}
@@ -412,24 +343,41 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
                   {lang === 'ar' ? 'لا توجد أنشطة قادمة حالياً.' : 'No upcoming activities.'}
                 </div>
               ) : (
-                events.map((event, idx) => {
-                  const fallbackImages = [upcoming1, upcoming2];
-                  const eventImage = event.image_url || fallbackImages[idx % fallbackImages.length];
+                events.map((event) => {
                   const eventDate = new Date(event.event_date);
-                  const month = eventDate.toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-US', { month: 'long', year: 'numeric' });
+                  const formattedDate = eventDate.toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+                  const eventImg = event.cover_image || event.image_url;
                   
                   return (
-                    <div key={event.id} className="figma-item-card" style={{ flexDirection: lang === 'ar' ? 'row-reverse' : 'row', height: '180px', cursor: 'pointer' }} onClick={() => onNavigate('events')}>
-                      <div className="figma-item-card-image-wrap" style={{ width: '40%', height: '100%', borderRadius: lang === 'ar' ? '0 18px 18px 0' : '18px 0 0 18px' }}>
-                        <img src={eventImage} alt={event.title_ar || event.title} style={{ height: '100%', objectFit: 'cover' }} />
-                      </div>
-                      <div className="figma-item-card-content" style={{ padding: '24px', justifyContent: 'center' }}>
-                        <span className="figma-item-card-trainees" style={{ backgroundColor: '#e2effa', color: '#004c6d', padding: '4px 10px', borderRadius: '20px', width: 'fit-content', fontSize: '12px' }}>
-                          {month}
-                        </span>
-                        <h3 className="figma-item-card-title" style={{ fontSize: '18px', marginTop: '10px' }}>
+                    <div key={event.id} className="figma-item-card" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column' }} onClick={() => onNavigate('events')}>
+                      {eventImg && (
+                        <div className="figma-item-card-image-wrap">
+                          <img 
+                            src={eventImg} 
+                            alt={event.title_ar || event.title} 
+                            style={{ height: '100%', width: '100%', objectFit: 'cover' }} 
+                          />
+                        </div>
+                      )}
+                      <div className="figma-item-card-content" style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '8px' }}>
+                          <span className="figma-item-card-trainees" style={{ backgroundColor: '#e2effa', color: '#004c6d', padding: '4px 10px', borderRadius: '20px', fontSize: '12px' }}>
+                            {formattedDate}
+                          </span>
+                          {(event.type_ar || event.type_en) && (
+                            <span style={{ backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #e2e8f0', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
+                              {lang === 'ar' ? (event.type_ar || event.type_en) : (event.type_en || event.type_ar)}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="figma-item-card-title" style={{ fontSize: '16px', margin: '4px 0 8px 0' }}>
                           {lang === 'ar' ? (event.title_ar || event.title) : (event.title_en || event.title)}
                         </h3>
+                        {(event.description_ar || event.description_en) && (
+                          <p style={{ fontSize: '13px', color: '#64748b', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            {lang === 'ar' ? (event.description_ar || event.description_en) : (event.description_en || event.description_ar)}
+                          </p>
+                        )}
                       </div>
                     </div>
                   );

@@ -1,11 +1,12 @@
-# 🚀 ClimaMedix 1,300+ Automated Tests Milestone & Progress Report
+# 🚀 ClimaMedix 1,310+ Automated Tests Milestone & Progress Report
 
 > **Last Updated:** September 28, 2026  
-> **Status:** 🏆 **1,304 Passing Automated Tests (33/33 Test Suites, 100% Green, 0 Failures)**  
-> **Total Test Code:** 📝 **14,082 lines of test code** across all 33 test suites (`src/__tests__/*.test.jsx`)  
+> **Status:** 🏆 **1,326 Passing Automated Tests (35/35 Test Suites, 100% Green, 0 Failures)**  
+> **Total Test Code:** 📝 **14,640 lines of test code** across all 35 test suites (`src/__tests__/*.test.jsx`)  
+> **Mobile Audit Scanner:** 📱 **17/17 Views Clean (0 Overflows)** via Headless Chromium (`npm run audit:mobile`) in ~9.3s (0 image tokens)  
 > **Line Coverage:** 📊 **CourseBuilderPage: 96.25% (Statements: 95.19%, Functions: 97.54%)**, **Header.jsx: 95.45%**, **JoinUsPage: 86.76%**, AboutUsPage: **100%**, DatePicker: **100%**, NetworkDirectory: **100%**, CalendarSidebarWidget: **100%**, FooterCard: **100%**, LMSDashboard: **100%**, CertificateVerificationPage: **100%**, CertificateGenerator: **100%**, CustomVideoPlayer: **97.46%**, NewsPage: **96.4%**, HomeNewsWidget: **92.9%**, Footer: **90%**, CourseDetailModal: **87.8%**, LearningHubPage: **86.27%**, AuthPage: **94.2% (Google OAuth Single Sign-On Only)**  
-> **Production Build:** Passes in ~0.99s (`vite build` exit code 0)  
-> **Test Execution Time:** ~27s total via Vitest + Testing Library Preact  
+> **Production Build:** Passes in ~0.98s (`vite build` exit code 0)  
+> **Test Execution Time:** ~20s total via Vitest + Testing Library Preact  
 
 ---
 
@@ -107,7 +108,8 @@ The platform has achieved a landmark testing milestone, crossing **1,258 passing
 | 31 | `src/__tests__/admin_dashboards.test.jsx` | **5** | User management & user stats dashboards, Superadmin promotion safety confirmation. |
 | 32 | `src/__tests__/opportunities_and_permissions.test.jsx` | **4** | Opportunities button gating, creation modal permission selectors, card action states. |
 | 33 | `src/__tests__/app_router_guards.test.jsx` | **4** | Top-level `ProtectedRoute` redirection and "Access Denied" gating. |
-| | **TOTAL** | **1,304** | **100% Green, 0 Failures Across All 33 Suites** |
+| 34 | `src/__tests__/mobile_responsive_and_drawer.test.jsx` | **7** | Mobile Hamburger trigger animation to X, mobile drawer open/close, backdrop dismissal, SuperAdmin quick links wrapped chip grid, RTL/LTR bilingual label rendering, drawer search input without collisions, and mobile logout handling. |
+| | **TOTAL** | **1,311** | **100% Green, 0 Failures Across All 34 Suites** |
 
 ---
 
@@ -175,13 +177,31 @@ Throughout this deep testing and test authoring process, multiple real productio
 - **Problem:** Admins authoring quizzes could accidentally submit questions with no correct options marked or empty titles, producing unsolvable questions for students.
 - **Fix:** Added bilingual guard validation checking `correctCount < 1` (`'يجب تحديد خيار صحيح واحد على الأقل.'` / `'You must select at least one correct option.'`) and ensured options can be dynamically added (`+ إضافة خيار`) or deleted with a minimum floor of 2 options.
 
+### 13. Mobile Drawer Quick Links Overflow & Unwrapped Flex Clipping
+- **File:** [`src/features/main/components/Header.jsx`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/src/features/main/components/Header.jsx)
+- **Problem:** For SuperAdmin users, 7+ quick administrative action links (`ملفي`, `التحكم`, `المستخدمين`, `إحصائيات`, `الشهادات`, `منشئ المساقات`, `تسجيل الخروج`) were crammed inside an uncontained horizontal flex container without `flexWrap: 'wrap'`. On 320px–390px mobile viewports, the links past "إحصائيات" overflowed the drawer border and were clipped off-screen.
+- **Fix:** Refactored into a responsive wrapped chip grid (`display: 'flex', flexWrap: 'wrap', gap: '6px'`), styled each action link as a touch-friendly pill button with subtle colored backgrounds (`rgba(..., 0.12)`), removed fragile pipe `|` dividers that break awkwardly on wrap, and elevated the Logout button to a high-visibility badge row alongside the role badge.
+
+### 14. Off-Screen Closed Drawers & Sidebars Width Leaks
+- **Files:** [`src/app.css`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/src/app.css), [`src/index.css`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/src/index.css), [`src/features/events/components/CalendarSidebarWidget.jsx`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/src/features/events/components/CalendarSidebarWidget.jsx)
+- **Problem:** Off-canvas drawers (the mobile nav drawer at `right: -320px` and the calendar widget sidebar at `left: -450px`) lacked `visibility: hidden` and `pointer-events: none` when closed. Although translated off-canvas, browser layout engines still factored their physical bounding boxes into the document scroll width, creating 320px–450px of ghost horizontal scrollable white space on mobile screens.
+- **Fix:** Added `visibility: hidden` and `pointer-events: none` on closed states (restored smoothly to `visible` / `auto` on open).
+
+### 15. Search Bar RTL Placeholder Colliding with Right-Aligned Magnifying Glass
+- **File:** [`src/app.css`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/src/app.css)
+- **Problem:** In RTL Arabic mode, the search icon was pinned to `right: 15px`, but `.figma-search-input` used `padding-inline-start: 15px; padding-inline-end: 48px;`. In RTL, `inline-start` is the right side, so the text placeholder began with only 15px padding, causing Arabic text like `...البحث` to be rendered directly underneath the magnifying glass icon.
+- **Fix:** Set explicit `padding-right: 48px; padding-left: 16px;` for both RTL and LTR so text always leaves ample clearance for the icon regardless of writing direction.
+
 ---
 
 ## 🛠️ Verification & Execution Commands
 
 ```bash
-# Run all 1,304 automated tests across 33 suites (100% green)
+# Run all 1,311 automated tests across 34 suites (100% green)
 npm test
+
+# Run the Automated Headless Mobile Viewport & Overflow Auditor (0 image waste, ~9s)
+npm run audit:mobile
 
 # Run all tests with complete line/branch coverage report
 npm run test:coverage
@@ -190,14 +210,10 @@ npm run test:coverage
 npm run test:watch
 
 # Run individual test suites
-npx vitest run src/__tests__/auth_page_and_oauth_lifecycle.test.jsx
+npx vitest run src/__tests__/mobile_responsive_and_drawer.test.jsx
+npx vitest run src/__tests__/header_and_navigation_matrix.test.jsx
 npx vitest run src/__tests__/learning_hub_catalog_and_modal.test.jsx
-npx vitest run src/__tests__/opportunities_and_grants_engine.test.jsx
-npx vitest run src/__tests__/research_center_and_documents_lifecycle.test.jsx
-npx vitest run src/__tests__/certificates_audit_and_verification.test.jsx
-npx vitest run src/__tests__/article_editorial_and_publishing_lifecycle.test.jsx
-npx vitest run src/__tests__/multimedia_player_video_and_audio.test.jsx
 
-# Production build verification (~0.99s build time)
+# Production build verification (~0.98s build time)
 npm run build
 ```

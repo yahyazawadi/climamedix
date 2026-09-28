@@ -107,11 +107,13 @@ export function CalendarSidebarWidget({ lang = 'ar', onNavigate }) {
         background: '#f8fafc',
         zIndex: 10001,
         boxShadow: isArabic ? '5px 0 25px rgba(0,0,0,0.2)' : '-5px 0 25px rgba(0,0,0,0.2)',
-        transition: isArabic ? 'left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1)' : 'right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1)',
+        transition: isArabic ? 'left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1), visibility 0.4s' : 'right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1), visibility 0.4s',
         display: 'flex',
         flexDirection: 'column',
         overflowY: 'auto',
-        overflowX: 'hidden'
+        overflowX: 'hidden',
+        visibility: isOpen ? 'visible' : 'hidden',
+        pointerEvents: isOpen ? 'auto' : 'none'
       }}>
         {/* Header */}
         <div style={{

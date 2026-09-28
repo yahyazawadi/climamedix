@@ -63,8 +63,8 @@ export function HomeNewsWidget({ lang, onNavigate }) {
   if (loading || articles.length === 0) return null;
 
   return (
-    <section className="figma-discovery-section" style={{ padding: '60px 20px', position: 'relative', zIndex: 10 }}>
-      <div className="discovery-container" style={{ maxWidth: '1700px', margin: '0 auto' }}>
+    <section className="figma-training-section" style={{ position: 'relative', zIndex: 10 }}>
+      <div className="figma-section-container">
         <h2 className="figma-section-title-main">
           {lang === 'ar' ? 'أحدث الأخبار والمقالات' : 'Latest News & Articles'}
         </h2>
@@ -72,6 +72,7 @@ export function HomeNewsWidget({ lang, onNavigate }) {
           articles={articles} 
           lang={lang}
           hideFilters={true}
+          horizontalScroll={true}
           onReadArticle={(article) => onNavigate('article', article.id)} 
         />
         <div style={{ textAlign: 'center', marginTop: '30px' }}>

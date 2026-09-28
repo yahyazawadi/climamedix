@@ -12,7 +12,7 @@ const CATEGORIES_MAP = {
 
 const CATEGORY_KEYS = Object.keys(CATEGORIES_MAP);
 
-export function NewsFeed({ articles = [], onReadArticle, onEditArticle, user, hasPermission, lang = 'ar', hideFilters = false }) {
+export function NewsFeed({ articles = [], onReadArticle, onEditArticle, user, hasPermission, lang = 'ar', hideFilters = false, horizontalScroll = false }) {
   const [activeCategory, setActiveCategory] = useState('الكل');
   const feedRef = useRef(null);
 
@@ -48,22 +48,21 @@ export function NewsFeed({ articles = [], onReadArticle, onEditArticle, user, ha
         </div>
       )}
 
-      <div className="figma-cards-grid-3">
+      <div className={horizontalScroll ? "figma-cards-horizontal-scroll" : "figma-cards-grid-3"}>
         {filteredArticles.map((art, idx) => (
-          <div key={`${art.title}-${idx}`}>
-            <ArticleCard
-              {...art}
-              lang={lang}
-              onClick={() => onReadArticle(art)}
-              onEdit={() => onEditArticle?.(art)}
-              canEdit={
-                // manage:any_article = can edit ALL articles
-                hasPermission?.('manage:any_article') ||
-                // write:articles = can only edit OWN articles
-                (hasPermission?.('write:articles') && user && user.id === art.created_by)
-              }
-            />
-          </div>
+          <ArticleCard
+            key={`${art.title}-${idx}`}
+            {...art}
+            lang={lang}
+            onClick={() => onReadArticle(art)}
+            onEdit={() => onEditArticle?.(art)}
+            canEdit={
+              // manage:any_article = can edit ALL articles
+              hasPermission?.('manage:any_article') ||
+              // write:articles = can only edit OWN articles
+              (hasPermission?.('write:articles') && user && user.id === art.created_by)
+            }
+          />
         ))}
         {filteredArticles.length === 0 && (
           <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'rgba(11, 40, 73, 0.5)', background: 'rgba(255,255,255,0.4)', borderRadius: '20px', border: '1px dashed rgba(11,40,73,0.2)' }}>

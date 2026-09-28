@@ -69,93 +69,114 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
 
   const currentSlide = slides[activeIndex];
 
-  return (
-    <div style={{ maxWidth: '1700px', width: '100%', margin: '20px auto', padding: '0 30px' }}>
-    <div className="geometric-carousel" style={{ position: 'relative', height: '750px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-      
-      {/* Background Image */}
-      {slides.map((slide, idx) => (
-        <img 
-          key={slide.id}
-          src={slide.image_url} 
-          style={{ 
-            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', 
-            objectFit: 'cover', zIndex: 1, 
-            opacity: idx === activeIndex ? 0.95 : 0,
-            transition: 'opacity 0.8s ease-in-out'
-          }} 
-          alt={lang === 'ar' ? slide.title_ar : slide.title_en} 
-        />
-      ))}
+  const getActionLabel = (entityType, language) => {
+    const type = (entityType || '').toLowerCase();
+    if (language === 'ar') {
+      if (type.includes('course') || type.includes('training')) return 'انضم للدورة التدريبية';
+      if (type.includes('article') || type.includes('news')) return 'اقرأ المقال';
+      if (type.includes('research')) return 'اقرأ البحث';
+      if (type.includes('event')) return 'سجل في الفعالية';
+      return 'استعرض التفاصيل';
+    } else {
+      if (type.includes('course') || type.includes('training')) return 'Join the Course';
+      if (type.includes('article') || type.includes('news')) return 'Read Article';
+      if (type.includes('research')) return 'Read Research';
+      if (type.includes('event')) return 'Register for Event';
+      return 'View Details';
+    }
+  };
 
-      {/* Triangular Geometric Overlay */}
-      <div style={{
-        position: 'absolute', top: 0, [lang === 'ar' ? 'right' : 'left']: 0, width: '33.33%', minWidth: '380px', height: '100%',
-        background: 'linear-gradient(135deg, rgba(11, 40, 73, 0.98) 20%, rgba(21, 180, 122, 0.9) 100%)',
-        clipPath: lang === 'ar' ? 'polygon(12% 0%, 100% 0%, 100% 100%, 0% 100%)' : 'polygon(0% 0%, 88% 0%, 100% 100%, 0% 100%)',
-        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start',
-        padding: lang === 'ar' ? '40px 80px 40px 40px' : '40px 40px 40px 80px', color: '#fff', zIndex: 2, direction: lang === 'ar' ? 'rtl' : 'ltr'
-      }}>
-        
-        {/* Type Badge */}
-        <span style={{ 
-          fontSize: '12px', background: 'rgba(21, 180, 122, 0.2)', border: '1px solid #15b47a', 
-          color: '#15b47a', padding: '4px 10px', borderRadius: '20px', fontWeight: 'bold', 
-          marginBottom: '15px', width: 'fit-content', textTransform: 'uppercase'
-        }}>
-          {currentSlide.entity_type}
-        </span>
-        
-        {/* Title */}
-        <h3 style={{ fontSize: '32px', fontWeight: 'bold', color: '#fff', marginBottom: '15px', lineHeight: '1.4', textAlign: lang === 'ar' ? 'right' : 'left' }}>
-          {lang === 'ar' ? currentSlide.title_ar : currentSlide.title_en}
-        </h3>
-        
-        {/* Action Button */}
-        {currentSlide.link_url && (
-          <button
-            onClick={() => window.location.href = currentSlide.link_url}
-            style={{ 
-              background: '#15b47a', color: '#fff', border: 'none', padding: '12px 30px', 
-              borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s',
-              marginTop: '20px'
-            }}
-            onMouseEnter={(e) => e.target.style.boxShadow = '0 0 15px #15b47a'}
-            onMouseLeave={(e) => e.target.style.boxShadow = 'none'}
+  const handleActionClick = (linkUrl) => {
+    if (!linkUrl) return;
+    if (linkUrl.startsWith('/') && onNavigate) {
+      const view = linkUrl.replace('/', '');
+      onNavigate(view || 'home');
+      window.history.pushState({}, '', linkUrl);
+    } else {
+      window.location.href = linkUrl;
+    }
+  };
+
+  return (
+    <div className="figma-slider-section">
+      <div className="home-hero-slider geometric-carousel">
+        {/* Background Slides */}
+        {slides.map((slide, idx) => (
+          <div 
+            key={slide.id}
+            className={`home-slider-slide ${idx === activeIndex ? 'active' : ''}`}
           >
-            {(() => {
-              const type = currentSlide.entity_type ? currentSlide.entity_type.toLowerCase() : '';
-              if (lang === 'ar') {
-                if (type.includes('course') || type.includes('training')) return 'انضم للدورة التدريبية';
-                if (type.includes('article') || type.includes('news')) return 'اقرأ المقال';
-                if (type.includes('research')) return 'اقرأ البحث';
-                if (type.includes('event')) return 'سجل في الفعالية';
-                return 'استعرض التفاصيل';
-              } else {
-                if (type.includes('course') || type.includes('training')) return 'Join the Course';
-                if (type.includes('article') || type.includes('news')) return 'Read Article';
-                if (type.includes('research')) return 'Read Research';
-                if (type.includes('event')) return 'Register for Event';
-                return 'View Details';
-              }
-            })()}
-          </button>
+            <img 
+              src={slide.image_url} 
+              className="home-slider-bg-img"
+              alt={lang === 'ar' ? slide.title_ar : slide.title_en} 
+            />
+            {/* Directional Gradient Scrim */}
+            <div className="home-slider-scrim" />
+          </div>
+        ))}
+
+        {/* Content Container Overlay */}
+        <div className="home-slider-content-wrap">
+          <div className="home-slider-content">
+            {/* Entity Badge */}
+            <span className="home-slider-badge">
+              <span className="home-slider-badge-dot" />
+              {currentSlide.entity_type}
+            </span>
+
+            {/* Title */}
+            <h2 className="home-slider-title">
+              {lang === 'ar' ? currentSlide.title_ar : currentSlide.title_en}
+            </h2>
+
+            {/* Action CTA Button */}
+            {currentSlide.link_url && (
+              <button
+                className="home-slider-cta-btn"
+                onClick={() => handleActionClick(currentSlide.link_url)}
+              >
+                <span>{getActionLabel(currentSlide.entity_type, lang)}</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: lang === 'ar' ? 'rotate(180deg)' : 'none' }}>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation Controls Bar (Anchored in bottom corner opposite to text) */}
+        {slides.length > 1 && (
+          <div className="home-slider-controls">
+            {/* Dot Indicators */}
+            <div className="home-slider-dots">
+              {slides.map((s, i) => (
+                <button
+                  key={s.id}
+                  className={`home-slider-dot ${i === activeIndex ? 'active' : ''}`}
+                  onClick={() => setActiveIndex(i)}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              ))}
+            </div>
+
+            {/* Arrow Buttons */}
+            <div className="home-slider-arrows">
+              <button className="home-slider-arrow-btn prev" onClick={handlePrev} aria-label="Previous slide">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points={lang === 'ar' ? "9 18 15 12 9 6" : "15 18 9 12 15 6"} />
+                </svg>
+              </button>
+              <button className="home-slider-arrow-btn next" onClick={handleNext} aria-label="Next slide">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points={lang === 'ar' ? "15 18 9 12 15 6" : "9 18 15 12 9 6"} />
+                </svg>
+              </button>
+            </div>
+          </div>
         )}
       </div>
-
-      {/* Navigation Arrows — Left & Right */}
-      {/* if you change the arrows position i will kill you */}
-      {slides.length > 1 && (
-        <>
-          <button className="carousel-nav-btn prev" onClick={handlePrev}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          </button>
-          <button className="carousel-nav-btn next" onClick={handleNext}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-          </button>
-        </>
-      )}
-    </div>
     </div>
   );
 }

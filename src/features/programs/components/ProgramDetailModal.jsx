@@ -76,12 +76,14 @@ export function ProgramDetailModal({ program, onClose, onApply }) {
         </button>
 
         {/* Hero Cover */}
-        <div style={{ position: 'relative', height: '240px', width: '100%', overflow: 'hidden' }}>
-          <img 
-            src={program.image || '/assets/bg_1.png'} 
-            alt={program.title} 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-          />
+        <div style={{ position: 'relative', height: '240px', width: '100%', overflow: 'hidden', background: 'linear-gradient(135deg, #0b2849 0%, #004c6d 100%)' }}>
+          {program.image && (
+            <img 
+              src={program.image} 
+              alt={program.title} 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            />
+          )}
           <div style={{
             position: 'absolute',
             inset: 0,

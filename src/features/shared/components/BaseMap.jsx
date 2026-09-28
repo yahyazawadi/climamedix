@@ -6,6 +6,7 @@ export function BaseMap({
   zoom = 4, 
   interactive = true,
   showScale = false,
+  className = '',
   style = { width: '100%', height: '500px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(11, 40, 73, 0.08)' },
   children 
 }) {
@@ -132,11 +133,20 @@ export function BaseMap({
       }
     });
 
-    // In BaseMap, we just provide the loaded map reference
+    const handleResize = () => {
+      if (mapInstanceRef.current && mapInstanceRef.current.resize) {
+        mapInstanceRef.current.resize();
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, [mapboxLoaded, center, zoom, interactive, onMapLoad]);
 
   return (
-    <div style={{ position: 'relative', ...style }}>
+    <div className={`base-map-root ${className}`.trim()} style={{ position: 'relative', ...style }}>
       <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }}></div>
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes mapRingPulse {

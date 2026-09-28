@@ -26,6 +26,21 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
   
   const t = translations[lang] || translations.ar;
 
+  const formatTwoLines = (text) => {
+    if (!text) return null;
+    const words = String(text).trim().split(/\s+/);
+    if (words.length >= 2) {
+      const mid = Math.ceil(words.length / 2);
+      return (
+        <>
+          <span>{words.slice(0, mid).join(' ')}</span>{' '}
+          <span>{words.slice(mid).join(' ')}</span>
+        </>
+      );
+    }
+    return <span>{text}</span>;
+  };
+
   // Close dropdowns on click outside
   useEffect(() => {
     const handleOutsideClick = (e) => {
@@ -65,11 +80,11 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               <button 
                 onClick={() => setShowLangDropdown(!showLangDropdown)}
                 class={`figma-nav-item language-toggle-btn ${showLangDropdown ? 'active' : ''}`}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px', outline: 'none' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, outline: 'none' }}
                 title="Select Language / اختيار اللغة"
               >
                 <img src={iconGlobe} class="figma-nav-icon" alt="Language" />
-                <span class="figma-nav-text">{t.language}</span>
+                <span class="figma-nav-text">{formatTwoLines(t.language)}</span>
               </button>
 
               {showLangDropdown && (
@@ -188,7 +203,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                   }}></span>
                 </div>
                 <span class="figma-nav-text" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  {t.myAccount}
+                  {formatTwoLines(t.myAccount)}
                 </span>
 
                 {/* Dropdown Menu */}
@@ -739,8 +754,8 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                 }}
                 class={`figma-nav-item ${currentView === 'auth' ? 'active' : ''}`}
               >
-                <img src={iconProfile} class="figma-nav-icon" alt="دخول / Login" style={{ height: '32px', width: 'auto' }} />
-                <span class="figma-nav-text">{t.login}</span>
+                <img src={iconProfile} class="figma-nav-icon" alt="دخول / Login" />
+                <span class="figma-nav-text">{formatTwoLines(t.login)}</span>
               </a>
             )}
 
@@ -755,7 +770,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               class={`figma-nav-item ${currentView === 'about' ? 'active' : ''}`}
             >
               <img src={iconAbout} class="figma-nav-icon" alt="من نحن" />
-              <span class="figma-nav-text">{t.about}</span>
+              <span class="figma-nav-text">{formatTwoLines(t.about)}</span>
             </a>
 
             {/* Community / Join Us */}
@@ -768,7 +783,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               class={`figma-nav-item ${currentView === 'join' ? 'active' : ''}`}
             >
               <img src={iconCommunity} class="figma-nav-icon" alt="انضم إلينا" />
-              <span class="figma-nav-text">{t.joinUs}</span>
+              <span class="figma-nav-text">{formatTwoLines(t.joinUs)}</span>
             </a>
 
             {/* Research */}
@@ -781,7 +796,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               class={`figma-nav-item ${currentView === 'research' ? 'active' : ''}`}
             >
               <img src={iconResearch} class="figma-nav-icon" alt="أبحاث" />
-              <span class="figma-nav-text">{t.research}</span>
+              <span class="figma-nav-text">{formatTwoLines(t.research)}</span>
             </a>
 
             {/* Opportunities */}
@@ -793,8 +808,8 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               }}
               class={`figma-nav-item ${currentView === 'opportunities' ? 'active' : ''}`}
             >
-              <img src={iconOpportunities} class="figma-nav-icon" alt="الفرص" style={{ height: '26px', width: 'auto' }} />
-              <span class="figma-nav-text">{t.opportunities}</span>
+              <img src={iconOpportunities} class="figma-nav-icon" alt="الفرص" />
+              <span class="figma-nav-text">{formatTwoLines(t.opportunities)}</span>
             </a>
 
             {/* News */}
@@ -807,7 +822,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               class={`figma-nav-item ${currentView === 'news' ? 'active' : ''}`}
             >
               <img src={iconNews} class="figma-nav-icon" alt="الأخبار" />
-              <span class="figma-nav-text">{t.newsBlog}</span>
+              <span class="figma-nav-text">{formatTwoLines(t.newsBlog)}</span>
             </a>
 
             {/* Learning Hub / Training */}
@@ -819,8 +834,8 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               }}
               class={`figma-nav-item ${currentView === 'courses' ? 'active' : ''}`}
             >
-              <img src={iconTraining} class="figma-nav-icon" alt="المركز التعليمي" style={{ height: '30px', width: 'auto' }} />
-              <span class="figma-nav-text">{lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}</span>
+              <img src={iconTraining} class="figma-nav-icon" alt="المركز التعليمي" />
+              <span class="figma-nav-text">{formatTwoLines(lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub')}</span>
             </a>
 
             {/* Search Input Container */}
@@ -845,7 +860,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
               class={`figma-nav-item ${(currentView === 'home' || currentView === 'newhome') ? 'active' : ''}`}
             >
               <img src={iconHome} class="figma-nav-icon" alt="الرئيسية" />
-              <span class="figma-nav-text">{t.home}</span>
+              <span class="figma-nav-text">{formatTwoLines(t.home)}</span>
             </a>
 
           </nav>
@@ -919,111 +934,177 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                 </div>
               </div>
 
-              {/* Roles Badge & Actions */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              {/* Roles Badge & User Actions Bar */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 {userProfile?.role === 'superadmin' ? (
-                  <span style={{ backgroundColor: '#15b47a', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                  <span style={{ backgroundColor: '#15b47a', color: '#ffffff', padding: '3px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
                     {lang === 'ar' ? 'مسؤول خارق' : 'Super Admin'}
                   </span>
                 ) : userProfile?.role === 'admin' ? (
-                  <span style={{ backgroundColor: '#8b5cf6', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                  <span style={{ backgroundColor: '#8b5cf6', color: '#ffffff', padding: '3px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
                     {lang === 'ar' ? 'مسؤول' : 'Admin'}
                   </span>
                 ) : userProfile?.role === 'educator' ? (
-                  <span style={{ backgroundColor: '#3b82f6', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                  <span style={{ backgroundColor: '#3b82f6', color: '#ffffff', padding: '3px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
                     {lang === 'ar' ? 'مثقف صحي' : 'Educator'}
                   </span>
                 ) : userProfile?.role === 'researcher' ? (
-                  <span style={{ backgroundColor: '#10b981', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                  <span style={{ backgroundColor: '#10b981', color: '#ffffff', padding: '3px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
                     {lang === 'ar' ? 'باحث علمي' : 'Researcher'}
                   </span>
                 ) : userProfile?.role === 'subscriber' ? (
-                  <span style={{ backgroundColor: '#f59e0b', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                  <span style={{ backgroundColor: '#f59e0b', color: '#ffffff', padding: '3px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
                     {lang === 'ar' ? 'مشترك' : 'Subscriber'}
                   </span>
                 ) : (
-                  <span style={{ backgroundColor: 'rgba(225, 239, 250, 0.1)', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px' }}>
+                  <span style={{ backgroundColor: 'rgba(225, 239, 250, 0.1)', color: '#ffffff', padding: '3px 10px', borderRadius: '6px', fontSize: '11px' }}>
                     {lang === 'ar' ? 'مستخدم' : 'Student'}
                   </span>
                 )}
 
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <a 
+                  href="#logout" 
+                  onClick={(e) => { e.preventDefault(); onLogout(); setDrawerOpen(false); }} 
+                  style={{ 
+                    color: '#ff4d4d', 
+                    textDecoration: 'none', 
+                    fontSize: '12px', 
+                    fontWeight: 'bold',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    background: 'rgba(255, 77, 77, 0.12)'
+                  }}
+                >
+                  {t.logout}
+                </a>
+              </div>
+
+              {/* Admin & Profile Quick Action Chips Grid (Wrapped, Responsive) */}
+              <div style={{ 
+                display: 'flex', 
+                flexWrap: 'wrap', 
+                gap: '6px', 
+                alignItems: 'center',
+                paddingTop: '8px',
+                borderTop: '1px solid rgba(225, 239, 250, 0.08)'
+              }}>
+                <a 
+                  href="#profile" 
+                  onClick={(e) => { e.preventDefault(); onNavigate('profile'); setDrawerOpen(false); }} 
+                  style={{ 
+                    color: '#15b47a', 
+                    textDecoration: 'none', 
+                    fontSize: '12px', 
+                    fontWeight: 'bold',
+                    padding: '5px 10px',
+                    borderRadius: '6px',
+                    background: 'rgba(21, 180, 122, 0.12)',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  {lang === 'ar' ? 'ملفي' : 'Profile'}
+                </a>
+
+                {hasPermission('manage:system') && (
                   <a 
-                    href="#profile" 
-                    onClick={(e) => { e.preventDefault(); onNavigate('profile'); setDrawerOpen(false); }} 
-                    style={{ color: '#15b47a', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
+                    href="#debug" 
+                    onClick={(e) => { e.preventDefault(); onNavigate('debug'); setDrawerOpen(false); }} 
+                    style={{ 
+                      color: '#15b47a', 
+                      textDecoration: 'none', 
+                      fontSize: '12px', 
+                      fontWeight: 'bold',
+                      padding: '5px 10px',
+                      borderRadius: '6px',
+                      background: 'rgba(21, 180, 122, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center'
+                    }}
                   >
-                    {lang === 'ar' ? 'ملفي' : 'Profile'}
+                    {lang === 'ar' ? 'التحكم' : 'Control'}
                   </a>
-                  <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
-                  {hasPermission('manage:system') && (
-                    <>
-                      <a 
-                        href="#debug" 
-                        onClick={(e) => { e.preventDefault(); onNavigate('debug'); setDrawerOpen(false); }} 
-                        style={{ color: '#15b47a', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
-                      >
-                        {lang === 'ar' ? 'التحكم' : 'Control'}
-                      </a>
-                      <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
-                    </>
-                  )}
-                  {(hasPermission('manage:system') || hasPermission('approve:users')) && (
-                    <>
-                      <a 
-                        href="#admin-users" 
-                        onClick={(e) => { e.preventDefault(); onNavigate('admin-users'); setDrawerOpen(false); }} 
-                        style={{ color: '#15b47a', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
-                      >
-                        {lang === 'ar' ? 'المستخدمين' : 'Users'}
-                      </a>
-                      <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
-                    </>
-                  )}
-                  {hasPermission('view:user_stats') && (
-                    <>
-                      <a 
-                        href="#admin-stats" 
-                        onClick={(e) => { e.preventDefault(); onNavigate('admin-stats'); setDrawerOpen(false); }} 
-                        style={{ color: '#3b82f6', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
-                      >
-                        {lang === 'ar' ? 'إحصائيات' : 'Stats'}
-                      </a>
-                      <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
-                      </>
-                  )}
-                  {(hasPermission('issue:certs') || hasPermission('manage:system')) && (
-                    <>
-                      <a 
-                        href="#admin-certificates" 
-                        onClick={(e) => { e.preventDefault(); onNavigate('admin-certificates'); setDrawerOpen(false); }} 
-                        style={{ color: '#8b5cf6', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
-                      >
-                        {lang === 'ar' ? 'الشهادات' : 'Certs'}
-                      </a>
-                      <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
-                    </>
-                  )}
-                  {(hasPermission('manage:any_course') || hasPermission('manage:courses') || hasPermission('write:courses')) && (
-                    <>
-                      <a 
-                        href="#admin-courses" 
-                        onClick={(e) => { e.preventDefault(); onNavigate('admin-courses'); setDrawerOpen(false); }} 
-                        style={{ color: '#10b981', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
-                      >
-                        {lang === 'ar' ? 'منشئ المساقات' : 'Course Builder'}
-                      </a>
-                      <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
-                    </>
-                  )}
+                )}
+
+                {(hasPermission('manage:system') || hasPermission('approve:users')) && (
                   <a 
-                    href="#logout" 
-                    onClick={(e) => { e.preventDefault(); onLogout(); setDrawerOpen(false); }} 
-                    style={{ color: '#ff4d4d', textDecoration: 'none', fontSize: '12px', fontWeight: 'bold' }}
+                    href="#admin-users" 
+                    onClick={(e) => { e.preventDefault(); onNavigate('admin-users'); setDrawerOpen(false); }} 
+                    style={{ 
+                      color: '#15b47a', 
+                      textDecoration: 'none', 
+                      fontSize: '12px', 
+                      fontWeight: 'bold',
+                      padding: '5px 10px',
+                      borderRadius: '6px',
+                      background: 'rgba(21, 180, 122, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center'
+                    }}
                   >
-                    {t.logout}
+                    {lang === 'ar' ? 'المستخدمين' : 'Users'}
                   </a>
-                </div>
+                )}
+
+                {hasPermission('view:user_stats') && (
+                  <a 
+                    href="#admin-stats" 
+                    onClick={(e) => { e.preventDefault(); onNavigate('admin-stats'); setDrawerOpen(false); }} 
+                    style={{ 
+                      color: '#3b82f6', 
+                      textDecoration: 'none', 
+                      fontSize: '12px', 
+                      fontWeight: 'bold',
+                      padding: '5px 10px',
+                      borderRadius: '6px',
+                      background: 'rgba(59, 130, 246, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    {lang === 'ar' ? 'إحصائيات' : 'Stats'}
+                  </a>
+                )}
+
+                {(hasPermission('issue:certs') || hasPermission('manage:system')) && (
+                  <a 
+                    href="#admin-certificates" 
+                    onClick={(e) => { e.preventDefault(); onNavigate('admin-certificates'); setDrawerOpen(false); }} 
+                    style={{ 
+                      color: '#8b5cf6', 
+                      textDecoration: 'none', 
+                      fontSize: '12px', 
+                      fontWeight: 'bold',
+                      padding: '5px 10px',
+                      borderRadius: '6px',
+                      background: 'rgba(139, 92, 246, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    {lang === 'ar' ? 'الشهادات' : 'Certs'}
+                  </a>
+                )}
+
+                {(hasPermission('manage:any_course') || hasPermission('manage:courses') || hasPermission('write:courses')) && (
+                  <a 
+                    href="#admin-courses" 
+                    onClick={(e) => { e.preventDefault(); onNavigate('admin-courses'); setDrawerOpen(false); }} 
+                    style={{ 
+                      color: '#10b981', 
+                      textDecoration: 'none', 
+                      fontSize: '12px', 
+                      fontWeight: 'bold',
+                      padding: '5px 10px',
+                      borderRadius: '6px',
+                      background: 'rgba(16, 185, 129, 0.12)',
+                      display: 'inline-flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    {lang === 'ar' ? 'منشئ المساقات' : 'Course Builder'}
+                  </a>
+                )}
               </div>
             </div>
           ) : (

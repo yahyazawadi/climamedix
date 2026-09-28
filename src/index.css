@@ -362,11 +362,15 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  transition: right var(--transition-normal);
+  transition: right var(--transition-normal), visibility var(--transition-normal);
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .mobile-drawer.open {
   right: 0;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .drawer-header {

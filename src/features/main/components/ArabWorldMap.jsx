@@ -36,6 +36,20 @@ function getDistance(lat1, lon1, lat2, lon2) {
 
 export function ArabWorldMap({ lang = 'ar' }) {
   const mapInstanceRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.setCenter(mobile ? [28.0, 26.0] : [38.0, 26.0]);
+        mapInstanceRef.current.setZoom(mobile ? 1.85 : 3.8);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleMapLoad = (map) => {
     mapInstanceRef.current = map;
@@ -138,5 +152,14 @@ export function ArabWorldMap({ lang = 'ar' }) {
     };
   }, []);
 
-  return <BaseMap onMapLoad={handleMapLoad} center={[38.0, 26.0]} zoom={3.8} interactive={false} style={{ width: '100%', height: '700px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(11, 40, 73, 0.08)' }} />;
+  return (
+    <BaseMap
+      className="arab-world-map-container"
+      onMapLoad={handleMapLoad}
+      center={isMobile ? [28.0, 26.0] : [38.0, 26.0]}
+      zoom={isMobile ? 1.85 : 3.8}
+      interactive={false}
+      style={{ width: '100%', height: '700px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(11, 40, 73, 0.08)' }}
+    />
+  );
 }

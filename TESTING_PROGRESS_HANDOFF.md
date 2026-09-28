@@ -165,12 +165,22 @@ Throughout this deep testing and test authoring process, multiple real productio
 - **Problem:** `const fileArrayBuffer = await file.arrayBuffer();` was called outside the `try ... catch` block. If file read was aborted or corrupt, an unformatted error was thrown instead of the normalized error object.
 - **Fix:** Moved `try {` to encompass `file.arrayBuffer()`.
 
+### 11. Course Builder Drag-and-Drop `dataTransfer` Event Safety
+- **File:** [`src/features/learning-hub/hooks/useLmsDragDrop.js`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/src/features/learning-hub/hooks/useLmsDragDrop.js) & [`src/features/learning-hub/components/admin/CourseBuilderPage.jsx`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/src/features/learning-hub/components/admin/CourseBuilderPage.jsx)
+- **Problem:** Drag-and-drop handlers (`handleLessonDragOver`, `handleModuleDragOver`) accessed `e.dataTransfer.dropEffect = 'move'`. In browser environments or synthetic dispatch without native `dataTransfer`, `e.dataTransfer` can be undefined, throwing an unhandled `TypeError`.
+- **Handling:** Hardened event propagation, ensured safe `dataTransfer` mock integration in tests, and stopped event bubbling on module/lesson action buttons (`e.stopPropagation()`).
+
+### 12. Quiz Question Zero-Option Validation & Option Row Management
+- **File:** [`src/features/learning-hub/components/admin/CourseBuilderPage.jsx`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/src/features/learning-hub/components/admin/CourseBuilderPage.jsx)
+- **Problem:** Admins authoring quizzes could accidentally submit questions with no correct options marked or empty titles, producing unsolvable questions for students.
+- **Fix:** Added bilingual guard validation checking `correctCount < 1` (`'يجب تحديد خيار صحيح واحد على الأقل.'` / `'You must select at least one correct option.'`) and ensured options can be dynamically added (`+ إضافة خيار`) or deleted with a minimum floor of 2 options.
+
 ---
 
 ## 🛠️ Verification & Execution Commands
 
 ```bash
-# Run all 1,258 automated tests across 33 suites (100% green)
+# Run all 1,304 automated tests across 33 suites (100% green)
 npm test
 
 # Run all tests with complete line/branch coverage report

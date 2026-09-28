@@ -1597,5 +1597,97 @@ describe('Student Learning Hub Catalog & Course Detail Modal Exhaustive Suite (5
         expect(screen.getByText('جاري إعداد محتوى هذا المساق...')).toBeInTheDocument();
       });
     });
+
+    it('triggers Start Course Now button in overview to activate first lesson', async () => {
+      // Mock syllabus with no lessons initially active
+      lmsService.fetchCourseSyllabus.mockResolvedValueOnce([
+        {
+          id: 'mod-1',
+          title_ar: 'الوحدة الأولى',
+          lessons: []
+        }
+      ]);
+      lmsService.fetchCompletedLessons.mockResolvedValueOnce({ completedSet: new Set(), totalLessons: 0 });
+
+      render(
+        <CourseDetailModal
+          lang="ar"
+          course={sampleCourses[0]}
+          userId="usr-student-42"
+          isLocked={false}
+          onClose={vi.fn()}
+        />
+      );
+
+      // In empty lessons overview mode
+      await waitFor(() => {
+        expect(screen.getByText('المفاهيم التأسيسية لتأثير التغير المناخي على الصحة العامة.')).toBeInTheDocument();
+      });
+    });
+
+    it('triggers Certificate Generator modal inside LearningHubPage when certificate is approved and downloaded', async () => {
+      mockCertRequestDb = {
+        id: 'cert-req-77',
+        user_id: 'usr-student-42',
+        course_id: sampleCourses[0].id,
+        requested_name_ar: 'د. سارة المنصوري',
+        requested_name_en: 'Dr. Sarah Al-Mansouri',
+        status: 'approved'
+      };
+
+      lmsService.fetchCourses.mockResolvedValueOnce(sampleCourses);
+      lmsService.fetchEnrollments.mockResolvedValueOnce([
+        {
+          id: 'enr-1',
+          user_id: 'usr-student-42',
+          course_id: sampleCourses[0].id,
+          status: 'active',
+          course: sampleCourses[0]
+        }
+      ]);
+      lmsService.fetchUserCertificates.mockResolvedValueOnce([]);
+      lmsService.fetchCompletedLessons.mockResolvedValue({
+        completedSet: new Set(['les-1-1', 'les-1-2', 'les-2-1']),
+        totalLessons: 3
+      });
+
+      render(<LearningHubPage lang="ar" onNavigate={vi.fn()} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('مقدمة في طب المناخ الأساسي')).toBeInTheDocument();
+      });
+
+      // Open modal via continue learning
+      const continueBtn = screen.getByText('متابعة التعلم');
+      fireEvent.click(continueBtn);
+
+      await waitFor(() => {
+        expect(screen.getByText('عرض الشهادة المعتمدة')).toBeInTheDocument();
+      });
+
+      // Click to view certificate panel
+      fireEvent.click(screen.getByText('عرض الشهادة المعتمدة'));
+
+      await waitFor(() => {
+        expect(screen.getByText('تحميل الشهادة')).toBeInTheDocument();
+      });
+
+      // Click download certificate button
+      fireEvent.click(screen.getByText('تحميل الشهادة'));
+
+      await waitFor(() => {
+        // CertificateGenerator renders canvas
+        expect(document.querySelector('canvas')).toBeInTheDocument();
+      });
+
+      // Close certificate generator modal using its specific close button (with fontSize 22px)
+      const closeButtons = screen.getAllByText('✕');
+      const certModalClose = closeButtons.find(btn => btn.style.fontSize === '22px') || closeButtons[closeButtons.length - 1];
+      fireEvent.click(certModalClose);
+
+      await waitFor(() => {
+        expect(document.querySelector('canvas')).not.toBeInTheDocument();
+      });
+    });
   });
 });

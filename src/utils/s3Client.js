@@ -62,17 +62,17 @@ export async function uploadFileToR2(file, folder = 'uploads', onProgress = null
       throw new Error(`Failed to upload file to storage: ${error.message || error.toString()}`);
     }
   } else {
-    const fileArrayBuffer = await file.arrayBuffer();
-    const fileUint8Array = new Uint8Array(fileArrayBuffer);
-
-    const command = new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
-      Key: fileName,
-      Body: fileUint8Array,
-      ContentType: file.type,
-    });
-
     try {
+      const fileArrayBuffer = await file.arrayBuffer();
+      const fileUint8Array = new Uint8Array(fileArrayBuffer);
+
+      const command = new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: fileName,
+        Body: fileUint8Array,
+        ContentType: file.type,
+      });
+
       await r2Client.send(command);
       return `${R2_PUBLIC_URL}/${fileName}`;
     } catch (error) {

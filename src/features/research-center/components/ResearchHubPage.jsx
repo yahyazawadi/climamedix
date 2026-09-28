@@ -136,7 +136,7 @@ export function ResearchHubPage({ lang, onNavigate }) {
         </div>
       ) : (
         <div className="rhp-grid">
-          {publications.filter(pub => !pub.teaser_permission_key || (hasPermission && hasPermission(pub.teaser_permission_key))).map(pub => {
+          {publications.filter(pub => !pub.teaser_permission_key || pub.teaser_permission_key === 'view:public_content' || (hasPermission && hasPermission(pub.teaser_permission_key))).map(pub => {
             const canDownload = !pub.full_access_permission_key || (hasPermission && hasPermission(pub.full_access_permission_key));
             return (
             <div key={pub.id} className="rhp-card" onClick={() => onNavigate?.('research-detail', pub.id)} style={{ cursor: 'pointer' }}>

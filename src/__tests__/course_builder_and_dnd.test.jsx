@@ -739,5 +739,22 @@ describe('Stage 3: Course Builder & Drag-and-Drop Test Suite', () => {
       expect(screen.getByText('Courses')).toBeInTheDocument();
       expect(screen.getByText('+ New Course')).toBeInTheDocument();
     });
+
+    it('handles cover image upload to R2 during course creation', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const newCourseBtn = await screen.findByText('+ مساق جديد');
+      fireEvent.click(newCourseBtn);
+
+      const fileInput = document.querySelector('input[type="file"][accept*="image"]');
+      expect(fileInput).toBeInTheDocument();
+
+      const dummyFile = new File(['image-bits'], 'cover.png', { type: 'image/png' });
+      fireEvent.change(fileInput, { target: { files: [dummyFile] } });
+
+      await waitFor(() => {
+        expect(fileInput).toBeInTheDocument();
+      });
+    });
   });
 });

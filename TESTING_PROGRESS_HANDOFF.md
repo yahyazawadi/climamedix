@@ -1,11 +1,11 @@
-# 🚀 ClimaMedix 1,250+ Automated Tests Milestone & Progress Report
+# 🚀 ClimaMedix 1,300+ Automated Tests Milestone & Progress Report
 
 > **Last Updated:** September 28, 2026  
-> **Status:** 🏆 **1,258 Passing Automated Tests (33/33 Test Suites, 100% Green, 0 Failures)**  
-> **Total Test Code:** 📝 **13,127 lines of test code** across all 33 test suites (`src/__tests__/*.test.jsx`)  
-> **Line Coverage:** 📊 **Header.jsx: 95.45%**, **JoinUsPage: 86.76%**, AboutUsPage: **100%**, DatePicker: **100%**, NetworkDirectory: **100%**, CalendarSidebarWidget: **100%**, FooterCard: **100%**, LMSDashboard: **100%**, CertificateVerificationPage: **100%**, CustomVideoPlayer: **96.2%**, NewsPage: **96.4%**, HomeNewsWidget: **92.9%**, Footer: **90%**, CourseDetailModal: **87.8%**, LearningHubPage: **84.3%**, AuthPage: **94.2% (Google OAuth Single Sign-On Only)**, CourseBuilderPage: **63.8%**  
+> **Status:** 🏆 **1,304 Passing Automated Tests (33/33 Test Suites, 100% Green, 0 Failures)**  
+> **Total Test Code:** 📝 **14,082 lines of test code** across all 33 test suites (`src/__tests__/*.test.jsx`)  
+> **Line Coverage:** 📊 **CourseBuilderPage: 96.25% (Statements: 95.19%, Functions: 97.54%)**, **Header.jsx: 95.45%**, **JoinUsPage: 86.76%**, AboutUsPage: **100%**, DatePicker: **100%**, NetworkDirectory: **100%**, CalendarSidebarWidget: **100%**, FooterCard: **100%**, LMSDashboard: **100%**, CertificateVerificationPage: **100%**, CertificateGenerator: **100%**, CustomVideoPlayer: **97.46%**, NewsPage: **96.4%**, HomeNewsWidget: **92.9%**, Footer: **90%**, CourseDetailModal: **87.8%**, LearningHubPage: **86.27%**, AuthPage: **94.2% (Google OAuth Single Sign-On Only)**  
 > **Production Build:** Passes in ~0.99s (`vite build` exit code 0)  
-> **Test Execution Time:** ~24s total via Vitest + Testing Library Preact  
+> **Test Execution Time:** ~27s total via Vitest + Testing Library Preact  
 
 ---
 
@@ -97,7 +97,7 @@ The platform has achieved a landmark testing milestone, crossing **1,258 passing
 | 21 | `src/__tests__/media_compression_and_editor_uploads.test.jsx` | **28** | `convertToWebP` client-side canvas compression, non-image bypass, custom Quill VideoBlot & AudioBlot embed creation, RichTextEditor upload status transitions, and multi-media alerts. |
 | 22 | `src/__tests__/join_us_flow.test.jsx` | **27** | `JoinUsPage.jsx` full lifecycle (86.76% line coverage): Track selection (`research` vs `educator`), dynamic activist & researcher sub-fields, CV upload to R2, focus/blur styling, IP geolocation auto-detection, and complete admin join request approval/deletion matrix. |
 | 23 | `src/__tests__/feature_file_uploads_lifecycle.test.jsx` | **26** | End-to-end upload integration across all 6 platform features: Profile avatar updates, research PDF attachments, article thumbnails, course covers, join requests CVs, and home slider banners. |
-| 24 | `src/__tests__/course_builder_and_dnd.test.jsx` | **23** | Course Builder full admin flow (`CourseBuilderPage` 63.8% line coverage): course creation/edit/deletion, module creation/edit/deletion, regular & exam lesson forms, interactive quiz builder, LMS Drag-and-drop hook (`useLmsDragDrop`), lesson reordering, module reordering, and rollback. |
+| 24 | `src/__tests__/course_builder_and_dnd.test.jsx` | **65** | Course Builder full admin flow (`CourseBuilderPage` 96.25% line coverage, 95.19% stmts, 97.54% funcs): course creation/edit/deletion, module creation/edit/deletion, regular & exam lesson forms, interactive quiz builder, option removal validation, cancellation actions, database error alerts, permission fallbacks, LMS Drag-and-drop hook (`useLmsDragDrop`), lesson reordering, module reordering, and rollback. |
 | 25 | `src/__tests__/permissions.test.jsx` | **13** | Role integrity, guest access, permission aliases, and reactive hook updates. |
 | 26 | `src/__tests__/header_permissions.test.jsx` | **10** | Desktop dropdown & mobile drawer UI reactivity when permissions are toggled; 6-role badges. |
 | 27 | `src/__tests__/exhaustive_permissions_matrix.test.jsx` | **10** | Least-privilege role boundaries and non-existent key rejection. |
@@ -107,7 +107,7 @@ The platform has achieved a landmark testing milestone, crossing **1,258 passing
 | 31 | `src/__tests__/admin_dashboards.test.jsx` | **5** | User management & user stats dashboards, Superadmin promotion safety confirmation. |
 | 32 | `src/__tests__/opportunities_and_permissions.test.jsx` | **4** | Opportunities button gating, creation modal permission selectors, card action states. |
 | 33 | `src/__tests__/app_router_guards.test.jsx` | **4** | Top-level `ProtectedRoute` redirection and "Access Denied" gating. |
-| | **TOTAL** | **1,258** | **100% Green, 0 Failures Across All 33 Suites** |
+| | **TOTAL** | **1,304** | **100% Green, 0 Failures Across All 33 Suites** |
 
 ---
 

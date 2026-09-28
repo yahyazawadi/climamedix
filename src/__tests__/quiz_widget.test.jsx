@@ -149,4 +149,46 @@ describe('Stage 2: Strict Quiz Validation & Review Mode Test Suite', () => {
     expect(screen.getByText('ما هي الغازات الدفيئة الرئيسية؟ (اختر كل ما ينطبق)')).toBeInTheDocument();
     expect(screen.queryByText((_, el) => el?.textContent?.trim() === '0%')).toBeNull();
   });
+
+  it('allows unselecting an already selected option and navigating between questions via Next and Back', () => {
+    const multiQuestionQuiz = {
+      ...mockQuizData,
+      quiz_questions: [
+        mockQuizData.quiz_questions[0],
+        {
+          id: 'q-2',
+          question_text_ar: 'سؤال ثاني',
+          question_text_en: 'Question 2',
+          points: 10,
+          quiz_options: [
+            { id: 'opt-2-1', option_text_ar: 'نعم', option_text_en: 'Yes', is_correct: true },
+            { id: 'opt-2-2', option_text_ar: 'لا', option_text_en: 'No', is_correct: false }
+          ]
+        }
+      ]
+    };
+
+    render(<QuizWidget quizData={multiQuestionQuiz} lang="ar" />);
+
+    const opt = screen.getByText('ثاني أكسيد الكربون (CO2)');
+    // Select option
+    fireEvent.click(opt);
+    // Unselect option (deselection toggle on line 32)
+    fireEvent.click(opt);
+
+    // Select again to enable Next
+    fireEvent.click(opt);
+    const nextBtn = screen.getByText('التالي');
+    fireEvent.click(nextBtn);
+
+    // Question 2 is now shown
+    expect(screen.getByText('سؤال ثاني')).toBeInTheDocument();
+
+    // Click Previous / Back (line 152)
+    const backBtn = screen.getByText('السابق');
+    fireEvent.click(backBtn);
+
+    // Question 1 is shown again
+    expect(screen.getByText('ما هي الغازات الدفيئة الرئيسية؟ (اختر كل ما ينطبق)')).toBeInTheDocument();
+  });
 });

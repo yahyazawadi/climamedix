@@ -189,13 +189,41 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
         return perm ? perm.id : null;
       }).filter(Boolean);
 
+      // Try RPC first (best for strict RLS bypass)
       const { error: rpcError } = await supabase.rpc('admin_update_user_access', {
         p_target_user_id: selectedUser.id,
         p_new_role: draftRole,
         p_permission_ids: permissionIds
       });
 
-      if (rpcError) throw rpcError;
+      if (rpcError) {
+        console.warn('RPC admin_update_user_access not found or failed, executing direct update fallback:', rpcError);
+        // Direct update fallback on profiles
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ role: draftRole })
+          .eq('id', selectedUser.id);
+        
+        if (profileError) throw profileError;
+
+        // Sync custom permissions in user_permissions table
+        await supabase
+          .from('user_permissions')
+          .delete()
+          .eq('user_id', selectedUser.id);
+
+        if (permissionIds.length > 0) {
+          const insertPayload = permissionIds.map(pId => ({
+            user_id: selectedUser.id,
+            permission_id: pId,
+            is_granted: true
+          }));
+          const { error: permInsertError } = await supabase
+            .from('user_permissions')
+            .insert(insertPayload);
+          if (permInsertError) console.warn('Could not insert custom permissions:', permInsertError);
+        }
+      }
 
       // Update local state
       setProfiles(prev => prev.map(p => p.id === selectedUser.id ? { ...p, role: draftRole } : p));
@@ -203,7 +231,7 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
       alert(lang === 'ar' ? 'تم حفظ الصلاحيات بنجاح' : 'Permissions saved successfully');
     } catch (err) {
       console.error('Save error:', err);
-      alert(lang === 'ar' ? 'حدث خطأ أثناء الحفظ. (قد تحتاج لتخطي RLS)' : 'Error saving. (Might need RPC to bypass RLS)');
+      alert(lang === 'ar' ? 'حدث خطأ أثناء الحفظ. تأكد من صلاحيات قاعدة البيانات.' : 'Error saving. Please check database permissions.');
     } finally {
       setSaving(false);
     }

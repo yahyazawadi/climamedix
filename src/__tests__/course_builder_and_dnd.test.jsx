@@ -4,6 +4,7 @@ import { renderHook, act } from '@testing-library/preact';
 import { CourseBuilderPage } from '../features/learning-hub/components/admin/CourseBuilderPage';
 import { useLmsDragDrop } from '../features/learning-hub/hooks/useLmsDragDrop';
 import * as adminLmsService from '../features/learning-hub/services/adminLmsService';
+import { uploadFileToR2 } from '../utils/s3Client';
 
 // Mock useAuth
 const mockUseAuth = vi.fn();
@@ -47,14 +48,22 @@ vi.mock('../features/shared/components/RichTextEditor', () => ({
 }));
 
 // Mock Supabase
+const mockSupabaseOrder = vi.fn().mockImplementation(() => 
+  Promise.resolve({ data: [{ perm_key: 'view:all_courses' }, { perm_key: 'view:free_content' }], error: null })
+);
 vi.mock('../utils/supabaseClient', () => ({
   supabase: {
     from: () => ({
       select: () => ({
-        order: () => Promise.resolve({ data: [{ perm_key: 'view:all_courses' }, { perm_key: 'view:free_content' }], error: null })
+        order: () => mockSupabaseOrder()
       })
     })
   }
+}));
+
+// Mock S3 / R2 client
+vi.mock('../utils/s3Client', () => ({
+  uploadFileToR2: vi.fn()
 }));
 
 describe('Stage 3: Course Builder & Drag-and-Drop Test Suite', () => {
@@ -741,6 +750,7 @@ describe('Stage 3: Course Builder & Drag-and-Drop Test Suite', () => {
     });
 
     it('handles cover image upload to R2 during course creation', async () => {
+      uploadFileToR2.mockResolvedValue('https://r2.climamedix.org/course_covers/cover.webp');
       render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
 
       const newCourseBtn = await screen.findByText('+ مساق جديد');
@@ -749,12 +759,940 @@ describe('Stage 3: Course Builder & Drag-and-Drop Test Suite', () => {
       const fileInput = document.querySelector('input[type="file"][accept*="image"]');
       expect(fileInput).toBeInTheDocument();
 
-      const dummyFile = new File(['image-bits'], 'cover.png', { type: 'image/png' });
-      fireEvent.change(fileInput, { target: { files: [dummyFile] } });
+      // Test with webp image
+      const dummyWebpFile = new File(['image-bits'], 'cover.webp', { type: 'image/webp' });
+      fireEvent.change(fileInput, { target: { files: [dummyWebpFile] } });
 
       await waitFor(() => {
-        expect(fileInput).toBeInTheDocument();
+        expect(uploadFileToR2).toHaveBeenCalledWith(expect.any(File), 'course_covers');
       });
+
+      // Test with empty files list (returns early)
+      fireEvent.change(fileInput, { target: { files: [] } });
+
+      // Test upload error
+      uploadFileToR2.mockRejectedValueOnce(new Error('R2 Network Error'));
+      fireEvent.change(fileInput, { target: { files: [dummyWebpFile] } });
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to upload cover image'));
+      });
+    });
+
+    it('cancels Course modal via Cancel button', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const newCourseBtn = await screen.findByText('+ مساق جديد');
+      fireEvent.click(newCourseBtn);
+
+      expect(screen.getByText('مساق جديد')).toBeInTheDocument();
+
+      const cancelBtn = screen.getByText('إلغاء');
+      fireEvent.click(cancelBtn);
+
+      expect(screen.queryByText('مساق جديد')).toBeNull();
+    });
+
+    it('handles loadCourses error when adminFetchAllCourses fails', async () => {
+      adminLmsService.adminFetchAllCourses.mockRejectedValueOnce(new Error('Database offline'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Error fetching courses: Database offline'));
+      });
+    });
+
+    it('displays empty state when no courses exist', async () => {
+      adminLmsService.adminFetchAllCourses.mockResolvedValueOnce([]);
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      expect(await screen.findByText('لا توجد مساقات')).toBeInTheDocument();
+    });
+
+    it('handles saveCourse error alert on course creation failure', async () => {
+      adminLmsService.adminCreateCourse.mockRejectedValueOnce(new Error('Course title conflict'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const newCourseBtn = await screen.findByText('+ مساق جديد');
+      fireEvent.click(newCourseBtn);
+
+      const form = document.querySelector('form.cb-form');
+      const textInputs = form.querySelectorAll('input[type="text"]');
+      fireEvent.input(textInputs[0], { target: { value: 'دورة مكررة' } });
+      fireEvent.input(textInputs[1], { target: { value: 'Duplicate Course' } });
+
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to save course: Course title conflict'));
+      });
+    });
+
+    it('aborts deleteCourse when user cancels confirmation', async () => {
+      vi.spyOn(window, 'confirm').mockReturnValueOnce(false);
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const optionsBtn = await screen.findByText('خيارات');
+      fireEvent.click(optionsBtn);
+
+      const deleteBtn = screen.getByText('حذف المساق');
+      fireEvent.click(deleteBtn);
+
+      expect(adminLmsService.adminDeleteCourse).not.toHaveBeenCalled();
+    });
+
+    it('handles deleteCourse error when adminDeleteCourse fails', async () => {
+      adminLmsService.adminDeleteCourse.mockRejectedValueOnce(new Error('Server error deleting course'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const optionsBtn = await screen.findByText('خيارات');
+      fireEvent.click(optionsBtn);
+
+      const deleteBtn = screen.getByText('حذف المساق');
+      fireEvent.click(deleteBtn);
+
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to delete course: Server error deleting course'));
+      });
+    });
+
+    it('handles handleSelectCourse error when adminFetchModules fails', async () => {
+      adminLmsService.adminFetchModules.mockRejectedValueOnce(new Error('Failed to load modules'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      await waitFor(() => {
+        expect(adminLmsService.adminFetchModules).toHaveBeenCalledWith('c-1');
+      });
+    });
+
+    it('CourseSettingsMenu closes on outside click and supports mouse hover effects', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const optionsBtn = await screen.findByText('خيارات');
+      fireEvent.click(optionsBtn);
+
+      const editBtn = screen.getByText('تعديل المساق');
+      const deleteBtn = screen.getByText('حذف المساق');
+
+      // Test hover styling
+      fireEvent.mouseEnter(editBtn);
+      expect(editBtn.style.background).toContain('rgba(11, 40, 73, 0.05)');
+      fireEvent.mouseLeave(editBtn);
+      expect(editBtn.style.background).toBe('none');
+
+      fireEvent.mouseEnter(deleteBtn);
+      expect(deleteBtn.style.background).toContain('rgba(255, 77, 77, 0.05)');
+      fireEvent.mouseLeave(deleteBtn);
+      expect(deleteBtn.style.background).toBe('none');
+
+      // Click outside on window closes dropdown
+      fireEvent.click(window);
+      expect(screen.queryByText('تعديل المساق')).toBeNull();
+    });
+
+    it('shows empty modules notice when course has no modules', async () => {
+      adminLmsService.adminFetchModules.mockResolvedValueOnce([]);
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      expect(await screen.findByText('لم يتم إضافة وحدات أو فصول بعد')).toBeInTheDocument();
+    });
+
+    it('cancels Module modal via Cancel button', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const addModuleBtn = await screen.findByText('+ وحدة جديدة');
+      fireEvent.click(addModuleBtn);
+
+      expect(screen.getByText('إضافة وحدة')).toBeInTheDocument();
+
+      const cancelBtn = screen.getByText('إلغاء');
+      fireEvent.click(cancelBtn);
+
+      expect(screen.queryByText('إضافة وحدة')).toBeNull();
+    });
+
+    it('handles saveModule error alert when adminCreateModule fails', async () => {
+      adminLmsService.adminCreateModule.mockRejectedValueOnce(new Error('Module validation error'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const addModuleBtn = await screen.findByText('+ وحدة جديدة');
+      fireEvent.click(addModuleBtn);
+
+      const form = document.querySelector('form.cb-form');
+      const textInputs = form.querySelectorAll('input[type="text"]');
+      fireEvent.input(textInputs[0], { target: { value: 'وحدة غير صالحة' } });
+      fireEvent.input(textInputs[1], { target: { value: 'Invalid Module' } });
+
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to save module: Module validation error'));
+      });
+    });
+
+    it('aborts deleteModule when confirm is cancelled', async () => {
+      vi.spyOn(window, 'confirm').mockReturnValueOnce(false);
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      await screen.findByText('الوحدة الأولى: الأساسيات');
+      const deleteModuleBtn = screen.getByTitle('Delete Module');
+      fireEvent.click(deleteModuleBtn);
+
+      expect(adminLmsService.adminDeleteModule).not.toHaveBeenCalled();
+    });
+
+    it('handles deleteModule error when adminDeleteModule fails', async () => {
+      adminLmsService.adminDeleteModule.mockRejectedValueOnce(new Error('Cannot delete module'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      await screen.findByText('الوحدة الأولى: الأساسيات');
+      const deleteModuleBtn = screen.getByTitle('Delete Module');
+      fireEvent.click(deleteModuleBtn);
+
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to delete module: Cannot delete module'));
+      });
+    });
+
+    it('shows empty lessons notice when module has no lessons', async () => {
+      adminLmsService.adminFetchModules.mockResolvedValueOnce([
+        { id: 'mod-empty', title_ar: 'وحدة فارغة', lessons: [] }
+      ]);
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      expect(await screen.findByText('لا توجد دروس في هذه الوحدة')).toBeInTheDocument();
+    });
+
+    it('closes Lesson modal using Cancel button and close (✕) button', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      await screen.findByText('الوحدة الأولى: الأساسيات');
+      const addLessonBtn = screen.getByTitle('Add Lesson');
+      fireEvent.click(addLessonBtn);
+
+      expect(screen.getByText('محتوى الدرس (عربي)')).toBeInTheDocument();
+
+      // Cancel button
+      const cancelBtn = screen.getByText('إلغاء');
+      fireEvent.click(cancelBtn);
+      expect(screen.queryByText('محتوى الدرس (عربي)')).toBeNull();
+
+      // Open again and close with ✕ button
+      fireEvent.click(addLessonBtn);
+      expect(screen.getByText('محتوى الدرس (عربي)')).toBeInTheDocument();
+
+      const closeCrossBtn = screen.getByText('✕');
+      fireEvent.click(closeCrossBtn);
+      expect(screen.queryByText('محتوى الدرس (عربي)')).toBeNull();
+    });
+
+    it('switches between AR and EN language tabs in Lesson modal', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      await screen.findByText('الوحدة الأولى: الأساسيات');
+      const addLessonBtn = screen.getByTitle('Add Lesson');
+      fireEvent.click(addLessonBtn);
+
+      // Initially AR tab is active
+      expect(screen.getByText('عنوان الدرس (عربي)')).toBeInTheDocument();
+      expect(screen.getByText('محتوى الدرس (عربي)')).toBeInTheDocument();
+
+      // Switch to EN tab
+      const enTabBtn = screen.getByText('English (EN)');
+      fireEvent.click(enTabBtn);
+      expect(screen.getByText('عنوان الدرس (إنجليزي)')).toBeInTheDocument();
+      expect(screen.getByText('محتوى الدرس (إنجليزي)')).toBeInTheDocument();
+
+      // Switch back to AR tab
+      const arTabBtn = screen.getByText('العربية (AR)');
+      fireEvent.click(arTabBtn);
+      expect(screen.getByText('عنوان الدرس (عربي)')).toBeInTheDocument();
+    });
+
+    it('switches between Content and Quiz tabs when editing a regular lesson', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const lessonItem = await screen.findByText('الدرس الأول: مقدمة');
+      fireEvent.click(lessonItem);
+
+      expect(await screen.findByText('محتوى الدرس')).toBeInTheDocument();
+      const quizTab = screen.getByText('الاختبار (Exam)');
+      fireEvent.click(quizTab);
+
+      expect(await screen.findByText('منشئ الاختبار الخاص بالدرس')).toBeInTheDocument();
+
+      const contentTab = screen.getByText('محتوى الدرس');
+      fireEvent.click(contentTab);
+      expect(screen.getByText('عنوان الدرس (عربي)')).toBeInTheDocument();
+    });
+
+    it('handles saveLesson error alert when adminCreateLesson fails', async () => {
+      adminLmsService.adminCreateLesson.mockRejectedValueOnce(new Error('Lesson limit exceeded'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      await screen.findByText('الوحدة الأولى: الأساسيات');
+      const addLessonBtn = screen.getByTitle('Add Lesson');
+      fireEvent.click(addLessonBtn);
+
+      const form = document.querySelector('form.cb-form');
+      const titleInput = form.querySelector('input[type="text"]');
+      fireEvent.input(titleInput, { target: { value: 'درس اختبار الخطأ' } });
+
+      const saveBtn = screen.getByText('حفظ الدرس');
+      fireEvent.click(saveBtn);
+
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to save lesson: Lesson limit exceeded'));
+      });
+    });
+
+    it('aborts deleteLesson when confirmation is cancelled', async () => {
+      vi.spyOn(window, 'confirm').mockReturnValueOnce(false);
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      await screen.findByText('الدرس الأول: مقدمة');
+      const deleteButtons = document.querySelectorAll('.cb-lesson-del');
+      fireEvent.click(deleteButtons[0]);
+
+      expect(adminLmsService.adminDeleteLesson).not.toHaveBeenCalled();
+    });
+
+    it('handles deleteLesson error when adminDeleteLesson fails', async () => {
+      adminLmsService.adminDeleteLesson.mockRejectedValueOnce(new Error('Cannot delete protected lesson'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      await screen.findByText('الدرس الأول: مقدمة');
+      const deleteButtons = document.querySelectorAll('.cb-lesson-del');
+      fireEvent.click(deleteButtons[0]);
+
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to delete lesson: Cannot delete protected lesson'));
+      });
+    });
+
+    it('creates a new quiz when lesson has no existing quiz', async () => {
+      adminLmsService.adminFetchFullQuiz.mockResolvedValueOnce(null);
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const lessonItem = await screen.findByText('الدرس الأول: مقدمة');
+      fireEvent.click(lessonItem);
+
+      const quizTab = await screen.findByText('الاختبار (Exam)');
+      fireEvent.click(quizTab);
+
+      expect(await screen.findByText('لا يوجد اختبار لهذا الدرس.')).toBeInTheDocument();
+      const createQuizBtn = screen.getByText('إنشاء اختبار جديد');
+      fireEvent.click(createQuizBtn);
+
+      await waitFor(() => {
+        expect(adminLmsService.adminCreateQuiz).toHaveBeenCalledWith(
+          expect.objectContaining({
+            lesson_id: 'l-1',
+            course_id: 'c-1',
+            title_ar: 'اختبار - الدرس الأول: مقدمة'
+          })
+        );
+      });
+    });
+
+    it('handles createQuiz error when adminCreateQuiz fails', async () => {
+      adminLmsService.adminFetchFullQuiz.mockResolvedValueOnce(null);
+      adminLmsService.adminCreateQuiz.mockRejectedValueOnce(new Error('Quiz creation failed'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const lessonItem = await screen.findByText('الدرس الأول: مقدمة');
+      fireEvent.click(lessonItem);
+
+      const quizTab = await screen.findByText('الاختبار (Exam)');
+      fireEvent.click(quizTab);
+
+      const createQuizBtn = await screen.findByText('إنشاء اختبار جديد');
+      fireEvent.click(createQuizBtn);
+
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to create quiz: Quiz creation failed'));
+      });
+    });
+
+    it('shows empty quiz questions notice when quiz has no questions', async () => {
+      adminLmsService.adminFetchFullQuiz.mockResolvedValueOnce({
+        id: 'quiz-empty',
+        lesson_id: 'l-2',
+        quiz_questions: []
+      });
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const examItem = await screen.findByText('اختبار الوحدة الأولى');
+      fireEvent.click(examItem);
+
+      expect(await screen.findByText('لا توجد أسئلة بعد.')).toBeInTheDocument();
+    });
+
+    it('validates addQuestionToQuiz requires at least one correct option', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const examItem = await screen.findByText('اختبار الوحدة الأولى');
+      fireEvent.click(examItem);
+
+      const qArInput = await screen.findByPlaceholderText('Question Text (AR)');
+      fireEvent.input(qArInput, { target: { value: 'سؤال بدون تحديد خيار صحيح' } });
+
+      const addQBtn = screen.getByText('إضافة السؤال للاختبار');
+      fireEvent.click(addQBtn);
+
+      expect(window.alert).toHaveBeenCalledWith('يجب تحديد خيار صحيح واحد على الأقل.');
+      expect(adminLmsService.adminCreateQuestion).not.toHaveBeenCalled();
+    });
+
+    it('ignores addQuestionToQuiz if question text is empty', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const examItem = await screen.findByText('اختبار الوحدة الأولى');
+      fireEvent.click(examItem);
+
+      await screen.findByPlaceholderText('Question Text (AR)');
+      const checkboxes = document.querySelectorAll('.cb-option-input-row input[type="checkbox"]');
+      fireEvent.click(checkboxes[0]);
+
+      // Question text AR is empty
+      const addQBtn = screen.getByText('إضافة السؤال للاختبار');
+      fireEvent.click(addQBtn);
+
+      expect(adminLmsService.adminCreateQuestion).not.toHaveBeenCalled();
+    });
+
+    it('handles addQuestionToQuiz error when adminCreateQuestion fails', async () => {
+      adminLmsService.adminCreateQuestion.mockRejectedValueOnce(new Error('Question insert failed'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const examItem = await screen.findByText('اختبار الوحدة الأولى');
+      fireEvent.click(examItem);
+
+      const qArInput = await screen.findByPlaceholderText('Question Text (AR)');
+      fireEvent.input(qArInput, { target: { value: 'سؤال يسبب خطأ' } });
+
+      const checkboxes = document.querySelectorAll('.cb-option-input-row input[type="checkbox"]');
+      fireEvent.click(checkboxes[0]);
+
+      const addQBtn = screen.getByText('إضافة السؤال للاختبار');
+      fireEvent.click(addQBtn);
+
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to add question: Question insert failed'));
+      });
+    });
+
+    it('adds and removes option inputs dynamically in quiz builder', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const examItem = await screen.findByText('اختبار الوحدة الأولى');
+      fireEvent.click(examItem);
+
+      await screen.findByPlaceholderText('Question Text (AR)');
+
+      // Initially 4 options
+      let optionRows = document.querySelectorAll('.cb-option-input-row');
+      expect(optionRows.length).toBe(4);
+
+      // Click "+ إضافة خيار"
+      const addOptionBtn = screen.getByText('+ إضافة خيار');
+      fireEvent.click(addOptionBtn);
+
+      optionRows = document.querySelectorAll('.cb-option-input-row');
+      expect(optionRows.length).toBe(5);
+
+      // Remove the last option
+      const removeButtons = screen.getAllByTitle('Remove Option');
+      expect(removeButtons.length).toBe(5);
+      fireEvent.click(removeButtons[4]);
+
+      optionRows = document.querySelectorAll('.cb-option-input-row');
+      expect(optionRows.length).toBe(4);
+    });
+
+    it('handles prefillTestQuestions error', async () => {
+      adminLmsService.adminCreateQuestion.mockRejectedValueOnce(new Error('Prefill DB Timeout'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const examItem = await screen.findByText('اختبار الوحدة الأولى');
+      fireEvent.click(examItem);
+
+      const prefillBtn = await screen.findByText('⚡ Prefill Demo Questions (Testing)');
+      fireEvent.click(prefillBtn);
+
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to prefill: Prefill DB Timeout'));
+      });
+    });
+
+    it('aborts removeQuestion when confirmation is cancelled', async () => {
+      vi.spyOn(window, 'confirm').mockReturnValueOnce(false);
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const examItem = await screen.findByText('اختبار الوحدة الأولى');
+      fireEvent.click(examItem);
+
+      await screen.findByText(/هل التغير المناخي يؤثر على الجهاز التنفسي؟/i);
+      const deleteQBtn = document.querySelector('.cb-q-del-btn');
+      fireEvent.click(deleteQBtn);
+
+      expect(adminLmsService.adminDeleteQuestion).not.toHaveBeenCalled();
+    });
+
+    it('handles removeQuestion error when adminDeleteQuestion fails', async () => {
+      adminLmsService.adminDeleteQuestion.mockRejectedValueOnce(new Error('Cannot delete quiz question'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const examItem = await screen.findByText('اختبار الوحدة الأولى');
+      fireEvent.click(examItem);
+
+      await screen.findByText(/هل التغير المناخي يؤثر على الجهاز التنفسي؟/i);
+      const deleteQBtn = document.querySelector('.cb-q-del-btn');
+      fireEvent.click(deleteQBtn);
+
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to remove question: Cannot delete quiz question'));
+      });
+    });
+
+    it('renders checking permissions screen when authLoading is true', () => {
+      mockUseAuth.mockReturnValueOnce({
+        user: null,
+        hasPermission: () => false,
+        authLoading: true
+      });
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+      expect(screen.getByText('جاري التحقق من الصلاحيات...')).toBeInTheDocument();
+    });
+
+    it('handles loadLessonQuiz error gracefully when adminFetchFullQuiz rejects', async () => {
+      adminLmsService.adminFetchFullQuiz.mockRejectedValueOnce(new Error('Quiz network failure'));
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const examItem = await screen.findByText('اختبار الوحدة الأولى');
+      fireEvent.click(examItem);
+
+      // Quiz modal opens and does not throw uncaught error
+      expect(await screen.findByText('منشئ الأسئلة')).toBeInTheDocument();
+    });
+
+    it('populates and changes all course form fields and selects', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const newCourseBtn = await screen.findByText('+ مساق جديد');
+      fireEvent.click(newCourseBtn);
+
+      const form = document.querySelector('form.cb-form');
+      const textareas = form.querySelectorAll('textarea');
+      fireEvent.input(textareas[0], { target: { value: 'وصف تفصيلي بالعربية' } });
+      fireEvent.input(textareas[1], { target: { value: 'Detailed English description' } });
+
+      const textInputs = form.querySelectorAll('input[type="text"]');
+      // Category input
+      fireEvent.input(textInputs[2], { target: { value: 'الصحة العامة' } });
+      // Duration input
+      fireEvent.input(textInputs[3], { target: { value: '12 hours' } });
+      // Cover image input
+      fireEvent.input(textInputs[4], { target: { value: 'https://images.climamedix.org/cover.webp' } });
+
+      const selects = form.querySelectorAll('select');
+      fireEvent.change(selects[0], { target: { value: 'view:all_courses' } });
+      fireEvent.change(selects[1], { target: { value: 'view:free_content' } });
+
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(adminLmsService.adminCreateCourse).toHaveBeenCalledWith(
+          expect.objectContaining({
+            description_ar: 'وصف تفصيلي بالعربية',
+            description_en: 'Detailed English description',
+            category: 'الصحة العامة',
+            duration: '12 hours',
+            cover_image: 'https://images.climamedix.org/cover.webp',
+            full_access_permission_key: 'view:all_courses',
+            teaser_permission_key: 'view:free_content'
+          })
+        );
+      });
+    });
+
+    it('updates sequence_order in module form', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const addModuleBtn = await screen.findByText('+ وحدة جديدة');
+      fireEvent.click(addModuleBtn);
+
+      const form = document.querySelector('form.cb-form');
+      const numInput = form.querySelector('input[type="number"]');
+      fireEvent.input(numInput, { target: { value: '5' } });
+
+      const textInputs = form.querySelectorAll('input[type="text"]');
+      fireEvent.input(textInputs[0], { target: { value: 'الوحدة الخامسة' } });
+      fireEvent.input(textInputs[1], { target: { value: 'Module 5' } });
+
+      fireEvent.submit(form);
+
+      await waitFor(() => {
+        expect(adminLmsService.adminCreateModule).toHaveBeenCalledWith(
+          expect.objectContaining({
+            sequence_order: 5
+          })
+        );
+      });
+    });
+
+    it('interacts with all lesson form fields (RichTextEditor, duration, sequence order, EN tab)', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      await screen.findByText('الوحدة الأولى: الأساسيات');
+      const addLessonBtn = screen.getByTitle('Add Lesson');
+      fireEvent.click(addLessonBtn);
+
+      // AR title
+      const form = document.querySelector('form.cb-form');
+      const titleArInput = form.querySelector('input[type="text"]');
+      fireEvent.input(titleArInput, { target: { value: 'درس شامل' } });
+
+      // AR rich text
+      const richEditorTextarea = screen.getByPlaceholderText('ابدأ بكتابة الدرس أو إدراج وسائط...');
+      fireEvent.input(richEditorTextarea, { target: { value: 'محتوى الدرس العربي' } });
+
+      // Duration & Sequence
+      const numInputs = form.querySelectorAll('input[type="number"]');
+      fireEvent.input(numInputs[0], { target: { value: '45' } });
+      fireEvent.input(numInputs[1], { target: { value: '3' } });
+
+      // Switch to EN tab and fill
+      const enTabBtn = screen.getByText('English (EN)');
+      fireEvent.click(enTabBtn);
+
+      const titleEnInput = form.querySelector('input[type="text"]');
+      fireEvent.input(titleEnInput, { target: { value: 'Comprehensive Lesson' } });
+
+      const richEditorEnTextarea = screen.getByPlaceholderText('Start writing the lesson or insert media...');
+      fireEvent.input(richEditorEnTextarea, { target: { value: 'English Content Body' } });
+
+      const saveBtn = screen.getByText('حفظ الدرس');
+      fireEvent.click(saveBtn);
+
+      await waitFor(() => {
+        expect(adminLmsService.adminCreateLesson).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title_ar: 'درس شامل',
+            title_en: 'Comprehensive Lesson',
+            content_ar: 'محتوى الدرس العربي',
+            content_en: 'English Content Body',
+            duration: '45',
+            sequence_order: 3
+          })
+        );
+      });
+    });
+
+    it('interacts with quiz points and option EN inputs', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const examItem = await screen.findByText('اختبار الوحدة الأولى');
+      fireEvent.click(examItem);
+
+      const qArInput = await screen.findByPlaceholderText('Question Text (AR)');
+      const qEnInput = screen.getByPlaceholderText('Question Text (EN)');
+      fireEvent.input(qArInput, { target: { value: 'سؤال متعدد اللغات' } });
+      fireEvent.input(qEnInput, { target: { value: 'Multilingual question' } });
+
+      // Points input
+      const pointsInput = screen.getByDisplayValue('10');
+      fireEvent.input(pointsInput, { target: { value: '25' } });
+
+      // Option 1 inputs
+      const opt1Ar = screen.getByPlaceholderText('Option 1 (AR)');
+      const opt1En = screen.getByPlaceholderText('Option 1 (EN)');
+      fireEvent.input(opt1Ar, { target: { value: 'الخيار 1' } });
+      fireEvent.input(opt1En, { target: { value: 'Option 1 EN' } });
+
+      const checkboxes = document.querySelectorAll('.cb-option-input-row input[type="checkbox"]');
+      fireEvent.click(checkboxes[0]);
+
+      const addQBtn = screen.getByText('إضافة السؤال للاختبار');
+      fireEvent.click(addQBtn);
+
+      await waitFor(() => {
+        expect(adminLmsService.adminCreateQuestion).toHaveBeenCalledWith(
+          expect.objectContaining({
+            points: 25,
+            question_text_ar: 'سؤال متعدد اللغات',
+            question_text_en: 'Multilingual question'
+          })
+        );
+      });
+    });
+
+    it('fires drag and drop events on module and lesson elements in UI', async () => {
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      await screen.findByText('الوحدة الأولى: الأساسيات');
+
+      // Module drag events
+      const moduleHeader = document.querySelector('.cb-module-header');
+      const moduleSection = document.querySelector('.cb-module-section');
+      
+      fireEvent.dragStart(moduleHeader, {
+        dataTransfer: { setData: vi.fn(), effectAllowed: '' }
+      });
+      fireEvent.dragOver(moduleSection, {
+        preventDefault: vi.fn(),
+        dataTransfer: { dropEffect: '' }
+      });
+      fireEvent.drop(moduleSection, {
+        preventDefault: vi.fn(),
+        clientY: 100,
+        currentTarget: { getBoundingClientRect: () => ({ top: 50, height: 100 }) }
+      });
+
+      // Module actions click & dragStart stopPropagation
+      const moduleActions = document.querySelector('.cb-module-actions');
+      fireEvent.click(moduleActions);
+      fireEvent.dragStart(moduleActions);
+
+      // Lesson drag events
+      const lessonItem = document.querySelector('.cb-lesson-item');
+      const lessonsList = document.querySelector('.cb-lessons-list');
+
+      fireEvent.dragStart(lessonItem, {
+        dataTransfer: { setData: vi.fn(), effectAllowed: '' }
+      });
+      fireEvent.dragOver(lessonsList, {
+        preventDefault: vi.fn(),
+        dataTransfer: { dropEffect: '' }
+      });
+      fireEvent.dragOver(lessonItem, {
+        preventDefault: vi.fn(),
+        dataTransfer: { dropEffect: '' }
+      });
+      fireEvent.drop(lessonItem, {
+        preventDefault: vi.fn(),
+        clientY: 80,
+        currentTarget: { getBoundingClientRect: () => ({ top: 50, height: 60 }) }
+      });
+      fireEvent.drop(lessonsList, {
+        preventDefault: vi.fn()
+      });
+
+      // Lesson meta click & dragStart stopPropagation
+      const lessonMeta = document.querySelector('.cb-lesson-meta');
+      fireEvent.click(lessonMeta);
+      fireEvent.dragStart(lessonMeta);
+    });
+
+    it('falls back to default permissions when supabase permissions table returns empty array', async () => {
+      mockSupabaseOrder.mockResolvedValueOnce({ data: [], error: null });
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const newCourseBtn = await screen.findByText('+ مساق جديد');
+      fireEvent.click(newCourseBtn);
+
+      expect(screen.getAllByText('view:all_courses').length).toBeGreaterThan(0);
+    });
+
+    it('falls back to default permissions when supabase permissions query throws error', async () => {
+      mockSupabaseOrder.mockResolvedValueOnce({ data: null, error: new Error('Permissions query failed') });
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const newCourseBtn = await screen.findByText('+ مساق جديد');
+      fireEvent.click(newCourseBtn);
+
+      expect(screen.getAllByText('view:all_courses').length).toBeGreaterThan(0);
+    });
+
+    it('converts non-webp images (PNG) via canvas to WebP in convertToWebP', async () => {
+      const originalImage = globalThis.Image;
+      const originalCreateObjectURL = URL.createObjectURL;
+      const originalRevokeObjectURL = URL.revokeObjectURL;
+
+      URL.createObjectURL = vi.fn().mockReturnValue('blob:http://localhost/dummy');
+      URL.revokeObjectURL = vi.fn();
+
+      class MockImage {
+        constructor() {
+          this.onload = null;
+          this.onerror = null;
+          this.width = 120;
+          this.height = 120;
+        }
+        set src(val) {
+          setTimeout(() => {
+            if (this.onload) this.onload();
+          }, 0);
+        }
+      }
+      globalThis.Image = MockImage;
+
+      const origGetContext = HTMLCanvasElement.prototype.getContext;
+      const origToBlob = HTMLCanvasElement.prototype.toBlob;
+      HTMLCanvasElement.prototype.getContext = () => ({
+        drawImage: vi.fn()
+      });
+      HTMLCanvasElement.prototype.toBlob = function(callback) {
+        callback(new Blob(['webp-bits'], { type: 'image/webp' }));
+      };
+
+      try {
+        uploadFileToR2.mockResolvedValueOnce('https://r2.climamedix.org/converted.webp');
+        render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+        const newCourseBtn = await screen.findByText('+ مساق جديد');
+        fireEvent.click(newCourseBtn);
+
+        const fileInput = document.querySelector('input[type="file"][accept*="image"]');
+        const pngFile = new File(['png-bits'], 'graphic.png', { type: 'image/png' });
+        fireEvent.change(fileInput, { target: { files: [pngFile] } });
+
+        await waitFor(() => {
+          expect(uploadFileToR2).toHaveBeenCalledWith(
+            expect.objectContaining({ type: 'image/webp' }),
+            'course_covers'
+          );
+        });
+      } finally {
+        globalThis.Image = originalImage;
+        URL.createObjectURL = originalCreateObjectURL;
+        URL.revokeObjectURL = originalRevokeObjectURL;
+        HTMLCanvasElement.prototype.getContext = origGetContext;
+        HTMLCanvasElement.prototype.toBlob = origToBlob;
+      }
+    });
+
+    it('handles image loading error in convertToWebP', async () => {
+      const originalImage = globalThis.Image;
+      const originalCreateObjectURL = URL.createObjectURL;
+      const originalRevokeObjectURL = URL.revokeObjectURL;
+
+      URL.createObjectURL = vi.fn().mockReturnValue('blob:http://localhost/dummy-err');
+      URL.revokeObjectURL = vi.fn();
+
+      class FailingImage {
+        constructor() {
+          this.onload = null;
+          this.onerror = null;
+        }
+        set src(val) {
+          setTimeout(() => {
+            if (this.onerror) this.onerror(new Error('Corrupted image'));
+          }, 0);
+        }
+      }
+      globalThis.Image = FailingImage;
+
+      try {
+        render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+        const newCourseBtn = await screen.findByText('+ مساق جديد');
+        fireEvent.click(newCourseBtn);
+
+        const fileInput = document.querySelector('input[type="file"][accept*="image"]');
+        const corruptedFile = new File(['corrupt'], 'corrupt.jpg', { type: 'image/jpeg' });
+        fireEvent.change(fileInput, { target: { files: [corruptedFile] } });
+
+        await waitFor(() => {
+          expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to upload cover image'));
+        });
+      } finally {
+        globalThis.Image = originalImage;
+        URL.createObjectURL = originalCreateObjectURL;
+        URL.revokeObjectURL = originalRevokeObjectURL;
+      }
     });
   });
 });

@@ -219,6 +219,8 @@ describe('Multimedia Player Video & Audio Engine Test Suite (55 Tests)', () => {
 
       const playBtn = container.querySelector('svg path[d="M8 5v14l11-7z"]')?.closest('div');
       expect(playBtn).not.toBeNull();
+      fireEvent.mouseEnter(playBtn);
+      fireEvent.mouseLeave(playBtn);
       fireEvent.click(playBtn);
 
       const video = container.querySelector('video');

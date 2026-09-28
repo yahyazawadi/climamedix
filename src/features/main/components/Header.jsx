@@ -267,6 +267,42 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         }}>
                           {lang === 'ar' ? 'مسؤول' : 'Admin'}
                         </span>
+                      ) : userProfile?.role === 'educator' ? (
+                        <span style={{ 
+                          backgroundColor: 'rgba(59, 130, 246, 0.2)', 
+                          color: '#60a5fa', 
+                          padding: '4px 8px', 
+                          borderRadius: '6px', 
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          border: '1px solid rgba(59, 130, 246, 0.3)'
+                        }}>
+                          {lang === 'ar' ? 'مثقف صحي' : 'Educator'}
+                        </span>
+                      ) : userProfile?.role === 'researcher' ? (
+                        <span style={{ 
+                          backgroundColor: 'rgba(16, 185, 129, 0.2)', 
+                          color: '#34d399', 
+                          padding: '4px 8px', 
+                          borderRadius: '6px', 
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          border: '1px solid rgba(16, 185, 129, 0.3)'
+                        }}>
+                          {lang === 'ar' ? 'باحث علمي' : 'Researcher'}
+                        </span>
+                      ) : userProfile?.role === 'subscriber' ? (
+                        <span style={{ 
+                          backgroundColor: 'rgba(245, 158, 11, 0.2)', 
+                          color: '#fbbf24', 
+                          padding: '4px 8px', 
+                          borderRadius: '6px', 
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          border: '1px solid rgba(245, 158, 11, 0.3)'
+                        }}>
+                          {lang === 'ar' ? 'مشترك' : 'Subscriber'}
+                        </span>
                       ) : (
                         <span style={{ 
                           backgroundColor: 'rgba(225, 239, 250, 0.1)', 
@@ -293,8 +329,8 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                     </div>
                     <div style={{ borderBottom: '1px solid rgba(225, 239, 250, 0.1)', marginBottom: '12px' }}></div>
 
-                    {/* Permissions Collapsible Dropdown (Superadmins only) */}
-                    {userProfile?.role === 'superadmin' && (
+                    {/* Permissions Collapsible Dropdown (System Managers only) */}
+                    {hasPermission('manage:system') && (
                       <div style={{ marginBottom: '12px' }}>
                         <button 
                           onClick={(e) => {
@@ -448,7 +484,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         {lang === 'ar' ? 'الملف الشخصي' : 'My Profile'}
                       </a>
 
-                      {(userProfile?.role === 'admin' || userProfile?.role === 'superadmin') && (
+                      {hasPermission('manage:system') && (
                         <a 
                           href="#debug"
                           onClick={(e) => {
@@ -485,7 +521,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         </a>
                       )}
 
-                      {userProfile?.role === 'superadmin' && (
+                      {(hasPermission('manage:system') || hasPermission('approve:users')) && (
                         <a 
                           href="#admin-users"
                           onClick={(e) => {
@@ -521,7 +557,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         </a>
                       )}
                       
-                      {(userProfile?.role === 'admin' || userProfile?.role === 'superadmin') && (
+                      {(hasPermission('manage:any_course') || hasPermission('manage:courses') || hasPermission('write:courses')) && (
                         <a 
                           href="#admin-courses"
                           onClick={(e) => {
@@ -593,7 +629,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         </a>
                       )}
                       
-                      {userProfile?.role === 'superadmin' && (
+                      {hasPermission('view:user_stats') && (
                         <a 
                           href="#admin-stats"
                           onClick={(e) => {
@@ -629,7 +665,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         </a>
                       )}
                       
-                      {userProfile?.role === 'superadmin' && (
+                      {(hasPermission('issue:certs') || hasPermission('manage:system')) && (
                         <a 
                           href="#admin-certificates"
                           onClick={(e) => {
@@ -885,9 +921,25 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
 
               {/* Roles Badge & Actions */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                {userProfile?.role === 'admin' ? (
+                {userProfile?.role === 'superadmin' ? (
                   <span style={{ backgroundColor: '#15b47a', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                    {lang === 'ar' ? 'مسؤول خارق' : 'Super Admin'}
+                  </span>
+                ) : userProfile?.role === 'admin' ? (
+                  <span style={{ backgroundColor: '#8b5cf6', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
                     {lang === 'ar' ? 'مسؤول' : 'Admin'}
+                  </span>
+                ) : userProfile?.role === 'educator' ? (
+                  <span style={{ backgroundColor: '#3b82f6', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                    {lang === 'ar' ? 'مثقف صحي' : 'Educator'}
+                  </span>
+                ) : userProfile?.role === 'researcher' ? (
+                  <span style={{ backgroundColor: '#10b981', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                    {lang === 'ar' ? 'باحث علمي' : 'Researcher'}
+                  </span>
+                ) : userProfile?.role === 'subscriber' ? (
+                  <span style={{ backgroundColor: '#f59e0b', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>
+                    {lang === 'ar' ? 'مشترك' : 'Subscriber'}
                   </span>
                 ) : (
                   <span style={{ backgroundColor: 'rgba(225, 239, 250, 0.1)', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '10px' }}>
@@ -904,7 +956,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                     {lang === 'ar' ? 'ملفي' : 'Profile'}
                   </a>
                   <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
-                  {userProfile?.role === 'admin' && (
+                  {hasPermission('manage:system') && (
                     <>
                       <a 
                         href="#debug" 
@@ -916,7 +968,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                       <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
                     </>
                   )}
-                  {userProfile?.role === 'superadmin' && (
+                  {(hasPermission('manage:system') || hasPermission('approve:users')) && (
                     <>
                       <a 
                         href="#admin-users" 
@@ -928,7 +980,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                       <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
                     </>
                   )}
-                  {userProfile?.role === 'superadmin' && (
+                  {hasPermission('view:user_stats') && (
                     <>
                       <a 
                         href="#admin-stats" 
@@ -940,7 +992,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                       <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
                       </>
                   )}
-                  {userProfile?.role === 'superadmin' && (
+                  {(hasPermission('issue:certs') || hasPermission('manage:system')) && (
                     <>
                       <a 
                         href="#admin-certificates" 
@@ -952,7 +1004,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                       <span style={{ color: 'rgba(225, 239, 250, 0.2)', fontSize: '12px' }}>|</span>
                     </>
                   )}
-                  {(userProfile?.role === 'admin' || userProfile?.role === 'superadmin') && (
+                  {(hasPermission('manage:any_course') || hasPermission('manage:courses') || hasPermission('write:courses')) && (
                     <>
                       <a 
                         href="#admin-courses" 

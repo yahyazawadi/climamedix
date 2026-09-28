@@ -535,6 +535,29 @@ describe('Certificate Verification, Generation & Audit Suite', () => {
 
       expect(closeMock).toHaveBeenCalled();
     });
+
+    it('copies verification URL to clipboard when "نسخ الرابط" is clicked', () => {
+      const writeTextMock = vi.fn().mockResolvedValue();
+      Object.assign(navigator, {
+        clipboard: {
+          writeText: writeTextMock
+        }
+      });
+
+      render(
+        <CertificateGenerator
+          recipientName="د. ريم الناصر"
+          courseTitle="طب الطوارئ المناخي"
+          certId="CERT-9900"
+          onClose={vi.fn()}
+        />
+      );
+
+      const copyBtn = screen.getByText('نسخ الرابط');
+      fireEvent.click(copyBtn);
+
+      expect(writeTextMock).toHaveBeenCalledWith(expect.stringContaining('/verify/CERT-9900'));
+    });
   });
 
   // =========================================================================

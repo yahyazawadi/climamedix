@@ -45,10 +45,10 @@ const convertToWebP = (file) => {
   });
 };
 
-// Module-level cache — the IP API is called at most once per browser session
+// Module-level cache — cached per session unless explicitly refreshed
 let _ipLocationCache = null;
-const getIpLocation = () => {
-  if (!_ipLocationCache) {
+const getIpLocation = (forceRefresh = false) => {
+  if (forceRefresh || !_ipLocationCache) {
     _ipLocationCache = fetch('https://ipapi.co/json/')
       .then(res => res.json())
       .catch(() => null);
@@ -86,7 +86,7 @@ export function ProfilePage({ lang, onNavigate }) {
 
   const handleDetectLocation = () => {
     setLocating(true);
-    getIpLocation()
+    getIpLocation(true)
       .then(data => {
         if (data && data.city && data.country_name) {
           setFormData(prev => ({ ...prev, city: data.city, country: data.country_name }));

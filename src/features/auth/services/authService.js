@@ -1,6 +1,48 @@
 import { supabase } from '../../../utils/supabaseClient';
 
+// In-memory & session cache for Supabase user profiles and permission lookups
+const _profileCache = new Map();
+
 export const authService = {
+  _profileCache,
+
+  /**
+   * Retrieve cached user profile if present and not expired
+   */
+  getCachedProfile(userId) {
+    if (!userId) return null;
+    const entry = _profileCache.get(userId);
+    if (!entry) return null;
+    if (Date.now() > entry.expiry) {
+      _profileCache.delete(userId);
+      return null;
+    }
+    return entry.data;
+  },
+
+  /**
+   * Cache user profile with TTL (default 5 minutes)
+   */
+  setCachedProfile(userId, profile, ttlMs = 5 * 60 * 1000) {
+    if (!userId || !profile) return;
+    _profileCache.set(userId, {
+      data: profile,
+      expiry: Date.now() + ttlMs,
+      cachedAt: Date.now()
+    });
+  },
+
+  /**
+   * Clear cache for specific user or all users
+   */
+  clearProfileCache(userId) {
+    if (userId) {
+      _profileCache.delete(userId);
+    } else {
+      _profileCache.clear();
+    }
+  },
+
   /**
    * Sign up a new user with email and password
    */
@@ -53,11 +95,14 @@ export const authService = {
    */
   async signOut(userId) {
     if (userId) {
+      this.clearProfileCache(userId);
       try {
         await this.updateOnlineStatus(userId, false);
       } catch (err) {
         console.error('Failed to set online status to false on sign out:', err);
       }
+    } else {
+      this.clearProfileCache();
     }
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
@@ -87,10 +132,16 @@ export const authService = {
   },
 
   /**
-   * Get the current user profile from the database
+   * Get the current user profile from the database, utilizing the cache when available
    */
-  async getUserProfile(userId) {
+  async getUserProfile(userId, { forceRefresh = false } = {}) {
     if (!userId) return null;
+
+    if (!forceRefresh) {
+      const cached = this.getCachedProfile(userId);
+      if (cached) return cached;
+    }
+
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -118,6 +169,9 @@ export const authService = {
       console.error('Error fetching custom permissions:', err);
       data.custom_permissions = [];
     }
+
+    // Cache the retrieved profile
+    this.setCachedProfile(userId, data);
 
     return data;
   }

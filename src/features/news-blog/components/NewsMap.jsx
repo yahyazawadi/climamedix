@@ -9,6 +9,8 @@ export function NewsMap({ lang = 'ar' }) {
   const markersRef = useRef([]);
   const [mapboxLoaded, setMapboxLoaded] = useState(false);
   const [nodes, setNodes] = useState([]);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
+  const hasInitialFitted = useRef(false);
   
   const { hasPermission, user } = useAuth();
   const canEdit = hasPermission('edit:news_map');
@@ -24,6 +26,58 @@ export function NewsMap({ lang = 'ar' }) {
     description_en: '',
     link: ''
   });
+
+  const fitAllCircles = useCallback((map, nodesList) => {
+    if (!map || typeof map.fitBounds !== 'function' || !nodesList || nodesList.length === 0) return;
+
+    let minLat = 90, maxLat = -90;
+    let minLng = 180, maxLng = -180;
+    let validCount = 0;
+
+    nodesList.forEach(node => {
+      const lat = Number(node.latitude);
+      const lng = Number(node.longitude);
+      const radius = Number(node.radius_km) || 0;
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      validCount++;
+      // 1 deg latitude ≈ 110.574 km
+      const latOffset = radius / 110.574;
+      // 1 deg longitude ≈ 111.320 * cos(lat) km
+      const latRad = (lat * Math.PI) / 180;
+      const lngOffset = radius / Math.max(0.1, 111.320 * Math.cos(latRad));
+
+      minLat = Math.min(minLat, lat - latOffset);
+      maxLat = Math.max(maxLat, lat + latOffset);
+      minLng = Math.min(minLng, lng - lngOffset);
+      maxLng = Math.max(maxLng, lng + lngOffset);
+    });
+
+    if (validCount === 0) return;
+
+    if (typeof map.resize === 'function') {
+      map.resize();
+    }
+
+    const isMobileView = typeof window !== 'undefined' && window.innerWidth <= 768;
+    // Padding with head space at the top so circles have breathing room from the top edge
+    const padding = isMobileView
+      ? { top: 90, bottom: 45, left: 35, right: 35 }
+      : { top: 90, bottom: 60, left: 60, right: 60 };
+
+    try {
+      map.fitBounds(
+        [[minLng, minLat], [maxLng, maxLat]],
+        {
+          padding,
+          maxZoom: 10,
+          duration: 0
+        }
+      );
+    } catch (err) {
+      console.warn('fitBounds error:', err);
+    }
+  }, []);
 
   const fetchNodes = async () => {
     const { data, error } = await supabase.from('news_map_nodes').select('*');
@@ -51,6 +105,22 @@ export function NewsMap({ lang = 'ar' }) {
     fetchNodes();
   }, [user]); // Re-fetch when user session is ready
 
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (mapInstanceRef.current && nodes.length > 0) {
+        setTimeout(() => {
+          if (mapInstanceRef.current) {
+            fitAllCircles(mapInstanceRef.current, nodes);
+          }
+        }, 100);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [nodes, fitAllCircles]);
+
   const handleMapLoad = useCallback((map) => {
     mapInstanceRef.current = map;
     setMapboxLoaded(true);
@@ -60,6 +130,18 @@ export function NewsMap({ lang = 'ar' }) {
       setMapFullyReady(true);
     });
   }, []);
+
+  useEffect(() => {
+    if (!mapFullyReady || !mapInstanceRef.current || nodes.length === 0) return;
+    if (!hasInitialFitted.current) {
+      hasInitialFitted.current = true;
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          fitAllCircles(mapInstanceRef.current, nodes);
+        }
+      }, 50);
+    }
+  }, [mapFullyReady, nodes, fitAllCircles]);
 
   useEffect(() => {
     if (!mapboxLoaded || !mapInstanceRef.current) return;
@@ -336,7 +418,11 @@ export function NewsMap({ lang = 'ar' }) {
   };
 
   return (
-    <BaseMap onMapLoad={handleMapLoad} center={[35.0, 31.0]} zoom={4}>
+    <BaseMap 
+      onMapLoad={handleMapLoad} 
+      center={isMobile ? [38.5, 28.0] : [37.0, 28.5]} 
+      zoom={isMobile ? 2.9 : 4}
+    >
       {canEdit && (
         <div style={{ 
           position: 'absolute', top: '20px', left: '20px', zIndex: 10,

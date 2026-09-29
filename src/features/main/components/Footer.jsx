@@ -51,15 +51,17 @@ export function Footer({ onJoinClick, onNavigate, lang, currentView }) {
             
           </div>
 
-          {/* Bottom CTA Block: Text (right) & Join button (left) */}
-          <div class="figma-footer-cta-block">
-            <div class="figma-cta-border-box">
-              <span>{t.footerCtaText}</span>
+          {/* Bottom CTA Block: Text (right) & Join button (left) - Hidden when already on /join */}
+          {currentView !== 'join' && (
+            <div class="figma-footer-cta-block">
+              <div class="figma-cta-border-box">
+                <span>{t.footerCtaText}</span>
+              </div>
+              <button onClick={onJoinClick} class="figma-footer-join-btn">
+                {t.joinNow}
+              </button>
             </div>
-            <button onClick={onJoinClick} class="figma-footer-join-btn">
-              {t.joinNow}
-            </button>
-          </div>
+          )}
 
         </div>
 

@@ -390,10 +390,12 @@ html[lang="en"] .figma-nav-text {
   background-image: url('./assets/footer background.png');
   /* literal figma background design */
   background-size: cover;
-  background-position: center;
+  background-position: center bottom;
   background-repeat: no-repeat;
+  background-color: #0b2849;
   color: #e2effa;
   padding: 80px 0 0;
+  margin-bottom: 0 !important;
   font-family: 'Tajawal', sans-serif;
 
   /* RTL aligned footer content */
@@ -577,10 +579,23 @@ html[lang="en"] .figma-nav-text {
 /* Subfooter */
 .figma-subfooter {
   border-top: 1px solid rgba(225, 239, 250, 0.1);
-  background-color: #0b2849;
+  background-color: #0b2849 !important;
   /* Deep blue from the header/design */
-  padding: 25px 0;
+  padding: 25px 0 calc(25px + env(safe-area-inset-bottom, 0px));
   margin-top: 40px;
+  margin-bottom: 0 !important;
+  position: relative;
+  width: 100%;
+}
+
+.figma-footer {
+  background-color: #0b2849;
+}
+
+@media (max-width: 768px) {
+  html, body {
+    background-color: #0b2849;
+  }
 }
 
 .figma-subfooter-container {
@@ -3474,6 +3489,31 @@ body.dark-mode .search-filter-tag.active {
 
 .home-slider-arrow-btn:active {
   transform: scale(0.95);
+}
+
+/* Floating Events Calendar Sidebar Tab */
+.calendar-sidebar-trigger {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9999;
+  background: linear-gradient(135deg, #0b2849, #004c6d);
+  color: #fff;
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .calendar-sidebar-trigger {
+    top: 22%;
+    transform: translateY(0);
+    padding: 8px 12px;
+  }
 }
 
 /* ========================================================

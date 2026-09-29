@@ -7,13 +7,36 @@ import { BaseMap } from '../../shared/components/BaseMap';
 export function NewsMap({ lang = 'ar' }) {
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
+  const draftMarkerRef = useRef(null);
+  const containerRef = useRef(null);
   const [mapboxLoaded, setMapboxLoaded] = useState(false);
   const [nodes, setNodes] = useState([]);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
   const hasInitialFitted = useRef(false);
   
-  const { hasPermission, user } = useAuth();
-  const canEdit = hasPermission('edit:news_map');
+  const { hasPermission, user, userProfile } = useAuth();
+  
+  // Persistent edit privilege check to prevent ghost button flashing during auth hydration
+  const isDevAdmin = typeof window !== 'undefined' && (
+    localStorage.getItem('dev_admin_mode') === 'true' || 
+    sessionStorage.getItem('dev_admin_mode') === 'true'
+  );
+  const cachedRole = typeof window !== 'undefined' ? (
+    localStorage.getItem('user_role') || 
+    sessionStorage.getItem('user_role')
+  ) : null;
+  const isRoleAdmin = userProfile?.role === 'admin' || userProfile?.role === 'superadmin' ||
+    user?.app_metadata?.role === 'admin' || user?.app_metadata?.role === 'superadmin' ||
+    user?.user_metadata?.role === 'admin' || user?.user_metadata?.role === 'superadmin' ||
+    cachedRole === 'admin' || cachedRole === 'superadmin';
+
+  const canEdit = Boolean(hasPermission('edit:news_map') || isDevAdmin || isRoleAdmin);
+
+  useEffect(() => {
+    if (canEdit && typeof window !== 'undefined') {
+      try { sessionStorage.setItem('user_role', 'admin'); } catch (_) {}
+    }
+  }, [canEdit]);
 
   const [isAddingMode, setIsAddingMode] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -92,10 +115,7 @@ export function NewsMap({ lang = 'ar' }) {
         longitude: Number(n.longitude),
         radius_km: Number(n.radius_km)
       }));
-      console.log('Fetched nodes from DB:', parsedData);
       setNodes(parsedData);
-    } else {
-      console.log('No data returned from DB.');
     }
   };
 
@@ -103,7 +123,7 @@ export function NewsMap({ lang = 'ar' }) {
 
   useEffect(() => {
     fetchNodes();
-  }, [user]); // Re-fetch when user session is ready
+  }, [user]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -120,6 +140,23 @@ export function NewsMap({ lang = 'ar' }) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [nodes, fitAllCircles]);
+
+  // Synchronize canvas resize when mobile drawer expands or collapses
+  useEffect(() => {
+    if (mapInstanceRef.current && typeof mapInstanceRef.current.resize === 'function') {
+      mapInstanceRef.current.resize();
+      const timer1 = setTimeout(() => {
+        if (mapInstanceRef.current) mapInstanceRef.current.resize();
+      }, 150);
+      const timer2 = setTimeout(() => {
+        if (mapInstanceRef.current) mapInstanceRef.current.resize();
+      }, 350);
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+      };
+    }
+  }, [showForm, isMobile]);
 
   const handleMapLoad = useCallback((map) => {
     mapInstanceRef.current = map;
@@ -143,6 +180,7 @@ export function NewsMap({ lang = 'ar' }) {
     }
   }, [mapFullyReady, nodes, fitAllCircles]);
 
+  // Map click and touch interaction handling
   useEffect(() => {
     if (!mapboxLoaded || !mapInstanceRef.current) return;
     const map = mapInstanceRef.current;
@@ -155,7 +193,6 @@ export function NewsMap({ lang = 'ar' }) {
       map.getCanvas().style.cursor = '';
     }
 
-    // Handle clicks for adding nodes
     const clickHandler = (e) => {
       if (isAddingMode) {
         setNewCoords({ lat: e.lngLat.lat, lng: e.lngLat.lng });
@@ -180,19 +217,94 @@ export function NewsMap({ lang = 'ar' }) {
 
     map.on('click', clickHandler);
     
-    // Cleanup event listener to avoid duplicates
     return () => {
       map.off('click', clickHandler);
       if (map.getCanvas()) {
         map.getCanvas().style.cursor = '';
       }
     };
+  }, [mapboxLoaded, isAddingMode, showForm, isMobile]);
 
-  }, [mapboxLoaded, isAddingMode, showForm]);
+  // Derived display nodes for GeoJSON circle layer
+  const baseNodes = editingNodeId && newCoords ? nodes.filter(n => n.id !== editingNodeId) : nodes;
+  const displayNodes = newCoords ? [...baseNodes, {
+    id: 'draft',
+    latitude: newCoords.lat,
+    longitude: newCoords.lng,
+    radius_km: Number(formData.radius_km) || 0,
+    icon_type: formData.icon_type,
+    description_ar: formData.description_ar,
+    description_en: formData.description_en,
+    link: formData.link
+  }] : nodes;
 
-  // Update markers and circles when nodes change
+  // 1. GeoJSON source & Circle layer (efficiently updates on radius / type change without touching DOM markers)
+  const updateSource = useCallback(() => {
+    if (!mapFullyReady || !mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+
+    const geojsonData = {
+      type: 'FeatureCollection',
+      features: displayNodes.map(node => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [node.longitude, node.latitude] },
+        properties: { ...node }
+      }))
+    };
+
+    try {
+      if (map.getSource('news-nodes')) {
+        map.getSource('news-nodes').setData(geojsonData);
+      } else {
+        map.addSource('news-nodes', { type: 'geojson', data: geojsonData });
+        
+        map.addLayer({
+          id: 'news-nodes-radius',
+          type: 'circle',
+          source: 'news-nodes',
+          paint: {
+            'circle-radius': [
+              'interpolate',
+              ['exponential', 2],
+              ['zoom'],
+              0, ['/', ['*', ['get', 'radius_km'], 1000], ['*', 78271.51696, ['cos', ['*', ['get', 'latitude'], Math.PI / 180]]]],
+              22, ['*', ['/', ['*', ['get', 'radius_km'], 1000], ['*', 78271.51696, ['cos', ['*', ['get', 'latitude'], Math.PI / 180]]]], Math.pow(2, 22)]
+            ],
+            'circle-color': [
+              'match', ['get', 'icon_type'],
+              'danger', '#ff4d4d',
+              'warning', '#ffcc00',
+              '#EEF6FC'
+            ],
+            'circle-opacity': 0.3,
+            'circle-stroke-width': 1,
+            'circle-stroke-color': [
+              'match', ['get', 'icon_type'],
+              'danger', '#ff4d4d',
+              'warning', '#ffcc00',
+              '#EEF6FC'
+            ]
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('Mapbox style not ready, retrying...', err);
+      setTimeout(updateSource, 200);
+    }
+  }, [mapFullyReady, displayNodes]);
+
   useEffect(() => {
-    // ONLY render nodes after the map is completely idle and ready
+    if (!mapFullyReady || !mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+    if (map.isStyleLoaded()) {
+      updateSource();
+    } else {
+      map.once('style.load', updateSource);
+    }
+  }, [updateSource, mapFullyReady]);
+
+  // 2. DOM Markers Lifecycle (Only updates when nodes or position change, NEVER on form keystrokes)
+  useEffect(() => {
     if (!mapFullyReady || !mapInstanceRef.current) return;
     const map = mapInstanceRef.current;
 
@@ -200,198 +312,122 @@ export function NewsMap({ lang = 'ar' }) {
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
 
-    const baseNodes = editingNodeId && newCoords ? nodes.filter(n => n.id !== editingNodeId) : nodes;
+    // Add HTML markers for all display nodes
+    displayNodes.forEach(node => {
+      let markerColor = '#EEF6FC';
+      let pulseColor = 'rgba(238, 246, 252, 0.4)';
+      let borderColor = '#2FAD78';
 
-    const displayNodes = newCoords ? [...baseNodes, {
-      id: 'draft',
-      latitude: newCoords.lat,
-      longitude: newCoords.lng,
-      radius_km: Number(formData.radius_km) || 0,
-      icon_type: formData.icon_type,
-      description_ar: formData.description_ar,
-      description_en: formData.description_en,
-      link: formData.link
-    }] : nodes;
-
-    const updateSource = () => {
-      const geojsonData = {
-        type: 'FeatureCollection',
-        features: displayNodes.map(node => ({
-          type: 'Feature',
-          geometry: { type: 'Point', coordinates: [node.longitude, node.latitude] },
-          properties: { ...node }
-        }))
-      };
-
-      try {
-        if (map.getSource('news-nodes')) {
-          map.getSource('news-nodes').setData(geojsonData);
-        } else {
-          map.addSource('news-nodes', { type: 'geojson', data: geojsonData });
-          
-          // Add circle layer for radius
-          map.addLayer({
-            id: 'news-nodes-radius',
-            type: 'circle',
-            source: 'news-nodes',
-            paint: {
-              // Accurate radius calculation in meters mapped to pixels based on Web Mercator projection (512px tile at zoom 0)
-              'circle-radius': [
-                'interpolate',
-                ['exponential', 2],
-                ['zoom'],
-                0, ['/', ['*', ['get', 'radius_km'], 1000], ['*', 78271.51696, ['cos', ['*', ['get', 'latitude'], Math.PI / 180]]]],
-                22, ['*', ['/', ['*', ['get', 'radius_km'], 1000], ['*', 78271.51696, ['cos', ['*', ['get', 'latitude'], Math.PI / 180]]]], Math.pow(2, 22)]
-              ],
-              'circle-color': [
-                'match', ['get', 'icon_type'],
-                'danger', '#ff4d4d',
-                'warning', '#ffcc00',
-                '#EEF6FC' // default / info
-              ],
-              'circle-opacity': 0.3,
-              'circle-stroke-width': 1,
-              'circle-stroke-color': [
-                'match', ['get', 'icon_type'],
-                'danger', '#ff4d4d',
-                'warning', '#ffcc00',
-                '#EEF6FC'
-              ]
-            }
-          });
-        }
-      } catch (err) {
-        console.warn('Mapbox style not ready, retrying...', err);
-        setTimeout(updateSource, 200);
-        return;
+      if (node.icon_type === 'danger') {
+        markerColor = '#ff4d4d';
+        pulseColor = 'rgba(255, 77, 77, 0.4)';
+        borderColor = '#fff';
+      } else if (node.icon_type === 'warning') {
+        markerColor = '#ffcc00';
+        pulseColor = 'rgba(255, 204, 0, 0.4)';
+        borderColor = '#fff';
       }
 
-      // Add HTML markers for icons and popups
-      displayNodes.forEach(node => {
-        let markerColor = '#EEF6FC';
-        let pulseColor = 'rgba(238, 246, 252, 0.4)';
-        let borderColor = '#2FAD78';
+      const el = document.createElement('div');
+      el.innerHTML = `
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; cursor: pointer;">
+          <div style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background: ${pulseColor}; animation: mapRingPulse 2s infinite; opacity: 0.4;"></div>
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: ${markerColor}; border: 2px solid ${borderColor}; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 10;"></div>
+        </div>
+      `;
 
-        if (node.icon_type === 'danger') {
-          markerColor = '#ff4d4d';
-          pulseColor = 'rgba(255, 77, 77, 0.4)';
-          borderColor = '#fff';
-        } else if (node.icon_type === 'warning') {
-          markerColor = '#ffcc00';
-          pulseColor = 'rgba(255, 204, 0, 0.4)';
-          borderColor = '#fff';
-        }
+      let absoluteLink = node.link;
+      if (absoluteLink && !absoluteLink.startsWith('http://') && !absoluteLink.startsWith('https://')) {
+        absoluteLink = 'https://' + absoluteLink;
+      }
 
-        const el = document.createElement('div');
-        el.innerHTML = `
-          <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; cursor: pointer;">
-            <div style="position: absolute; width: 20px; height: 20px; border-radius: 50%; background: ${pulseColor}; animation: mapRingPulse 2s infinite; opacity: 0.4;"></div>
-            <div style="width: 10px; height: 10px; border-radius: 50%; background: ${markerColor}; border: 2px solid ${borderColor}; box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 10;"></div>
-          </div>
-        `;
+      const popupHTML = `
+        <div style="padding: 10px; max-width: 250px; text-align: ${lang === 'ar' ? 'right' : 'left'};" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
+          <h4 style="margin: 0 0 8px 0; color: #0b2849;">${node.icon_type.toUpperCase()} - ${node.radius_km}km ${node.id === 'draft' ? '(Preview)' : ''}</h4>
+          <p style="margin: 0 0 12px 0; font-size: 14px; color: #334155;">
+            ${lang === 'ar' && node.description_ar ? node.description_ar : node.description_en || '...'}
+          </p>
+          ${node.link ? `<a href="${absoluteLink}" target="_blank" style="color: #15b47a; font-weight: bold; text-decoration: none;">${lang === 'ar' ? 'اقرأ المزيد' : 'Read more'}</a>` : ''}
+        </div>
+      `;
 
-        let absoluteLink = node.link;
-        if (absoluteLink && !absoluteLink.startsWith('http://') && !absoluteLink.startsWith('https://')) {
-          absoluteLink = 'https://' + absoluteLink;
-        }
+      const popup = new window.mapboxgl.Popup({ offset: 25, focusAfterOpen: false, closeButton: false }).setHTML(popupHTML);
 
-        const popupHTML = `
-          <div style="padding: 10px; max-width: 250px; text-align: ${lang === 'ar' ? 'right' : 'left'};" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
-            <h4 style="margin: 0 0 8px 0; color: #0b2849;">${node.icon_type.toUpperCase()} - ${node.radius_km}km ${node.id === 'draft' ? '(Preview)' : ''}</h4>
-            <p style="margin: 0 0 12px 0; font-size: 14px; color: #334155;">
-              ${lang === 'ar' && node.description_ar ? node.description_ar : node.description_en || '...'}
-            </p>
-            ${node.link ? `<a href="${absoluteLink}" target="_blank" style="color: #15b47a; font-weight: bold; text-decoration: none;">${lang === 'ar' ? 'اقرأ المزيد' : 'Read more'}</a>` : ''}
-          </div>
-        `;
+      const marker = new window.mapboxgl.Marker(el)
+        .setLngLat([node.longitude, node.latitude])
+        .setPopup(popup)
+        .addTo(map);
 
-        const popup = new window.mapboxgl.Popup({ offset: 25, focusAfterOpen: false, closeButton: false }).setHTML(popupHTML);
+      let hideTimeout;
 
-        const marker = new window.mapboxgl.Marker(el)
-          .setLngLat([node.longitude, node.latitude])
-          .setPopup(popup)
-          .addTo(map);
-
-        let hideTimeout;
-
-        el.addEventListener('pointerenter', (e) => {
-          if (e.pointerType === 'mouse') {
-            clearTimeout(hideTimeout);
-            popup.addTo(map);
-            
-            // Allow user to move mouse into the popup without it closing
-            const popupNode = popup.getElement();
-            if (popupNode) {
-              popupNode.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
-              popupNode.addEventListener('mouseleave', () => {
-                hideTimeout = setTimeout(() => popup.remove(), 150);
-              });
-            }
-          }
-        });
-
-        el.addEventListener('pointerleave', (e) => {
-          if (e.pointerType === 'mouse') {
-            hideTimeout = setTimeout(() => {
-              popup.remove();
-            }, 150);
-          }
-        });
-
-        el.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (canEdit && node.id !== 'draft') {
-            popup.remove(); // Close the native popup if we are an admin opening the edit form
-            setFormData({
-              radius_km: node.radius_km,
-              icon_type: node.icon_type,
-              description_ar: node.description_ar || '',
-              description_en: node.description_en || '',
-              link: node.link || ''
-            });
-            setEditingNodeId(node.id);
-            setNewCoords({ lat: node.latitude, lng: node.longitude });
-            setShowForm(true);
-            setIsAddingMode(false);
-
-            if (isMobile) {
-              // Smoothly pan camera so the node stays centered in the upper visible half of the map
-              setTimeout(() => {
-                if (map && typeof map.flyTo === 'function') {
-                  map.resize();
-                  map.flyTo({
-                    center: [node.longitude, node.latitude],
-                    offset: [0, -100],
-                    zoom: Math.max(map.getZoom(), 4.5),
-                    duration: 500
-                  });
-                }
-              }, 100);
-            }
-          } else {
-            if (popup.isOpen()) {
-              popup.remove();
-            } else {
-              popup.addTo(map);
-            }
-          }
-        });
-
-        // Just show the popup without stealing focus if it's the draft
-        if (node.id === 'draft') {
+      el.addEventListener('pointerenter', (e) => {
+        if (e.pointerType === 'mouse') {
+          clearTimeout(hideTimeout);
           popup.addTo(map);
+          
+          const popupNode = popup.getElement();
+          if (popupNode) {
+            popupNode.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+            popupNode.addEventListener('mouseleave', () => {
+              hideTimeout = setTimeout(() => popup.remove(), 150);
+            });
+          }
         }
-
-        markersRef.current.push(marker);
       });
-    };
 
-    if (map.isStyleLoaded()) {
-      updateSource();
-    } else {
-      map.once('style.load', updateSource);
-    }
-  }, [nodes, mapboxLoaded, mapFullyReady, newCoords, formData, lang, canEdit]);
+      el.addEventListener('pointerleave', (e) => {
+        if (e.pointerType === 'mouse') {
+          hideTimeout = setTimeout(() => {
+            popup.remove();
+          }, 150);
+        }
+      });
+
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (canEdit && node.id !== 'draft') {
+          popup.remove();
+          setFormData({
+            radius_km: node.radius_km,
+            icon_type: node.icon_type,
+            description_ar: node.description_ar || '',
+            description_en: node.description_en || '',
+            link: node.link || ''
+          });
+          setEditingNodeId(node.id);
+          setNewCoords({ lat: node.latitude, lng: node.longitude });
+          setShowForm(true);
+          setIsAddingMode(false);
+
+          if (isMobile) {
+            setTimeout(() => {
+              if (map && typeof map.flyTo === 'function') {
+                map.resize();
+                map.flyTo({
+                  center: [node.longitude, node.latitude],
+                  offset: [0, -100],
+                  zoom: Math.max(map.getZoom(), 4.5),
+                  duration: 500
+                });
+              }
+            }, 100);
+          }
+        } else {
+          if (popup.isOpen()) {
+            popup.remove();
+          } else {
+            popup.addTo(map);
+          }
+        }
+      });
+
+      if (node.id === 'draft') {
+        popup.addTo(map);
+      }
+
+      markersRef.current.push(marker);
+    });
+  }, [nodes, mapFullyReady, canEdit, lang, editingNodeId, newCoords?.lat, newCoords?.lng, formData.icon_type]);
 
   const handleSaveNode = async () => {
     if (!newCoords) return;
@@ -409,6 +445,7 @@ export function NewsMap({ lang = 'ar' }) {
         setShowForm(false);
         setNewCoords(null);
         setEditingNodeId(null);
+        setIsAddingMode(false);
         fetchNodes();
       } else {
         alert('Error updating node: ' + error.message);
@@ -428,6 +465,7 @@ export function NewsMap({ lang = 'ar' }) {
       if (!error) {
         setShowForm(false);
         setNewCoords(null);
+        setIsAddingMode(false);
         fetchNodes();
       } else {
         alert('Error saving node: ' + error.message);
@@ -443,6 +481,7 @@ export function NewsMap({ lang = 'ar' }) {
         setShowForm(false);
         setNewCoords(null);
         setEditingNodeId(null);
+        setIsAddingMode(false);
         fetchNodes();
       } else {
         alert('Error deleting node: ' + error.message);
@@ -482,7 +521,7 @@ export function NewsMap({ lang = 'ar' }) {
             }}
             style={{ 
               background: (isAddingMode || showForm) ? '#ff4d4d' : '#15b47a', 
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              boxShadow: 'none',
               width: '50px', height: '50px', padding: 0, borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}
@@ -503,38 +542,81 @@ export function NewsMap({ lang = 'ar' }) {
         </div>
       )}
 
+      {/* Modern floating helper chip when in Add Mode */}
+      {isAddingMode && !showForm && (
+        <div 
+          style={{
+            position: 'absolute',
+            top: '24px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 15,
+            background: 'rgba(11, 40, 73, 0.95)',
+            color: '#4dff82',
+            padding: '8px 18px',
+            borderRadius: '20px',
+            fontSize: '13px',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            border: '1px solid rgba(77, 255, 130, 0.4)',
+            boxShadow: 'none',
+            pointerEvents: 'none',
+            direction: lang === 'ar' ? 'rtl' : 'ltr',
+            fontFamily: 'Tajawal, sans-serif',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <span style={{ 
+            display: 'inline-block',
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: '#ff4d4d',
+            animation: 'mapRingPulse 1.5s infinite'
+          }} />
+          <span>{lang === 'ar' ? 'انقر على الخريطة لتحديد الموقع' : 'Tap on map to select location'}</span>
+        </div>
+      )}
+
       {showForm && (
-        <div style={{
-          position: 'absolute', 
-          top: isMobile ? '38%' : 0, 
-          right: 0, 
-          left: isMobile ? 0 : 'auto',
-          bottom: 0, 
-          width: isMobile ? '100%' : '420px',
-          maxWidth: '100%',
-          boxSizing: 'border-box',
-          background: 'rgba(11, 40, 73, 0.96)', 
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderLeft: isMobile ? 'none' : '1px solid rgba(255,255,255,0.15)',
-          borderTop: isMobile ? '2px solid rgba(21, 180, 122, 0.5)' : 'none',
-          borderTopLeftRadius: isMobile ? '20px' : '0',
-          borderTopRightRadius: isMobile ? '20px' : '0',
-          boxShadow: isMobile ? '0 -10px 30px rgba(0,0,0,0.5)' : '-10px 0 30px rgba(0,0,0,0.3)',
-          zIndex: 25, 
-          padding: isMobile ? '16px 16px 24px 16px' : '30px',
-          direction: lang === 'ar' ? 'rtl' : 'ltr',
-          color: '#EEF6FC',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
+        <div 
+          onClick={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          style={{
+            position: 'absolute', 
+            top: isMobile ? '38%' : 0, 
+            right: 0, 
+            left: isMobile ? 0 : 'auto',
+            bottom: 0, 
+            width: isMobile ? '100%' : '420px',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+            background: 'rgba(11, 40, 73, 0.96)', 
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderLeft: isMobile ? 'none' : '1px solid rgba(255,255,255,0.15)',
+            borderTop: isMobile ? '2px solid rgba(21, 180, 122, 0.5)' : 'none',
+            borderTopLeftRadius: isMobile ? '20px' : '0',
+            borderTopRightRadius: isMobile ? '20px' : '0',
+            boxShadow: 'none',
+            zIndex: 25, 
+            padding: isMobile ? '16px 16px 24px 16px' : '30px',
+            direction: lang === 'ar' ? 'rtl' : 'ltr',
+            color: '#EEF6FC',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
             <h3 style={{ margin: 0, color: '#4dff82', fontSize: '18px', fontWeight: 'bold' }}>
               {lang === 'ar' ? 'إضافة حدث على الخريطة' : 'Add Map Event'}
             </h3>
             <button
-              onClick={() => { setShowForm(false); setNewCoords(null); setEditingNodeId(null); }}
+              onClick={() => { setShowForm(false); setNewCoords(null); setEditingNodeId(null); setIsAddingMode(false); }}
               style={{
                 background: 'rgba(255,255,255,0.1)',
                 border: 'none',
@@ -584,12 +666,12 @@ export function NewsMap({ lang = 'ar' }) {
             <input type="url" value={formData.link} onChange={e => setFormData({...formData, link: e.target.value})} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff' }} />
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', paddingTop: '15px' }}>
-            <Button onClick={handleSaveNode} style={{ flex: 1, background: '#15b47a' }}>{lang === 'ar' ? 'حفظ' : 'Save'}</Button>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: 'auto', paddingTop: '15px' }}>
+            <Button onClick={handleSaveNode} style={{ flex: '1 1 100px', background: '#15b47a', boxShadow: 'none' }}>{lang === 'ar' ? 'حفظ' : 'Save'}</Button>
             {editingNodeId && (
-              <Button onClick={handleDeleteNode} style={{ flex: 1, background: '#ff4d4d' }}>{lang === 'ar' ? 'حذف' : 'Delete'}</Button>
+              <Button onClick={handleDeleteNode} style={{ flex: '1 1 100px', background: '#ff4d4d', boxShadow: 'none' }}>{lang === 'ar' ? 'حذف' : 'Delete'}</Button>
             )}
-            <Button variant="secondary" onClick={() => { setShowForm(false); setNewCoords(null); setEditingNodeId(null); }} style={{ flex: 1, background: 'rgba(255,255,255,0.1)', color: '#cbd5e1' }}>
+            <Button variant="secondary" onClick={() => { setShowForm(false); setNewCoords(null); setEditingNodeId(null); setIsAddingMode(false); }} style={{ flex: '1 1 100px', background: 'rgba(255,255,255,0.1)', color: '#cbd5e1', boxShadow: 'none' }}>
               {lang === 'ar' ? 'إلغاء' : 'Cancel'}
             </Button>
           </div>

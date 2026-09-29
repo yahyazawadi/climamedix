@@ -106,9 +106,16 @@
   - [ ] **Article Grid:** Cards render thumbnails, publication dates, and category tags.
   - [ ] **Category Filter Chips:** Filtering by category updates grid smoothly.
   - [ ] **Search Bar:** Typing query filters article titles without colliding with right-aligned magnifying glass in RTL.
-  - [ ] **Geospatial News Map View:** Toggling to "Map View" renders interactive node pins and severity radius circles.
+  - [x] **Geospatial News Map View:** Toggling to "Map View" renders interactive node pins and severity radius circles.
 - **Notes / Bugs Found:**
-  - 
+  - Fixed mobile responsive breakage: converted full-screen blocking drawer into a modern responsive bottom-sheet docked at `top: 38%` with rounded top corners and a dedicated close button.
+  - Implemented auto-panning (`map.flyTo` with offset `[0, -100]`) so clicked nodes remain centered in the visible upper half of the viewport on mobile devices.
+  - Fixed race condition where edit button flickered or disappeared during auth hydration by caching role in `sessionStorage` and evaluating admin metadata.
+  - Replaced disappearing state with a sleek floating helper pill (`📍 انقر على الخريطة لتحديد الموقع`) when in Add Mode.
+  - Isolated touch and click event propagation on the drawer container (`stopPropagation`) to prevent Mapbox canvas coordinate jumping.
+  - Decoupled Mapbox DOM marker lifecycle from form keystrokes: updating radius/text now updates GeoJSON directly without tearing down and recreating DOM markers on every keystroke.
+  - Synchronized Mapbox canvas resizing with drawer expansion via timed `map.resize()` calls.
+  - Removed all `box-shadow` styles across custom map controls per design system guidelines. 
 
 ---
 

@@ -5,6 +5,7 @@ import { translations } from '../../i18n/translations';
 import { Button } from '../shared/components/Button';
 import { useAuth } from '../auth/hooks/useAuth';
 import { GlassCard } from '../shared/components/GlassCard';
+import { Microscope, Stethoscope } from 'lucide-preact';
 
 export function JoinUsPage({ lang, onNavigate }) {
   const { hasPermission } = useAuth();
@@ -368,7 +369,7 @@ export function JoinUsPage({ lang, onNavigate }) {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       flexShrink: 0
                     }}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="1"/><path d="M16 2v4"/><path d="M12 2v4"/><path d="M12 6a4 4 0 0 1 4 4c0 5-6 10-6 10S4 15 4 10a4 4 0 0 1 4-4h4z"/><path d="M16 6a4 4 0 0 1 4 4c0 2.5-2 5.5-4 7.5"/></svg>
+                      <Microscope size={26} color="#ffffff" strokeWidth={2.8} />
                     </div>
                     <h4 style={{ margin: 0, color: '#0b2849', fontSize: '17px', fontWeight: 'bold',
                       fontFamily: isArabic ? 'Tajawal, sans-serif' : 'Outfit, sans-serif'
@@ -396,7 +397,7 @@ export function JoinUsPage({ lang, onNavigate }) {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       flexShrink: 0
                     }}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+                      <Stethoscope size={26} color="#ffffff" strokeWidth={2.8} />
                     </div>
                     <h4 style={{ margin: 0, color: '#0b2849', fontSize: '17px', fontWeight: 'bold',
                       fontFamily: isArabic ? 'Tajawal, sans-serif' : 'Outfit, sans-serif'
@@ -424,8 +425,8 @@ export function JoinUsPage({ lang, onNavigate }) {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                   }}>
                     {selectedTrack === 'research'
-                      ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="1"/><path d="M16 2v4"/><path d="M12 2v4"/><path d="M12 6a4 4 0 0 1 4 4c0 5-6 10-6 10S4 15 4 10a4 4 0 0 1 4-4h4z"/><path d="M16 6a4 4 0 0 1 4 4c0 2.5-2 5.5-4 7.5"/></svg>
-                      : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+                      ? <Microscope size={18} color="#ffffff" strokeWidth={2.8} />
+                      : <Stethoscope size={18} color="#ffffff" strokeWidth={2.8} />
                     }
                   </div>
                   <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#0b2849', flex: 1,

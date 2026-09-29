@@ -14,29 +14,8 @@ export function NewsMap({ lang = 'ar' }) {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
   const hasInitialFitted = useRef(false);
   
-  const { hasPermission, user, userProfile } = useAuth();
-  
-  // Persistent edit privilege check to prevent ghost button flashing during auth hydration
-  const isDevAdmin = typeof window !== 'undefined' && (
-    localStorage.getItem('dev_admin_mode') === 'true' || 
-    sessionStorage.getItem('dev_admin_mode') === 'true'
-  );
-  const cachedRole = typeof window !== 'undefined' ? (
-    localStorage.getItem('user_role') || 
-    sessionStorage.getItem('user_role')
-  ) : null;
-  const isRoleAdmin = userProfile?.role === 'admin' || userProfile?.role === 'superadmin' ||
-    user?.app_metadata?.role === 'admin' || user?.app_metadata?.role === 'superadmin' ||
-    user?.user_metadata?.role === 'admin' || user?.user_metadata?.role === 'superadmin' ||
-    cachedRole === 'admin' || cachedRole === 'superadmin';
-
-  const canEdit = Boolean(hasPermission('edit:news_map') || isDevAdmin || isRoleAdmin);
-
-  useEffect(() => {
-    if (canEdit && typeof window !== 'undefined') {
-      try { sessionStorage.setItem('user_role', 'admin'); } catch (_) {}
-    }
-  }, [canEdit]);
+  const { hasPermission, user } = useAuth();
+  const canEdit = Boolean(hasPermission && hasPermission('edit:news_map'));
 
   const [isAddingMode, setIsAddingMode] = useState(false);
   const [showForm, setShowForm] = useState(false);

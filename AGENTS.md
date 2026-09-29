@@ -1,0 +1,22 @@
+# ClimaMedix Engineering Guidelines & Behavioral Rules
+
+## 1. Strict Permission Enforcement (NO BYPASS / NO FALLBACKS)
+- **Single Source of Truth**: Feature permissions MUST ALWAYS be evaluated strictly through `hasPermission(permission)`.
+- **CRITICAL — NEVER Add Role Fallbacks to Feature Checks**:
+  - ❌ **NEVER write**: `hasPermission('...') || isRoleAdmin || role === 'admin' || isDevAdmin || cachedRole === 'superadmin'`
+  - ✅ **ALWAYS write**: `Boolean(hasPermission && hasPermission('...'))`
+- **Why this is strictly forbidden**:
+  - Superadmins and Admins can dynamically disable any permission from the profile dropdown menu ("صلاحيات الحساب النشطة" / Active Account Permissions, backed by `disabled_permissions` in `localStorage`) to test and verify lower-tier user experiences.
+  - Adding role-based fallbacks or cached role bypasses completely circumvents `evaluatePermission()`, breaking the Superadmin permission toggle engine and causing test suite failures (`superadmin_toggles_matrix.test.jsx`).
+  - If a button or control shouldn't disappear during cold session loading, handle loading skeletons or auth state cleanly in the parent provider — NEVER by short-circuiting permission checks with role fallbacks.
+
+## 2. UI & Design System Guidelines
+- **Zero Custom Box-Shadows**:
+  - Custom cards, buttons, drawers, bottom-sheets, and modals must use `boxShadow: 'none'` (or subtle border lines `1px solid rgba(...)`), adhering to the project's flat design language.
+- **Mobile Responsiveness (<= 768px)**:
+  - Mobile modals and forms must use docked bottom-sheets (e.g. `top: 38%`, `borderRadius: '20px 20px 0 0'`) or full-viewport overlays.
+  - Canvas overlays (such as Mapbox WebGL canvas) must synchronize dimension changes via `map.resize()` on transition start and completion.
+  - All interactive drawers must isolate pointer/touch events (`e.stopPropagation()`) so underlying canvas gestures are not erroneously triggered.
+- **Bilingual & Directional Integrity**:
+  - Fully support both Arabic (`dir="rtl"`) and English (`dir="ltr"`).
+  - Do not hardcode directional margins or absolute alignments without respecting the active `lang` (`ar` vs `en`).

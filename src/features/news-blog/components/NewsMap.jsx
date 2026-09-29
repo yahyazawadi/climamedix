@@ -542,44 +542,6 @@ export function NewsMap({ lang = 'ar' }) {
         </div>
       )}
 
-      {/* Modern floating helper chip when in Add Mode */}
-      {isAddingMode && !showForm && (
-        <div 
-          style={{
-            position: 'absolute',
-            top: '24px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 15,
-            background: 'rgba(11, 40, 73, 0.95)',
-            color: '#4dff82',
-            padding: '8px 18px',
-            borderRadius: '20px',
-            fontSize: '13px',
-            fontWeight: '600',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            border: '1px solid rgba(77, 255, 130, 0.4)',
-            boxShadow: 'none',
-            pointerEvents: 'none',
-            direction: lang === 'ar' ? 'rtl' : 'ltr',
-            fontFamily: 'Tajawal, sans-serif',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          <span style={{ 
-            display: 'inline-block',
-            width: '8px',
-            height: '8px',
-            borderRadius: '50%',
-            background: '#ff4d4d',
-            animation: 'mapRingPulse 1.5s infinite'
-          }} />
-          <span>{lang === 'ar' ? 'انقر على الخريطة لتحديد الموقع' : 'Tap on map to select location'}</span>
-        </div>
-      )}
-
       {showForm && (
         <div 
           onClick={(e) => e.stopPropagation()}

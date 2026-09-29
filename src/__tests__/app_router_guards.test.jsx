@@ -829,7 +829,6 @@ describe('AppRouter Comprehensive Permission Matrix & Routing Suite', () => {
       expect(getViewFromPath('/admin/courses')).toBe('admin-courses');
       expect(getViewFromPath('/admin/certificates')).toBe('admin-certificates');
       expect(getViewFromPath('/admin/slider')).toBe('admin-slider');
-      expect(getViewFromPath('/test')).toBe('debug');
     });
 
     it('resolves dynamic certificate verification parameterized paths', () => {

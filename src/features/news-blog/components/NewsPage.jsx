@@ -104,16 +104,19 @@ export function NewsPage({ lang, onNavigate }) {
         </div>
       </div>
 
-      <div style={{ 
-        flexGrow: 1,
-        padding: '50px 20px 80px 20px',
-        position: 'relative',
-        zIndex: 1,
-        background: '#f8fafc',
-        width: '100%',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto 40px auto' }}>
+      <div 
+        className="news-page-body"
+        style={{ 
+          flexGrow: 1,
+          padding: 'clamp(20px, 4vw, 50px) clamp(12px, 3vw, 20px) 80px clamp(12px, 3vw, 20px)',
+          position: 'relative',
+          zIndex: 1,
+          background: '#f8fafc',
+          width: '100%',
+          boxSizing: 'border-box'
+        }}
+      >
+        <div style={{ maxWidth: '1200px', margin: '0 auto clamp(24px, 4vw, 40px) auto', width: '100%' }}>
           <NewsMap lang={lang} />
         </div>
         {loading ? (

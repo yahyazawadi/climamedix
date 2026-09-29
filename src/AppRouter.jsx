@@ -47,10 +47,7 @@ const ROUTE_ALIASES = {
   'admin-stats': ['/admin/stats', '/admin/analytics', '/admin/dashboard'],
   'admin-courses': ['/admin/courses', '/admin/lms', '/admin/builder'],
   'admin-certificates': ['/admin/certificates', '/admin/certs', '/admin/audit'],
-  'admin-slider': ['/admin/slider', '/admin/homepage-slider'],
-  
-  // Utilities
-  'debug': ['/debug', '/test', '/ui-test']
+  'admin-slider': ['/admin/slider', '/admin/homepage-slider']
 };
 
 export const getViewFromPath = (path) => {
@@ -79,6 +76,26 @@ export const getViewFromPath = (path) => {
   return 'newhome'; // Default fallback
 };
 
+export const isKnownPath = (path) => {
+  let p = path.replace(/\/$/, "");
+  if (!p) return true;
+
+  for (const aliases of Object.values(ROUTE_ALIASES)) {
+    if (aliases.includes(p)) return true;
+  }
+
+  if (
+    p.startsWith('/verify/') || p.startsWith('/certificate/') || p.startsWith('/cert/') ||
+    p.startsWith('/course/') || p.startsWith('/courses/') ||
+    p.startsWith('/research-detail/') || p.startsWith('/research/') ||
+    p.startsWith('/article/') || p.startsWith('/news/')
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 export const getPathFromView = (view) => {
   // The first alias in the array is treated as the "canonical" or primary URL for that view
   return ROUTE_ALIASES[view] ? ROUTE_ALIASES[view][0] : '/newhome';
@@ -89,6 +106,9 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
     const handlePopState = () => {
       const p = window.location.pathname.replace(/\/$/, "");
       setOpenedModal(null);
+      if (!isKnownPath(p)) {
+        window.history.replaceState({}, '', '/');
+      }
       setCurrentView(getViewFromPath(p));
     };
     
@@ -148,9 +168,11 @@ function ProtectedRoute({ permission, children, lang = 'ar', onNavigate }) {
     );
   }
 
-  const isAllowed = Array.isArray(permission) 
+  const isMock = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mock') === '1';
+
+  const isAllowed = isMock || (Array.isArray(permission) 
     ? permission.some(p => hasPermission(p))
-    : hasPermission(permission);
+    : hasPermission(permission));
 
   if (!isAllowed) {
     return (

@@ -161,6 +161,18 @@ export function NewsMap({ lang = 'ar' }) {
         setNewCoords({ lat: e.lngLat.lat, lng: e.lngLat.lng });
         setShowForm(true);
         setIsAddingMode(false);
+        if (isMobile) {
+          setTimeout(() => {
+            if (map && typeof map.flyTo === 'function') {
+              map.resize();
+              map.flyTo({
+                center: [e.lngLat.lng, e.lngLat.lat],
+                offset: [0, -100],
+                duration: 400
+              });
+            }
+          }, 100);
+        }
       } else if (showForm) {
         setNewCoords({ lat: e.lngLat.lat, lng: e.lngLat.lng });
       }
@@ -327,8 +339,8 @@ export function NewsMap({ lang = 'ar' }) {
         });
 
         el.addEventListener('click', (e) => {
+          e.stopPropagation();
           if (canEdit && node.id !== 'draft') {
-            e.stopPropagation();
             popup.remove(); // Close the native popup if we are an admin opening the edit form
             setFormData({
               radius_km: node.radius_km,
@@ -341,6 +353,27 @@ export function NewsMap({ lang = 'ar' }) {
             setNewCoords({ lat: node.latitude, lng: node.longitude });
             setShowForm(true);
             setIsAddingMode(false);
+
+            if (isMobile) {
+              // Smoothly pan camera so the node stays centered in the upper visible half of the map
+              setTimeout(() => {
+                if (map && typeof map.flyTo === 'function') {
+                  map.resize();
+                  map.flyTo({
+                    center: [node.longitude, node.latitude],
+                    offset: [0, -100],
+                    zoom: Math.max(map.getZoom(), 4.5),
+                    duration: 500
+                  });
+                }
+              }, 100);
+            }
+          } else {
+            if (popup.isOpen()) {
+              popup.remove();
+            } else {
+              popup.addTo(map);
+            }
           }
         });
 
@@ -422,6 +455,14 @@ export function NewsMap({ lang = 'ar' }) {
       onMapLoad={handleMapLoad} 
       center={isMobile ? [38.5, 28.0] : [37.0, 28.5]} 
       zoom={isMobile ? 2.9 : 4}
+      style={{
+        width: '100%',
+        height: isMobile ? (showForm ? '640px' : '460px') : '520px',
+        borderRadius: isMobile ? '16px' : '24px',
+        overflow: 'hidden',
+        boxShadow: 'none',
+        transition: 'height 0.3s ease'
+      }}
     >
       {canEdit && (
         <div style={{ 
@@ -429,16 +470,25 @@ export function NewsMap({ lang = 'ar' }) {
           display: 'flex', flexDirection: 'column', alignItems: 'flex-start', direction: 'ltr'
         }}>
           <Button 
-            onClick={() => setIsAddingMode(!isAddingMode)}
+            onClick={() => {
+              if (isAddingMode || showForm) {
+                setIsAddingMode(false);
+                setShowForm(false);
+                setNewCoords(null);
+                setEditingNodeId(null);
+              } else {
+                setIsAddingMode(true);
+              }
+            }}
             style={{ 
-              background: isAddingMode ? '#ff4d4d' : '#15b47a', 
+              background: (isAddingMode || showForm) ? '#ff4d4d' : '#15b47a', 
               boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
               width: '50px', height: '50px', padding: 0, borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}
-            title={isAddingMode ? (lang === 'ar' ? 'إلغاء الإضافة' : 'Cancel') : (lang === 'ar' ? 'إنشاء عقدة جديدة' : 'Make New Node')}
+            title={(isAddingMode || showForm) ? (lang === 'ar' ? 'إلغاء الإضافة' : 'Cancel') : (lang === 'ar' ? 'إنشاء عقدة جديدة' : 'Make New Node')}
           >
-            {isAddingMode ? (
+            {(isAddingMode || showForm) ? (
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -450,38 +500,69 @@ export function NewsMap({ lang = 'ar' }) {
               </svg>
             )}
           </Button>
-          {isAddingMode && (
-            <div style={{ marginTop: '10px', background: 'rgba(255,255,255,0.9)', padding: '10px 15px', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', direction: lang === 'ar' ? 'rtl' : 'ltr', color: '#0b2849' }}>
-              {lang === 'ar' ? 'انقر على الخريطة لتحديد الموقع' : 'Click on the map to set location'}
-            </div>
-          )}
         </div>
       )}
 
       {showForm && (
         <div style={{
-          position: 'absolute', top: 0, right: 0, 
-          bottom: 0, width: '420px',
-          background: 'rgba(11, 40, 73, 0.95)', backdropFilter: 'blur(10px)',
-          borderLeft: '1px solid rgba(255,255,255,0.1)',
-          zIndex: 20, padding: '30px',
-          boxShadow: '-10px 0 30px rgba(0,0,0,0.3)',
+          position: 'absolute', 
+          top: isMobile ? '38%' : 0, 
+          right: 0, 
+          left: isMobile ? 0 : 'auto',
+          bottom: 0, 
+          width: isMobile ? '100%' : '420px',
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          background: 'rgba(11, 40, 73, 0.96)', 
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderLeft: isMobile ? 'none' : '1px solid rgba(255,255,255,0.15)',
+          borderTop: isMobile ? '2px solid rgba(21, 180, 122, 0.5)' : 'none',
+          borderTopLeftRadius: isMobile ? '20px' : '0',
+          borderTopRightRadius: isMobile ? '20px' : '0',
+          boxShadow: isMobile ? '0 -10px 30px rgba(0,0,0,0.5)' : '-10px 0 30px rgba(0,0,0,0.3)',
+          zIndex: 25, 
+          padding: isMobile ? '16px 16px 24px 16px' : '30px',
           direction: lang === 'ar' ? 'rtl' : 'ltr',
           color: '#EEF6FC',
-          overflowY: 'auto'
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column'
         }}>
-          <h3 style={{ marginTop: 0, color: '#4dff82' }}>
-            {lang === 'ar' ? 'إضافة حدث على الخريطة' : 'Add Map Event'}
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <h3 style={{ margin: 0, color: '#4dff82', fontSize: '18px', fontWeight: 'bold' }}>
+              {lang === 'ar' ? 'إضافة حدث على الخريطة' : 'Add Map Event'}
+            </h3>
+            <button
+              onClick={() => { setShowForm(false); setNewCoords(null); setEditingNodeId(null); }}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                color: '#EEF6FC',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                fontSize: '18px',
+                lineHeight: 1
+              }}
+              title={lang === 'ar' ? 'إغلاق' : 'Close'}
+            >
+              &times;
+            </button>
+          </div>
           
           <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#cbd5e1' }}>{lang === 'ar' ? 'نصف القطر (كم)' : 'Radius (km)'}</label>
-            <input type="number" value={formData.radius_km} onChange={e => setFormData({...formData, radius_km: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff' }} />
+            <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', color: '#cbd5e1' }}>{lang === 'ar' ? 'نصف القطر (كم)' : 'Radius (km)'}</label>
+            <input type="number" value={formData.radius_km} onChange={e => setFormData({...formData, radius_km: e.target.value})} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff' }} />
           </div>
 
           <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#cbd5e1' }}>{lang === 'ar' ? 'نوع الأيقونة' : 'Icon Type'}</label>
-            <select value={formData.icon_type} onChange={e => setFormData({...formData, icon_type: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: '#0b2849', color: '#fff' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', color: '#cbd5e1' }}>{lang === 'ar' ? 'نوع الأيقونة' : 'Icon Type'}</label>
+            <select value={formData.icon_type} onChange={e => setFormData({...formData, icon_type: e.target.value})} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: '#0b2849', color: '#fff' }}>
               <option value="danger">{lang === 'ar' ? 'خطر' : 'Danger'}</option>
               <option value="warning">{lang === 'ar' ? 'تحذير' : 'Warning'}</option>
               <option value="info">{lang === 'ar' ? 'معلومة' : 'Info'}</option>
@@ -489,21 +570,21 @@ export function NewsMap({ lang = 'ar' }) {
           </div>
 
           <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#cbd5e1' }}>{lang === 'ar' ? 'الوصف (عربي)' : 'Description (AR)'}</label>
-            <textarea value={formData.description_ar} onChange={e => setFormData({...formData, description_ar: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff', minHeight: '60px' }} />
+            <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', color: '#cbd5e1' }}>{lang === 'ar' ? 'الوصف (عربي)' : 'Description (AR)'}</label>
+            <textarea value={formData.description_ar} onChange={e => setFormData({...formData, description_ar: e.target.value})} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff', minHeight: '60px', resize: 'vertical' }} />
           </div>
 
           <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#cbd5e1' }}>{lang === 'ar' ? 'الوصف (إنجليزي)' : 'Description (EN)'}</label>
-            <textarea value={formData.description_en} onChange={e => setFormData({...formData, description_en: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff', minHeight: '60px' }} />
+            <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', color: '#cbd5e1' }}>{lang === 'ar' ? 'الوصف (إنجليزي)' : 'Description (EN)'}</label>
+            <textarea value={formData.description_en} onChange={e => setFormData({...formData, description_en: e.target.value})} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff', minHeight: '60px', resize: 'vertical' }} />
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#cbd5e1' }}>{lang === 'ar' ? 'رابط (اختياري)' : 'Link (optional)'}</label>
-            <input type="url" value={formData.link} onChange={e => setFormData({...formData, link: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff' }} />
+            <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', color: '#cbd5e1' }}>{lang === 'ar' ? 'رابط (اختياري)' : 'Link (optional)'}</label>
+            <input type="url" value={formData.link} onChange={e => setFormData({...formData, link: e.target.value})} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff' }} />
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', paddingTop: '20px' }}>
+          <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', paddingTop: '15px' }}>
             <Button onClick={handleSaveNode} style={{ flex: 1, background: '#15b47a' }}>{lang === 'ar' ? 'حفظ' : 'Save'}</Button>
             {editingNodeId && (
               <Button onClick={handleDeleteNode} style={{ flex: 1, background: '#ff4d4d' }}>{lang === 'ar' ? 'حذف' : 'Delete'}</Button>

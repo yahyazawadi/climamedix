@@ -2,12 +2,35 @@ import { useState, useEffect } from 'preact/hooks';
 import { supabase } from '../../../../utils/supabaseClient';
 import { CertificateGenerator } from './CertificateGenerator';
 
+// ─── DEV MOCK DATA ────────────────────────────────────────────────────────────
+// Injected when ?mock=1 is present in the URL. Remove before production deploy.
+const MOCK_CERT = {
+  id: 'mock-cert-dev-001',
+  status: 'approved',
+  requested_name_ar: 'د. يحيى الزوادي',
+  requested_name_en: 'Dr. Yahya Al-Zawadi',
+  courses: {
+    title_ar: 'زمالة طب الكوارث المناخية والبيئية',
+    title_en: 'Climate & Environmental Disaster Medicine Fellowship',
+  },
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function CertificateVerificationPage({ lang = 'ar', certId }) {
   const [certRequest, setCertRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // DEV BYPASS: ?mock=1 skips Supabase and renders fake data instantly
+    const isMock = new URLSearchParams(window.location.search).get('mock') === '1';
+    if (isMock) {
+      console.warn('[DEV] Certificate verification running in MOCK mode — not hitting Supabase.');
+      setCertRequest({ ...MOCK_CERT, id: certId || MOCK_CERT.id });
+      setLoading(false);
+      return;
+    }
+
     async function verifyCert() {
       try {
         setLoading(true);

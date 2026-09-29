@@ -308,7 +308,7 @@ describe('Geospatial NewsMap: Interactive Points & Radius Circle Matrix', () => 
       fireEvent.click(container.querySelector('button[title="إنشاء عقدة جديدة"]'));
 
       await waitFor(() => {
-        expect(screen.getByText('انقر على الخريطة لتحديد الموقع')).toBeInTheDocument();
+        expect(container.querySelector('button[title="إلغاء الإضافة"]')).not.toBeNull();
       });
       expect(activeMapMock.getCanvas().style.cursor).toContain('data:image/svg+xml');
     });
@@ -326,7 +326,7 @@ describe('Geospatial NewsMap: Interactive Points & Radius Circle Matrix', () => 
 
       // 2. Wait for mode to activate
       await waitFor(() => {
-        expect(screen.getByText('انقر على الخريطة لتحديد الموقع')).toBeInTheDocument();
+        expect(container.querySelector('button[title="إلغاء الإضافة"]')).not.toBeNull();
       });
 
       // 3. Simulate user clicking on the map at Riyadh (Lat: 24.71, Lng: 46.67)
@@ -362,7 +362,7 @@ describe('Geospatial NewsMap: Interactive Points & Radius Circle Matrix', () => 
       fireEvent.click(container.querySelector('button[title="إنشاء عقدة جديدة"]'));
 
       await waitFor(() => {
-        expect(screen.getByText('انقر على الخريطة لتحديد الموقع')).toBeInTheDocument();
+        expect(container.querySelector('button[title="إلغاء الإضافة"]')).not.toBeNull();
       });
 
       act(() => {
@@ -397,7 +397,7 @@ describe('Geospatial NewsMap: Interactive Points & Radius Circle Matrix', () => 
       fireEvent.click(container.querySelector('button[title="إنشاء عقدة جديدة"]'));
 
       await waitFor(() => {
-        expect(screen.getByText('انقر على الخريطة لتحديد الموقع')).toBeInTheDocument();
+        expect(container.querySelector('button[title="إلغاء الإضافة"]')).not.toBeNull();
       });
 
       act(() => {
@@ -661,7 +661,7 @@ describe('Geospatial NewsMap: Interactive Points & Radius Circle Matrix', () => 
       fireEvent.click(container.querySelector('button[title="إنشاء عقدة جديدة"]'));
 
       await waitFor(() => {
-        expect(screen.getByText('انقر على الخريطة لتحديد الموقع')).toBeInTheDocument();
+        expect(container.querySelector('button[title="إلغاء الإضافة"]')).not.toBeNull();
       });
 
       act(() => {

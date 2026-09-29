@@ -7,7 +7,7 @@
 
 ## 📊 Testing Progress Overview
 
-- [ ] **1. Public & Core Visitor Pages** (2/5 Completed)
+- [ ] **1. Public & Core Visitor Pages** (3/5 Completed)
 - [ ] **2. Content Hubs & Community Pages** (0/4 Completed)
 - [ ] **3. Learning Hub (LMS) & Research Center** (0/3 Completed)
 - [ ] **4. User Account & Contributor Authoring Portals** (0/3 Completed)
@@ -40,12 +40,12 @@
 - **URL:** [http://localhost:9090/about](http://localhost:9090/about) *(or `/about-us`, `/info`)*
 - **Access Level:** Public (All)
 - **Checklist:**
-  - [ ] **Mission, Vision & Core Values:** Cards render with clean glassmorphic borders and legible typography.
-  - [ ] **Team Members Grid:** Avatars, roles, and bios display correctly.
-  - [ ] **Strategic Partners Grid:** Partner logos render without distortion.
-  - [ ] **Join Team CTA:** Action button triggers navigation to `/join`.
+  - [x] **Mission, Vision & Core Values:** Cards render with clean glassmorphic borders and legible typography.
+  - [x] **Team Members Grid:** Avatars, roles, and bios display correctly.
+  - [x] **Strategic Partners Grid:** Partner logos render without distortion.
+  - [x] **Join Team CTA:** Action button triggers navigation to `/join`.
 - **Notes / Bugs Found:**
-  - 
+  - Mobile layout was broken due to SVG background clipping and conflicting CSS. Replaced SVG with ambient CSS gradient, added glassmorphic section cards, removed all shadows, fixed RTL/LTR accent bar and checklist direction bugs, and removed conflicting duplicate `.au-container` override.
 
 ---
 
@@ -289,12 +289,19 @@
 - **URL:** [http://localhost:9090/admin/certificates](http://localhost:9090/admin/certificates) *(or `/admin/audit`)*
 - **Access Level:** `issue:certs` or `manage:system`
 - **Checklist:**
-  - [ ] **Pending Claims Queue:** Displays student certificate claim requests.
-  - [ ] **Anti-Cheat Inspection:** Flags suspicious video scrubbing warnings (`⚠️ نشاط مشبوه`).
-  - [ ] **Approval Workflow:** One-click approval issues valid certificate with verifiable serial ID.
-  - [ ] **Rejection Feedback:** Rejecting request requires reason and alerts student in modal.
+  - [x] **Pending Claims Queue:** Displays student certificate claim requests.
+  - [x] **Anti-Cheat Inspection:** Flags suspicious video scrubbing warnings (`⚠️ نشاط مشبوه`).
+  - [x] **Approval Workflow:** One-click approval issues valid certificate with verifiable serial ID.
+  - [x] **Rejection Feedback:** Rejecting request requires reason and alerts student in modal.
 - **Notes / Bugs Found:**
-  - 
+  - Tested via `?mock=1` bypass with two mock requests (req-mock-001 clean, req-mock-002 suspicious).
+  - Added real-time search bar (by Arabic/English name) and custom course dropdown filter.
+  - Fixed mobile layout: master/detail pattern — list and detail panels no longer overlap on small screens. Back button returns to list.
+  - Removed all `box-shadow` from cards and header banner (zero shadows).
+  - Replaced native OS `<select>` dropdown with custom styled dropdown (no OS overlay covering content).
+  - Rejection input is now full-width and stacked vertically (no overflow on mobile).
+  - Approve/Reject in mock mode auto-returns to list view on mobile after action.
+
 
 ---
 
@@ -311,13 +318,3 @@
 
 ---
 
-## 🔧 6. Developer & Debug Tooling
-
-### Page 21: Debug & UI Test
-- **URL:** [http://localhost:9090/debug](http://localhost:9090/debug) *(or `/test`)*
-- **Access Level:** Developer / Superadmin
-- **Checklist:**
-  - [ ] **Component Sandbox:** Test buttons, glass cards, date pickers, and modals in isolation.
-  - [ ] **Permissions Override Playground:** Verify dynamic permission toggles and role switching.
-- **Notes / Bugs Found:**
-  - 

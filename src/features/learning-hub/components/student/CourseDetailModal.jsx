@@ -104,12 +104,41 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
     loadCertRequest();
   }, [completedSet.size, allLessons.length, course.id, userId]);
 
+  // Support ?mockClaim=1 to immediately unlock certificate claim module during manual testing
+  useEffect(() => {
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mockClaim') === '1') {
+      if (allLessons.length > 0) {
+        const fullSet = new Set(allLessons.map(l => l.id));
+        setCompletedSet(fullSet);
+        setActiveLessonId('CERTIFICATE_MODULE');
+      }
+    }
+  }, [allLessons]);
+
   async function handleSubmitCertRequest() {
     if (!certNameAr || !certNameEn) {
       alert(lang === 'ar' ? 'يرجى إدخال اسمك باللغتين العربية والإنجليزية.' : 'Please enter your name in both Arabic and English.');
       return;
     }
     setCertRequestLoading(true);
+
+    const isMock = typeof window !== 'undefined' && (new URLSearchParams(window.location.search).get('mock') === '1' || new URLSearchParams(window.location.search).get('mockClaim') === '1');
+    if (isMock) {
+      setTimeout(() => {
+        setCertRequest({
+          course_id: course.id,
+          user_id: userId || 'mock-user-123',
+          requested_name_ar: certNameAr,
+          requested_name_en: certNameEn,
+          status: 'pending',
+          requested_at: new Date().toISOString()
+        });
+        setCertRequestLoading(false);
+        alert(lang === 'ar' ? 'تم إرسال طلب الشهادة للتدقيق بنجاح!' : 'Certificate claim submitted for review!');
+      }, 500);
+      return;
+    }
+
     const payload = {
       course_id: course.id,
       user_id: userId,

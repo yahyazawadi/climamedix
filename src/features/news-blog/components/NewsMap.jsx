@@ -500,6 +500,7 @@ export function NewsMap({ lang = 'ar' }) {
             }}
             style={{ 
               background: (isAddingMode || showForm) ? '#ff4d4d' : '#15b47a', 
+              border: '2px solid #ffffff',
               boxShadow: 'none',
               width: '50px', height: '50px', padding: 0, borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center'

@@ -7,7 +7,7 @@
 
 ## 📊 Testing Progress Overview
 
-- [ ] **1. Public & Core Visitor Pages** (1/5 Completed)
+- [ ] **1. Public & Core Visitor Pages** (2/5 Completed)
 - [ ] **2. Content Hubs & Community Pages** (0/4 Completed)
 - [ ] **3. Learning Hub (LMS) & Research Center** (0/3 Completed)
 - [ ] **4. User Account & Contributor Authoring Portals** (0/3 Completed)
@@ -49,16 +49,18 @@
 
 ---
 
-### Page 3: Auth / Single Sign-On
-- **URL:** [http://localhost:9090/auth](http://localhost:9090/auth) *(or `/login`, `/signin`)*
+### Page 3: Login / Authentication
+- **URL:** [http://localhost:9090/login](http://localhost:9090/login) *(or `/auth`, `/signin`)*
 - **Access Level:** Public / Guests
 - **Checklist:**
-  - [ ] **Google OAuth Button:** "Sign in with Google" / "تسجيل الدخول عبر Google" triggers popup/redirect.
-  - [ ] **Loading Spinner State:** Displays feedback while session initializes.
-  - [ ] **Already Logged In:** If already authenticated, redirects directly to `/home`.
-  - [ ] **Bilingual Messaging:** Security badges, benefit bullet points, and disclaimer translate cleanly in AR/EN.
+  - [x] **Primary Route & Aliases:** Canonical URL `/login` works seamlessly alongside `/auth`, `/signin`, and `/register`.
+  - [x] **Google OAuth Button:** "Sign in with Google" / "تسجيل الدخول عبر Google" triggers popup/redirect.
+  - [x] **Loading Spinner State:** Displays feedback while session initializes.
+  - [x] **Already Logged In:** If already authenticated, redirects directly to `/home`.
+  - [x] **Bilingual Messaging:** Security badges, benefit bullet points, and disclaimer translate cleanly in AR/EN.
 - **Notes / Bugs Found:**
-  - 
+  - Verified route mapping: canonical route updated to `/login` with full backwards compatibility for `/auth`.
+  - Passed visual & functional inspection.
 
 ---
 

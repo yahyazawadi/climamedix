@@ -669,6 +669,125 @@ describe('Profile Management & Account Security Test Suite (48 Tests)', () => {
       });
     });
 
+    it('displays visual uploading overlay with is-uploading class while avatar upload is in flight', async () => {
+      const s3Client = await import('../utils/s3Client');
+      let resolveUpload;
+      vi.spyOn(s3Client, 'uploadFileToR2').mockReturnValue(new Promise(res => { resolveUpload = res; }));
+
+      const { container } = renderProfileWithAuth(<ProfilePage lang="ar" onNavigate={vi.fn()} />, {
+        role: 'user'
+      });
+
+      const fileInput = container.querySelector('input[type="file"]');
+      const fakeImage = new File(['image bits'], 'avatar.webp', { type: 'application/octet-stream' });
+      fireEvent.change(fileInput, { target: { files: [fakeImage] } });
+
+      // Verify wrapper has is-uploading class and overlay shows "جاري الرفع..."
+      const avatarWrapper = container.querySelector('.avatar-circle-wrapper');
+      expect(avatarWrapper.classList.contains('is-uploading')).toBe(true);
+      expect(container.querySelector('.overlay-text-label').textContent).toBe('جاري الرفع...');
+
+      // Finish upload
+      resolveUpload('https://cdn.climamedix.org/avatars/finished.webp');
+
+      await waitFor(() => {
+        expect(avatarWrapper.classList.contains('is-uploading')).toBe(false);
+      });
+    });
+
+    it('displays error alert when R2 upload returns an empty or null URL', async () => {
+      const s3Client = await import('../utils/s3Client');
+      vi.spyOn(s3Client, 'uploadFileToR2').mockResolvedValueOnce(null);
+
+      const { container } = renderProfileWithAuth(<ProfilePage lang="ar" onNavigate={vi.fn()} />, {
+        role: 'user'
+      });
+
+      const fileInput = container.querySelector('input[type="file"]');
+      const fakeImage = new File(['image'], 'empty_url.webp', { type: 'application/octet-stream' });
+      fireEvent.change(fileInput, { target: { files: [fakeImage] } });
+
+      await waitFor(() => {
+        const alertBox = container.querySelector('.profile-status-alert.alert-error');
+        expect(alertBox).not.toBeNull();
+        expect(alertBox.textContent).toContain('File upload returned empty URL');
+      });
+    });
+
+    it('surfaces database error alert when Supabase profile update fails after upload', async () => {
+      const s3Client = await import('../utils/s3Client');
+      vi.spyOn(s3Client, 'uploadFileToR2').mockResolvedValueOnce('https://cdn.climamedix.org/avatars/uploaded.webp');
+
+      const { supabase } = await import('../utils/supabaseClient');
+      const fromSpy = vi.spyOn(supabase, 'from').mockImplementation((table) => {
+        if (table === 'profiles') {
+          return {
+            update: vi.fn().mockReturnValue({
+              eq: vi.fn().mockResolvedValue({ error: new Error('Postgres lock timeout') })
+            })
+          };
+        }
+        return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ single: vi.fn() }) }) };
+      });
+
+      const { container } = renderProfileWithAuth(<ProfilePage lang="ar" onNavigate={vi.fn()} />, {
+        role: 'user'
+      });
+
+      const fileInput = container.querySelector('input[type="file"]');
+      const fakeImage = new File(['data'], 'avatar.webp', { type: 'application/octet-stream' });
+      fireEvent.change(fileInput, { target: { files: [fakeImage] } });
+
+      await waitFor(() => {
+        const alertBox = container.querySelector('.profile-status-alert.alert-error');
+        expect(alertBox).not.toBeNull();
+        expect(alertBox.textContent).toContain('Postgres lock timeout');
+      });
+
+      fromSpy.mockRestore();
+    });
+
+    it('ignores file change if user cancels file chooser with no file selected', async () => {
+      const s3Client = await import('../utils/s3Client');
+      const uploadSpy = vi.spyOn(s3Client, 'uploadFileToR2');
+
+      const { container } = renderProfileWithAuth(<ProfilePage lang="ar" onNavigate={vi.fn()} />, {
+        role: 'user'
+      });
+
+      const fileInput = container.querySelector('input[type="file"]');
+      fireEvent.change(fileInput, { target: { files: [] } });
+
+      expect(uploadSpy).not.toHaveBeenCalled();
+      expect(container.querySelector('.profile-status-alert')).toBeNull();
+    });
+
+    it('replaces initials fallback with avatar image element upon successful upload', async () => {
+      const s3Client = await import('../utils/s3Client');
+      vi.spyOn(s3Client, 'uploadFileToR2').mockResolvedValueOnce('https://cdn.climamedix.org/avatars/new_photo.webp');
+
+      const { container } = renderProfileWithAuth(<ProfilePage lang="ar" onNavigate={vi.fn()} />, {
+        role: 'user',
+        profileOverrides: { avatar_url: '', full_name: 'سارة خالد' }
+      });
+
+      // Verify initials element is rendered initially
+      expect(container.querySelector('.avatar-initials-el')).not.toBeNull();
+      expect(container.querySelector('.avatar-image-el')).toBeNull();
+
+      // Upload file
+      const fileInput = container.querySelector('input[type="file"]');
+      const fakeImage = new File(['data'], 'avatar.webp', { type: 'application/octet-stream' });
+      fireEvent.change(fileInput, { target: { files: [fakeImage] } });
+
+      await waitFor(() => {
+        expect(container.querySelector('.avatar-initials-el')).toBeNull();
+        const img = container.querySelector('.avatar-image-el');
+        expect(img).not.toBeNull();
+        expect(img.src).toBe('https://cdn.climamedix.org/avatars/new_photo.webp');
+      });
+    });
+
     it('Learning Hub card renders title and empty placeholder in Arabic', () => {
       renderProfileWithAuth(<ProfilePage lang="ar" onNavigate={vi.fn()} />, { role: 'user' });
 

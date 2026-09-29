@@ -74,6 +74,26 @@ export function SliderManagerPage({ lang, onNavigate }) {
     }
   };
 
+  const getEntityTypeLabel = (type, language) => {
+    const t = (type || '').toLowerCase();
+    if (language === 'ar') {
+      if (t.includes('course') || t.includes('training')) return 'دورة تدريبية';
+      if (t.includes('article') || t.includes('news')) return 'مقال';
+      if (t.includes('research')) return 'بحث علمي';
+      if (t.includes('event')) return 'فعالية';
+      if (t.includes('opportunity')) return 'فرصة';
+      if (t.includes('custom')) return 'إعلان';
+      return type;
+    }
+    if (t.includes('course') || t.includes('training')) return 'Course';
+    if (t.includes('article') || t.includes('news')) return 'News';
+    if (t.includes('research')) return 'Research';
+    if (t.includes('event')) return 'Event';
+    if (t.includes('opportunity')) return 'Opportunity';
+    if (t.includes('custom')) return 'Announcement';
+    return type;
+  };
+
   const handleInitiateAdd = (content) => {
     setSelectedContent(content);
     setCustomImageUrl(content.image || '');
@@ -286,7 +306,7 @@ export function SliderManagerPage({ lang, onNavigate }) {
                     </button>
                     <div style={{ padding: '16px' }}>
                       <div style={{ fontSize: '10px', background: 'rgba(21, 180, 122, 0.1)', color: '#15b47a', display: 'inline-block', padding: '4px 8px', borderRadius: '4px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
-                        {item.entity_type}
+                        {getEntityTypeLabel(item.entity_type, lang)}
                       </div>
                       <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 'bold', color: '#0b2849' }}>{lang === 'ar' ? item.title_ar : item.title_en}</h4>
                     </div>
@@ -342,7 +362,7 @@ export function SliderManagerPage({ lang, onNavigate }) {
                       <tr key={idx} style={{ borderBottom: '1px solid rgba(11, 40, 73, 0.05)' }}>
                         <td style={{ padding: '16px' }}>
                           <span style={{ background: 'rgba(21, 180, 122, 0.1)', color: '#15b47a', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>
-                            {item.type}
+                            {getEntityTypeLabel(item.type, lang)}
                           </span>
                         </td>
                         <td style={{ padding: '16px', fontWeight: 'bold', fontSize: '15px', color: '#0b2849' }}>{item.title}</td>

@@ -97,9 +97,15 @@ export function LearningHubPage({ lang, onNavigate }) {
         };
       }));
 
-      // Check URL for course auto-open
+      // Check URL for course auto-open (supports /courses?courseId=..., /courses?course=..., or /courses/:id)
       const params = new URLSearchParams(window.location.search);
-      const urlCourseId = params.get('course');
+      let urlCourseId = params.get('course') || params.get('courseId');
+      if (!urlCourseId) {
+        const pathParts = window.location.pathname.replace(/\/$/, '').split('/');
+        if (pathParts.length > 2 && (pathParts[1] === 'course' || pathParts[1] === 'courses')) {
+          urlCourseId = pathParts[2];
+        }
+      }
       if (urlCourseId) {
         const c = (courses || []).find(x => x.id === urlCourseId);
         if (c) setSelectedCourse(c);

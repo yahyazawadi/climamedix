@@ -48,23 +48,11 @@ export function CalendarSidebarWidget({ lang = 'ar', onNavigate }) {
     <>
       {/* Floating Side Button */}
       <div 
+        className="calendar-sidebar-trigger"
         style={{
-          position: 'fixed',
-          top: '50%',
           [isArabic ? 'left' : 'right']: 0,
-          transform: 'translateY(-50%)',
-          zIndex: 9999,
-          background: 'linear-gradient(135deg, #0b2849, #004c6d)',
-          color: '#fff',
-          padding: '12px 16px',
           borderRadius: isArabic ? '0 12px 12px 0' : '12px 0 0 12px',
-          cursor: 'pointer',
-          boxShadow: isArabic ? '4px 0 15px rgba(0,0,0,0.1)' : '-4px 0 15px rgba(0,0,0,0.1)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          fontWeight: 'bold',
-          transition: 'all 0.3s ease'
+          boxShadow: isArabic ? '4px 0 15px rgba(0,0,0,0.1)' : '-4px 0 15px rgba(0,0,0,0.1)'
         }}
         onClick={() => setIsOpen(true)}
       >

@@ -10,7 +10,7 @@ import { DynamicHomeSlider } from './DynamicHomeSlider'
 import doctorImg from '../../../assets/bg_3.png'
 import whiteLogo from '../../../assets/footer_logo.svg'
 
-export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }) {
+export function HomePage({ lang, setCurrentView, setOpenedModal, onNavigate }) {
   const t = translations[lang] || translations.ar;
   const [publications, setPublications] = useState([]);
   const [loadingPubs, setLoadingPubs] = useState(true);
@@ -408,3 +408,5 @@ export function NewHomePage({ lang, setCurrentView, setOpenedModal, onNavigate }
 
   );
 }
+
+export const NewHomePage = HomePage;

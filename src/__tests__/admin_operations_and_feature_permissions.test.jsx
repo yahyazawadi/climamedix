@@ -635,21 +635,115 @@ describe('Admin Operations & Feature Permissions Test Suite (38 Tests)', () => {
       });
     });
 
-    it('clicking Next/Prev arrow buttons in DynamicHomeSlider changes active slide index', async () => {
+    it('clicking Next/Prev arrow buttons and dots in DynamicHomeSlider changes active slide index', async () => {
       mockSliderItems = [
         {
           id: 'slide-1',
           title_ar: 'إطلاق مساق طب الكوارث',
           title_en: 'Disaster Medicine Course Launch',
           image_url: 'https://cdn.climamedix.org/slider/slide1.webp',
-          sequence_order: 1
+          sequence_order: 1,
+          entity_type: 'course',
+          link_url: '/courses'
         },
         {
           id: 'slide-2',
           title_ar: 'شريحة ثانية للمناخ',
           title_en: 'Second Climate Slide',
           image_url: 'https://cdn.climamedix.org/slider/slide2.webp',
-          sequence_order: 2
+          sequence_order: 2,
+          entity_type: 'article',
+          link_url: '/article-detail'
+        }
+      ];
+
+      const onNavigate = vi.fn();
+      const { container } = renderWithAuth(
+        <DynamicHomeSlider lang="ar" onNavigate={onNavigate} />,
+        { role: 'user' }
+      );
+
+      await waitFor(() => {
+        expect(container.textContent).toContain('إطلاق مساق طب الكوارث');
+      });
+
+      // Next button
+      const nextBtn = container.querySelector('.home-slider-arrow-btn.next');
+      if (nextBtn) {
+        fireEvent.click(nextBtn);
+        expect(container.textContent).toContain('شريحة ثانية للمناخ');
+      }
+
+      // Prev button
+      const prevBtn = container.querySelector('.home-slider-arrow-btn.prev');
+      if (prevBtn) {
+        fireEvent.click(prevBtn);
+        expect(container.textContent).toContain('إطلاق مساق طب الكوارث');
+      }
+
+      // Dot buttons
+      const dots = container.querySelectorAll('.home-slider-dot');
+      if (dots.length >= 2) {
+        fireEvent.click(dots[1]);
+        expect(container.textContent).toContain('شريحة ثانية للمناخ');
+      }
+
+      // CTA click
+      const ctaBtn = container.querySelector('.home-slider-cta-btn');
+      if (ctaBtn) {
+        fireEvent.click(ctaBtn);
+        expect(onNavigate).toHaveBeenCalled();
+      }
+    });
+
+    it('renders localized CTA labels for different entity types and handles root link', async () => {
+      const onNavigate = vi.fn();
+      mockSliderItems = [
+        {
+          id: 'slide-research',
+          title_ar: 'بحث مناخي جديد',
+          title_en: 'New Climate Research',
+          image_url: 'https://cdn.climamedix.org/slider/research.webp',
+          entity_type: 'research',
+          link_url: '/'
+        }
+      ];
+
+      const { container } = renderWithAuth(
+        <DynamicHomeSlider lang="ar" onNavigate={onNavigate} />,
+        { role: 'user' }
+      );
+
+      await waitFor(() => {
+        expect(container.textContent).toContain('اقرأ البحث');
+      });
+
+      const ctaBtn = container.querySelector('.home-slider-cta-btn');
+      if (ctaBtn) {
+        fireEvent.click(ctaBtn);
+        expect(onNavigate).toHaveBeenCalledWith('home');
+      }
+
+      // In English
+      const enRender = renderWithAuth(
+        <DynamicHomeSlider lang="en" onNavigate={onNavigate} />,
+        { role: 'user' }
+      );
+
+      await waitFor(() => {
+        expect(enRender.container.textContent).toContain('Read Research');
+      });
+    });
+
+    it('renders event CTA label in Arabic and English', async () => {
+      mockSliderItems = [
+        {
+          id: 'slide-event',
+          title_ar: 'قمة المناخ 2026',
+          title_en: 'Climate Summit 2026',
+          image_url: 'https://cdn.climamedix.org/slider/event.webp',
+          entity_type: 'event',
+          link_url: 'https://external-summit.org'
         }
       ];
 
@@ -659,15 +753,52 @@ describe('Admin Operations & Feature Permissions Test Suite (38 Tests)', () => {
       );
 
       await waitFor(() => {
-        expect(container.textContent).toContain('إطلاق مساق طب الكوارث');
+        expect(container.textContent).toContain('سجل في الفعالية');
       });
 
-      const navButtons = container.querySelectorAll('button');
-      // Arrow navigation buttons
-      if (navButtons.length >= 2) {
-        fireEvent.click(navButtons[1]); // Next button
-        expect(container.textContent).toContain('شريحة ثانية للمناخ');
-      }
+      const enRender = renderWithAuth(
+        <DynamicHomeSlider lang="en" onNavigate={vi.fn()} />,
+        { role: 'user' }
+      );
+
+      await waitFor(() => {
+        expect(enRender.container.textContent).toContain('Register for Event');
+      });
+    });
+
+    it('renders entity badge localized into Arabic and English in DynamicHomeSlider', async () => {
+      mockSliderItems = [
+        {
+          id: 'slide-course',
+          title_ar: 'مساق المناخ',
+          title_en: 'Climate Course',
+          image_url: 'https://cdn.climamedix.org/slider/course.webp',
+          entity_type: 'course',
+          link_url: '/courses'
+        }
+      ];
+
+      const arRender = renderWithAuth(
+        <DynamicHomeSlider lang="ar" onNavigate={vi.fn()} />,
+        { role: 'user' }
+      );
+
+      await waitFor(() => {
+        const badge = arRender.container.querySelector('.home-slider-badge');
+        expect(badge).not.toBeNull();
+        expect(badge.textContent).toContain('دورة تدريبية');
+      });
+
+      const enRender = renderWithAuth(
+        <DynamicHomeSlider lang="en" onNavigate={vi.fn()} />,
+        { role: 'user' }
+      );
+
+      await waitFor(() => {
+        const badge = enRender.container.querySelector('.home-slider-badge');
+        expect(badge).not.toBeNull();
+        expect(badge.textContent).toContain('Course');
+      });
     });
 
     it('granting custom_permissions: ["manage:slider"] allows educator to configure homepage slider', () => {

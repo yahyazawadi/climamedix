@@ -69,6 +69,27 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
 
   const currentSlide = slides[activeIndex];
 
+  const getEntityLabel = (entityType, language) => {
+    const type = (entityType || '').toLowerCase();
+    if (language === 'ar') {
+      if (type.includes('course') || type.includes('training')) return 'دورة تدريبية';
+      if (type.includes('article') || type.includes('news')) return 'مقال';
+      if (type.includes('research')) return 'بحث علمي';
+      if (type.includes('event')) return 'فعالية';
+      if (type.includes('opportunity')) return 'فرصة';
+      if (type.includes('custom')) return 'إعلان';
+      return entityType;
+    } else {
+      if (type.includes('course') || type.includes('training')) return 'Course';
+      if (type.includes('article') || type.includes('news')) return 'Article';
+      if (type.includes('research')) return 'Research';
+      if (type.includes('event')) return 'Event';
+      if (type.includes('opportunity')) return 'Opportunity';
+      if (type.includes('custom')) return 'Announcement';
+      return entityType;
+    }
+  };
+
   const getActionLabel = (entityType, language) => {
     const type = (entityType || '').toLowerCase();
     if (language === 'ar') {
@@ -88,10 +109,33 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
 
   const handleActionClick = (linkUrl) => {
     if (!linkUrl) return;
-    if (linkUrl.startsWith('/') && onNavigate) {
-      const view = linkUrl.replace('/', '');
-      onNavigate(view || 'home');
+    if (linkUrl.startsWith('/')) {
+      // Split pathname and search query
+      const [pathOnly, search] = linkUrl.split('?');
+      let targetView = 'home';
+      
+      const cleanPath = pathOnly.replace(/\/$/, '');
+      if (cleanPath.startsWith('/course') || cleanPath.startsWith('/training')) {
+        targetView = 'courses';
+      } else if (cleanPath.startsWith('/research')) {
+        targetView = cleanPath.includes('detail') ? 'research-detail' : 'research';
+      } else if (cleanPath.startsWith('/article') || cleanPath.startsWith('/news')) {
+        targetView = cleanPath.includes('article') ? 'article' : 'news';
+      } else if (cleanPath.startsWith('/event')) {
+        targetView = 'events';
+      } else if (cleanPath.startsWith('/opportunity') || cleanPath.startsWith('/opportunities')) {
+        targetView = 'opportunities';
+      } else if (cleanPath.startsWith('/join') || cleanPath.startsWith('/apply')) {
+        targetView = 'join';
+      } else {
+        const seg = cleanPath.replace(/^\//, '').split('/')[0];
+        targetView = seg || 'home';
+      }
+
       window.history.pushState({}, '', linkUrl);
+      if (onNavigate) {
+        onNavigate(targetView);
+      }
     } else {
       window.location.href = linkUrl;
     }
@@ -122,7 +166,7 @@ export function DynamicHomeSlider({ lang, onNavigate }) {
             {/* Entity Badge */}
             <span className="home-slider-badge">
               <span className="home-slider-badge-dot" />
-              {currentSlide.entity_type}
+              {getEntityLabel(currentSlide.entity_type, lang)}
             </span>
 
             {/* Title */}

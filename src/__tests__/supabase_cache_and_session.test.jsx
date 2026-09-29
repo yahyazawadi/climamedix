@@ -5,7 +5,10 @@ import { authService } from '../features/auth/services/authService';
 import { supabase } from '../utils/supabaseClient';
 
 describe('Supabase Cache, Session Persistence & Lifecycle Test Suite (40 Tests)', () => {
+  let consoleErrorSpy;
+
   beforeEach(() => {
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     localStorage.clear();
     sessionStorage.clear();
     authService.clearProfileCache();
@@ -15,6 +18,7 @@ describe('Supabase Cache, Session Persistence & Lifecycle Test Suite (40 Tests)'
   afterEach(() => {
     authService.clearProfileCache();
     localStorage.clear();
+    consoleErrorSpy?.mockRestore();
   });
 
   describe('1. authService In-Memory Profile Cache & TTL Invalidation (13 Tests)', () => {

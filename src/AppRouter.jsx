@@ -1,7 +1,6 @@
 import { useEffect } from 'preact/hooks';
 import { useAuth } from './features/auth/hooks/useAuth';
 import { AboutUsPage } from './features/about-us/AboutUsPage';
-import { DebugUIPage } from './features/debug-ui/DebugUIPage';
 import { AuthPage } from './features/auth/AuthPage';
 import { JoinUsPage } from './features/join-us/JoinUsPage';
 import { OpportunitiesPage } from './features/opportunities/components/OpportunitiesPage';
@@ -11,8 +10,7 @@ import { NewsPage } from './features/news-blog/components/NewsPage';
 import { ArticleReaderPage } from './features/news-blog/components/ArticleReaderPage';
 import { ProfilePage } from './features/profile/components/ProfilePage';
 import { LearningHubPage } from './features/learning-hub/components/student/LearningHubPage';
-import { NewHomePage } from './features/main/components/NewHomePage';
-import { OldHomePage } from './features/main/components/OldHomePage';
+import { HomePage, NewHomePage } from './features/main/components/NewHomePage';
 import { UserManagementDashboard } from './features/admin/components/UserManagementDashboard';
 import { UserStatsDashboard } from './features/admin/components/UserStatsDashboard';
 import { CourseBuilderPage } from './features/learning-hub/components/admin/CourseBuilderPage';
@@ -26,9 +24,8 @@ import { SliderManagerPage } from './features/admin/components/SliderManagerPage
 const ROUTE_ALIASES = {
   // Public Pages
   'newhome': ['/newhome', '/home', '/index', '/main', '/'],
-  'oldhome': ['/oldhome', '/legacy'],
   'about': ['/about', '/about-us', '/info', '/who-we-are'],
-  'auth': ['/auth', '/login', '/signin', '/register', '/signup'],
+  'auth': ['/login', '/auth', '/signin', '/register', '/signup'],
   'join': ['/join', '/apply', '/membership', '/register-network'],
   'profile': ['/profile', '/account', '/me', '/settings'],
   
@@ -60,14 +57,23 @@ export const getViewFromPath = (path) => {
   let p = path.replace(/\/$/, "");
   if (!p) p = '/';
 
+  // Exact matching against all aliases
+  for (const [view, aliases] of Object.entries(ROUTE_ALIASES)) {
+    if (aliases.includes(p)) return view;
+  }
+
   // Dynamic parameterized routes
   if (p.startsWith('/verify/') || p.startsWith('/certificate/') || p.startsWith('/cert/')) {
     return 'verify';
   }
-
-  // Exact matching against all aliases
-  for (const [view, aliases] of Object.entries(ROUTE_ALIASES)) {
-    if (aliases.includes(p)) return view;
+  if (p.startsWith('/course/') || p.startsWith('/courses/')) {
+    return 'courses';
+  }
+  if (p.startsWith('/research-detail/') || p.startsWith('/research/')) {
+    return 'research-detail';
+  }
+  if (p.startsWith('/article/') || p.startsWith('/news/')) {
+    return 'article';
   }
   
   return 'newhome'; // Default fallback
@@ -177,9 +183,8 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
   const simpleNav = (view) => navigate(view);
   const paramNav = (view, idName, id) => navigate(view, null, `${idName}=${id}`);
 
-  if (currentView === 'home' || currentView === 'newhome') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} onNavigate={simpleNav} />;
+  if (currentView === 'home' || currentView === 'newhome' || currentView === 'debug') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} onNavigate={simpleNav} />;
   if (currentView === 'about') return <AboutUsPage lang={lang} onJoinClick={() => navigate('join')} onNavigate={(view, sectionId) => navigate(view, sectionId)} />;
-  if (currentView === 'debug') return <DebugUIPage />;
   if (currentView === 'auth') return <AuthPage lang={lang} onAuthSuccess={() => setCurrentView('newhome')} />;
   if (currentView === 'opportunities') return <OpportunitiesPage lang={lang} onNavigate={simpleNav} />;
   if (currentView === 'join') return <JoinUsPage lang={lang} onNavigate={navigate} />;
@@ -242,8 +247,6 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
   if (currentView === 'research-detail') return <ResearchDetailPage lang={lang} onNavigate={simpleNav} />;
   
   if (currentView === 'newhome' || currentView === 'home') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} onNavigate={simpleNav} />;
-  
-  if (currentView === 'oldhome') return <OldHomePage lang={lang} setOpenedModal={setOpenedModal} setCurrentView={setCurrentView} />;
   
   if (currentView === 'verify') return <CertificateVerificationPage lang={lang} certId={window.location.pathname.split('/').pop()} />;
   

@@ -250,7 +250,7 @@ describe('Article Editorial & Publishing Lifecycle Test Suite (55 Tests)', () =>
       expect(screen.getByText('جاري التحميل...')).toBeDefined();
     });
 
-    it('ArticleCard renders edit button when canEdit is true', () => {
+    it('ArticleCard renders edit button when canEdit is true and handles mouse hover', () => {
       const onEdit = vi.fn();
       render(
         <ArticleCard
@@ -258,13 +258,32 @@ describe('Article Editorial & Publishing Lifecycle Test Suite (55 Tests)', () =>
           category="المناخ"
           canEdit={true}
           onEdit={onEdit}
+          lang="ar"
         />
       );
 
       const editBtn = screen.getByTitle('تعديل المقال');
       expect(editBtn).not.toBeNull();
+      fireEvent.mouseEnter(editBtn);
+      expect(editBtn.style.background).toBe('rgba(14, 165, 233, 0.1)');
+      fireEvent.mouseLeave(editBtn);
+      expect(editBtn.style.background).toBe('transparent');
       fireEvent.click(editBtn);
       expect(onEdit).toHaveBeenCalledTimes(1);
+    });
+
+    it('ArticleCard renders English edit button title when lang is en', () => {
+      render(
+        <ArticleCard
+          title="Test Article"
+          category="Climate"
+          canEdit={true}
+          onEdit={vi.fn()}
+          lang="en"
+        />
+      );
+
+      expect(screen.getByTitle('Edit Article')).toBeInTheDocument();
     });
 
     it('ArticleCard hides edit button when canEdit is false', () => {
@@ -639,6 +658,138 @@ describe('Article Editorial & Publishing Lifecycle Test Suite (55 Tests)', () =>
       await waitFor(() => {
         expect(screen.getByText('Cloudflare S3 Network Timeout')).toBeDefined();
       });
+    });
+
+    it('blocks publishing when media is still uploading, disables publish button and shows spinner', async () => {
+      const { container } = render(<ArticleEditorPage lang="ar" onNavigate={vi.fn()} />);
+
+      fireEvent.input(screen.getByPlaceholderText('عنوان المقال بالعربية...'), {
+        target: { value: 'مقال قيد الرفع' }
+      });
+      fireEvent.input(screen.getByTestId('editor-textarea'), {
+        target: { value: '<p>محتوى قيد الرفع</p>' }
+      });
+
+      // Simulate media upload in progress
+      fireEvent.click(screen.getByTestId('trigger-media-uploading'));
+
+      const publishBtn = container.querySelector('.aep-btn-publish');
+      expect(publishBtn).toBeDisabled();
+      expect(container.querySelector('.aep-spinner')).toBeInTheDocument();
+
+      // Stop uploading and verify publish is now unblocked
+      fireEvent.click(screen.getByTestId('stop-media-uploading'));
+      expect(publishBtn).not.toBeDisabled();
+      expect(container.querySelector('.aep-spinner')).toBeNull();
+
+      fireEvent.click(publishBtn);
+
+      await waitFor(() => {
+        expect(mockInsertArticle).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('supports Ctrl+V paste interaction on dropzone with image clipboard data', async () => {
+      const clipboardBlob = new Blob(['pasted-img-data'], { type: 'image/webp' });
+      const readSpy = vi.fn().mockResolvedValue([
+        {
+          types: ['image/webp'],
+          getType: vi.fn().mockResolvedValue(clipboardBlob)
+        }
+      ]);
+      Object.assign(navigator, {
+        clipboard: { read: readSpy }
+      });
+
+      const { container } = render(<ArticleEditorPage lang="ar" onNavigate={vi.fn()} />);
+      const dropZone = container.querySelector('.aep-thumb-zone');
+
+      fireEvent.keyDown(dropZone, { key: 'v', ctrlKey: true });
+
+      await waitFor(() => {
+        expect(readSpy).toHaveBeenCalled();
+        expect(container.querySelector('img.aep-thumb-preview')).not.toBeNull();
+      });
+    });
+
+    it('retains existing cover image when editing an existing article without selecting a new thumbnail', async () => {
+      setMockAuth({ role: 'admin', userId: 'usr-editor-1' });
+      mockArticleRecords['art-with-thumb'] = {
+        id: 'art-with-thumb',
+        title_ar: 'مقال قديم مع صورة',
+        title_en: 'Old Article With Photo',
+        content_ar: '<p>محتوى قديم</p>',
+        content_en: '<p>Old content</p>',
+        category: 'general',
+        cover_image: 'https://cdn.climamedix.org/article_thumbnails/retained-image.webp',
+        created_by: 'usr-editor-1'
+      };
+
+      window.history.replaceState({}, '', '/?id=art-with-thumb');
+
+      render(<ArticleEditorPage lang="ar" onNavigate={vi.fn()} />);
+
+      await screen.findByDisplayValue('مقال قديم مع صورة');
+
+      const publishBtn = screen.getByText('حفظ التعديلات');
+      fireEvent.click(publishBtn);
+
+      await waitFor(() => {
+        expect(mockUpdateArticle).toHaveBeenCalledTimes(1);
+      });
+
+      // R2 upload was NOT triggered since no new file was chosen
+      expect(mockUploadFileToR2).not.toHaveBeenCalled();
+      const updatedData = mockUpdateArticle.mock.calls[0][0];
+      expect(updatedData.cover_image).toBe('https://cdn.climamedix.org/article_thumbnails/retained-image.webp');
+    });
+
+    it('replaces existing cover image when editing an article and selecting a new thumbnail', async () => {
+      setMockAuth({ role: 'admin', userId: 'usr-editor-1' });
+      mockArticleRecords['art-replace-thumb'] = {
+        id: 'art-replace-thumb',
+        title_ar: 'مقال لتغيير الصورة',
+        title_en: 'Article To Replace Photo',
+        content_ar: '<p>محتوى</p>',
+        content_en: '<p>Content</p>',
+        category: 'general',
+        cover_image: 'https://cdn.climamedix.org/article_thumbnails/old.webp',
+        created_by: 'usr-editor-1'
+      };
+
+      window.history.replaceState({}, '', '/?id=art-replace-thumb');
+
+      const { container } = render(<ArticleEditorPage lang="ar" onNavigate={vi.fn()} />);
+      await screen.findByDisplayValue('مقال لتغيير الصورة');
+
+      // Pick new image
+      const fileInput = container.querySelector('input[type="file"]');
+      const newImage = new File(['new-bits'], 'brand_new_cover.webp', { type: 'image/webp' });
+      fireEvent.change(fileInput, { target: { files: [newImage] } });
+
+      await waitFor(() => {
+        expect(container.querySelector('img.aep-thumb-preview')).not.toBeNull();
+      });
+
+      const publishBtn = screen.getByText('حفظ التعديلات');
+      fireEvent.click(publishBtn);
+
+      await waitFor(() => {
+        expect(mockUploadFileToR2).toHaveBeenCalledWith(expect.any(File), 'article_thumbnails');
+        expect(mockUpdateArticle).toHaveBeenCalledTimes(1);
+      });
+
+      const updatedData = mockUpdateArticle.mock.calls[0][0];
+      expect(updatedData.cover_image).toContain('article_thumbnails');
+    });
+
+    it('renders English placeholders and upload text when lang is en', () => {
+      render(<ArticleEditorPage lang="en" onNavigate={vi.fn()} />);
+
+      expect(screen.getByText('Paste or drag image here')).toBeInTheDocument();
+      expect(screen.getByText('or click to upload')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Article title in English...')).toBeInTheDocument();
+      expect(screen.getByText('Publish Article')).toBeInTheDocument();
     });
   });
 

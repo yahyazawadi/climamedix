@@ -4,6 +4,7 @@ import { DatePicker } from '../features/shared/components/DatePicker';
 import { ShareActionButtons } from '../features/shared/components/ShareActionButtons';
 import { RichTextRenderer } from '../features/shared/components/RichTextRenderer';
 import { AboutUsPage } from '../features/about-us/AboutUsPage';
+import { Button } from '../features/shared/components/Button';
 
 // ─── 1. Mocks ────────────────────────────────────────────────────────────────
 
@@ -277,11 +278,54 @@ describe('Shared UI Components & Public Pages Exhaustive Matrix (36 Tests)', () 
       expect(onEdit).toHaveBeenCalled();
     });
 
-    it('hides Edit button when onEdit callback is not provided', () => {
-      render(<ShareActionButtons lang="ar" />);
+    it('handles navigator.share failure gracefully and logs error', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      navigator.share = vi.fn().mockRejectedValue(new Error('User cancelled share'));
+      render(<ShareActionButtons lang="ar" title="Climate Article" url="https://climamedix.org/article/1" />);
 
-      expect(screen.queryByTitle('تعديل المقال')).toBeNull();
-      expect(screen.queryByTitle('Edit Article')).toBeNull();
+      const shareBtn = screen.getByTitle('مشاركة عبر...');
+      fireEvent.click(shareBtn);
+
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith('Error sharing:', expect.any(Error));
+      });
+      consoleSpy.mockRestore();
+    });
+
+    it('triggers mouse enter and leave events to adjust button background colors', () => {
+      const onEdit = vi.fn();
+      render(<ShareActionButtons lang="ar" onEdit={onEdit} />);
+
+      const editBtn = screen.getByTitle('تعديل المقال');
+      fireEvent.mouseEnter(editBtn);
+      expect(editBtn.style.backgroundColor).toBe('rgba(11, 40, 73, 0.1)');
+      fireEvent.mouseLeave(editBtn);
+      expect(editBtn.style.backgroundColor).toBe('rgba(11, 40, 73, 0.06)');
+
+      const copyBtn = screen.getByTitle('نسخ الرابط');
+      fireEvent.mouseEnter(copyBtn);
+      expect(copyBtn.style.backgroundColor).toBe('rgba(11, 40, 73, 0.1)');
+      fireEvent.mouseLeave(copyBtn);
+      expect(copyBtn.style.backgroundColor).toBe('rgba(11, 40, 73, 0.06)');
+
+      const shareBtn = screen.getByTitle('مشاركة عبر...');
+      fireEvent.mouseEnter(shareBtn);
+      expect(shareBtn.style.backgroundColor).toBe('rgba(11, 40, 73, 0.1)');
+      fireEvent.mouseLeave(shareBtn);
+      expect(shareBtn.style.backgroundColor).toBe('rgba(11, 40, 73, 0.06)');
+    });
+
+    it('resets copied state and share spinning state after timeout', () => {
+      vi.useFakeTimers();
+      render(<ShareActionButtons lang="ar" url="https://climamedix.org/article/1" />);
+
+      const copyBtn = screen.getByTitle('نسخ الرابط');
+      fireEvent.click(copyBtn);
+      const shareBtn = screen.getByTitle('مشاركة عبر...');
+      fireEvent.click(shareBtn);
+
+      vi.advanceTimersByTime(2500);
+      vi.useRealTimers();
     });
   });
 
@@ -424,6 +468,58 @@ describe('Shared UI Components & Public Pages Exhaustive Matrix (36 Tests)', () 
       const bgWrap = document.querySelector('.au-bg-wrap');
       expect(bgWrap).toBeInTheDocument();
       expect(bgWrap).toHaveAttribute('aria-hidden', 'true');
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SECTION 5: Button Component Variants & Interactions (6 Tests)
+  // ═══════════════════════════════════════════════════════════════════════════
+  describe('5. Button Component Variants & Interactions', () => {
+    it('renders default variant ("gradient") button with figma-gradient-btn class', () => {
+      render(<Button>Click Me</Button>);
+      const btn = screen.getByRole('button', { name: 'Click Me' });
+      expect(btn).toHaveClass('figma-gradient-btn');
+      expect(btn).toHaveAttribute('type', 'button');
+      expect(btn).not.toBeDisabled();
+    });
+
+    it('renders "outline" variant with figma-outline-btn class', () => {
+      render(<Button variant="outline">Outline</Button>);
+      const btn = screen.getByRole('button', { name: 'Outline' });
+      expect(btn).toHaveClass('figma-outline-btn');
+    });
+
+    it('renders "text" variant with figma-text-btn class', () => {
+      render(<Button variant="text">Text Button</Button>);
+      const btn = screen.getByRole('button', { name: 'Text Button' });
+      expect(btn).toHaveClass('figma-text-btn');
+    });
+
+    it('renders "more" variant with figma-more-btn class', () => {
+      render(<Button variant="more">View More</Button>);
+      const btn = screen.getByRole('button', { name: 'View More' });
+      expect(btn).toHaveClass('figma-more-btn');
+    });
+
+    it('falls back to "figma-gradient-btn" for unknown variant and accepts custom className', () => {
+      render(<Button variant="unknown" className="custom-extra-class">Unknown</Button>);
+      const btn = screen.getByRole('button', { name: 'Unknown' });
+      expect(btn).toHaveClass('figma-gradient-btn');
+      expect(btn).toHaveClass('custom-extra-class');
+    });
+
+    it('respects disabled prop, custom type, and fires onClick when active', () => {
+      const handleClick = vi.fn();
+      const { rerender } = render(<Button type="submit" onClick={handleClick}>Submit</Button>);
+      let btn = screen.getByRole('button', { name: 'Submit' });
+      expect(btn).toHaveAttribute('type', 'submit');
+
+      fireEvent.click(btn);
+      expect(handleClick).toHaveBeenCalledTimes(1);
+
+      rerender(<Button disabled={true} onClick={handleClick}>Disabled</Button>);
+      btn = screen.getByRole('button', { name: 'Disabled' });
+      expect(btn).toBeDisabled();
     });
   });
 });

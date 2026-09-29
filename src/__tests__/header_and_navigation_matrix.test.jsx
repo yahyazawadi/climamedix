@@ -402,7 +402,7 @@ describe('Suite 33: Header & Navigation Matrix Test Suite', () => {
         />
       );
 
-      fireEvent.click(screen.getByText('My Account'));
+      fireEvent.click(screen.getByText(/Account/i));
       const dropdown = document.querySelector('.premium-profile-dropdown');
       expect(dropdown.textContent).toContain('Admin');
     });
@@ -437,7 +437,7 @@ describe('Suite 33: Header & Navigation Matrix Test Suite', () => {
         />
       );
 
-      fireEvent.click(screen.getByText('My Account'));
+      fireEvent.click(screen.getByText(/Account/i));
       const dropdown = document.querySelector('.premium-profile-dropdown');
       expect(dropdown.textContent).toContain('Educator');
     });

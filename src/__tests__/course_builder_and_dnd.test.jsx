@@ -778,6 +778,179 @@ describe('Stage 3: Course Builder & Drag-and-Drop Test Suite', () => {
       });
     });
 
+    it('displays "Uploading..." label and updates Cover Image URL input on successful cover upload', async () => {
+      let resolveUpload;
+      uploadFileToR2.mockReturnValue(new Promise(res => { resolveUpload = res; }));
+
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+      const newCourseBtn = await screen.findByText('+ مساق جديد');
+      fireEvent.click(newCourseBtn);
+
+      const fileInput = document.querySelector('input[type="file"][accept*="image"]');
+      const testFile = new File(['content'], 'sample.webp', { type: 'image/webp' });
+      fireEvent.change(fileInput, { target: { files: [testFile] } });
+
+      // Label displays Uploading...
+      expect(screen.getByText('Uploading...')).toBeInTheDocument();
+
+      // Resolve upload
+      resolveUpload('https://cdn.climamedix.org/course_covers/sample.webp');
+
+      await waitFor(() => {
+        expect(screen.getByText('Upload Image')).toBeInTheDocument();
+      });
+
+      // Cover image input is populated
+      const inputs = Array.from(document.querySelectorAll('.cb-modal-card input'));
+      const urlInput = inputs.find(i => i.value === 'https://cdn.climamedix.org/course_covers/sample.webp');
+      expect(urlInput).toBeDefined();
+    });
+
+    it('submits course creation form with uploaded cover image URL and verifies adminCreateCourse payload', async () => {
+      uploadFileToR2.mockResolvedValueOnce('https://cdn.climamedix.org/course_covers/climate_basics.webp');
+      adminLmsService.adminCreateCourse.mockResolvedValueOnce({
+        id: 'new-c-99',
+        title_ar: 'أساسيات طب المناخ',
+        title_en: 'Climate Medicine Basics',
+        cover_image: 'https://cdn.climamedix.org/course_covers/climate_basics.webp'
+      });
+
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+      const newCourseBtn = await screen.findByText('+ مساق جديد');
+      fireEvent.click(newCourseBtn);
+
+      // Fill in title
+      const modal = document.querySelector('.cb-modal-card');
+      const inputs = modal.querySelectorAll('input[type="text"]');
+      fireEvent.input(inputs[0], { target: { value: 'أساسيات طب المناخ' } }); // title_ar
+      fireEvent.input(inputs[1], { target: { value: 'Climate Medicine Basics' } }); // title_en
+
+      // Upload cover
+      const fileInput = modal.querySelector('input[type="file"][accept*="image"]');
+      const testFile = new File(['bits'], 'climate_basics.webp', { type: 'image/webp' });
+      fireEvent.change(fileInput, { target: { files: [testFile] } });
+
+      await waitFor(() => {
+        expect(uploadFileToR2).toHaveBeenCalledWith(expect.any(File), 'course_covers');
+      });
+
+      // Submit form
+      const saveBtn = modal.querySelector('button[type="submit"]');
+      fireEvent.click(saveBtn);
+
+      await waitFor(() => {
+        expect(adminLmsService.adminCreateCourse).toHaveBeenCalledWith(expect.objectContaining({
+          title_ar: 'أساسيات طب المناخ',
+          title_en: 'Climate Medicine Basics',
+          cover_image: 'https://cdn.climamedix.org/course_covers/climate_basics.webp'
+        }));
+      });
+    });
+
+    it('replaces cover image when editing an existing course and verifies adminUpdateCourse payload', async () => {
+      uploadFileToR2.mockResolvedValueOnce('https://cdn.climamedix.org/course_covers/replaced_cover.webp');
+      adminLmsService.adminUpdateCourse.mockResolvedValueOnce({
+        id: 'c-1',
+        title_ar: 'دورة تغير المناخ والصحة',
+        cover_image: 'https://cdn.climamedix.org/course_covers/replaced_cover.webp'
+      });
+
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      // Open Options dropdown
+      const optionsBtn = await screen.findByText('خيارات');
+      fireEvent.click(optionsBtn);
+
+      // Click Edit Course
+      const editBtn = screen.getByText('تعديل المساق');
+      fireEvent.click(editBtn);
+
+      const modal = document.querySelector('.cb-modal-card');
+      expect(modal).not.toBeNull();
+
+      // Upload new cover
+      const fileInput = modal.querySelector('input[type="file"][accept*="image"]');
+      const newFile = new File(['new-bits'], 'new_photo.webp', { type: 'image/webp' });
+      fireEvent.change(fileInput, { target: { files: [newFile] } });
+
+      await waitFor(() => {
+        expect(uploadFileToR2).toHaveBeenCalledWith(expect.any(File), 'course_covers');
+      });
+
+      // Save course
+      const saveBtn = modal.querySelector('button[type="submit"]');
+      fireEvent.click(saveBtn);
+
+      await waitFor(() => {
+        expect(adminLmsService.adminUpdateCourse).toHaveBeenCalledWith('c-1', expect.objectContaining({
+          cover_image: 'https://cdn.climamedix.org/course_covers/replaced_cover.webp'
+        }));
+      });
+    });
+
+    it('handles cover image upload failure and alerts with error message during course edit', async () => {
+      uploadFileToR2.mockRejectedValueOnce(new Error('Cloudflare S3 Connection Refused'));
+
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const courseItem = await screen.findByText('دورة تغير المناخ والصحة');
+      fireEvent.click(courseItem);
+
+      const optionsBtn = await screen.findByText('خيارات');
+      fireEvent.click(optionsBtn);
+
+      const editBtn = screen.getByText('تعديل المساق');
+      fireEvent.click(editBtn);
+
+      const modal = document.querySelector('.cb-modal-card');
+      const fileInput = modal.querySelector('input[type="file"][accept*="image"]');
+      const badFile = new File(['bad'], 'bad.webp', { type: 'image/webp' });
+      fireEvent.change(fileInput, { target: { files: [badFile] } });
+
+      await waitFor(() => {
+        expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Failed to upload cover image'));
+      });
+    });
+
+    it('populates Cover Image URL and submits course with uploaded cover URL', async () => {
+      uploadFileToR2.mockResolvedValueOnce('https://cdn.climamedix.org/course_covers/sync_cover.webp');
+      adminLmsService.adminCreateCourse.mockResolvedValueOnce({
+        id: 'new-c-100',
+        title_ar: 'المناخ والصحة 100',
+        title_en: 'Climate & Health 100',
+        cover_image: 'https://cdn.climamedix.org/course_covers/sync_cover.webp'
+      });
+
+      render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
+
+      const newCourseBtn = await screen.findByText('+ مساق جديد');
+      fireEvent.click(newCourseBtn);
+
+      const modal = document.querySelector('.cb-modal-card');
+      const inputs = modal.querySelectorAll('input[type="text"]');
+      fireEvent.input(inputs[0], { target: { value: 'المناخ والصحة 100' } });
+      fireEvent.input(inputs[1], { target: { value: 'Climate & Health 100' } });
+
+      const fileInput = modal.querySelector('input[type="file"][accept*="image"]');
+      const goodFile = new File(['good'], 'cover_test.webp', { type: 'image/webp' });
+      fireEvent.change(fileInput, { target: { files: [goodFile] } });
+
+      await waitFor(() => {
+        expect(uploadFileToR2).toHaveBeenCalledWith(expect.any(File), 'course_covers');
+      });
+
+      const saveBtn = modal.querySelector('button[type="submit"]');
+      fireEvent.click(saveBtn);
+
+      await waitFor(() => {
+        expect(adminLmsService.adminCreateCourse).toHaveBeenCalledWith(expect.objectContaining({
+          cover_image: 'https://cdn.climamedix.org/course_covers/sync_cover.webp'
+        }));
+      });
+    });
+
     it('cancels Course modal via Cancel button', async () => {
       render(<CourseBuilderPage lang="ar" onNavigate={vi.fn()} />);
 

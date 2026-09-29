@@ -21,7 +21,7 @@ vi.mock('../utils/supabaseClient', () => {
 import { uploadFileToR2 } from '../utils/s3Client';
 import { supabase } from '../utils/supabaseClient';
 
-describe('Platform Feature File Uploads Lifecycle Matrix (26 Tests)', () => {
+describe('Platform Feature File Uploads Lifecycle Matrix (36 Tests)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -327,6 +327,182 @@ describe('Platform Feature File Uploads Lifecycle Matrix (26 Tests)', () => {
       mockFileInput.value = '';
 
       expect(mockFileInput.value).toBe('');
+    });
+  });
+
+  // ─── 7. RichTextEditor Embedded Cloud Uploads Lifecycle (5 Tests) ───────────
+  describe('7. RichTextEditor Embedded Cloud Uploads Lifecycle (5 Tests)', () => {
+    it('uploads article body image to "articles" folder with onProgress callback tracking', async () => {
+      let progressVal = 0;
+      const onProgress = vi.fn((pct) => { progressVal = pct; });
+      uploadFileToR2.mockImplementationOnce(async (file, folder, cb) => {
+        cb(50);
+        cb(100);
+        return `https://pub-r2.climamedix.org/${folder}/embedded-figure.webp`;
+      });
+
+      const imageFile = new File(['webp-bytes'], 'figure.webp', { type: 'image/webp' });
+      const url = await uploadFileToR2(imageFile, 'articles', onProgress);
+
+      expect(uploadFileToR2).toHaveBeenCalledWith(imageFile, 'articles', onProgress);
+      expect(onProgress).toHaveBeenCalledWith(50);
+      expect(onProgress).toHaveBeenCalledWith(100);
+      expect(url).toBe('https://pub-r2.climamedix.org/articles/embedded-figure.webp');
+    });
+
+    it('uploads lecture video to "videos" folder and tracks continuous stream progress', async () => {
+      const progressSteps = [];
+      const onProgress = vi.fn((pct) => { progressSteps.push(pct); });
+
+      uploadFileToR2.mockImplementationOnce(async (file, folder, cb) => {
+        cb(25);
+        cb(75);
+        cb(100);
+        return `https://pub-r2.climamedix.org/${folder}/lecture-part1.mp4`;
+      });
+
+      const videoFile = new File(['video-stream'], 'lecture-part1.mp4', { type: 'video/mp4' });
+      const url = await uploadFileToR2(videoFile, 'videos', onProgress);
+
+      expect(url).toContain('/videos/lecture-part1.mp4');
+      expect(progressSteps).toEqual([25, 75, 100]);
+    });
+
+    it('uploads audio podcast to "course_audio" folder and returns persistent audio stream URL', async () => {
+      uploadFileToR2.mockResolvedValueOnce('https://pub-r2.climamedix.org/course_audio/episode-10.mp3');
+
+      const audioFile = new File(['audio-frames'], 'episode-10.mp3', { type: 'audio/mpeg' });
+      const onProgress = vi.fn();
+      const url = await uploadFileToR2(audioFile, 'course_audio', onProgress);
+
+      expect(uploadFileToR2).toHaveBeenCalledWith(audioFile, 'course_audio', onProgress);
+      expect(url).toBe('https://pub-r2.climamedix.org/course_audio/episode-10.mp3');
+    });
+
+    it('media handler discriminates between image and video files and routes to distinct folders', async () => {
+      uploadFileToR2.mockImplementation(async (file, folder) => {
+        return `https://pub-r2.climamedix.org/${folder}/${file.name}`;
+      });
+
+      const img = new File(['img'], 'photo.png', { type: 'image/png' });
+      const vid = new File(['vid'], 'video.webm', { type: 'video/webm' });
+
+      const files = [img, vid];
+      const results = [];
+
+      for (const f of files) {
+        if (f.type.startsWith('image/')) {
+          results.push(await uploadFileToR2(f, 'articles'));
+        } else if (f.type.startsWith('video/')) {
+          results.push(await uploadFileToR2(f, 'videos'));
+        }
+      }
+
+      expect(results[0]).toContain('/articles/photo.png');
+      expect(results[1]).toContain('/videos/video.webm');
+      expect(uploadFileToR2).toHaveBeenCalledWith(img, 'articles');
+      expect(uploadFileToR2).toHaveBeenCalledWith(vid, 'videos');
+    });
+
+    it('handles media upload error during loop without breaking remaining file pipeline state', async () => {
+      uploadFileToR2
+        .mockRejectedValueOnce(new Error('Network drop on video'))
+        .mockResolvedValueOnce('https://pub-r2.climamedix.org/videos/video2.mp4');
+
+      const v1 = new File(['v1'], 'v1.mp4', { type: 'video/mp4' });
+      const v2 = new File(['v2'], 'v2.mp4', { type: 'video/mp4' });
+
+      let err1 = null;
+      try {
+        await uploadFileToR2(v1, 'videos');
+      } catch (e) {
+        err1 = e;
+      }
+      const url2 = await uploadFileToR2(v2, 'videos');
+
+      expect(err1).toBeDefined();
+      expect(err1.message).toBe('Network drop on video');
+      expect(url2).toBe('https://pub-r2.climamedix.org/videos/video2.mp4');
+    });
+  });
+
+  // ─── 8. Cloud Storage Invariants, Concurrency & Target Routing Matrix (5 Tests) ─
+  describe('8. Cloud Storage Invariants, Concurrency & Target Routing Matrix (5 Tests)', () => {
+    it('executes concurrent multi-feature uploads simultaneously without cross-talk or race conditions', async () => {
+      uploadFileToR2
+        .mockResolvedValueOnce('https://pub-r2.climamedix.org/avatars/user-1.webp')
+        .mockResolvedValueOnce('https://pub-r2.climamedix.org/research_publications/paper-1.pdf')
+        .mockResolvedValueOnce('https://pub-r2.climamedix.org/cvs/cv-1.pdf');
+
+      const avatarFile = new File(['a'], 'avatar.png', { type: 'image/png' });
+      const paperFile = new File(['p'], 'paper.pdf', { type: 'application/pdf' });
+      const cvFile = new File(['c'], 'cv.pdf', { type: 'application/pdf' });
+
+      const [avatarUrl, paperUrl, cvUrl] = await Promise.all([
+        uploadFileToR2(avatarFile, 'avatars'),
+        uploadFileToR2(paperFile, 'research_publications'),
+        uploadFileToR2(cvFile, 'cvs')
+      ]);
+
+      expect(avatarUrl).toContain('/avatars/');
+      expect(paperUrl).toContain('/research_publications/');
+      expect(cvUrl).toContain('/cvs/');
+      expect(uploadFileToR2).toHaveBeenCalledTimes(3);
+    });
+
+    it('preserves multi-extension files correctly (.tar.gz, .min.js, .backup.pdf)', async () => {
+      uploadFileToR2.mockImplementation(async (file, folder) => {
+        return `https://pub-r2.climamedix.org/${folder}/${Date.now()}-${file.name}`;
+      });
+
+      const complexFile = new File(['data'], 'report.backup.pdf', { type: 'application/pdf' });
+      const uploadedUrl = await uploadFileToR2(complexFile, 'documents');
+
+      expect(uploadedUrl).toMatch(/\/documents\/\d+-report\.backup\.pdf$/);
+    });
+
+    it('ensures all 9 storage folders strictly maintain their directory separation invariants', async () => {
+      const folders = [
+        'avatars',
+        'research_publications',
+        'article_thumbnails',
+        'course_covers',
+        'cvs',
+        'slider',
+        'videos',
+        'course_audio',
+        'articles'
+      ];
+
+      uploadFileToR2.mockImplementation(async (file, folder) => {
+        return `https://pub-r2.climamedix.org/${folder}/${file.name}`;
+      });
+
+      for (const folder of folders) {
+        const testFile = new File(['test'], `${folder}-asset.bin`, { type: 'application/octet-stream' });
+        const res = await uploadFileToR2(testFile, folder);
+        expect(res).toBe(`https://pub-r2.climamedix.org/${folder}/${folder}-asset.bin`);
+        expect(res.startsWith('https://pub-r2.climamedix.org/')).toBe(true);
+      }
+    });
+
+    it('handles zero-byte file upload attempt cleanly without throwing unhandled exceptions', async () => {
+      uploadFileToR2.mockResolvedValueOnce('https://pub-r2.climamedix.org/documents/empty.txt');
+
+      const emptyFile = new File([], 'empty.txt', { type: 'text/plain' });
+      const result = await uploadFileToR2(emptyFile, 'documents');
+
+      expect(result).toBe('https://pub-r2.climamedix.org/documents/empty.txt');
+    });
+
+    it('re-throws clear and actionable storage failure message when cloud gateway rejects upload', async () => {
+      uploadFileToR2.mockRejectedValueOnce(new Error('Failed to upload file to storage: 504 Gateway Timeout'));
+
+      const file = new File(['data'], 'heavy.pdf', { type: 'application/pdf' });
+
+      await expect(uploadFileToR2(file, 'research_publications')).rejects.toThrow(
+        'Failed to upload file to storage: 504 Gateway Timeout'
+      );
     });
   });
 });

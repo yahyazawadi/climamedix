@@ -13,7 +13,10 @@ export default defineConfig({
       include: ['src/**/*.{js,jsx}'],
       exclude: [
         'src/__tests__/**',
-        'src/main.jsx'
+        'src/main.jsx',
+        'src/**/InteractiveParticles.jsx',
+        'src/**/AmbientParticles.jsx',
+        'src/**/*Particles*.jsx'
       ],
     },
   },

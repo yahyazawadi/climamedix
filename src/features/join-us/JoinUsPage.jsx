@@ -455,71 +455,74 @@ export function JoinUsPage({ lang, onNavigate }) {
                   </div>
                 )}
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  <div>
-                    <label style={labelStyle}>{t.fullNameLabel}</label>
-                    <input 
-                      type="text" required placeholder={t.fullNamePlaceholder}
-                      value={form.name} onInput={(e) => setForm({ ...form, name: e.target.value })}
-                      style={inputStyle}
-                      onFocus={(e) => e.target.style.borderColor = '#15b47a'}
-                      onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>{t.emailLabel}</label>
-                    <input 
-                      type="email" required placeholder="name@example.com" 
-                      value={form.email} onInput={(e) => setForm({ ...form, email: e.target.value })}
-                      style={inputStyle}
-                      onFocus={(e) => e.target.style.borderColor = '#15b47a'}
-                      onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
-                    />
-                  </div>
+                {/* Full Name */}
+                <div>
+                  <label style={labelStyle}>{t.fullNameLabel}</label>
+                  <input 
+                    type="text" required placeholder={t.fullNamePlaceholder}
+                    value={form.name} onInput={(e) => setForm({ ...form, name: e.target.value })}
+                    style={inputStyle}
+                    onFocus={(e) => e.target.style.borderColor = '#15b47a'}
+                    onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
+                  />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  <div>
-                    <label style={labelStyle}>{t.birthDateLabel}</label>
-                    <DatePicker 
-                      value={form.birth_date} 
-                      onChange={(date) => setForm({ ...form, birth_date: date })}
-                      lang={lang}
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>{t.professionLabel}</label>
-                    <input 
-                      type="text" required placeholder={t.professionPlaceholder}
-                      value={form.profession} onInput={(e) => setForm({ ...form, profession: e.target.value })}
-                      style={inputStyle}
-                      onFocus={(e) => e.target.style.borderColor = '#15b47a'}
-                      onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
-                    />
-                  </div>
+                {/* Email */}
+                <div>
+                  <label style={labelStyle}>{t.emailLabel}</label>
+                  <input 
+                    type="email" required placeholder="name@example.com" 
+                    value={form.email} onInput={(e) => setForm({ ...form, email: e.target.value })}
+                    style={inputStyle}
+                    onFocus={(e) => e.target.style.borderColor = '#15b47a'}
+                    onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
+                  />
+                </div>
+
+                {/* Birth Date */}
+                <div>
+                  <label style={labelStyle}>{t.birthDateLabel}</label>
+                  <DatePicker 
+                    value={form.birth_date} 
+                    onChange={(date) => setForm({ ...form, birth_date: date })}
+                    lang={lang}
+                  />
+                </div>
+
+                {/* Profession */}
+                <div>
+                  <label style={labelStyle}>{t.professionLabel}</label>
+                  <input 
+                    type="text" required placeholder={t.professionPlaceholder}
+                    value={form.profession} onInput={(e) => setForm({ ...form, profession: e.target.value })}
+                    style={inputStyle}
+                    onFocus={(e) => e.target.style.borderColor = '#15b47a'}
+                    onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
+                  />
                 </div>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                  <div>
-                    <label style={labelStyle}>{t.universityLabel}</label>
-                    <input 
-                      type="text" placeholder={t.universityPlaceholder}
-                      value={form.university_org} onInput={(e) => setForm({ ...form, university_org: e.target.value })}
-                      style={inputStyle}
-                      onFocus={(e) => e.target.style.borderColor = '#15b47a'}
-                      onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>{t.workLabel}</label>
-                    <input 
-                      type="text" placeholder={t.workPlaceholder}
-                      value={form.work} onInput={(e) => setForm({ ...form, work: e.target.value })}
-                      style={inputStyle}
-                      onFocus={(e) => e.target.style.borderColor = '#15b47a'}
-                      onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
-                    />
-                  </div>
+                {/* Organization / University */}
+                <div>
+                  <label style={labelStyle}>{t.universityLabel}</label>
+                  <input 
+                    type="text" placeholder={t.universityPlaceholder}
+                    value={form.university_org} onInput={(e) => setForm({ ...form, university_org: e.target.value })}
+                    style={inputStyle}
+                    onFocus={(e) => e.target.style.borderColor = '#15b47a'}
+                    onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
+                  />
+                </div>
+
+                {/* Current Role / Work */}
+                <div>
+                  <label style={labelStyle}>{t.workLabel}</label>
+                  <input 
+                    type="text" placeholder={t.workPlaceholder}
+                    value={form.work} onInput={(e) => setForm({ ...form, work: e.target.value })}
+                    style={inputStyle}
+                    onFocus={(e) => e.target.style.borderColor = '#15b47a'}
+                    onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
+                  />
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

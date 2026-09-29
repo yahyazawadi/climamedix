@@ -28,6 +28,7 @@ vi.mock('../utils/supabaseClient', () => {
 describe('Stage 4: Join Us Application Form & Admin Requests Comprehensive Suite', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    uploadFileToR2.mockReset();
     window.alert = vi.fn();
     window.confirm = vi.fn(() => true);
     window.scrollTo = vi.fn();
@@ -157,11 +158,10 @@ describe('Stage 4: Join Us Application Form & Admin Requests Comprehensive Suite
       expect(bioInput.value).toBe('اهتمام بأبحاث التغير المناخي والربو.');
     });
 
-    it('updates birth date input', () => {
-      const dateInput = document.querySelector('input[type="date"]');
-      expect(dateInput).toBeInTheDocument();
-      fireEvent.input(dateInput, { target: { value: '1990-05-15' } });
-      expect(dateInput.value).toBe('1990-05-15');
+    it('updates birth date input with DatePicker', () => {
+      const dateTrigger = document.querySelector('.dp-trigger');
+      expect(dateTrigger).toBeInTheDocument();
+      expect(screen.getByText('اختر تاريخ الميلاد')).toBeInTheDocument();
     });
 
     it('toggles activist checkbox and displays dynamic field', () => {
@@ -260,6 +260,140 @@ describe('Stage 4: Join Us Application Form & Admin Requests Comprehensive Suite
       expect(screen.getByText('Upload File')).toBeInTheDocument();
       expect(screen.getByText('No file chosen')).toBeInTheDocument();
       expect(screen.getByText('Supported formats: PDF, DOC, DOCX')).toBeInTheDocument();
+    });
+
+    it('replaces selected CV when user picks a different file and updates file name display', () => {
+      render(<JoinUsPage lang="ar" onNavigate={vi.fn()} />);
+      fireEvent.click(screen.getByText('مسار البحث العلمي'));
+
+      const fileInput = document.querySelector('input[type="file"]');
+      const file1 = new File(['content1'], 'old_cv.pdf', { type: 'application/pdf' });
+      fireEvent.change(fileInput, { target: { files: [file1] } });
+      expect(screen.getByText('old_cv.pdf')).toBeInTheDocument();
+
+      const file2 = new File(['content2'], 'updated_curriculum_vitae.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      });
+      fireEvent.change(fileInput, { target: { files: [file2] } });
+
+      expect(screen.queryByText('old_cv.pdf')).toBeNull();
+      expect(screen.getByText('updated_curriculum_vitae.docx')).toBeInTheDocument();
+    });
+
+    it('uploads Word document (.docx) CV to R2 bucket folder "cvs" and stores url in join_requests', async () => {
+      uploadFileToR2.mockResolvedValueOnce('https://pub-r2.climamedix.org/cvs/researcher_doc.docx');
+      const mockInsert = vi.fn().mockResolvedValue({ error: null });
+      supabase.from.mockReturnValue({ insert: mockInsert });
+
+      render(<JoinUsPage lang="ar" onNavigate={vi.fn()} />);
+      fireEvent.click(screen.getByText('مسار البحث العلمي'));
+
+      fireEvent.input(screen.getByPlaceholderText('أدخل اسمك الكامل'), { target: { value: 'د. هند القاسم' } });
+      fireEvent.input(screen.getByPlaceholderText('name@example.com'), { target: { value: 'hind@med.org' } });
+      fireEvent.input(screen.getByPlaceholderText('اختر تخصصك'), { target: { value: 'أبحاث بيئية' } });
+
+      const fileInput = document.querySelector('input[type="file"]');
+      const wordDoc = new File(['binary-doc-bytes'], 'researcher_doc.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      });
+      fireEvent.change(fileInput, { target: { files: [wordDoc] } });
+
+      fireEvent.click(screen.getByText('إرسال طلب الانضمام'));
+
+      await waitFor(() => {
+        expect(uploadFileToR2).toHaveBeenCalledWith(wordDoc, 'cvs');
+        expect(mockInsert).toHaveBeenCalledTimes(1);
+      });
+
+      expect(mockInsert).toHaveBeenCalledWith([
+        expect.objectContaining({
+          cv_url: 'https://pub-r2.climamedix.org/cvs/researcher_doc.docx'
+        })
+      ]);
+    });
+
+    it('displays loading spinner and disables submit button while CV upload is in flight', async () => {
+      let resolveUpload;
+      uploadFileToR2.mockReturnValue(new Promise(res => { resolveUpload = res; }));
+      supabase.from.mockReturnValue({ insert: vi.fn().mockResolvedValue({ error: null }) });
+
+      render(<JoinUsPage lang="ar" onNavigate={vi.fn()} />);
+      fireEvent.click(screen.getByText('مسار البحث العلمي'));
+
+      fireEvent.input(screen.getByPlaceholderText('أدخل اسمك الكامل'), { target: { value: 'كريم عادل' } });
+      fireEvent.input(screen.getByPlaceholderText('name@example.com'), { target: { value: 'karim@climamedix.org' } });
+      fireEvent.input(screen.getByPlaceholderText('اختر تخصصك'), { target: { value: 'طب بيئي' } });
+
+      const fileInput = document.querySelector('input[type="file"]');
+      const cvFile = new File(['data'], 'karim_cv.pdf', { type: 'application/pdf' });
+      fireEvent.change(fileInput, { target: { files: [cvFile] } });
+
+      const submitBtn = screen.getByText('إرسال طلب الانضمام').closest('button');
+      fireEvent.click(submitBtn);
+
+      // Verify button is disabled and text switched to submitting state
+      await waitFor(() => {
+        expect(submitBtn).toBeDisabled();
+        expect(screen.getByText('جاري إرسال طلبك...')).toBeInTheDocument();
+      });
+
+      // Finish upload and await full submission cycle
+      resolveUpload('https://r2.climamedix.org/cvs/karim.pdf');
+      expect(await screen.findByText('تم إرسال طلبك بنجاح!')).toBeInTheDocument();
+    });
+
+    it('handles Cloudflare R2 upload failure, displays error banner, and aborts Supabase submission', async () => {
+      uploadFileToR2.mockRejectedValueOnce(new Error('Cloudflare R2 Bucket Connection Timeout'));
+      const mockInsert = vi.fn();
+      supabase.from.mockReturnValue({ insert: mockInsert });
+
+      render(<JoinUsPage lang="ar" onNavigate={vi.fn()} />);
+      fireEvent.click(screen.getByText('مسار البحث العلمي'));
+
+      fireEvent.input(screen.getByPlaceholderText('أدخل اسمك الكامل'), { target: { value: 'طارق زياد' } });
+      fireEvent.input(screen.getByPlaceholderText('name@example.com'), { target: { value: 'tariq@climamedix.org' } });
+      fireEvent.input(screen.getByPlaceholderText('اختر تخصصك'), { target: { value: 'طاقة متجددة' } });
+
+      const fileInput = document.querySelector('input[type="file"]');
+      const cvFile = new File(['data'], 'tariq_cv.pdf', { type: 'application/pdf' });
+      fireEvent.change(fileInput, { target: { files: [cvFile] } });
+
+      const submitBtn = screen.getByText('إرسال طلب الانضمام').closest('button');
+      fireEvent.click(submitBtn);
+
+      expect(await screen.findByText(/حدث خطأ أثناء الإرسال.*Cloudflare R2 Bucket Connection Timeout/)).toBeInTheDocument();
+      expect(mockInsert).not.toHaveBeenCalled();
+
+      // Submit button is re-enabled with normal text
+      const buttonAfter = screen.getByText('إرسال طلب الانضمام').closest('button');
+      expect(buttonAfter).not.toBeDisabled();
+    });
+
+    it('submits with CV file in English mode and verifies English messages and status transitions', async () => {
+      uploadFileToR2.mockResolvedValueOnce('https://pub-r2.climamedix.org/cvs/alice_smith.pdf');
+      const mockInsert = vi.fn().mockResolvedValue({ error: null });
+      supabase.from.mockReturnValue({ insert: mockInsert });
+
+      render(<JoinUsPage lang="en" onNavigate={vi.fn()} />);
+      fireEvent.click(screen.getByText('Research Track'));
+
+      fireEvent.input(screen.getByPlaceholderText('Enter your full name'), { target: { value: 'Alice Smith' } });
+      fireEvent.input(screen.getByPlaceholderText('name@example.com'), { target: { value: 'alice@example.com' } });
+      fireEvent.input(screen.getByPlaceholderText('Select your specialty'), { target: { value: 'Epidemiology' } });
+
+      const fileInput = document.querySelector('input[type="file"]');
+      const cvFile = new File(['pdf-data'], 'alice_smith.pdf', { type: 'application/pdf' });
+      fireEvent.change(fileInput, { target: { files: [cvFile] } });
+
+      const submitBtn = screen.getByText('Submit Join Request');
+      fireEvent.click(submitBtn);
+
+      await waitFor(() => {
+        expect(uploadFileToR2).toHaveBeenCalledWith(cvFile, 'cvs');
+        expect(mockInsert).toHaveBeenCalledTimes(1);
+      });
+
+      expect(await screen.findByText('Your request was sent successfully!')).toBeInTheDocument();
     });
   });
 

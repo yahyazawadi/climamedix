@@ -6,6 +6,7 @@ import { Button } from '../shared/components/Button';
 import { useAuth } from '../auth/hooks/useAuth';
 import { GlassCard } from '../shared/components/GlassCard';
 import { Microscope, Stethoscope } from 'lucide-preact';
+import { DatePicker } from '../shared/components/DatePicker';
 
 export function JoinUsPage({ lang, onNavigate }) {
   const { hasPermission } = useAuth();
@@ -365,11 +366,12 @@ export function JoinUsPage({ lang, onNavigate }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}>
                     <div style={{
                       width: '48px', height: '48px', borderRadius: '14px',
-                      background: 'linear-gradient(135deg, #15b47a, #004c6d)',
+                      background: 'linear-gradient(135deg, rgba(21, 180, 122, 0.15), rgba(0, 76, 109, 0.15))',
+                      border: '1.5px solid rgba(21, 180, 122, 0.35)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       flexShrink: 0
                     }}>
-                      <Microscope size={26} color="#ffffff" strokeWidth={2.8} />
+                      <Microscope size={26} color="#15b47a" strokeWidth={2.8} />
                     </div>
                     <h4 style={{ margin: 0, color: '#0b2849', fontSize: '17px', fontWeight: 'bold',
                       fontFamily: isArabic ? 'Tajawal, sans-serif' : 'Outfit, sans-serif'
@@ -387,17 +389,18 @@ export function JoinUsPage({ lang, onNavigate }) {
                     background: 'linear-gradient(135deg, rgba(0, 76, 109, 0.04) 0%, rgba(21, 180, 122, 0.04) 100%)',
                     transition: 'all 0.3s ease', position: 'relative', overflow: 'hidden'
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#004c6d'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 76, 109, 0.15)'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#15b47a'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(21, 180, 122, 0.15)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(0, 76, 109, 0.2)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}>
                     <div style={{
                       width: '48px', height: '48px', borderRadius: '14px',
-                      background: 'linear-gradient(135deg, #004c6d, #15b47a)',
+                      background: 'linear-gradient(135deg, rgba(0, 76, 109, 0.15), rgba(21, 180, 122, 0.15))',
+                      border: '1.5px solid rgba(21, 180, 122, 0.35)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       flexShrink: 0
                     }}>
-                      <Stethoscope size={26} color="#ffffff" strokeWidth={2.8} />
+                      <Stethoscope size={26} color="#15b47a" strokeWidth={2.8} />
                     </div>
                     <h4 style={{ margin: 0, color: '#0b2849', fontSize: '17px', fontWeight: 'bold',
                       fontFamily: isArabic ? 'Tajawal, sans-serif' : 'Outfit, sans-serif'
@@ -419,14 +422,13 @@ export function JoinUsPage({ lang, onNavigate }) {
                 }}>
                   <div style={{
                     width: '32px', height: '32px', borderRadius: '8px',
-                    background: selectedTrack === 'research'
-                      ? 'linear-gradient(135deg, #15b47a, #004c6d)'
-                      : 'linear-gradient(135deg, #004c6d, #15b47a)',
+                    background: 'linear-gradient(135deg, rgba(21, 180, 122, 0.15), rgba(0, 76, 109, 0.15))',
+                    border: '1px solid rgba(21, 180, 122, 0.3)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                   }}>
                     {selectedTrack === 'research'
-                      ? <Microscope size={18} color="#ffffff" strokeWidth={2.8} />
-                      : <Stethoscope size={18} color="#ffffff" strokeWidth={2.8} />
+                      ? <Microscope size={18} color="#15b47a" strokeWidth={2.8} />
+                      : <Stethoscope size={18} color="#15b47a" strokeWidth={2.8} />
                     }
                   </div>
                   <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#0b2849', flex: 1,
@@ -479,12 +481,10 @@ export function JoinUsPage({ lang, onNavigate }) {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                   <div>
                     <label style={labelStyle}>{t.birthDateLabel}</label>
-                    <input 
-                      type="date"
-                      value={form.birth_date} onInput={(e) => setForm({ ...form, birth_date: e.target.value })}
-                      style={inputStyle}
-                      onFocus={(e) => e.target.style.borderColor = '#15b47a'}
-                      onBlur={(e) => e.target.style.borderColor = 'rgba(11, 40, 73, 0.15)'}
+                    <DatePicker 
+                      value={form.birth_date} 
+                      onChange={(date) => setForm({ ...form, birth_date: date })}
+                      lang={lang}
                     />
                   </div>
                   <div>

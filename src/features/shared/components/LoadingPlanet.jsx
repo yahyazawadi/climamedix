@@ -171,16 +171,16 @@ export function LoadingPlanet({
 
           {/* Continuously Rotating Earth Globe */}
           <g className="loader-globe-spinner">
-            {/* Ocean Sphere Body (Brand Blue) */}
+            {/* Planet Background Sphere (Now Brand Green Continents) */}
             <path
               d={OCEAN_PATH}
-              fill="url(#cmOceanGrad)"
+              fill="url(#cmLandGrad)"
             />
 
-            {/* Land Continents (Brand Green) */}
+            {/* Ocean Cutout (Now Brand Blue Water) */}
             <path
               d={CONTINENTS_PATH}
-              fill="url(#cmLandGrad)"
+              fill="url(#cmOceanGrad)"
             />
 
             {/* Atmosphere Rim Highlight */}

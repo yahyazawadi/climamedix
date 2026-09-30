@@ -116,12 +116,12 @@ body.dark-mode .loader-orbit-beacon {
   100% { transform: rotate(360deg); }
 }
 
-/* Atmosphere Rim */
+/* Atmosphere Rim Border around Planet */
 .loader-atmosphere-rim {
   fill: none;
-  stroke: var(--primary, #004c6d);
-  stroke-width: 1.2;
-  opacity: 0.4;
+  stroke: #016c7f;
+  stroke-width: 1.5;
+  opacity: 0.9;
 }
 
 /* ─── Brand Box ───────────────────────────────────────────────────────────── */

@@ -8,7 +8,7 @@
 ## 📊 Testing Progress Overview
 
 - [ ] **1. Public & Core Visitor Pages** (3/5 Completed)
-- [x] **2. Content Hubs & Community Pages** (4/4 Completed)
+- [x] **2. Content Hubs & Community Pages** (4/4 Completed: News, Article Reader, Opportunities, Events)
 - [ ] **3. Learning Hub (LMS) & Research Center** (0/3 Completed)
 - [ ] **4. User Account & Contributor Authoring Portals** (0/3 Completed)
 - [ ] **5. Administration & Management Portals** (0/5 Completed)

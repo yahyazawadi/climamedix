@@ -1,14 +1,35 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
+import { lazy, Suspense } from 'preact/compat';
 import { supabase } from '../../../utils/supabaseClient';
 import { NewsFeed } from './NewsFeed';
-import { NewsMap } from './NewsMap';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { extractSnippet } from '../../../utils/contentFormatter';
+
+// Lazy-load the heavy Mapbox-based news map. An IntersectionObserver will
+// mount it only when scrolled into view and unmount (freeing WebGL GPU RAM)
+// when it leaves the viewport.
+const NewsMap = lazy(() => import('./NewsMap').then(m => ({ default: m.NewsMap })));
 
 export function NewsPage({ lang, onNavigate }) {
   const { user, hasPermission } = useAuth();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mapVisible, setMapVisible] = useState(false);
+  const mapContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.IntersectionObserver) {
+      setMapVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setMapVisible(entry.isIntersecting),
+      { rootMargin: '200px 0px' }
+    );
+    const el = mapContainerRef.current;
+    if (el) observer.observe(el);
+    return () => { if (el) observer.unobserve(el); observer.disconnect(); };
+  }, []);
 
   useEffect(() => {
     async function fetchArticles() {
@@ -122,8 +143,14 @@ export function NewsPage({ lang, onNavigate }) {
           boxSizing: 'border-box'
         }}
       >
-        <div style={{ maxWidth: '1200px', margin: '0 auto clamp(24px, 4vw, 40px) auto', width: '100%' }}>
-          <NewsMap lang={lang} />
+        <div ref={mapContainerRef} style={{ maxWidth: '1200px', margin: '0 auto clamp(24px, 4vw, 40px) auto', width: '100%', minHeight: '400px' }}>
+          {mapVisible ? (
+            <Suspense fallback={<div style={{ width: '100%', height: '400px', borderRadius: '16px', background: '#eaf2f8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#014C6D', fontFamily: 'Tajawal, sans-serif' }}>{lang === 'ar' ? 'جاري تحميل الخريطة...' : 'Loading map...'}</div>}>
+              <NewsMap lang={lang} />
+            </Suspense>
+          ) : (
+            <div style={{ width: '100%', height: '400px', borderRadius: '16px', background: '#eaf2f8' }} />
+          )}
         </div>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '50px', color: '#0b2849' }}>

@@ -1,4 +1,4 @@
-import topBgText from '../../../assets/topbackgroundtext.svg'
+import topBgText from '../../../assets/topbackgroundtext.webp'
 
 export function TopBackground() {
   return (

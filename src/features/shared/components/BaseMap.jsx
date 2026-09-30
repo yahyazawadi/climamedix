@@ -45,8 +45,14 @@ export function BaseMap({
 
     return () => {
       if (scriptInterval) clearInterval(scriptInterval);
-      if (mapInstanceRef.current && mapInstanceRef.current.remove) {
-        mapInstanceRef.current.remove();
+      if (mapInstanceRef.current) {
+        try {
+          if (typeof mapInstanceRef.current.remove === 'function') {
+            mapInstanceRef.current.remove();
+          }
+        } catch (e) {
+          // ignore cleanup errors
+        }
         mapInstanceRef.current = null;
       }
     };

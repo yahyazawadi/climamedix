@@ -2,11 +2,11 @@ import { useState, useEffect } from 'preact/hooks'
 import { supabase } from '../../../utils/supabaseClient'
 import { Button } from '../../shared/components/Button'
 import { GlassCard } from '../../shared/components/GlassCard'
-import { ArabWorldMap } from './ArabWorldMap'
 import { HomeNewsWidget } from '../../news-blog/components/HomeNewsWidget'
 import { translations } from '../../../i18n/translations'
 import { CalendarSidebarWidget } from '../../events/components/CalendarSidebarWidget'
 import { DynamicHomeSlider } from './DynamicHomeSlider'
+import { ArabWorldMapSVG } from './ArabWorldMapSVG'
 import doctorImg from '../../../assets/bg_3.webp'
 import whiteLogo from '../../../assets/footer_logo.svg'
 
@@ -260,7 +260,7 @@ export function HomePage({ lang, setCurrentView, setOpenedModal, onNavigate }) {
               </p>
             </div>
             
-            <ArabWorldMap lang={lang} />
+            <ArabWorldMapSVG lang={lang} />
             
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
               <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => onNavigate('join')}>

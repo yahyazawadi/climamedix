@@ -8,7 +8,7 @@
 ## 📊 Testing Progress Overview
 
 - [ ] **1. Public & Core Visitor Pages** (3/5 Completed)
-- [ ] **2. Content Hubs & Community Pages** (0/4 Completed)
+- [x] **2. Content Hubs & Community Pages** (4/4 Completed)
 - [ ] **3. Learning Hub (LMS) & Research Center** (0/3 Completed)
 - [ ] **4. User Account & Contributor Authoring Portals** (0/3 Completed)
 - [ ] **5. Administration & Management Portals** (0/5 Completed)
@@ -103,11 +103,16 @@
 - **URL:** [http://localhost:9090/news](http://localhost:9090/news) *(or `/blog`, `/feed`)*
 - **Access Level:** Public (All)
 - **Checklist:**
-  - [ ] **Article Grid:** Cards render thumbnails, publication dates, and category tags.
-  - [ ] **Category Filter Chips:** Filtering by category updates grid smoothly.
-  - [ ] **Search Bar:** Typing query filters article titles without colliding with right-aligned magnifying glass in RTL.
+  - [x] **Article Grid:** Cards render thumbnails, publication dates, and category tags.
+  - [x] **Category Filter Chips:** Dynamically generated from available articles; filters grid smoothly with GSAP animation.
+  - [x] **Search Bar:** Real-time query filtering for title, summary, and author with clear (X) button; RTL-aware padding prevents collision with right-aligned magnifying glass.
   - [x] **Geospatial News Map View:** Toggling to "Map View" renders interactive node pins and severity radius circles.
 - **Notes / Bugs Found:**
+  - Replaced hardcoded category tags with dynamic category chip derivation from active articles.
+  - Categories are ordered descending by number of articles and capped at 4 maximum; if more categories exist, a 5th "أخرى" / "Other" filter chip is appended to group remaining categories. Empty categories with 0 articles are omitted from the filter bar, preventing dead ends.
+  - Added bilingual category resolution (`KNOWN_CATEGORIES` & `categoriesMatch`) so custom or localized categories map accurately in both Arabic and English.
+  - Added real-time search bar above category filters. Configured bidirectional layout: in RTL, magnifying glass is pinned right with `paddingRight: 46px` preventing collision; in LTR, icon is pinned left with `paddingLeft: 46px`.
+  - Added instant clear (X) button and bilingual empty search state (`لا توجد مقالات تطابق بحثك حالياً`).
   - Fixed mobile responsive breakage: converted full-screen blocking drawer into a modern responsive bottom-sheet docked at `top: 38%` with rounded top corners and a dedicated close button.
   - Implemented auto-panning (`map.flyTo` with offset `[0, -100]`) so clicked nodes remain centered in the visible upper half of the viewport on mobile devices.
   - Fixed race condition where edit button flickered or disappeared during auth hydration by caching role in `sessionStorage` and evaluating admin metadata.
@@ -123,14 +128,23 @@
 - **URL:** [http://localhost:9090/article?id=...](http://localhost:9090/article) *(or `/post`, `/read`)*
 - **Access Level:** Public (All)
 - **Checklist:**
-  - [ ] **Article Layout:** Headline, author card, publication date, and cover image render properly.
-  - [ ] **Rich Content:** Quill-formatted text, embedded videos, audio clips, and images load correctly.
-  - [ ] **View Counter:** Auto-increments view counter upon article opening.
-  - [ ] **Likes & Engagement:** Authenticated users can toggle like; guests receive prompt to sign in.
-  - [ ] **Author Edit Button:** "تعديل" appears ONLY for the author or users with `manage:any_article`.
-  - [ ] **Share Buttons:** Web Share API / Copy Link action works with feedback toast.
+  - [x] **Article Layout:** Headline, author card, publication date, and cover image render properly.
+  - [x] **Rich Content:** Quill-formatted text, embedded videos, audio clips, and images load correctly.
+  - [x] **View Counter:** Auto-increments view counter upon article opening.
+  - [x] **Likes & Engagement:** Authenticated users can toggle like; guests receive prompt to sign in.
+  - [x] **Author Edit Button:** "تعديل" appears ONLY for the author or users with `manage:any_article`.
+  - [x] **Share Buttons:** Web Share API / Copy Link action works with feedback toast.
 - **Notes / Bugs Found:**
-  - 
+  - Fixed raw `\n` escaping bug: seeded database records contained literal `\n\n` characters and raw Markdown syntax (`##`, `###`, `*`), which rendered as literal text strings instead of formatted paragraphs and headings inside the Quill HTML container.
+  - Converted existing database articles (`news_articles`) to clean semantic HTML.
+  - Created resilient formatting utility [`formatArticleContent`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/src/utils/contentFormatter.js) to unescape literal `\n` sequences and automatically parse Markdown into semantic HTML elements (`<h2>`, `<h3>`, `<ul>`, `<ol>`, `<p>`) for any incoming articles.
+  - Created [`extractSnippet`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/src/utils/contentFormatter.js) utility used in `NewsPage` and `HomeNewsWidget` to strip Markdown markers and unescape newlines before generating card preview snippets.
+  - Fixed text alignment and list direction (RTL): Quill Snow stylesheet defaults to `text-align: left` and forces left padding/negative margins on list elements (`.ql-editor ul li:not(.ql-direction-rtl)`). Added dynamic `dir={isRtl ? 'rtl' : 'ltr'}` and `ql-direction-rtl` class to the reader card, with scoped CSS enforcing `direction: rtl`, `text-align: right`, proper list indentation (`padding-inline-start: 1.8em`), and native right-aligned bullets (`•`).
+  - Fixed like counter badge centering: The badge number "1" was previously pushed towards the top/left edge due to Arabic font metrics (`Tajawal`). Set font family to `'Outfit', system-ui, sans-serif`, added `direction: ltr`, and calibrated badge dimensions/padding to ensure mathematical and visual centering.
+  - Aligned action buttons bar: Separated the Love icon (with like count) to the right (start) and grouped the share/utility icons (`[Edit]`, `[Copy Link]`, `[Share]`) to the left (end) using a full-width flex container (`justify-content: space-between`).
+  - Removed redundant top "تعديل" (Edit) pill button next to `→ العودة للأخبار` since a dedicated edit icon button is integrated directly in the action bar.
+  - Fixed top padding below fixed navbar: Increased `paddingTop` to `clamp(120px, 12vw, 140px)` so the back button row has 24px–44px clear breathing room and never tucks beneath the 96px fixed header.
+  - Fixed background particles leaking over footer: Scoped `AmbientParticles` from a viewport `position: fixed` overlay to a container-scoped `position: absolute; inset: 0` element inside `overflow: hidden`, and set `.figma-footer` to `position: relative; z-index: 20` to guarantee complete separation.
 
 ---
 
@@ -138,12 +152,15 @@
 - **URL:** [http://localhost:9090/opportunities](http://localhost:9090/opportunities) *(or `/jobs`, `/grants`)*
 - **Access Level:** Public (All)
 - **Checklist:**
-  - [ ] **Category Filters:** Filter by Fellowship, Scholarship, Grant, Internship, or Conference.
-  - [ ] **Column-Masking Guard:** Unauthenticated guests see "سجل لعرض الرابط" (Sign in to Apply) instead of raw link.
-  - [ ] **Opportunity Modal:** Clicking card opens modal with full requirements, deadline, and eligibility.
-  - [ ] **External Apply Link:** Authenticated users see direct "Apply Now" button opening external URL in new tab.
+  - [x] **Category Filters:** Filter by Fellowship, Scholarship, Grant, Internship, or Conference.
+  - [x] **Column-Masking Guard:** Unauthenticated guests see "سجل لعرض الرابط" (Sign in to Apply) instead of raw link.
+  - [x] **Opportunity Modal:** Clicking card opens modal with full requirements, deadline, and eligibility.
+  - [x] **External Apply Link:** Authenticated users see direct "Apply Now" button opening external URL in new tab.
 - **Notes / Bugs Found:**
-  - 
+  - Fixed dead action button ("تقديم الطلب" / "Apply Now") on opportunity cards: links lacking protocol (e.g. `raw.example.com`) are automatically prepended with `https://` before opening in a secure new tab.
+  - Built responsive [`OpportunityDetailModal`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/src/features/opportunities/components/OpportunityDetailModal.jsx) inspired by the `/join` aesthetic (top mint-to-navy gradient accent, glassmorphic backdrop blur, responsive card sizing, and key info grid). Clicking any opportunity card opens the detail modal displaying full eligibility criteria, long description, deadline, and direct application action.
+  - Integrated `onNavigate` prop from `AppRouter` down through `OpportunitiesPage`, `OpportunitiesGrid`, and `OpportunityCard`, replacing raw unhandled popstate events with seamless SPA routing to `/login` when unauthenticated users attempt to apply.
+  - All 59 tests in opportunities test suite passing.
 
 ---
 
@@ -151,12 +168,15 @@
 - **URL:** [http://localhost:9090/events](http://localhost:9090/events) *(or `/calendar`, `/webinars`)*
 - **Access Level:** Public (All)
 - **Checklist:**
-  - [ ] **Calendar Grid:** Current month days render with event indicator dot markers.
-  - [ ] **Month Navigation:** Previous and Next buttons switch months seamlessly.
-  - [ ] **Event Selection:** Clicking an active day highlights matching events in the agenda list.
-  - [ ] **Event Detail Inspect:** Clicking event shows time, location/online link, speaker info, and RSVP action.
+  - [x] **Calendar Grid:** Current month days render with event indicator dot markers.
+  - [x] **Month Navigation:** Previous and Next buttons switch months seamlessly.
+  - [x] **Event Selection:** Clicking an active day highlights matching events in the agenda list.
+  - [x] **Event Detail Inspect:** Clicking event shows time, location/online link, speaker info, and RSVP action.
 - **Notes / Bugs Found:**
-  - 
+  - Fixed mobile layout off-centering bug: on narrow screens and inside the mobile calendar sidebar drawer, the calendar month grid card (`.events-calendar-month-card`) was misaligned. Updated CSS grid minmax column constraint (`minmax(min(100%, 320px), 1fr))`, added responsive card max-width (`360px`) and `margin: 0 auto` with `justify-content: center` to ensure mathematical and visual centering.
+  - Removed `transform: scale(0.95)` on `CalendarSidebarWidget` drawer content which caused content shift and clipping on small mobile viewports.
+  - Centered view switcher header (`.events-calendar-header`) on mobile displays when toggle buttons wrap.
+
 
 ---
 

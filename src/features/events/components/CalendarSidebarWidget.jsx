@@ -134,7 +134,7 @@ export function CalendarSidebarWidget({ lang = 'ar', onNavigate }) {
         </div>
 
         {/* Content */}
-        <div style={{ padding: '15px', flexGrow: 1, background: '#f8fafc', transform: 'scale(0.95)', transformOrigin: 'top center', direction: isArabic ? 'rtl' : 'ltr' }}>
+        <div style={{ padding: '12px', flexGrow: 1, background: '#f8fafc', boxSizing: 'border-box', width: '100%', direction: isArabic ? 'rtl' : 'ltr' }}>
           {isLoading ? (
             <div style={{ textAlign: 'center', padding: '40px', color: '#0b2849' }}>
               {isArabic ? 'جاري تحميل الفعاليات...' : 'Loading events...'}

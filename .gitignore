@@ -29,3 +29,6 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+
+scripts/capture_map.cjs
+scripts/capture_map.js

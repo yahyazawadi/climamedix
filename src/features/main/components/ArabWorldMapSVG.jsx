@@ -135,10 +135,6 @@ function MapOverlay({ cfg, lang, id }) {
       {pts.map((city, i) => {
         const [cx, cy] = city.pos;
         const delay = `${(i * 0.35) % 2.5}s`;
-        const label = lang === 'ar' ? city.ar : city.en;
-        // Decide label side: right if city is in left half of map, else left
-        const labelAnchor = cx < w * 0.6 ? 'start' : 'end';
-        const labelX = labelAnchor === 'start' ? cx + 8 : cx - 8;
 
         return (
           <g key={city.id}>
@@ -168,19 +164,6 @@ function MapOverlay({ cfg, lang, id }) {
 
             {/* Core dot */}
             <circle cx={cx} cy={cy} r="4" fill="#4dff82" />
-
-            {/* Label */}
-            <text
-              x={labelX} y={cy + 4}
-              textAnchor={labelAnchor}
-              fontSize="11"
-              fontWeight="700"
-              fontFamily="Tajawal, system-ui, sans-serif"
-              fill="#EEF6FC"
-              style={{ userSelect: 'none' }}
-            >
-              {label}
-            </text>
           </g>
         );
       })}

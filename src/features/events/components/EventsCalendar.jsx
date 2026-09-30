@@ -85,7 +85,7 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
     <div ref={containerRef} className="events-calendar-component" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
       
       {/* View Switcher Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '35px', flexWrap: 'wrap', gap: '15px' }}>
+      <div className="events-calendar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '35px', flexWrap: 'wrap', gap: '15px' }}>
         <h3 style={{ color: '#0b2849', fontSize: '20px', fontWeight: 'bold', margin: 0 }}>
           {isArabic ? 'الندوات والفعاليات البيئية' : 'Environmental Events & Seminars'}
         </h3>
@@ -110,41 +110,41 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
             </button>
           )}
           <div style={{ display: 'flex', background: 'rgba(0, 76, 109, 0.08)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(11, 40, 73, 0.1)' }}>
-          <button
-            onClick={() => setViewMode('list')}
-            style={{
-              padding: '8px 20px',
-              borderRadius: '8px',
-              border: 'none',
-              background: viewMode === 'list' ? '#004c6d' : 'transparent',
-              color: viewMode === 'list' ? '#ffffff' : '#0b2849',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              fontSize: '13.5px',
-              transition: 'all 0.25s'
-            }}
-          >
-            {isArabic ? 'عرض القائمة' : 'List View'}
-          </button>
-          <button
-            onClick={() => setViewMode('calendar')}
-            style={{
-              padding: '8px 20px',
-              borderRadius: '8px',
-              border: 'none',
-              background: viewMode === 'calendar' ? '#004c6d' : 'transparent',
-              color: viewMode === 'calendar' ? '#ffffff' : '#0b2849',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              fontSize: '13.5px',
-              transition: 'all 0.25s'
-            }}
-          >
-            {isArabic ? 'عرض التقويم' : 'Calendar View'}
-          </button>
+            <button
+              onClick={() => setViewMode('list')}
+              style={{
+                padding: '8px 20px',
+                borderRadius: '8px',
+                border: 'none',
+                background: viewMode === 'list' ? '#004c6d' : 'transparent',
+                color: viewMode === 'list' ? '#ffffff' : '#0b2849',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '13.5px',
+                transition: 'all 0.25s'
+              }}
+            >
+              {isArabic ? 'عرض القائمة' : 'List View'}
+            </button>
+            <button
+              onClick={() => setViewMode('calendar')}
+              style={{
+                padding: '8px 20px',
+                borderRadius: '8px',
+                border: 'none',
+                background: viewMode === 'calendar' ? '#004c6d' : 'transparent',
+                color: viewMode === 'calendar' ? '#ffffff' : '#0b2849',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '13.5px',
+                transition: 'all 0.25s'
+              }}
+            >
+              {isArabic ? 'عرض التقويم' : 'Calendar View'}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
       {viewMode === 'list' ? (
         /* ================== LIST VIEW ================== */
@@ -161,10 +161,10 @@ export function EventsCalendar({ events = [], onRegisterEvent, registeredEvents 
         </div>
       ) : (
         /* ================== CALENDAR VIEW ================== */
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px', alignItems: 'start' }}>
+        <div className="events-calendar-view-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '24px', alignItems: 'start', justifyContent: 'center', width: '100%' }}>
           
           {/* Month Grid Card */}
-          <div style={{ background: 'rgba(255, 255, 255, 0.45)', backdropFilter: 'blur(20px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', padding: '24px', boxShadow: '0 12px 30px rgba(0, 76, 109, 0.05)' }}>
+          <div className="events-calendar-month-card" style={{ background: 'rgba(255, 255, 255, 0.45)', backdropFilter: 'blur(20px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.4)', padding: '20px 16px', boxShadow: '0 12px 30px rgba(0, 76, 109, 0.05)', width: '100%', boxSizing: 'border-box', margin: '0 auto', maxWidth: '420px' }}>
             
             {/* Header Controls */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', direction: 'ltr' }}>

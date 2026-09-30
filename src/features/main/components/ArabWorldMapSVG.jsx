@@ -37,8 +37,8 @@ function project(lng, lat, centerLng, centerLat, zoom, viewW, viewH) {
 }
 
 // ─── Map configs (must match the screenshots) ──────────────────────────────────
-const DESKTOP = { centerLng: 38.0, centerLat: 26.0, zoom: 3.8, w: 1440, h: 700 };
-const MOBILE  = { centerLng: 36.0, centerLat: 27.0, zoom: 3.3, w: 390,  h: 700 };
+const DESKTOP = { centerLng: 22.5, centerLat: 26.0, zoom: 3.8, w: 1440, h: 700 };
+const MOBILE  = { centerLng: 21.5, centerLat: 23.0, zoom: 1.85, w: 390,  h: 240 };
 
 // ─── Cities ────────────────────────────────────────────────────────────────────
 const CITIES = [
@@ -106,64 +106,97 @@ function MapOverlay({ cfg, lang, id }) {
       aria-hidden="true"
     >
       <defs>
-        {/* One keyframe animation per city (staggered delays) */}
+        {/* Glow filter matching original 0 0 12px rgba(77, 255, 130, 0.8) */}
+        <filter id={`cityGlow-${id}`} x="-100%" y="-100%" width="300%" height="300%">
+          <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="#4dff82" floodOpacity="0.8" />
+        </filter>
+
         <style>{`
-          @keyframes mapPulse {
-            0%   { r: 4px;  opacity: 0.9; }
-            100% { r: 20px; opacity: 0;   }
+          @keyframes dashMove {
+            to {
+              stroke-dashoffset: -44;
+            }
+          }
+          @keyframes originalRingPulse {
+            0% {
+              r: 5px;
+              opacity: 0.8;
+            }
+            100% {
+              r: 18px;
+              opacity: 0;
+            }
+          }
+          .network-traveling-line {
+            stroke: #4dff82;
+            stroke-width: 1.5;
+            stroke-opacity: 0.45;
+            stroke-dasharray: 12 10;
+            animation: dashMove 3.2s linear infinite;
           }
         `}</style>
       </defs>
 
-      {/* Connection lines */}
+      {/* Connection lines with traveling dashes */}
       {CONNECTIONS.map(([i, j], k) => {
         const a = pts[i].pos;
         const b = pts[j].pos;
         return (
           <line
             key={k}
-            x1={a[0]} y1={a[1]}
-            x2={b[0]} y2={b[1]}
-            stroke="#4dff82"
-            strokeWidth="0.8"
-            strokeOpacity="0.3"
+            className="network-traveling-line"
+            x1={a[0]}
+            y1={a[1]}
+            x2={b[0]}
+            y2={b[1]}
           />
         );
       })}
 
-      {/* City markers */}
+      {/* City markers - solid glowing dots and pulsing rings */}
       {pts.map((city, i) => {
         const [cx, cy] = city.pos;
-        const delay = `${(i * 0.35) % 2.5}s`;
+        const delay = `${(i * 0.25) % 2.0}s`;
 
         return (
           <g key={city.id}>
-            {/* Pulse ring */}
+            {/* Outer expanding pulsing ring */}
             <circle
-              cx={cx} cy={cy}
-              r="4"
+              cx={cx}
+              cy={cy}
+              r="6"
               fill="none"
               stroke="#4dff82"
               strokeWidth="1.5"
             >
               <animate
                 attributeName="r"
-                from="4" to="20"
-                dur="2.2s"
+                from="6"
+                to="20"
+                dur="2s"
                 begin={delay}
                 repeatCount="indefinite"
               />
               <animate
                 attributeName="opacity"
-                from="0.8" to="0"
-                dur="2.2s"
+                from="0.7"
+                to="0"
+                dur="2s"
                 begin={delay}
                 repeatCount="indefinite"
               />
             </circle>
 
-            {/* Core dot */}
-            <circle cx={cx} cy={cy} r="4" fill="#4dff82" />
+            {/* Glowing solid white core */}
+            <circle
+              cx={cx}
+              cy={cy}
+              r="5.5"
+              fill="#FFFFFF"
+              stroke="#2FAD78"
+              strokeWidth="2"
+              filter={`url(#cityGlow-${id})`}
+            />
           </g>
         );
       })}

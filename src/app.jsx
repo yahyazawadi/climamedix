@@ -9,6 +9,7 @@ import { ColoredBackground } from './features/main/components/ColoredBackground'
 import { AppRouter, useAppRouting } from './AppRouter'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
+import { LoadingPlanet } from './features/shared/components/LoadingPlanet'
 
 export function App() {
   return (
@@ -25,6 +26,7 @@ function AppContent() {
   const [activeSection, setActiveSection] = useState('home');
   const [openedModal, setOpenedModal] = useState(null); // 'join', 'policy'
   const [currentView, setCurrentView] = useState('newhome'); // 'newhome', 'home', or others
+  const [initialLoading, setInitialLoading] = useState(true);
   const { user, userProfile, signOut } = useAuth();
   const handleLogout = async () => {
     await signOut();
@@ -57,27 +59,42 @@ function AppContent() {
       document.body.classList.remove('dark-mode');
     }
   };
-  // Scroll Spy for active section styling
+  // Scroll Spy for active section styling (rAF throttled to prevent mobile jitter & layout thrashing)
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const sections = document.querySelectorAll('section[id], footer[id]');
-      const scrollY = window.scrollY;
-      let currentSection = 'home';
-      
-      sections.forEach((section) => {
-        const sectionHeight = section.offsetHeight;
-        const sectionTop = section.offsetTop - 150;
-        if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
-          currentSection = section.getAttribute('id');
-        }
-      });
-      setActiveSection(currentSection);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const sections = document.querySelectorAll('section[id], footer[id]');
+          const scrollY = window.scrollY;
+          let currentSection = 'home';
+          
+          sections.forEach((section) => {
+            const sectionHeight = section.offsetHeight;
+            const sectionTop = section.offsetTop - 150;
+            if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+              currentSection = section.getAttribute('id');
+            }
+          });
+          setActiveSection(currentSection);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   return (
     <div style={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh' }}>
+      {/* Brand Planet Loading Screen */}
+      {initialLoading && (
+        <LoadingPlanet
+          isReady={false}
+          lang={lang}
+          onFinished={() => setInitialLoading(false)}
+        />
+      )}
       {/* Background components */}
       {currentView === 'home' || currentView === 'newhome' ? (
         <>

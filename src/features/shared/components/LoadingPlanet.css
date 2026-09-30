@@ -1,0 +1,236 @@
+/* ─── CLIMAMEDIX PLANET LOADING SCREEN (ZERO-FILTER HIGH PERFORMANCE) ─── */
+
+.climamedix-loader-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-primary, #f5f9fd);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  contain: strict;
+  transform: translateZ(0);
+}
+
+.climamedix-loader-curtain.loaded {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Inline variant (e.g. for Suspense / card / route transitions) */
+.climamedix-loader-inline {
+  width: 100%;
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  contain: layout style;
+}
+
+/* ─── Inner Container ─────────────────────────────────────────────────────── */
+
+.climamedix-loader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+  max-width: 90vw;
+  text-align: center;
+  transform: translateZ(0);
+}
+
+/* ─── Planet Stage & Radial Orbit Ring ────────────────────────────────────── */
+
+.loader-planet-stage {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  transform: translateZ(0);
+}
+
+.loader-planet-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Outer static dashed guide ring */
+.loader-orbit-track {
+  fill: none;
+  stroke: rgba(0, 76, 109, 0.15);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 6;
+}
+
+body.dark-mode .loader-orbit-track {
+  stroke: rgba(29, 163, 216, 0.2);
+}
+
+/* GPU-Composited smooth orbit spinner ring (Hardware Matrix Rotation) */
+.loader-orbit-group {
+  transform-origin: 1px 129px;
+  animation: climamedix-orbit-spin 2.6s linear infinite;
+  will-change: transform;
+}
+
+@keyframes climamedix-orbit-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loader-orbit-spinner {
+  fill: none;
+  stroke: var(--accent, #15b47a);
+  stroke-width: 2.2;
+  stroke-dasharray: 70 190;
+  stroke-linecap: round;
+}
+
+.loader-orbit-beacon {
+  fill: var(--primary, #004c6d);
+}
+
+body.dark-mode .loader-orbit-beacon {
+  fill: #ffffff;
+}
+
+/* Earth Globe: Pure GPU hardware-cached matrix rotation */
+.loader-globe-spinner {
+  transform-origin: 1px 129px;
+  animation: climamedix-planet-spin 4.5s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+@keyframes climamedix-planet-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Atmosphere Rim */
+.loader-atmosphere-rim {
+  fill: none;
+  stroke: var(--primary, #004c6d);
+  stroke-width: 1.2;
+  opacity: 0.4;
+}
+
+/* ─── Brand Box ───────────────────────────────────────────────────────────── */
+
+.climamedix-loader-brand-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.climamedix-loader-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--accent, #15b47a);
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: climamedix-dot-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes climamedix-dot-pulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.8; }
+  50%      { transform: scale(1.3); opacity: 1; }
+}
+
+.climamedix-loader-title {
+  font-family: var(--font-family, 'Tajawal', sans-serif) !important;
+  font-size: clamp(1.2rem, 3.5vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-primary, #0b2849);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.climamedix-loader-accent {
+  color: var(--accent, #15b47a);
+}
+
+/* ─── Subtitle ────────────────────────────────────────────────────────────── */
+
+.climamedix-loader-subtitle {
+  font-family: var(--font-family, 'Tajawal', sans-serif) !important;
+  font-size: clamp(0.72rem, 2vw, 0.82rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary, #4a607a);
+  margin-bottom: 1.5rem;
+}
+
+/* ─── Telemetry Progress Bar ──────────────────────────────────────────────── */
+
+.climamedix-loader-track {
+  width: min(240px, 75vw);
+  height: 4px;
+  background: rgba(1, 76, 109, 0.08);
+  border: 1px solid rgba(1, 76, 109, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.65rem;
+  position: relative;
+}
+
+body.dark-mode .climamedix-loader-track {
+  background: rgba(29, 163, 216, 0.1);
+  border-color: rgba(29, 163, 216, 0.25);
+}
+
+.climamedix-loader-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary, #004c6d) 0%, var(--teal, #016c7f) 50%, var(--accent, #15b47a) 100%);
+  border-radius: 999px;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: width;
+}
+
+/* ─── Status & Progress Meta ──────────────────────────────────────────────── */
+
+.climamedix-loader-meta {
+  width: min(240px, 75vw);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.climamedix-loader-ticker {
+  font-family: var(--font-family, 'Tajawal', sans-serif) !important;
+  font-size: clamp(0.68rem, 1.8vw, 0.74rem);
+  color: var(--text-muted, #8295ab);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+html[dir="rtl"] .climamedix-loader-ticker {
+  text-align: right;
+}
+
+.climamedix-loader-pct {
+  font-family: monospace, sans-serif;
+  font-size: clamp(0.72rem, 1.8vw, 0.78rem);
+  font-weight: 700;
+  color: var(--primary, #004c6d);
+  flex-shrink: 0;
+}
+
+body.dark-mode .climamedix-loader-pct {
+  color: var(--accent, #15b47a);
+}

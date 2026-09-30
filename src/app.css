@@ -387,6 +387,8 @@ html[lang="en"] .figma-nav-text {
    ========================================================================== */
 
 .figma-footer {
+  position: relative;
+  z-index: 20;
   background-image: url('./assets/footer background.png');
   /* literal figma background design */
   background-size: cover;
@@ -590,12 +592,6 @@ html[lang="en"] .figma-nav-text {
 
 .figma-footer {
   background-color: #0b2849;
-}
-
-@media (max-width: 768px) {
-  html, body {
-    background-color: #0b2849;
-  }
 }
 
 .figma-subfooter-container {
@@ -3721,5 +3717,113 @@ body.dark-mode .search-filter-tag.active {
   .figma-more-btn {
     height: 36px !important;
     font-size: 12px !important;
+  }
+}
+
+/* ==========================================================================
+   EventCard Responsive Styles (Desktop & Mobile)
+   ========================================================================== */
+.event-card .event-card-inner {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.event-card .event-card-top-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+.event-card .event-card-date-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.event-card .event-card-title-area {
+  display: none; /* In desktop, title sits in body-area */
+}
+
+.event-card .event-card-body-area {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Mobile Screen Layout (< 768px) */
+@media (max-width: 768px) {
+  .event-card {
+    padding: 16px !important;
+  }
+
+  .event-card .event-card-inner {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  /* Top Row: Date badge on one side, title on the other */
+  .event-card .event-card-top-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  .event-card .event-card-title-area {
+    display: block !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .event-card .event-card-desktop-title {
+    display: none !important;
+  }
+
+  /* Full Width Description Area */
+  .event-card .event-card-body-area {
+    width: 100% !important;
+  }
+
+  .event-card .event-card-desc {
+    width: 100% !important;
+    font-size: 13.5px !important;
+    line-height: 1.6 !important;
+  }
+
+  /* Centering Calendar View on Mobile */
+  .events-calendar-header {
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .events-calendar-header > div {
+    justify-content: center !important;
+    width: 100% !important;
+  }
+
+  .events-calendar-view-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+  }
+
+  .events-calendar-month-card {
+    width: 100% !important;
+    max-width: 360px !important;
+    margin: 0 auto !important;
+    padding: 16px 12px !important;
+    box-sizing: border-box !important;
   }
 }

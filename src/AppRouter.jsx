@@ -1,25 +1,28 @@
 import { useEffect } from 'preact/hooks';
+import { lazy, Suspense } from 'preact/compat';
 import { useAuth } from './features/auth/hooks/useAuth';
-import { AboutUsPage } from './features/about-us/AboutUsPage';
-import { AuthPage } from './features/auth/AuthPage';
-import { JoinUsPage } from './features/join-us/JoinUsPage';
-import { OpportunitiesPage } from './features/opportunities/components/OpportunitiesPage';
-import { EventsPage } from './features/events/EventsPage';
-import { ArticleEditorPage } from './features/news-blog/components/ArticleEditorPage';
-import { NewsPage } from './features/news-blog/components/NewsPage';
-import { ArticleReaderPage } from './features/news-blog/components/ArticleReaderPage';
-import { ProfilePage } from './features/profile/components/ProfilePage';
-import { LearningHubPage } from './features/learning-hub/components/student/LearningHubPage';
 import { HomePage, NewHomePage } from './features/main/components/NewHomePage';
-import { UserManagementDashboard } from './features/admin/components/UserManagementDashboard';
-import { UserStatsDashboard } from './features/admin/components/UserStatsDashboard';
-import { CourseBuilderPage } from './features/learning-hub/components/admin/CourseBuilderPage';
-import { CertificateAuditDashboard } from './features/admin/components/CertificateAuditDashboard';
-import { ResearchHubPage } from './features/research-center/components/ResearchHubPage';
-import { ResearchUploadPage } from './features/research-center/components/ResearchUploadPage';
-import { ResearchDetailPage } from './features/research-center/components/ResearchDetailPage';
-import { CertificateVerificationPage } from './features/learning-hub/components/certificates/CertificateVerificationPage';
-import { SliderManagerPage } from './features/admin/components/SliderManagerPage';
+
+// Route-level code-splitting: lazy load heavy secondary pages
+const AboutUsPage = lazy(() => import('./features/about-us/AboutUsPage').then(m => ({ default: m.AboutUsPage })));
+const AuthPage = lazy(() => import('./features/auth/AuthPage').then(m => ({ default: m.AuthPage })));
+const JoinUsPage = lazy(() => import('./features/join-us/JoinUsPage').then(m => ({ default: m.JoinUsPage })));
+const OpportunitiesPage = lazy(() => import('./features/opportunities/components/OpportunitiesPage').then(m => ({ default: m.OpportunitiesPage })));
+const EventsPage = lazy(() => import('./features/events/EventsPage').then(m => ({ default: m.EventsPage })));
+const ArticleEditorPage = lazy(() => import('./features/news-blog/components/ArticleEditorPage').then(m => ({ default: m.ArticleEditorPage })));
+const NewsPage = lazy(() => import('./features/news-blog/components/NewsPage').then(m => ({ default: m.NewsPage })));
+const ArticleReaderPage = lazy(() => import('./features/news-blog/components/ArticleReaderPage').then(m => ({ default: m.ArticleReaderPage })));
+const ProfilePage = lazy(() => import('./features/profile/components/ProfilePage').then(m => ({ default: m.ProfilePage })));
+const LearningHubPage = lazy(() => import('./features/learning-hub/components/student/LearningHubPage').then(m => ({ default: m.LearningHubPage })));
+const UserManagementDashboard = lazy(() => import('./features/admin/components/UserManagementDashboard').then(m => ({ default: m.UserManagementDashboard })));
+const UserStatsDashboard = lazy(() => import('./features/admin/components/UserStatsDashboard').then(m => ({ default: m.UserStatsDashboard })));
+const CourseBuilderPage = lazy(() => import('./features/learning-hub/components/admin/CourseBuilderPage').then(m => ({ default: m.CourseBuilderPage })));
+const CertificateAuditDashboard = lazy(() => import('./features/admin/components/CertificateAuditDashboard').then(m => ({ default: m.CertificateAuditDashboard })));
+const ResearchHubPage = lazy(() => import('./features/research-center/components/ResearchHubPage').then(m => ({ default: m.ResearchHubPage })));
+const ResearchUploadPage = lazy(() => import('./features/research-center/components/ResearchUploadPage').then(m => ({ default: m.ResearchUploadPage })));
+const ResearchDetailPage = lazy(() => import('./features/research-center/components/ResearchDetailPage').then(m => ({ default: m.ResearchDetailPage })));
+const CertificateVerificationPage = lazy(() => import('./features/learning-hub/components/certificates/CertificateVerificationPage').then(m => ({ default: m.CertificateVerificationPage })));
+const SliderManagerPage = lazy(() => import('./features/admin/components/SliderManagerPage').then(m => ({ default: m.SliderManagerPage })));
 
 const ROUTE_ALIASES = {
   // Public Pages
@@ -205,73 +208,82 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
   const simpleNav = (view) => navigate(view);
   const paramNav = (view, idName, id) => navigate(view, null, `${idName}=${id}`);
 
-  if (currentView === 'home' || currentView === 'newhome' || currentView === 'debug') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} onNavigate={simpleNav} />;
-  if (currentView === 'about') return <AboutUsPage lang={lang} onJoinClick={() => navigate('join')} onNavigate={(view, sectionId) => navigate(view, sectionId)} />;
-  if (currentView === 'auth') return <AuthPage lang={lang} onAuthSuccess={() => setCurrentView('newhome')} />;
-  if (currentView === 'opportunities') return <OpportunitiesPage lang={lang} onNavigate={simpleNav} />;
-  if (currentView === 'join') return <JoinUsPage lang={lang} onNavigate={navigate} />;
-  if (currentView === 'write-article') return (
-    <ProtectedRoute permission={['write:articles', 'manage:any_article']} lang={lang} onNavigate={simpleNav}>
-      <ArticleEditorPage lang={lang} onNavigate={simpleNav} />
-    </ProtectedRoute>
+  const renderView = () => {
+    if (currentView === 'home' || currentView === 'newhome' || currentView === 'debug') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} onNavigate={simpleNav} />;
+    if (currentView === 'about') return <AboutUsPage lang={lang} onJoinClick={() => navigate('join')} onNavigate={(view, sectionId) => navigate(view, sectionId)} />;
+    if (currentView === 'auth') return <AuthPage lang={lang} onAuthSuccess={() => setCurrentView('newhome')} />;
+    if (currentView === 'opportunities') return <OpportunitiesPage lang={lang} onNavigate={simpleNav} />;
+    if (currentView === 'join') return <JoinUsPage lang={lang} onNavigate={navigate} />;
+    if (currentView === 'write-article') return (
+      <ProtectedRoute permission={['write:articles', 'manage:any_article']} lang={lang} onNavigate={simpleNav}>
+        <ArticleEditorPage lang={lang} onNavigate={simpleNav} />
+      </ProtectedRoute>
+    );
+    if (currentView === 'profile') return <ProfilePage lang={lang} onNavigate={simpleNav} />;
+    if (currentView === 'events') return <EventsPage lang={lang} onNavigate={simpleNav} />;
+    
+    if (currentView === 'news') return <NewsPage lang={lang} onNavigate={(v, id) => {
+      if (v === 'article') paramNav('article', 'id', id); 
+      else if (v === 'write-article' && id) navigate('write-article', null, id);
+      else simpleNav(v);
+    }} />;
+    
+    if (currentView === 'article') return <ArticleReaderPage lang={lang} onNavigate={(v, id) => {
+      if (v === 'write-article' && id) navigate('write-article', null, id);
+      else simpleNav(v);
+    }} />;
+    if (currentView === 'courses') return <LearningHubPage lang={lang} onNavigate={simpleNav} />;
+    
+    // Guarded Admin Portals
+    if (currentView === 'admin-users') return (
+      <ProtectedRoute permission={['manage:system', 'approve:users']} lang={lang} onNavigate={simpleNav}>
+        <UserManagementDashboard lang={lang} onNavigate={simpleNav} />
+      </ProtectedRoute>
+    );
+    if (currentView === 'admin-stats') return (
+      <ProtectedRoute permission="view:user_stats" lang={lang} onNavigate={simpleNav}>
+        <UserStatsDashboard lang={lang} onNavigate={simpleNav} />
+      </ProtectedRoute>
+    );
+    if (currentView === 'admin-courses') return (
+      <ProtectedRoute permission={['manage:any_course', 'manage:courses', 'write:courses']} lang={lang} onNavigate={simpleNav}>
+        <CourseBuilderPage lang={lang} onNavigate={simpleNav} />
+      </ProtectedRoute>
+    );
+    if (currentView === 'admin-certificates') return (
+      <ProtectedRoute permission={['issue:certs', 'manage:system']} lang={lang} onNavigate={simpleNav}>
+        <CertificateAuditDashboard lang={lang} onNavigate={simpleNav} />
+      </ProtectedRoute>
+    );
+    if (currentView === 'admin-slider') return (
+      <ProtectedRoute permission="manage:slider" lang={lang} onNavigate={simpleNav}>
+        <SliderManagerPage lang={lang} onNavigate={simpleNav} />
+      </ProtectedRoute>
+    );
+    
+    if (currentView === 'research') return <ResearchHubPage lang={lang} onNavigate={(v, id) => {
+      if (v === 'research-detail') paramNav('research-detail', 'id', id); else simpleNav(v);
+    }} />;
+    
+    if (currentView === 'research-upload') return (
+      <ProtectedRoute permission="write:research" lang={lang} onNavigate={simpleNav}>
+        <ResearchUploadPage lang={lang} onNavigate={simpleNav} />
+      </ProtectedRoute>
+    );
+    if (currentView === 'research-detail') return <ResearchDetailPage lang={lang} onNavigate={simpleNav} />;
+    
+    if (currentView === 'verify') return <CertificateVerificationPage lang={lang} certId={window.location.pathname.split('/').pop()} />;
+    
+    return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} onNavigate={simpleNav} />;
+  };
+
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '36px', height: '36px', border: '3px solid #E2EFFA', borderTopColor: '#0b2849', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      </div>
+    }>
+      {renderView()}
+    </Suspense>
   );
-  if (currentView === 'profile') return <ProfilePage lang={lang} onNavigate={simpleNav} />;
-  if (currentView === 'events') return <EventsPage lang={lang} onNavigate={simpleNav} />;
-  
-  if (currentView === 'news') return <NewsPage lang={lang} onNavigate={(v, id) => {
-    if (v === 'article') paramNav('article', 'id', id); 
-    else if (v === 'write-article' && id) navigate('write-article', null, id);
-    else simpleNav(v);
-  }} />;
-  
-  if (currentView === 'article') return <ArticleReaderPage lang={lang} onNavigate={(v, id) => {
-    if (v === 'write-article' && id) navigate('write-article', null, id);
-    else simpleNav(v);
-  }} />;
-  if (currentView === 'courses') return <LearningHubPage lang={lang} onNavigate={simpleNav} />;
-  
-  // Guarded Admin Portals
-  if (currentView === 'admin-users') return (
-    <ProtectedRoute permission={['manage:system', 'approve:users']} lang={lang} onNavigate={simpleNav}>
-      <UserManagementDashboard lang={lang} onNavigate={simpleNav} />
-    </ProtectedRoute>
-  );
-  if (currentView === 'admin-stats') return (
-    <ProtectedRoute permission="view:user_stats" lang={lang} onNavigate={simpleNav}>
-      <UserStatsDashboard lang={lang} onNavigate={simpleNav} />
-    </ProtectedRoute>
-  );
-  if (currentView === 'admin-courses') return (
-    <ProtectedRoute permission={['manage:any_course', 'manage:courses', 'write:courses']} lang={lang} onNavigate={simpleNav}>
-      <CourseBuilderPage lang={lang} onNavigate={simpleNav} />
-    </ProtectedRoute>
-  );
-  if (currentView === 'admin-certificates') return (
-    <ProtectedRoute permission={['issue:certs', 'manage:system']} lang={lang} onNavigate={simpleNav}>
-      <CertificateAuditDashboard lang={lang} onNavigate={simpleNav} />
-    </ProtectedRoute>
-  );
-  if (currentView === 'admin-slider') return (
-    <ProtectedRoute permission="manage:slider" lang={lang} onNavigate={simpleNav}>
-      <SliderManagerPage lang={lang} onNavigate={simpleNav} />
-    </ProtectedRoute>
-  );
-  
-  if (currentView === 'research') return <ResearchHubPage lang={lang} onNavigate={(v, id) => {
-    if (v === 'research-detail') paramNav('research-detail', 'id', id); else simpleNav(v);
-  }} />;
-  
-  if (currentView === 'research-upload') return (
-    <ProtectedRoute permission="write:research" lang={lang} onNavigate={simpleNav}>
-      <ResearchUploadPage lang={lang} onNavigate={simpleNav} />
-    </ProtectedRoute>
-  );
-  if (currentView === 'research-detail') return <ResearchDetailPage lang={lang} onNavigate={simpleNav} />;
-  
-  if (currentView === 'newhome' || currentView === 'home') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} onNavigate={simpleNav} />;
-  
-  if (currentView === 'verify') return <CertificateVerificationPage lang={lang} certId={window.location.pathname.split('/').pop()} />;
-  
-  
-  return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} />; // Default fallback if no view matched
 }

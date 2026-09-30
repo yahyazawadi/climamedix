@@ -389,7 +389,7 @@ html[lang="en"] .figma-nav-text {
 .figma-footer {
   position: relative;
   z-index: 20;
-  background-image: url('./assets/footer background.png');
+  background-image: url('./assets/footer_background.webp');
   /* literal figma background design */
   background-size: cover;
   background-position: center bottom;
@@ -417,7 +417,7 @@ html[lang="en"] .figma-nav-text {
 .figma-footer-card {
   width: 402px;
   height: 430px;
-  background-image: url('./assets/bg_4.png');
+  background-image: url('./assets/bg_4.webp');
   /* literal card background design */
   background-size: 112% 112%;
   /* Scale slightly to push white corners out of bounds */
@@ -1394,7 +1394,7 @@ html[lang="en"] .figma-nav-text {
 .figma-cta-section-wrap {
   max-width: 900px;
   margin: 0 auto;
-  background-image: url('./assets/bg_4.png');
+  background-image: url('./assets/bg_4.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1772,7 +1772,7 @@ html[lang="en"] .figma-nav-text {
 
 /* About Us Page View */
 .figma-about-us-page {
-  background-image: url('./assets/about_bg.svg');
+  background-image: url('./assets/about_bg.webp');
   background-size: 100% auto;
   background-position: top center;
   background-repeat: no-repeat;

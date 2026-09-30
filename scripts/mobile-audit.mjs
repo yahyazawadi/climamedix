@@ -59,7 +59,8 @@ const ROUTES = [
   { name: 'Admin Stats', path: '/admin/stats' },
   { name: 'Admin Courses', path: '/admin/courses' },
   { name: 'Admin Certificates', path: '/admin/certificates' },
-  { name: 'Admin Slider', path: '/admin/slider' }
+  { name: 'Admin Slider', path: '/admin/slider' },
+  { name: 'Article Reader', path: '/article?id=11111111-1111-1111-1111-111111111111' }
 ];
 
 // Helper to launch system Chrome or Edge

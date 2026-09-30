@@ -7,7 +7,7 @@ import { HomeNewsWidget } from '../../news-blog/components/HomeNewsWidget'
 import { translations } from '../../../i18n/translations'
 import { CalendarSidebarWidget } from '../../events/components/CalendarSidebarWidget'
 import { DynamicHomeSlider } from './DynamicHomeSlider'
-import doctorImg from '../../../assets/bg_3.png'
+import doctorImg from '../../../assets/bg_3.webp'
 import whiteLogo from '../../../assets/footer_logo.svg'
 
 export function HomePage({ lang, setCurrentView, setOpenedModal, onNavigate }) {

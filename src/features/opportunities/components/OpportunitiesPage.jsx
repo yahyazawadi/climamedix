@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'preact/hooks';
 import { useOpportunities } from '../hooks/useOpportunities';
 import { OpportunitiesGrid, CATEGORY_MAP } from './OpportunitiesGrid';
+import { OpportunityDetailModal } from './OpportunityDetailModal';
 import { translations } from '../../../i18n/translations';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { createOpportunity } from '../services/opportunityService';
 
 const CATEGORY_KEYS = ['all', 'fellowship', 'scholarship', 'conference', 'internship', 'grant'];
 
-export function OpportunitiesPage({ lang }) {
+export function OpportunitiesPage({ lang, onNavigate }) {
   const { opportunities, loading, error, refreshOpportunities } = useOpportunities();
   const { user, userProfile, hasPermission } = useAuth();
   const [activeCategory, setActiveCategory] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   
@@ -293,10 +295,26 @@ export function OpportunitiesPage({ lang }) {
               </button>
             </div>
           ) : (
-            <OpportunitiesGrid opportunities={opportunities} activeCategory={activeCategory} lang={lang} />
+            <OpportunitiesGrid 
+              opportunities={opportunities} 
+              activeCategory={activeCategory} 
+              lang={lang}
+              onNavigate={onNavigate}
+              onCardClick={(opp) => setSelectedOpportunity(opp)}
+            />
           )}
         </div>
       </div>
+
+      {/* Opportunity Detail & Application Modal */}
+      {selectedOpportunity && (
+        <OpportunityDetailModal
+          opportunity={selectedOpportunity}
+          onClose={() => setSelectedOpportunity(null)}
+          lang={lang}
+          onNavigate={onNavigate}
+        />
+      )}
 
       {/* Add Opportunity Modal Form */}
       {showAddModal && (

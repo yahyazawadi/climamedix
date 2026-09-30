@@ -1,9 +1,10 @@
 import { Button } from '../../shared/components/Button';
 
-export function ArticleCard({ title, category, date, author, summary, image, onClick, onEdit, canEdit, views_count = 0, likes_count = 0, lang = 'ar' }) {
+export function ArticleCard({ id, title, category, date, author, summary, image, onClick, onEdit, canEdit, views_count = 0, likes_count = 0, lang = 'ar' }) {
   return (
     <div 
-      className="figma-item-card" 
+      className="figma-item-card article-card" 
+      data-article-id={id || title}
       onClick={onClick}
       style={{ cursor: 'pointer' }}
     >

@@ -3,6 +3,7 @@ import { supabase } from '../../../utils/supabaseClient';
 import { NewsFeed } from './NewsFeed';
 import { NewsMap } from './NewsMap';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { extractSnippet } from '../../../utils/contentFormatter';
 
 export function NewsPage({ lang, onNavigate }) {
   const { user, hasPermission } = useAuth();
@@ -21,26 +22,31 @@ export function NewsPage({ lang, onNavigate }) {
         
         // Map data to match NewsFeed properties
         const mappedArticles = (data || []).map(article => {
-          let categoryKey = 'المناخ والصحة'; // Default
-          if (article.category === 'research') categoryKey = 'الأبحاث والابتكار';
-          if (article.category === 'opportunities') categoryKey = 'فرص وتطوير';
-          if (article.category === 'events') categoryKey = 'فعاليات ومؤتمرات';
+          let categoryKey = article.category || 'المناخ والصحة';
+          if (article.category === 'climate_health') categoryKey = 'المناخ والصحة';
+          else if (article.category === 'research') categoryKey = 'الأبحاث والابتكار';
+          else if (article.category === 'opportunities') categoryKey = 'فرص وتطوير';
+          else if (article.category === 'events') categoryKey = 'فعاليات ومؤتمرات';
           
           let categoryLabel = categoryKey;
           if (lang === 'en') {
-            if (article.category === 'climate_health') categoryLabel = 'Climate & Health';
-            if (article.category === 'research') categoryLabel = 'Research & Innovation';
-            if (article.category === 'opportunities') categoryLabel = 'Opportunities & Dev';
-            if (article.category === 'events') categoryLabel = 'Events & Conferences';
+            if (article.category === 'climate_health' || categoryKey === 'المناخ والصحة') categoryLabel = 'Climate & Health';
+            else if (article.category === 'research' || categoryKey === 'الأبحاث والابتكار') categoryLabel = 'Research & Innovation';
+            else if (article.category === 'opportunities' || categoryKey === 'فرص وتطوير') categoryLabel = 'Opportunities & Dev';
+            else if (article.category === 'events' || categoryKey === 'فعاليات ومؤتمرات') categoryLabel = 'Events & Conferences';
           }
 
           const rawContent = lang === 'en' && article.content_en ? article.content_en : (article.content_ar || '');
-          const summary = rawContent.replace(/<[^>]+>/g, '').substring(0, 120) + '...';
+          const summary = extractSnippet(rawContent, 120);
 
           return {
             id: article.id,
             title: lang === 'en' && article.title_en ? article.title_en : article.title_ar,
+            title_ar: article.title_ar,
+            title_en: article.title_en,
             summary: summary,
+            content_ar: article.content_ar,
+            content_en: article.content_en,
             categoryKey: categoryKey, // For filtering
             category: categoryLabel,  // For display
             image: article.cover_image,

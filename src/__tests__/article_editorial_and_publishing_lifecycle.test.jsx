@@ -1054,14 +1054,35 @@ describe('Article Editorial & Publishing Lifecycle Test Suite (55 Tests)', () =>
       }
     ];
 
-    it('NewsFeed renders all category filter buttons', () => {
+    it('NewsFeed dynamically renders category filter buttons matching available articles', () => {
       render(<NewsFeed articles={mockArticles} lang="ar" onReadArticle={vi.fn()} />);
 
       expect(screen.getByText('الكل')).toBeDefined();
       expect(screen.getAllByText('المناخ والصحة').length).toBeGreaterThan(0);
-      expect(screen.getByText('الأبحاث والابتكار')).toBeDefined();
       expect(screen.getAllByText('فرص وتطوير').length).toBeGreaterThan(0);
-      expect(screen.getByText('فعاليات ومؤتمرات')).toBeDefined();
+      // Categories with 0 articles are NOT rendered dynamically
+      expect(screen.queryByText('الأبحاث والابتكار')).toBeNull();
+      expect(screen.queryByText('فعاليات ومؤتمرات')).toBeNull();
+    });
+
+    it('dynamically generates category filter chips when new article category is added', () => {
+      const articlesWithResearch = [
+        ...mockArticles,
+        {
+          id: 'art-3',
+          title: 'بحث جديد في الطاقة والبيئة',
+          summary: 'ملخص البحث...',
+          categoryKey: 'الأبحاث والابتكار',
+          category: 'الأبحاث والابتكار',
+          author: 'د. سامي',
+          date: '2026-06-15',
+          views_count: 50,
+          likes_count: 10,
+          created_by: 'usr-3'
+        }
+      ];
+      render(<NewsFeed articles={articlesWithResearch} lang="ar" onReadArticle={vi.fn()} />);
+      expect(screen.getAllByText('الأبحاث والابتكار').length).toBeGreaterThanOrEqual(2);
     });
 
     it('renders all articles when "الكل" filter is active', () => {
@@ -1081,22 +1102,102 @@ describe('Article Editorial & Publishing Lifecycle Test Suite (55 Tests)', () =>
       expect(screen.queryByText('أثر موجات الحر على الربو')).toBeNull();
     });
 
-    it('displays empty state placeholder when a category has 0 articles', () => {
+    it('typing query in search bar filters articles by title', () => {
       render(<NewsFeed articles={mockArticles} lang="ar" onReadArticle={vi.fn()} />);
 
-      const eventsBtn = screen.getByText('فعاليات ومؤتمرات');
-      fireEvent.click(eventsBtn);
+      const searchInput = screen.getByPlaceholderText('ابحث في الأخبار والمقالات...');
+      fireEvent.input(searchInput, { target: { value: 'الربو' } });
 
-      expect(screen.getByText('لا توجد مقالات في هذا القسم حالياً.')).toBeDefined();
+      expect(screen.getByText('أثر موجات الحر على الربو')).toBeDefined();
+      expect(screen.queryByText('منحة بحثية في التغير المناخي')).toBeNull();
     });
 
-    it('displays empty state placeholder in English when lang is en', () => {
+    it('displays empty state placeholder when search query finds 0 matches', () => {
+      render(<NewsFeed articles={mockArticles} lang="ar" onReadArticle={vi.fn()} />);
+
+      const searchInput = screen.getByPlaceholderText('ابحث في الأخبار والمقالات...');
+      fireEvent.input(searchInput, { target: { value: 'استعلام غير موجود' } });
+
+      expect(screen.getByText('لا توجد مقالات تطابق بحثك حالياً.')).toBeDefined();
+    });
+
+    it('displays empty state placeholder in English when lang is en and search finds 0 matches', () => {
       render(<NewsFeed articles={mockArticles} lang="en" onReadArticle={vi.fn()} />);
 
-      const eventsBtn = screen.getByText('Events & Conferences');
-      fireEvent.click(eventsBtn);
+      const searchInput = screen.getByPlaceholderText('Search news & articles...');
+      fireEvent.input(searchInput, { target: { value: 'nonexistent query' } });
 
-      expect(screen.getByText('No articles available in this category.')).toBeDefined();
+      expect(screen.getByText('No articles match your search.')).toBeDefined();
+    });
+
+    it('allows searching in Arabic when English is selected as the language', () => {
+      const bilingualArticles = [
+        {
+          id: 'art-en-1',
+          title: 'Impact of Heatwaves on Asthma',
+          title_ar: 'أثر موجات الحر على الربو',
+          title_en: 'Impact of Heatwaves on Asthma',
+          summary: 'A study conducted in Jordan...',
+          content_ar: 'دراسة حديثة في الأردن عن موجات الحر...',
+          content_en: 'A study conducted in Jordan about heatwaves...',
+          categoryKey: 'المناخ والصحة',
+          category: 'Climate & Health',
+          author: 'Dr. Khaled',
+          date: '2026-05-10',
+          created_by: 'usr-1'
+        },
+        {
+          id: 'art-en-2',
+          title: 'Climate Change Grant',
+          title_ar: 'منحة بحثية في التغير المناخي',
+          title_en: 'Climate Change Grant',
+          summary: 'Funding opportunity...',
+          content_ar: 'فرصة تمويل لأبحاث البيئة...',
+          content_en: 'Funding opportunity for environmental research...',
+          categoryKey: 'فرص وتطوير',
+          category: 'Opportunities & Dev',
+          author: 'Dr. Rania',
+          date: '2026-06-01',
+          created_by: 'usr-2'
+        }
+      ];
+
+      render(<NewsFeed articles={bilingualArticles} lang="en" onReadArticle={vi.fn()} />);
+
+      const searchInput = screen.getByPlaceholderText('Search news & articles...');
+      // Type Arabic query in English mode
+      fireEvent.input(searchInput, { target: { value: 'موجات' } });
+
+      // Should find the heatwaves article
+      expect(screen.getByText('Impact of Heatwaves on Asthma')).toBeDefined();
+      expect(screen.queryByText('Climate Change Grant')).toBeNull();
+    });
+
+    it('normalizes Arabic characters (hamza, taa marbuta) during search', () => {
+      const bilingualArticles = [
+        {
+          id: 'art-norm-1',
+          title: 'تأثير درجات الحرارة على الصحة',
+          title_ar: 'تأثير درجات الحرارة على الصحة',
+          title_en: 'Temperature effect on health',
+          summary: 'دراسة شاملة...',
+          categoryKey: 'المناخ والصحة',
+          category: 'المناخ والصحة',
+          author: 'د. يوسف',
+          date: '2026-05-10'
+        }
+      ];
+
+      render(<NewsFeed articles={bilingualArticles} lang="ar" onReadArticle={vi.fn()} />);
+
+      const searchInput = screen.getByPlaceholderText('ابحث في الأخبار والمقالات...');
+      // Query without hamza: "تاثير" matches "تأثير"
+      fireEvent.input(searchInput, { target: { value: 'تاثير' } });
+      expect(screen.getByText('تأثير درجات الحرارة على الصحة')).toBeDefined();
+
+      // Query with haa instead of taa marbuta: "الصحه" matches "الصحة"
+      fireEvent.input(searchInput, { target: { value: 'الصحه' } });
+      expect(screen.getByText('تأثير درجات الحرارة على الصحة')).toBeDefined();
     });
 
     it('clicking article card triggers onReadArticle with article object', () => {
@@ -1124,6 +1225,81 @@ describe('Article Editorial & Publishing Lifecycle Test Suite (55 Tests)', () =>
       expect(screen.getByText('350')).toBeDefined();
       expect(screen.getByText('42')).toBeDefined();
       expect(screen.getByText('بواسطة: د. سامي')).toBeDefined();
+    });
+
+    it('orders categories by number of articles descending and caps at 4 with 5th as "أخرى"', () => {
+      const multiCategoryArticles = [
+        // Category A: 4 articles
+        { id: '1', title: 'A1', summary: 's', categoryKey: 'المناخ والصحة', category: 'المناخ والصحة', author: 'a', date: 'd' },
+        { id: '2', title: 'A2', summary: 's', categoryKey: 'المناخ والصحة', category: 'المناخ والصحة', author: 'a', date: 'd' },
+        { id: '3', title: 'A3', summary: 's', categoryKey: 'المناخ والصحة', category: 'المناخ والصحة', author: 'a', date: 'd' },
+        { id: '4', title: 'A4', summary: 's', categoryKey: 'المناخ والصحة', category: 'المناخ والصحة', author: 'a', date: 'd' },
+        // Category B: 3 articles
+        { id: '5', title: 'B1', summary: 's', categoryKey: 'الأبحاث والابتكار', category: 'الأبحاث والابتكار', author: 'a', date: 'd' },
+        { id: '6', title: 'B2', summary: 's', categoryKey: 'الأبحاث والابتكار', category: 'الأبحاث والابتكار', author: 'a', date: 'd' },
+        { id: '7', title: 'B3', summary: 's', categoryKey: 'الأبحاث والابتكار', category: 'الأبحاث والابتكار', author: 'a', date: 'd' },
+        // Category C: 2 articles
+        { id: '8', title: 'C1', summary: 's', categoryKey: 'فرص وتطوير', category: 'فرص وتطوير', author: 'a', date: 'd' },
+        { id: '9', title: 'C2', summary: 's', categoryKey: 'فرص وتطوير', category: 'فرص وتطوير', author: 'a', date: 'd' },
+        // Category D: 2 articles
+        { id: '10', title: 'D1', summary: 's', categoryKey: 'فعاليات ومؤتمرات', category: 'فعاليات ومؤتمرات', author: 'a', date: 'd' },
+        { id: '11', title: 'D2', summary: 's', categoryKey: 'فعاليات ومؤتمرات', category: 'فعاليات ومؤتمرات', author: 'a', date: 'd' },
+        // Category E: 1 article (should be grouped under "أخرى")
+        { id: '12', title: 'E1', summary: 's', categoryKey: 'السياسات البيئية', category: 'السياسات البيئية', author: 'a', date: 'd' },
+        // Category F: 1 article (should be grouped under "أخرى")
+        { id: '13', title: 'F1', summary: 's', categoryKey: 'المدن المستدامة', category: 'المدن المستدامة', author: 'a', date: 'd' },
+      ];
+
+      const { container } = render(<NewsFeed articles={multiCategoryArticles} lang="ar" onReadArticle={vi.fn()} />);
+
+      const filterButtons = Array.from(container.querySelectorAll('.search-filter-tag')).map(b => b.textContent.trim());
+      expect(filterButtons).toEqual([
+        'الكل',
+        'المناخ والصحة',
+        'الأبحاث والابتكار',
+        'فرص وتطوير',
+        'فعاليات ومؤتمرات',
+        'أخرى'
+      ]);
+
+      expect(filterButtons.includes('السياسات البيئية')).toBe(false);
+      expect(filterButtons.includes('المدن المستدامة')).toBe(false);
+    });
+
+    it('clicking "أخرى" filters to articles in the 5th and subsequent categories', () => {
+      const multiCategoryArticles = [
+        { id: '1a', title: 'مقال مناخ رئيسي 1', summary: 's', categoryKey: 'المناخ والصحة', category: 'المناخ والصحة', author: 'a', date: 'd' },
+        { id: '1b', title: 'مقال مناخ رئيسي 2', summary: 's', categoryKey: 'المناخ والصحة', category: 'المناخ والصحة', author: 'a', date: 'd' },
+        { id: '2a', title: 'مقال بحث علمي 1', summary: 's', categoryKey: 'الأبحاث والابتكار', category: 'الأبحاث والابتكار', author: 'a', date: 'd' },
+        { id: '2b', title: 'مقال بحث علمي 2', summary: 's', categoryKey: 'الأبحاث والابتكار', category: 'الأبحاث والابتكار', author: 'a', date: 'd' },
+        { id: '3a', title: 'مقال فرص عمل 1', summary: 's', categoryKey: 'فرص وتطوير', category: 'فرص وتطوير', author: 'a', date: 'd' },
+        { id: '3b', title: 'مقال فرص عمل 2', summary: 's', categoryKey: 'فرص وتطوير', category: 'فرص وتطوير', author: 'a', date: 'd' },
+        { id: '4a', title: 'مقال مؤتمر بيئي 1', summary: 's', categoryKey: 'فعاليات ومؤتمرات', category: 'فعاليات ومؤتمرات', author: 'a', date: 'd' },
+        { id: '4b', title: 'مقال مؤتمر بيئي 2', summary: 's', categoryKey: 'فعاليات ومؤتمرات', category: 'فعاليات ومؤتمرات', author: 'a', date: 'd' },
+        { id: '5', title: 'مقال سياسات خضراء نادرة', summary: 's', categoryKey: 'السياسات البيئية', category: 'السياسات البيئية', author: 'a', date: 'd' },
+      ];
+
+      render(<NewsFeed articles={multiCategoryArticles} lang="ar" onReadArticle={vi.fn()} />);
+
+      const otherBtn = screen.getByText('أخرى');
+      fireEvent.click(otherBtn);
+
+      expect(screen.getByText('مقال سياسات خضراء نادرة')).toBeDefined();
+      expect(screen.queryByText('مقال مناخ رئيسي 1')).toBeNull();
+    });
+
+    it('renders "Other" for 5th category tag when lang is en', () => {
+      const multiCategoryArticles = [
+        { id: '1', title: 'A1', summary: 's', categoryKey: 'climate_health', category: 'Climate & Health', author: 'a', date: 'd' },
+        { id: '2', title: 'B1', summary: 's', categoryKey: 'research', category: 'Research & Innovation', author: 'a', date: 'd' },
+        { id: '3', title: 'C1', summary: 's', categoryKey: 'opportunities', category: 'Opportunities & Dev', author: 'a', date: 'd' },
+        { id: '4', title: 'D1', summary: 's', categoryKey: 'events', category: 'Events & Conferences', author: 'a', date: 'd' },
+        { id: '5', title: 'E1', summary: 's', categoryKey: 'policy', category: 'Policy', author: 'a', date: 'd' },
+      ];
+
+      render(<NewsFeed articles={multiCategoryArticles} lang="en" onReadArticle={vi.fn()} />);
+
+      expect(screen.getByText('Other')).toBeDefined();
     });
   });
 });

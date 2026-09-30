@@ -3,7 +3,7 @@ import iconScience      from '../../assets/icon_science.svg';
 import iconEmpowerment2 from '../../assets/icon_empowerment2.svg';
 import iconInnovation   from '../../assets/icon_innovation.svg';
 import iconCommunity    from '../../assets/icon_community.svg';
-import aboutBg          from '../../assets/svgbackground.svg';
+import aboutBg          from '../../assets/about_bg.webp';
 import { translations } from '../../i18n/translations';
 
 export function AboutUsPage({ onJoinClick, lang }) {
@@ -12,7 +12,7 @@ export function AboutUsPage({ onJoinClick, lang }) {
   return (
     <main className="au-page" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
 
-      {/* SVG background kept in DOM but hidden via CSS (.au-bg-wrap { display: none }) */}
+      {/* Background illustration kept for semantic DOM structure (now lightweight webp) */}
       <div className="au-bg-wrap" aria-hidden="true">
         <img src={aboutBg} alt="" className="au-bg-img" />
       </div>
@@ -53,7 +53,7 @@ export function AboutUsPage({ onJoinClick, lang }) {
                   <img src={iconEmpowerment} alt={t.empowerment} />
                 </div>
                 <div>
-                  <h3 className="au-value-title">{t.empowerment}</h3>
+                  <h3 className="au-value-title">{lang === 'ar' ? `${t.empowerment}:` : t.empowerment}</h3>
                   <p className="au-value-desc">{t.empowermentDesc}</p>
                 </div>
               </div>
@@ -63,7 +63,7 @@ export function AboutUsPage({ onJoinClick, lang }) {
                   <img src={iconScience} alt={t.scientificResearch} />
                 </div>
                 <div>
-                  <h3 className="au-value-title">{t.scientificResearch}</h3>
+                  <h3 className="au-value-title">{lang === 'ar' ? `${t.scientificResearch}:` : t.scientificResearch}</h3>
                   <p className="au-value-desc">{t.scientificResearchDesc}</p>
                 </div>
               </div>
@@ -73,7 +73,7 @@ export function AboutUsPage({ onJoinClick, lang }) {
                   <img src={iconEmpowerment2} alt={t.empowerment} />
                 </div>
                 <div>
-                  <h3 className="au-value-title">{t.empowerment}</h3>
+                  <h3 className="au-value-title">{lang === 'ar' ? `${t.empowerment}:` : t.empowerment}</h3>
                   <p className="au-value-desc">{t.globalNetwork}</p>
                 </div>
               </div>
@@ -83,7 +83,7 @@ export function AboutUsPage({ onJoinClick, lang }) {
                   <img src={iconInnovation} alt={t.innovation} />
                 </div>
                 <div>
-                  <h3 className="au-value-title">{t.innovation}</h3>
+                  <h3 className="au-value-title">{lang === 'ar' ? `${t.innovation}:` : t.innovation}</h3>
                   <p className="au-value-desc">{t.innovationDesc}</p>
                 </div>
               </div>
@@ -96,7 +96,7 @@ export function AboutUsPage({ onJoinClick, lang }) {
                   <img src={iconCommunity} alt={t.communityImpact} />
                 </div>
                 <div>
-                  <h3 className="au-value-title">{t.communityImpact}</h3>
+                  <h3 className="au-value-title">{lang === 'ar' ? `${t.communityImpact}:` : t.communityImpact}</h3>
                   <p className="au-value-desc">{t.communityImpactDesc}</p>
                 </div>
               </div>

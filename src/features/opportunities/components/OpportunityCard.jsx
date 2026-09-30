@@ -3,6 +3,7 @@ import { GlassCard } from '../../shared/components/GlassCard';
 import { CATEGORY_MAP } from './OpportunitiesGrid';
 
 export function OpportunityCard({ 
+  id,
   title_ar, 
   title_en, 
   type, 
@@ -13,7 +14,9 @@ export function OpportunityCard({
   eligibility_en, 
   apply_link, 
   lang = 'ar',
-  style = {} 
+  style = {},
+  onNavigate,
+  onCardClick
 }) {
   const title = lang === 'ar' ? title_ar : (title_en || title_ar);
   const description = lang === 'ar' ? description_ar : (description_en || description_ar);
@@ -38,21 +41,105 @@ export function OpportunityCard({
   }
 
   // Handle the action button based on apply_link status (RLS column masking)
-  const handleApplyClick = () => {
+  const handleApplyClick = (e) => {
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
     if (apply_link) {
-      window.open(apply_link, '_blank', 'noopener,noreferrer');
+      let rawLink = String(apply_link).trim();
+      
+      // 1. If it's a relative path (e.g. "/join" or "apply"), navigate within current app
+      if (rawLink.startsWith('/')) {
+        if (onNavigate) {
+          const view = rawLink.replace(/^\//, '');
+          onNavigate(view);
+        } else {
+          window.history.pushState({}, '', rawLink);
+          window.dispatchEvent(new PopStateEvent('popstate'));
+        }
+        return;
+      }
+
+      // 2. Prepend protocol if missing
+      let url = rawLink;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+
+      // 3. If link points to current host/port, handle locally without opening redundant external tab
+      try {
+        const parsed = new URL(url);
+        if (parsed.host === window.location.host) {
+          if (onNavigate) {
+            onNavigate(parsed.pathname.replace(/^\//, '') || 'newhome', null, parsed.search.replace(/^\?/, ''));
+          } else {
+            window.history.pushState({}, '', parsed.pathname + parsed.search);
+            window.dispatchEvent(new PopStateEvent('popstate'));
+          }
+          return;
+        }
+      } catch (err) {
+        // Fallback to window.open if parsing fails
+      }
+
+      // 4. External link: open in new tab
+      window.open(url, '_blank', 'noopener,noreferrer');
     } else {
-      // Redirect to Auth page
-      window.history.pushState({}, '', '/auth');
-      // Trigger native event so routing catches it
-      const navEvent = new PopStateEvent('popstate');
-      window.dispatchEvent(navEvent);
+      if (onNavigate) {
+        onNavigate('auth');
+      } else {
+        window.history.pushState({}, '', '/auth');
+        const navEvent = new PopStateEvent('popstate');
+        window.dispatchEvent(navEvent);
+      }
     }
   };
+
+  const handleCardClick = () => {
+    if (onCardClick) {
+      onCardClick({
+        id,
+        title_ar,
+        title_en,
+        type,
+        deadline,
+        description_ar,
+        description_en,
+        eligibility_ar,
+        eligibility_en,
+        apply_link
+      });
+    }
+  };
+
+  // Compute the preview URL so the browser renders it in the bottom-left status bar on hover
+  let resolvedHref = null;
+  let isExternalLink = false;
+  if (apply_link) {
+    const rawLink = String(apply_link).trim();
+    if (rawLink.startsWith('/')) {
+      resolvedHref = rawLink;
+    } else {
+      let url = rawLink;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      resolvedHref = url;
+      try {
+        const parsed = new URL(url);
+        isExternalLink = parsed.host !== (typeof window !== 'undefined' ? window.location.host : '');
+      } catch (e) {
+        isExternalLink = true;
+      }
+    }
+  } else {
+    resolvedHref = '/auth';
+  }
 
   return (
     <GlassCard 
       className="opportunity-card" 
+      onClick={handleCardClick}
       style={{ 
         padding: '24px', 
         display: 'flex', 
@@ -64,6 +151,8 @@ export function OpportunityCard({
         textAlign: lang === 'ar' ? 'right' : 'left',
         direction: lang === 'ar' ? 'rtl' : 'ltr',
         boxSizing: 'border-box',
+        cursor: onCardClick ? 'pointer' : 'default',
+        transition: 'transform 0.2s ease, border-color 0.2s ease',
         ...style 
       }}
     >
@@ -149,20 +238,36 @@ export function OpportunityCard({
         {apply_link ? (
           <Button 
             variant="outline" 
+            href={resolvedHref}
+            target={isExternalLink ? '_blank' : undefined}
+            rel={isExternalLink ? 'noopener noreferrer' : undefined}
             onClick={handleApplyClick} 
-            style={{ padding: '6px 16px', fontSize: '12.5px', fontWeight: 'bold' }}
+            style={{ 
+              padding: '6px 16px', 
+              fontSize: '12.5px', 
+              fontWeight: 'bold',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
           >
             {lang === 'ar' ? 'تقديم الطلب' : 'Apply Now'}
           </Button>
         ) : (
           <Button 
             variant="gradient" 
+            href="/auth"
             onClick={handleApplyClick} 
             style={{ 
               padding: '6px 14px', 
               fontSize: '11.5px', 
               fontWeight: 'bold',
-              borderRadius: '8px'
+              borderRadius: '8px',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
             {lang === 'ar' ? 'سجل لعرض الرابط' : 'Sign in to Apply'}

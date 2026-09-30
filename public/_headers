@@ -1,0 +1,4 @@
+/*
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), midi=()
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN

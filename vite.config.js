@@ -9,6 +9,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons.svg'],
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,svg}'],
+        maximumFileSizeToCacheInBytes: 500000,
+      },
       manifest: {
         name: 'كلايما ميدكس | العمل المناخي والصحة',
         short_name: 'ClimaMedix',

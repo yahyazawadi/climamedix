@@ -5,6 +5,10 @@ export function Button({
   variant = 'gradient', 
   type = 'button',
   disabled = false,
+  href,
+  target,
+  rel,
+  as: Component = href ? 'a' : 'button',
   ...props 
 }) {
   const getButtonClass = () => {
@@ -22,15 +26,16 @@ export function Button({
     }
   };
 
+  const isAnchor = Component === 'a' || Boolean(href);
+
   return (
-    <button
-      type={type}
+    <Component
+      {...(isAnchor ? { href, target, rel } : { type, disabled })}
       onClick={onClick}
-      disabled={disabled}
       className={`${getButtonClass()} ${className}`}
       {...props}
     >
       {children}
-    </button>
+    </Component>
   );
 }

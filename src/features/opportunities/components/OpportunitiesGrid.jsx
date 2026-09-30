@@ -11,7 +11,13 @@ export const CATEGORY_MAP = {
   grant: { ar: 'منحة مالية / دعم', en: 'Grant' }
 };
 
-export function OpportunitiesGrid({ opportunities = [], activeCategory = 'all', lang = 'ar' }) {
+export function OpportunitiesGrid({ 
+  opportunities = [], 
+  activeCategory = 'all', 
+  lang = 'ar',
+  onNavigate,
+  onCardClick
+}) {
   const gridRef = useRef(null);
 
   useLayoutEffect(() => {
@@ -53,6 +59,8 @@ export function OpportunitiesGrid({ opportunities = [], activeCategory = 'all', 
               <OpportunityCard 
                 {...opp} 
                 lang={lang}
+                onNavigate={onNavigate}
+                onCardClick={onCardClick}
               />
             </div>
           );

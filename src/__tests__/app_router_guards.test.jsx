@@ -886,6 +886,7 @@ describe('AppRouter Comprehensive Permission Matrix & Routing Suite', () => {
       delete window.location;
       window.location = new URL('http://localhost:3000/news');
       window.history.pushState = vi.fn();
+      window.history.replaceState = vi.fn();
       window.scrollTo = vi.fn();
     });
 
@@ -952,6 +953,34 @@ describe('AppRouter Comprehensive Permission Matrix & Routing Suite', () => {
       fireEvent(window, new Event('hashchange'));
       vi.advanceTimersByTime(200);
       expect(footerElem.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' });
+
+      unmount();
+      vi.useRealTimers();
+    });
+
+    it('pushes to top on link navigation and restores scroll position on popstate back arrow', () => {
+      vi.useFakeTimers();
+      const mockElem = { scrollIntoView: vi.fn() };
+      vi.spyOn(document, 'getElementById').mockImplementation(() => mockElem);
+      window.scrollY = 2500;
+
+      const { unmount } = render(<TestRoutingComponent currentView="newhome" />);
+
+      // Clicking link should navigate and push scroll to top (0)
+      fireEvent.click(screen.getByText('NavToNews'));
+      expect(window.history.replaceState).toHaveBeenCalledWith(
+        expect.objectContaining({ scrollY: 2500 }),
+        ''
+      );
+      expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'instant' });
+
+      // Returning via back button with popstate event carrying state
+      window.location.pathname = '/';
+      const popStateEvent = new PopStateEvent('popstate', { state: { scrollY: 2500 } });
+      window.dispatchEvent(popStateEvent);
+
+      vi.advanceTimersByTime(150);
+      expect(window.scrollTo).toHaveBeenCalledWith({ top: 2500, behavior: 'smooth' });
 
       unmount();
       vi.useRealTimers();

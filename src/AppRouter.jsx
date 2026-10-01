@@ -108,13 +108,28 @@ export const getPathFromView = (view) => {
 
 export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
   useEffect(() => {
-    const handlePopState = () => {
+    const handlePopState = (e) => {
       const p = window.location.pathname.replace(/\/$/, "");
       setOpenedModal(null);
       if (!isKnownPath(p)) {
         window.history.replaceState({}, '', '/');
       }
       setCurrentView(getViewFromPath(p));
+
+      // When returning with browser back/forward arrow, restore saved scroll position or scroll down to target
+      const savedScrollY = e?.state?.scrollY;
+      const hash = window.location.hash.replace(/^#/, '');
+      const segment = window.location.pathname.substring(1);
+      const target = hash || (['about', 'research', 'training', 'upcoming', 'footer', 'contact'].includes(segment) ? segment : null);
+
+      setTimeout(() => {
+        if (target) {
+          const el = document.getElementById(target);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        } else if (typeof savedScrollY === 'number' && savedScrollY > 0) {
+          window.scrollTo({ top: savedScrollY, behavior: 'smooth' });
+        }
+      }, 100);
     };
     
     // Initial load
@@ -151,12 +166,24 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
   }, [currentView]);
 
   const navigate = (view, sectionId, extraParam = '') => {
+    // Record current scroll position on outgoing history entry
+    const currentScrollY = typeof window !== 'undefined' ? (window.scrollY || window.pageYOffset || 0) : 0;
+    if (typeof window !== 'undefined' && window.history?.replaceState) {
+      window.history.replaceState(
+        { ...(window.history.state || {}), scrollY: currentScrollY },
+        ''
+      );
+    }
+
     if (view) {
       setCurrentView(view);
     }
 
     if (extraParam) {
       window.history.pushState({}, '', `${getPathFromView(view)}?${extraParam}`);
+      if (typeof window !== 'undefined' && window.scrollTo) {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
     } else if (sectionId) {
       window.history.pushState({}, '', '/' + sectionId);
       setTimeout(() => {
@@ -165,6 +192,9 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
       }, 100);
     } else {
       window.history.pushState({}, '', getPathFromView(view));
+      if (typeof window !== 'undefined' && window.scrollTo) {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
     }
   };
 

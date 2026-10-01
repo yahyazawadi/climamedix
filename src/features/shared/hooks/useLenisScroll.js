@@ -36,6 +36,7 @@ export function useLenisScroll(currentView) {
     });
 
     lenisRef.current = lenis;
+    window.__lenis = lenis;
 
     // Drive Lenis via rAF loop
     function raf(time) {
@@ -54,6 +55,7 @@ export function useLenisScroll(currentView) {
         lenisRef.current.destroy();
         lenisRef.current = null;
       }
+      window.__lenis = null;
     };
   }, [isHomepage]);
 

@@ -122,19 +122,28 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
 
       // When returning with browser back/forward arrow, restore saved scroll position or scroll down to target
       const savedScrollY = e?.state?.scrollY;
+      const wasAtFooter = Boolean(e?.state?.wasAtFooter);
       const hash = window.location.hash.replace(/^#/, '');
       const segment = window.location.pathname.substring(1);
-      const target = hash || (['about', 'research', 'training', 'upcoming', 'footer', 'contact'].includes(segment) ? segment : null);
+      const target = (wasAtFooter || hash === 'footer' || segment === 'footer') 
+        ? 'footer' 
+        : (hash || (['about', 'research', 'training', 'upcoming', 'contact'].includes(segment) ? segment : null));
 
       const performScroll = () => {
         if (target === 'footer' || target === 'contact') {
           const bottomEl = document.getElementById('footer-bottom');
           const el = document.getElementById('footer') || document.querySelector('footer');
-          if (bottomEl) {
-            bottomEl.scrollIntoView({ behavior: 'smooth' });
-          } else if (el) {
-            el.scrollIntoView({ behavior: 'smooth' });
+          
+          if (window.__lenis) {
+            window.__lenis.scrollTo(bottomEl || el || 'bottom', { immediate: false, duration: 1.2 });
+          } else {
+            if (bottomEl) {
+              bottomEl.scrollIntoView({ behavior: 'smooth' });
+            } else if (el) {
+              el.scrollIntoView({ behavior: 'smooth' });
+            }
           }
+
           if (typeof window !== 'undefined' && document.documentElement) {
             const docHeight = Math.max(
               document.body?.scrollHeight || 0,
@@ -146,14 +155,20 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
           }
         } else if (target) {
           const el = document.getElementById(target);
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
+          if (window.__lenis && el) {
+            window.__lenis.scrollTo(el, { immediate: false, duration: 1.2 });
+          } else if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+          }
         } else if (typeof savedScrollY === 'number' && savedScrollY > 0) {
           const docHeight = document.documentElement?.scrollHeight || 0;
           const maxScroll = docHeight > window.innerHeight ? docHeight - window.innerHeight : 0;
-          if (maxScroll > 0 && savedScrollY >= maxScroll - 600) {
-            window.scrollTo({ top: maxScroll, behavior: 'smooth' });
+          const finalY = (maxScroll > 0 && savedScrollY >= maxScroll - 600) ? maxScroll : savedScrollY;
+
+          if (window.__lenis) {
+            window.__lenis.scrollTo(finalY, { immediate: false, duration: 1.2 });
           } else {
-            window.scrollTo({ top: savedScrollY, behavior: 'smooth' });
+            window.scrollTo({ top: finalY, behavior: 'smooth' });
           }
         }
       };
@@ -162,6 +177,7 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
       setTimeout(performScroll, 50);
       setTimeout(performScroll, 250);
       setTimeout(performScroll, 500);
+      setTimeout(performScroll, 900);
     };
     
     // Initial load
@@ -175,9 +191,16 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
       
       if (target === 'footer' || target === 'contact') {
         const scrollBottom = () => {
+          const bottomEl = document.getElementById('footer-bottom');
           const el = document.getElementById('footer') || document.querySelector('footer');
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth' });
+          if (window.__lenis) {
+            window.__lenis.scrollTo(bottomEl || el || 'bottom', { immediate: false, duration: 1.2 });
+          } else {
+            if (bottomEl) {
+              bottomEl.scrollIntoView({ behavior: 'smooth' });
+            } else if (el) {
+              el.scrollIntoView({ behavior: 'smooth' });
+            }
           }
           if (typeof window !== 'undefined' && document.documentElement) {
             const docHeight = Math.max(
@@ -192,10 +215,15 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
         setTimeout(scrollBottom, 50);
         setTimeout(scrollBottom, 250);
         setTimeout(scrollBottom, 500);
+        setTimeout(scrollBottom, 900);
       } else if (target) {
         setTimeout(() => {
           const el = document.getElementById(target);
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
+          if (window.__lenis && el) {
+            window.__lenis.scrollTo(el, { immediate: false, duration: 1.2 });
+          } else if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+          }
         }, 150);
       }
     };
@@ -219,9 +247,17 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
   const navigate = (view, sectionId, extraParam = '') => {
     // Record current scroll position on outgoing history entry
     const currentScrollY = typeof window !== 'undefined' ? (window.scrollY || window.pageYOffset || 0) : 0;
+    const isNearBottom = typeof document !== 'undefined' && document.documentElement
+      ? (currentScrollY >= (document.documentElement.scrollHeight - window.innerHeight - 800))
+      : false;
+
     if (typeof window !== 'undefined' && window.history?.replaceState) {
       window.history.replaceState(
-        { ...(window.history.state || {}), scrollY: currentScrollY },
+        { 
+          ...(window.history.state || {}), 
+          scrollY: currentScrollY,
+          wasAtFooter: isNearBottom || (typeof window !== 'undefined' && (window.location.hash === '#footer' || window.location.pathname.endsWith('/footer')))
+        },
         ''
       );
     }

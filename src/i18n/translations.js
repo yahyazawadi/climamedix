@@ -85,6 +85,9 @@ export const translations = {
     quickLinks: 'الروابط السريعة',
     myAccount: 'حسابي',
     copyright: 'جميع الحقوق محفوظة.',
+    privacyPolicy: 'سياسة الاستخدام وحماية البيانات',
+    termsOfUse: 'شروط الاستخدام',
+    intellectualProperty: 'حقوق الملكية والنشر',
     footerCtaText: 'انضم إلينا في رحلتنا لدعم الصحة البيئية والتغيير المناخي!',
 
     // Auth Page Switch
@@ -244,6 +247,9 @@ export const translations = {
     quickLinks: 'Quick Links',
     myAccount: 'My Account',
     copyright: 'All rights reserved.',
+    privacyPolicy: 'Terms of Use & Privacy',
+    termsOfUse: 'Terms of Use',
+    intellectualProperty: 'Intellectual Property',
     footerCtaText: 'Join us on our journey to support environmental health and climate change!',
 
     // Auth Page Switch

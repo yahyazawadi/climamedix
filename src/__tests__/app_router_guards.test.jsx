@@ -191,6 +191,24 @@ vi.mock('../features/learning-hub/components/certificates/CertificateVerificatio
   )
 }));
 
+vi.mock('../features/legal/PrivacyPolicyPage', () => ({
+  PrivacyPolicyPage: ({ lang, onNavigate }) => (
+    <div data-testid="page-privacy">
+      <span>PrivacyPolicyPage-{lang}</span>
+      <button onClick={() => onNavigate('home')}>PrivacyNavBtn</button>
+    </div>
+  )
+}));
+
+vi.mock('../features/legal/CopyrightPolicyPage', () => ({
+  CopyrightPolicyPage: ({ lang, onNavigate }) => (
+    <div data-testid="page-copyright">
+      <span>CopyrightPolicyPage-{lang}</span>
+      <button onClick={() => onNavigate('home')}>CopyrightNavBtn</button>
+    </div>
+  )
+}));
+
 // Helper to mock auth state for different roles
 const mockRole = (role, loading = false) => {
   const perms = role ? (ROLE_PERMISSIONS[role] || []) : [];
@@ -720,6 +738,38 @@ describe('AppRouter Comprehensive Permission Matrix & Routing Suite', () => {
       expect(screen.getByText('CertificateVerificationPage-en-CERT-12345')).toBeInTheDocument();
     });
 
+    it('renders PrivacyPolicyPage on privacy view and triggers onNavigate', async () => {
+      render(
+        <AppRouter
+          currentView="privacy"
+          lang="ar"
+          setCurrentView={mockSetCurrentView}
+          setOpenedModal={mockSetOpenedModal}
+          navigate={mockNavigate}
+        />
+      );
+
+      expect(await screen.findByTestId('page-privacy')).toBeInTheDocument();
+      fireEvent.click(screen.getByText('PrivacyNavBtn'));
+      expect(mockNavigate).toHaveBeenCalledWith('home');
+    });
+
+    it('renders CopyrightPolicyPage on copyright view and triggers onNavigate', async () => {
+      render(
+        <AppRouter
+          currentView="copyright"
+          lang="en"
+          setCurrentView={mockSetCurrentView}
+          setOpenedModal={mockSetOpenedModal}
+          navigate={mockNavigate}
+        />
+      );
+
+      expect(await screen.findByTestId('page-copyright')).toBeInTheDocument();
+      fireEvent.click(screen.getByText('CopyrightNavBtn'));
+      expect(mockNavigate).toHaveBeenCalledWith('home');
+    });
+
     it('falls back to NewHomePage when currentView is unrecognized', () => {
       render(
         <AppRouter
@@ -811,6 +861,11 @@ describe('AppRouter Comprehensive Permission Matrix & Routing Suite', () => {
       expect(getViewFromPath('/membership')).toBe('join');
       expect(getViewFromPath('/settings')).toBe('profile');
       expect(getViewFromPath('/account')).toBe('profile');
+      expect(getViewFromPath('/privacy')).toBe('privacy');
+      expect(getViewFromPath('/terms')).toBe('privacy');
+      expect(getViewFromPath('/privacy-policy')).toBe('privacy');
+      expect(getViewFromPath('/copyright')).toBe('copyright');
+      expect(getViewFromPath('/intellectual-property')).toBe('copyright');
     });
 
     it('resolves content hubs and admin routes correctly', () => {
@@ -856,6 +911,8 @@ describe('AppRouter Comprehensive Permission Matrix & Routing Suite', () => {
       expect(getPathFromView('admin-slider')).toBe('/admin/slider');
       expect(getPathFromView('write-article')).toBe('/write-article');
       expect(getPathFromView('research-upload')).toBe('/research-upload');
+      expect(getPathFromView('privacy')).toBe('/privacy');
+      expect(getPathFromView('copyright')).toBe('/copyright');
       expect(getPathFromView('unknown-view')).toBe('/newhome');
     });
   });

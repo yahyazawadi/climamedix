@@ -135,31 +135,9 @@ function AppContent() {
         user={user}
         onLogout={handleLogout}
         onJoinClick={() => navigate('join')} 
-        onPolicyClick={() => setOpenedModal('policy')} 
+        onPolicyClick={() => navigate('privacy')} 
         onNavigate={navigate}
       />
-      {/* ==========================================================================
-         MODALS
-         ========================================================================== */}
-      
-      {/* Use Policy Modal */}
-      <div class={`modal-overlay ${openedModal === 'policy' ? 'open' : ''}`}>
-        <div class="modal-card">
-          <div class="modal-header">
-            <h3>{lang === 'ar' ? 'سياسة الاستخدام وحماية البيانات' : 'Terms of Use & Data Protection'}</h3>
-            <button onClick={() => setOpenedModal(null)} class="close-modal-btn">&times;</button>
-          </div>
-          <div class="modal-body" style={{ lineHeight: '1.8', fontSize: '0.95rem', color: 'var(--text-secondary)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
-            <p style={{ marginBottom: '1rem' }}>{lang === 'ar' ? 'نحن في ClimaMedix نلتزم بأعلى معايير السرية والأمان البيولوجي والرقمي للمعلومات السريرية أو الشخصية:' : 'At ClimaMedix, we are committed to the highest standards of confidentiality and digital safety for all clinical and personal information:'}</p>
-            <ul style={{ paddingRight: lang === 'ar' ? '1.5rem' : '0', paddingLeft: lang === 'en' ? '1.5rem' : '0', marginBottom: '1.5rem' }}>
-              <li>{lang === 'ar' ? 'يتم جمع البيانات عبر نماذج التسجيل حصراً لغرض الاتصال بخصوص أبحاثنا وتدريباتنا.' : 'Data is collected via registration forms solely for communications regarding our research.'}</li>
-              <li>{lang === 'ar' ? 'لا نقوم بمشاركة أي بيانات شخصية مع أطراف ثالثة لأغراض تجارية على الإطلاق.' : 'We never share any personal data with third parties for commercial purposes.'}</li>
-              <li>{lang === 'ar' ? 'تلتزم أبحاثنا الميدانية ببروتوكولات الموافقة المسبقة المستنيرة للمشاركين.' : 'Our field research strictly complies with informed consent protocols.'}</li>
-            </ul>
-            <p>{lang === 'ar' ? 'لأي استفسارات إضافية، يرجى مراسلة مكتب التنسيق الطبي التابع للمبادرة.' : 'For any further inquiries, please contact the coordinator office of the initiative.'}</p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

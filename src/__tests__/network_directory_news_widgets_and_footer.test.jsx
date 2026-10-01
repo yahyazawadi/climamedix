@@ -498,9 +498,14 @@ describe('Suite 32: Network Directory, Widgets, News, Footer & Admin LMS Service
       fireEvent.click(screen.getByText('الأنشطة والفعاليات'));
       expect(onNavigate).toHaveBeenCalledWith('events');
 
-      // Click Terms of Use modal trigger
+      // Click Terms of Use & Privacy Policy
       fireEvent.click(screen.getByText('سياسة الاستخدام وحماية البيانات'));
       expect(onPolicyClick).toHaveBeenCalled();
+      expect(onNavigate).toHaveBeenCalledWith('privacy');
+
+      // Click Intellectual Property & Copyright
+      fireEvent.click(screen.getByText('حقوق الملكية والنشر'));
+      expect(onNavigate).toHaveBeenCalledWith('copyright');
     });
 
     it('renders logged in account options when user prop is provided', () => {

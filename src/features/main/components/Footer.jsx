@@ -7,6 +7,12 @@ export function Footer({ onJoinClick, onNavigate, onPolicyClick, lang, currentVi
   const handlePolicy = (e) => {
     e.preventDefault();
     if (onPolicyClick) onPolicyClick();
+    if (onNavigate) onNavigate('privacy');
+  };
+
+  const handleCopyright = (e) => {
+    e.preventDefault();
+    if (onNavigate) onNavigate('copyright');
   };
 
   return (
@@ -25,8 +31,8 @@ export function Footer({ onJoinClick, onNavigate, onPolicyClick, lang, currentVi
               <ul>
                 <li><a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>{lang === 'ar' ? 'عن المنصة' : 'About Platform'}</a></li>
                 <li><a href="mailto:info@climamedix.org">{lang === 'ar' ? 'تواصل معنا' : 'Contact Us'}</a></li>
-                <li><a href="#terms" onClick={handlePolicy}>{lang === 'ar' ? 'سياسة الاستخدام وحماية البيانات' : 'Terms of Use & Privacy'}</a></li>
-                <li><a href="#ip" onClick={handlePolicy}>{lang === 'ar' ? 'حقوق الملكية والنشر' : 'Intellectual Property'}</a></li>
+                <li><a href="/privacy" onClick={handlePolicy}>{t.privacyPolicy || (lang === 'ar' ? 'سياسة الاستخدام وحماية البيانات' : 'Terms of Use & Privacy')}</a></li>
+                <li><a href="/copyright" onClick={handleCopyright}>{t.intellectualProperty || (lang === 'ar' ? 'حقوق الملكية والنشر' : 'Intellectual Property')}</a></li>
                 <li><a href="#help" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>{lang === 'ar' ? 'مركز المساعدة والأسئلة الشائعة' : 'Help & FAQs'}</a></li>
               </ul>
             </div>

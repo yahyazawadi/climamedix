@@ -1,0 +1,398 @@
+/* ==========================================================================
+   LEGAL PAGES DESIGN SYSTEM (Privacy Policy & Copyright / Terms)
+   ========================================================================== */
+
+.legal-page-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 1. Hero Banner */
+.legal-hero-banner {
+  background: linear-gradient(90deg, #15b47a 0%, #12a978 5%, #0c8774 23%, #066d71 41%, #025a6e 60%, #004f6d 79%, #004c6d 100%);
+  padding: 150px 24px 60px 24px;
+  position: relative;
+  box-shadow: 0 8px 30px rgba(0, 76, 109, 0.15);
+  color: #ffffff;
+}
+
+.legal-hero-banner::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: linear-gradient(to top, var(--bg-primary), transparent);
+  pointer-events: none;
+}
+
+.legal-hero-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.legal-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  letter-spacing: 0.3px;
+}
+
+.legal-hero-title {
+  font-size: clamp(28px, 4.5vw, 42px);
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0 0 16px 0;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.legal-hero-subtitle {
+  font-size: clamp(15px, 2vw, 17px);
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 820px;
+  line-height: 1.7;
+  margin: 0 0 24px 0;
+}
+
+.legal-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.legal-hero-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 2. Main Layout Grid */
+.legal-main-content {
+  flex-grow: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: -30px auto 60px auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.legal-grid-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .legal-grid-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* 3. Sticky Quick-Nav Sidebar */
+.legal-sidebar {
+  position: sticky;
+  top: 100px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-glass, rgba(0, 76, 109, 0.1));
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(11, 40, 73, 0.04);
+  backdrop-filter: blur(16px);
+}
+
+.legal-sidebar-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 76, 109, 0.08);
+}
+
+.legal-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legal-nav-item {
+  width: 100%;
+}
+
+.legal-nav-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: start;
+}
+
+.legal-nav-btn:hover {
+  background: rgba(21, 180, 122, 0.08);
+  color: var(--primary);
+  transform: translateX(2px);
+}
+
+[dir="rtl"] .legal-nav-btn:hover {
+  transform: translateX(-2px);
+}
+
+.legal-nav-btn.active {
+  background: linear-gradient(135deg, rgba(21, 180, 122, 0.15) 0%, rgba(0, 76, 109, 0.12) 100%);
+  color: var(--primary);
+  border-left: 3px solid #15b47a;
+}
+
+[dir="rtl"] .legal-nav-btn.active {
+  border-left: none;
+  border-right: 3px solid #15b47a;
+}
+
+/* 4. Section Card */
+.legal-section-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-glass, rgba(0, 76, 109, 0.08));
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 30px rgba(11, 40, 73, 0.03);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  scroll-margin-top: 120px;
+}
+
+.legal-section-card:hover {
+  border-color: rgba(21, 180, 122, 0.3);
+  box-shadow: 0 12px 36px rgba(11, 40, 73, 0.06);
+}
+
+.legal-section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(0, 76, 109, 0.06);
+}
+
+.legal-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(21, 180, 122, 0.15) 0%, rgba(0, 76, 109, 0.1) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #004c6d;
+  flex-shrink: 0;
+}
+
+.legal-section-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.legal-body-text {
+  font-size: 0.98rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.legal-body-text:last-child {
+  margin-bottom: 0;
+}
+
+/* 5. Custom Callouts and Highlights */
+.legal-callout {
+  background: rgba(21, 180, 122, 0.07);
+  border: 1px solid rgba(21, 180, 122, 0.25);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin: 18px 0;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.legal-callout.warning {
+  background: rgba(241, 196, 15, 0.08);
+  border-color: rgba(241, 196, 15, 0.35);
+}
+
+.legal-callout.info {
+  background: rgba(0, 76, 109, 0.06);
+  border-color: rgba(0, 76, 109, 0.2);
+}
+
+.legal-callout-icon {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.legal-callout-content {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--text-primary);
+}
+
+/* 6. Legal Lists */
+.legal-list {
+  padding: 0;
+  margin: 16px 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legal-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.legal-bullet-icon {
+  color: #15b47a;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+/* 7. Data Comparison Table */
+.legal-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  margin: 20px 0;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 76, 109, 0.08);
+}
+
+.legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: start;
+  font-size: 0.9rem;
+}
+
+.legal-table th {
+  background: rgba(0, 76, 109, 0.05);
+  padding: 14px 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-bottom: 1px solid rgba(0, 76, 109, 0.1);
+}
+
+.legal-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0, 76, 109, 0.05);
+  color: var(--text-secondary);
+}
+
+.legal-table tr:last-child td {
+  border-bottom: none;
+}
+
+.legal-badge-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.legal-badge-pill.public {
+  background: rgba(21, 180, 122, 0.15);
+  color: #0c8774;
+}
+
+.legal-badge-pill.private {
+  background: rgba(0, 76, 109, 0.12);
+  color: #004c6d;
+}
+
+.legal-badge-pill.restricted {
+  background: rgba(224, 94, 94, 0.12);
+  color: #c0392b;
+}
+
+/* 8. Contact Box Footer */
+.legal-contact-box {
+  background: linear-gradient(135deg, rgba(0, 76, 109, 0.03) 0%, rgba(21, 180, 122, 0.05) 100%);
+  border: 1px dashed rgba(21, 180, 122, 0.35);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  margin-top: 32px;
+}
+
+.legal-contact-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #004c6d;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1.05rem;
+  margin-top: 8px;
+  padding: 8px 18px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 76, 109, 0.06);
+  transition: all 0.2s ease;
+}
+
+.legal-contact-email:hover {
+  color: #15b47a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(21, 180, 122, 0.15);
+}
+
+@media (max-width: 600px) {
+  .legal-section-card {
+    padding: 20px 16px;
+  }
+  .legal-hero-banner {
+    padding: 130px 16px 40px 16px;
+  }
+}

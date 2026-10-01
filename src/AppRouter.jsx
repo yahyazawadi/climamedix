@@ -126,14 +126,42 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
       const segment = window.location.pathname.substring(1);
       const target = hash || (['about', 'research', 'training', 'upcoming', 'footer', 'contact'].includes(segment) ? segment : null);
 
-      setTimeout(() => {
-        if (target) {
+      const performScroll = () => {
+        if (target === 'footer' || target === 'contact') {
+          const bottomEl = document.getElementById('footer-bottom');
+          const el = document.getElementById('footer') || document.querySelector('footer');
+          if (bottomEl) {
+            bottomEl.scrollIntoView({ behavior: 'smooth' });
+          } else if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+          }
+          if (typeof window !== 'undefined' && document.documentElement) {
+            const docHeight = Math.max(
+              document.body?.scrollHeight || 0,
+              document.documentElement?.scrollHeight || 0
+            );
+            if (docHeight > window.innerHeight) {
+              window.scrollTo({ top: docHeight, behavior: 'smooth' });
+            }
+          }
+        } else if (target) {
           const el = document.getElementById(target);
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         } else if (typeof savedScrollY === 'number' && savedScrollY > 0) {
-          window.scrollTo({ top: savedScrollY, behavior: 'smooth' });
+          const docHeight = document.documentElement?.scrollHeight || 0;
+          const maxScroll = docHeight > window.innerHeight ? docHeight - window.innerHeight : 0;
+          if (maxScroll > 0 && savedScrollY >= maxScroll - 600) {
+            window.scrollTo({ top: maxScroll, behavior: 'smooth' });
+          } else {
+            window.scrollTo({ top: savedScrollY, behavior: 'smooth' });
+          }
         }
-      }, 100);
+      };
+
+      // Perform scroll with multiple ticks to account for async page layout and dynamic content mounting
+      setTimeout(performScroll, 50);
+      setTimeout(performScroll, 250);
+      setTimeout(performScroll, 500);
     };
     
     // Initial load
@@ -145,7 +173,26 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
       const segment = window.location.pathname.substring(1);
       const target = hash || (['about', 'research', 'training', 'upcoming', 'footer', 'contact'].includes(segment) ? segment : null);
       
-      if (target) {
+      if (target === 'footer' || target === 'contact') {
+        const scrollBottom = () => {
+          const el = document.getElementById('footer') || document.querySelector('footer');
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+          }
+          if (typeof window !== 'undefined' && document.documentElement) {
+            const docHeight = Math.max(
+              document.body?.scrollHeight || 0,
+              document.documentElement?.scrollHeight || 0
+            );
+            if (docHeight > window.innerHeight) {
+              window.scrollTo({ top: docHeight, behavior: 'smooth' });
+            }
+          }
+        };
+        setTimeout(scrollBottom, 50);
+        setTimeout(scrollBottom, 250);
+        setTimeout(scrollBottom, 500);
+      } else if (target) {
         setTimeout(() => {
           const el = document.getElementById(target);
           if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -191,8 +238,17 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
     } else if (sectionId) {
       window.history.pushState({}, '', '/' + sectionId);
       setTimeout(() => {
-        const el = document.getElementById(sectionId);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        if (sectionId === 'footer' || sectionId === 'contact') {
+          const el = document.getElementById('footer') || document.querySelector('footer');
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          } else {
+            window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+          }
+        } else {
+          const el = document.getElementById(sectionId);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
       }, 100);
     } else {
       window.history.pushState({}, '', getPathFromView(view));

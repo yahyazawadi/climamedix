@@ -99,6 +99,7 @@ export function Footer({ onJoinClick, onNavigate, onPolicyClick, lang, currentVi
       <div class="figma-subfooter">
         <div class="figma-subfooter-container">
           <span>&copy; 2026 ClimaMedix PWA. {t.copyright}</span>
+          <div id="footer-bottom" style={{ height: '1px' }} />
         </div>
       </div>
     </footer>

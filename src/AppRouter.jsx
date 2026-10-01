@@ -27,7 +27,7 @@ const LoadingViewerPage = lazy(() => import('./features/shared/components/Loadin
 
 const ROUTE_ALIASES = {
   // Public Pages
-  'newhome': ['/newhome', '/home', '/index', '/main', '/'],
+  'newhome': ['/newhome', '/home', '/index', '/main', '/', '/footer', '/contact'],
   'about': ['/about', '/about-us', '/info', '/who-we-are'],
   'auth': ['/login', '/auth', '/signin', '/register', '/signup'],
   'join': ['/join', '/apply', '/membership', '/register-network'],
@@ -120,17 +120,28 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
     // Initial load
     handlePopState();
     
-    // Scroll to segment if matching home section
-    const segment = window.location.pathname.substring(1);
-    if (['about', 'research', 'training', 'upcoming'].includes(segment)) {
-      setTimeout(() => {
-        const el = document.getElementById(segment);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }, 150);
-    }
+    // Scroll to segment or hash if matching section or footer
+    const scrollToTarget = () => {
+      const hash = window.location.hash.replace(/^#/, '');
+      const segment = window.location.pathname.substring(1);
+      const target = hash || (['about', 'research', 'training', 'upcoming', 'footer', 'contact'].includes(segment) ? segment : null);
+      
+      if (target) {
+        setTimeout(() => {
+          const el = document.getElementById(target);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      }
+    };
+
+    scrollToTarget();
+    window.addEventListener('hashchange', scrollToTarget);
 
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', scrollToTarget);
+    };
   }, []);
 
   useEffect(() => {

@@ -10,7 +10,7 @@ export function Footer({ onJoinClick, onNavigate, onPolicyClick, lang, currentVi
   };
 
   return (
-    <footer id="contact" class="figma-footer">
+    <footer id="footer" data-section="contact" class="figma-footer">
       <div class="figma-footer-container">
         
         {/* Right Side: Columns & Join Box (rendered first in HTML so it displays on the right in RTL) */}

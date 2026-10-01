@@ -931,5 +931,30 @@ describe('AppRouter Comprehensive Permission Matrix & Routing Suite', () => {
       rerender(<TestRoutingComponent currentView="auth" />);
       expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
     });
+
+    it('auto-scrolls to footer when hash is #footer or path is /footer', () => {
+      vi.useFakeTimers();
+      delete window.location;
+      window.location = new URL('http://localhost:3000/#footer');
+      const footerElem = { scrollIntoView: vi.fn() };
+      vi.spyOn(document, 'getElementById').mockImplementation((id) => {
+        if (id === 'footer') return footerElem;
+        return null;
+      });
+
+      const { unmount } = render(<TestRoutingComponent currentView="newhome" />);
+      vi.advanceTimersByTime(200);
+      expect(footerElem.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' });
+
+      // Test hashchange
+      footerElem.scrollIntoView.mockClear();
+      window.location.hash = '#footer';
+      fireEvent(window, new Event('hashchange'));
+      vi.advanceTimersByTime(200);
+      expect(footerElem.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' });
+
+      unmount();
+      vi.useRealTimers();
+    });
   });
 });

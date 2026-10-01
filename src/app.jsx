@@ -132,6 +132,8 @@ function AppContent() {
       <Footer 
         lang={lang}
         currentView={currentView}
+        user={user}
+        onLogout={handleLogout}
         onJoinClick={() => navigate('join')} 
         onPolicyClick={() => setOpenedModal('policy')} 
         onNavigate={navigate}

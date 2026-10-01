@@ -478,38 +478,42 @@ describe('Suite 32: Network Directory, Widgets, News, Footer & Admin LMS Service
       expect(onJoinClick).toHaveBeenCalled();
     });
 
-    it('navigates to anchor sections with onNavigate callback', () => {
+    it('navigates to pages and triggers policy callback', () => {
       const onNavigate = vi.fn();
-      render(<Footer lang="ar" onJoinClick={vi.fn()} onNavigate={onNavigate} currentView="home" />);
+      const onPolicyClick = vi.fn();
+      render(<Footer lang="ar" onJoinClick={vi.fn()} onNavigate={onNavigate} onPolicyClick={onPolicyClick} currentView="home" />);
 
       fireEvent.click(screen.getByText('عن المنصة'));
-      expect(onNavigate).toHaveBeenCalledWith('home', 'about');
-
-      fireEvent.click(screen.getByText('تواصل معنا'));
-      expect(onNavigate).toHaveBeenCalledWith('home', 'contact');
+      expect(onNavigate).toHaveBeenCalledWith('about');
 
       fireEvent.click(screen.getByText('كتابة مقال'));
       expect(onNavigate).toHaveBeenCalledWith('write-article');
 
-      fireEvent.click(screen.getByText('الدورات التدريبية'));
-      expect(onNavigate).toHaveBeenCalledWith('home', 'training');
+      fireEvent.click(screen.getByText('المركز التعليمي'));
+      expect(onNavigate).toHaveBeenCalledWith('courses');
 
       fireEvent.click(screen.getByText('أحدث الأبحاث'));
-      expect(onNavigate).toHaveBeenCalledWith('home', 'research');
+      expect(onNavigate).toHaveBeenCalledWith('research');
 
-      fireEvent.click(screen.getByText('الأنشطة القادمة'));
-      expect(onNavigate).toHaveBeenCalledWith('home', 'upcoming');
+      fireEvent.click(screen.getByText('الأنشطة والفعاليات'));
+      expect(onNavigate).toHaveBeenCalledWith('events');
 
-      // Click Terms of Use (preventDefault)
-      fireEvent.click(screen.getByText('سياسة الاستخدام'));
+      // Click Terms of Use modal trigger
+      fireEvent.click(screen.getByText('سياسة الاستخدام وحماية البيانات'));
+      expect(onPolicyClick).toHaveBeenCalled();
     });
 
-    it('navigates with "newhome" view when currentView is newhome', () => {
+    it('renders logged in account options when user prop is provided', () => {
       const onNavigate = vi.fn();
-      render(<Footer lang="ar" onJoinClick={vi.fn()} onNavigate={onNavigate} currentView="newhome" />);
+      const onLogout = vi.fn();
+      render(<Footer lang="ar" onJoinClick={vi.fn()} onNavigate={onNavigate} onLogout={onLogout} user={{ email: 'test@example.com' }} currentView="home" />);
 
-      fireEvent.click(screen.getByText('عن المنصة'));
-      expect(onNavigate).toHaveBeenCalledWith('newhome', 'about');
+      expect(screen.getByText('الملف الشخصي')).toBeInTheDocument();
+      fireEvent.click(screen.getByText('الملف الشخصي'));
+      expect(onNavigate).toHaveBeenCalledWith('profile');
+
+      fireEvent.click(screen.getByText('خروج'));
+      expect(onLogout).toHaveBeenCalled();
     });
 
     it('renders FooterCard with social media icons and aria labels', () => {

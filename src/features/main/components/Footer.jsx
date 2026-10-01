@@ -1,8 +1,13 @@
 import { FooterCard } from './FooterCard'
 import { translations } from '../../../i18n/translations'
 
-export function Footer({ onJoinClick, onNavigate, lang, currentView }) {
+export function Footer({ onJoinClick, onNavigate, onPolicyClick, lang, currentView, user, onLogout }) {
   const t = translations[lang] || translations.ar;
+
+  const handlePolicy = (e) => {
+    e.preventDefault();
+    if (onPolicyClick) onPolicyClick();
+  };
 
   return (
     <footer id="contact" class="figma-footer">
@@ -18,11 +23,11 @@ export function Footer({ onJoinClick, onNavigate, lang, currentView }) {
             <div class="figma-col">
               <h4>{t.footerTitle}</h4>
               <ul>
-                <li><a href="#about" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'about'); }}>{lang === 'ar' ? 'عن المنصة' : 'About Platform'}</a></li>
-                <li><a href="#training" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'contact'); }}>{lang === 'ar' ? 'تواصل معنا' : 'Contact Us'}</a></li>
-                <li><a href="#" onClick={(e) => { e.preventDefault(); }}>{lang === 'ar' ? 'سياسة الاستخدام' : 'Terms of Use'}</a></li>
-                <li><a href="#">{lang === 'ar' ? 'حقوق الملكية' : 'Intellectual Property'}</a></li>
-                <li><a href="#">{lang === 'ar' ? 'الأسئلة الشائعة' : 'FAQs'}</a></li>
+                <li><a href="#about" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>{lang === 'ar' ? 'عن المنصة' : 'About Platform'}</a></li>
+                <li><a href="mailto:info@climamedix.org">{lang === 'ar' ? 'تواصل معنا' : 'Contact Us'}</a></li>
+                <li><a href="#terms" onClick={handlePolicy}>{lang === 'ar' ? 'سياسة الاستخدام وحماية البيانات' : 'Terms of Use & Privacy'}</a></li>
+                <li><a href="#ip" onClick={handlePolicy}>{lang === 'ar' ? 'حقوق الملكية والنشر' : 'Intellectual Property'}</a></li>
+                <li><a href="#help" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>{lang === 'ar' ? 'مركز المساعدة والأسئلة الشائعة' : 'Help & FAQs'}</a></li>
               </ul>
             </div>
 
@@ -30,11 +35,12 @@ export function Footer({ onJoinClick, onNavigate, lang, currentView }) {
             <div class="figma-col">
               <h4>{t.quickLinks}</h4>
               <ul>
-                <li><a href="#training" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'training'); }}>{t.trainingCourses}</a></li>
-                <li><a href="#about" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'about'); }}>{t.about}</a></li>
-                <li><a href="#research" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'research'); }}>{t.latestResearch}</a></li>
+                <li><a href="/courses" onClick={(e) => { e.preventDefault(); onNavigate('courses'); }}>{lang === 'ar' ? 'المركز التعليمي' : 'Learning Hub'}</a></li>
+                <li><a href="/research" onClick={(e) => { e.preventDefault(); onNavigate('research'); }}>{t.latestResearch}</a></li>
+                <li><a href="/news" onClick={(e) => { e.preventDefault(); onNavigate('news'); }}>{lang === 'ar' ? 'الأخبار والمدونة' : 'News & Blog'}</a></li>
+                <li><a href="/opportunities" onClick={(e) => { e.preventDefault(); onNavigate('opportunities'); }}>{lang === 'ar' ? 'الفرص والمنح' : 'Opportunities'}</a></li>
+                <li><a href="/events" onClick={(e) => { e.preventDefault(); onNavigate('events'); }}>{lang === 'ar' ? 'الأنشطة والفعاليات' : 'Events & Activities'}</a></li>
                 <li><a href="/write-article" onClick={(e) => { e.preventDefault(); onNavigate('write-article'); }}>{lang === 'ar' ? 'كتابة مقال' : 'Write Article'}</a></li>
-                <li><a href="#upcoming" onClick={(e) => { e.preventDefault(); onNavigate(currentView === 'newhome' ? 'newhome' : 'home', 'upcoming'); }}>{lang === 'ar' ? 'الأنشطة القادمة' : 'Upcoming Activities'}</a></li>
               </ul>
             </div>
 
@@ -42,10 +48,23 @@ export function Footer({ onJoinClick, onNavigate, lang, currentView }) {
             <div class="figma-col">
               <h4>{t.myAccount}</h4>
               <ul>
-                <li><a href="#">{t.login}</a></li>
-                <li><a href="#">{lang === 'ar' ? 'حساب جديد' : 'New Account'}</a></li>
-                <li><a href="#">{lang === 'ar' ? 'نسيت كلمة السر' : 'Forgot Password'}</a></li>
-                <li><a href="#">{lang === 'ar' ? 'مركز المساعدة' : 'Help Center'}</a></li>
+                {user ? (
+                  <>
+                    <li><a href="/profile" onClick={(e) => { e.preventDefault(); onNavigate('profile'); }}>{lang === 'ar' ? 'الملف الشخصي' : 'My Profile'}</a></li>
+                    <li><a href="/courses" onClick={(e) => { e.preventDefault(); onNavigate('courses'); }}>{lang === 'ar' ? 'دوراتي التعليمية' : 'My Courses'}</a></li>
+                    <li><a href="/join" onClick={(e) => { e.preventDefault(); onNavigate('join'); }}>{lang === 'ar' ? 'بيانات العضوية' : 'Membership Status'}</a></li>
+                    {onLogout && (
+                      <li><a href="#logout" onClick={(e) => { e.preventDefault(); onLogout(); }} style={{ color: '#ff6b6b' }}>{t.logout || (lang === 'ar' ? 'تسجيل الخروج' : 'Log Out')}</a></li>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <li><a href="/auth" onClick={(e) => { e.preventDefault(); onNavigate('auth'); }}>{lang === 'ar' ? 'تسجيل الدخول (Google)' : 'Login (Google)'}</a></li>
+                    <li><a href="/join" onClick={(e) => { e.preventDefault(); onNavigate('join'); }}>{lang === 'ar' ? 'الانضمام للشبكة' : 'Join Network'}</a></li>
+                    <li><a href="/courses" onClick={(e) => { e.preventDefault(); onNavigate('courses'); }}>{lang === 'ar' ? 'تصفح المساقات' : 'Explore Courses'}</a></li>
+                    <li><a href="mailto:support@climamedix.org">{lang === 'ar' ? 'الدعم والمساعدة' : 'Support & Help'}</a></li>
+                  </>
+                )}
               </ul>
             </div>
             

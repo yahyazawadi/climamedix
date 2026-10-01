@@ -6,8 +6,11 @@ export function Footer({ onJoinClick, onNavigate, onPolicyClick, lang, currentVi
 
   const handlePolicy = (e) => {
     e.preventDefault();
-    if (onPolicyClick) onPolicyClick();
-    if (onNavigate) onNavigate('privacy');
+    if (onPolicyClick) {
+      onPolicyClick();
+    } else if (onNavigate) {
+      onNavigate('privacy');
+    }
   };
 
   const handleCopyright = (e) => {

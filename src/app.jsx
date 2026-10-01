@@ -135,7 +135,6 @@ function AppContent() {
         user={user}
         onLogout={handleLogout}
         onJoinClick={() => navigate('join')} 
-        onPolicyClick={() => navigate('privacy')} 
         onNavigate={navigate}
       />
     </div>

@@ -501,7 +501,6 @@ describe('Suite 32: Network Directory, Widgets, News, Footer & Admin LMS Service
       // Click Terms of Use & Privacy Policy
       fireEvent.click(screen.getByText('سياسة الاستخدام وحماية البيانات'));
       expect(onPolicyClick).toHaveBeenCalled();
-      expect(onNavigate).toHaveBeenCalledWith('privacy');
 
       // Click Intellectual Property & Copyright
       fireEvent.click(screen.getByText('حقوق الملكية والنشر'));

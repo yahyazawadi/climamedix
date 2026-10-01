@@ -143,6 +143,10 @@ export function LoadingPlanet({
               <stop offset="0%" stopColor="#15b47a" />
               <stop offset="100%" stopColor="#2fad78" />
             </linearGradient>
+            {/* Clip Path to cleanly contain enlarged continents within the globe sphere */}
+            <clipPath id="cmGlobeClip">
+              <circle cx="1" cy="129" r="60.6" />
+            </clipPath>
           </defs>
 
           {/* Static Outer Track Guide */}
@@ -169,21 +173,25 @@ export function LoadingPlanet({
             />
           </g>
 
-          {/* Continuously Rotating Earth Globe */}
+          {/* Continuously Rotating Earth Globe (Clean borderless full-bleed continents) */}
           <g className="loader-globe-spinner">
-            {/* Ocean Sphere Body (Deep Blue Ocean) */}
-            <path
-              d={OCEAN_PATH}
-              fill="url(#cmOceanGrad)"
-            />
+            {/* Globe Base Ocean Sphere */}
+            <circle cx="1" cy="129" r="60.6" fill="url(#cmOceanGrad)" />
 
-            {/* Continents & Landmasses (Vibrant Green) */}
-            <path
-              d={CONTINENTS_PATH}
-              fill="url(#cmLandGrad)"
-            />
+            {/* Enlarged Continents clipped cleanly to the sphere edge */}
+            <g clipPath="url(#cmGlobeClip)">
+              <g transform="translate(1, 129) scale(1.135) translate(-1, -129)">
+                {/* Green Continents */}
+                <circle cx="1" cy="129" r="60.6" fill="url(#cmLandGrad)" />
+                {/* Ocean Cutout */}
+                <path
+                  d={CONTINENTS_PATH}
+                  fill="url(#cmOceanGrad)"
+                />
+              </g>
+            </g>
 
-            {/* Atmosphere Rim Highlight (Deep Brand Blue Border) */}
+            {/* Slim Elegant Planet Border */}
             <circle
               cx="1"
               cy="129"

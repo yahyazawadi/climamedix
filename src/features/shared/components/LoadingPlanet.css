@@ -48,12 +48,12 @@
 
 .loader-planet-stage {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: min(250px, 68vw);
+  height: min(250px, 68vw);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   transform: translateZ(0);
 }
 
@@ -116,12 +116,12 @@ body.dark-mode .loader-orbit-beacon {
   100% { transform: rotate(360deg); }
 }
 
-/* Atmosphere Rim Border around Planet */
+/* Slim Atmosphere Rim */
 .loader-atmosphere-rim {
   fill: none;
-  stroke: #016c7f;
-  stroke-width: 1.5;
-  opacity: 0.9;
+  stroke: var(--accent, #15b47a);
+  stroke-width: 1.2;
+  opacity: 0.8;
 }
 
 /* ─── Brand Box ───────────────────────────────────────────────────────────── */

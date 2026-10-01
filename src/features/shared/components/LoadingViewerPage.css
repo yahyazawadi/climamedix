@@ -1,0 +1,221 @@
+/* ─── FULL-SCREEN GENUINE LOADING TEST ENVIRONMENT ─────────────────────── */
+
+.loading-test-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-primary, #f5f9fd);
+  color: #0b2849;
+  transition: background-color 0.3s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.loading-test-screen.dark-mode {
+  background-color: #080f1d;
+  color: #f1f5f9;
+}
+
+/* ─── FLOATING BOTTOM CONTROLS DOCK ────────────────────────────────────────── */
+
+.test-controls-dock {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(580px, 94vw);
+  background: rgba(11, 40, 73, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  padding: 0.9rem 1.25rem;
+  z-index: 1000000;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-family, 'Tajawal', sans-serif);
+}
+
+.test-controls-dock.collapsed {
+  padding: 0.5rem 1rem;
+  width: auto;
+  border-radius: 999px;
+}
+
+.dock-handle-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dock-title {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #e2effa;
+}
+
+.dock-title strong {
+  color: #15b47a;
+  font-family: monospace;
+  font-size: 0.95rem;
+}
+
+.dock-collapse-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.dock-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.dock-content {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dock-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.dock-row label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.84rem;
+  color: #c9d8e6;
+  font-weight: 600;
+}
+
+.dock-val {
+  color: #15b47a;
+  font-family: monospace;
+}
+
+.dock-slider {
+  width: 100%;
+  accent-color: #15b47a;
+  cursor: pointer;
+  height: 6px;
+}
+
+.dock-presets {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.dock-presets button {
+  flex: 1;
+  padding: 0.25rem 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2effa;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.dock-presets button:hover {
+  background: #15b47a;
+  color: #ffffff;
+  border-color: #15b47a;
+}
+
+.dock-split {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.84rem;
+  flex-wrap: wrap;
+}
+
+.dock-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.dock-toggle.active {
+  background: #15b47a;
+  border-color: #15b47a;
+}
+
+.dock-inline-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: #c9d8e6;
+}
+
+.dock-inline-inputs strong {
+  color: #15b47a;
+  font-family: monospace;
+}
+
+.dock-slider-sm {
+  width: 100px;
+  accent-color: #15b47a;
+  cursor: pointer;
+}
+
+.dock-row-bottom {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.dock-btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.dock-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dock-code-hint {
+  font-size: 0.75rem;
+  color: #9ab4cc;
+}
+
+.dock-code-hint code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  color: #15b47a;
+}

@@ -224,8 +224,8 @@ export function HomePage({ lang, setCurrentView, setOpenedModal, onNavigate }) {
                 })
               )}
             </div>
-            
-            <div style={{ textAlign: 'center', marginTop: '30px' }}>
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
               <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => { setCurrentView('research'); window.history.pushState({}, '', '/research'); }}>
                 {lang === 'ar' ? 'تصفح جميع الأبحاث' : 'Browse All Research'}
               </Button>
@@ -319,8 +319,8 @@ export function HomePage({ lang, setCurrentView, setOpenedModal, onNavigate }) {
                 })
               )}
             </div>
-            
-            <div style={{ textAlign: 'center', marginTop: '30px' }}>
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
               <Button variant="gradient" style={{ padding: '14px 36px' }} onClick={() => { setCurrentView('courses'); window.history.pushState({}, '', '/courses'); }}>
                 {lang === 'ar' ? 'تصفح جميع الدورات' : 'Browse All Courses'}
               </Button>

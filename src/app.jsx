@@ -10,6 +10,7 @@ import { AppRouter, useAppRouting } from './AppRouter'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import { LoadingPlanet } from './features/shared/components/LoadingPlanet'
+import { useLenisScroll } from './features/shared/hooks/useLenisScroll'
 
 export function App() {
   return (
@@ -28,6 +29,9 @@ function AppContent() {
   const [currentView, setCurrentView] = useState('newhome'); // 'newhome', 'home', or others
   const [initialLoading, setInitialLoading] = useState(true);
   const { user, userProfile, signOut } = useAuth();
+
+  // Lenis smooth scroll — desktop homepage only; hook self-guards against touch/mobile/other views
+  useLenisScroll(currentView);
   const handleLogout = async () => {
     await signOut();
     setCurrentView('home');
@@ -88,7 +92,7 @@ function AppContent() {
   return (
     <div style={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh' }}>
       {/* Brand Planet Loading Screen */}
-      {initialLoading && (
+      {initialLoading && currentView !== 'loading' && (
         <LoadingPlanet
           isReady={false}
           lang={lang}

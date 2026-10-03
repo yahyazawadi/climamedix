@@ -197,6 +197,37 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
     }
   }
 
+  function isTouchDevice() {
+    if (typeof window === 'undefined') return false;
+    return Boolean(
+      (window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches) ||
+      (window.matchMedia && window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(hover: hover)').matches) ||
+      (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0 && window.innerWidth <= 768)
+    );
+  }
+
+  function isMouseDevice() {
+    return !isTouchDevice();
+  }
+
+  // Auto-close popovers when tapping outside (vital for mobile touch UX)
+  useEffect(() => {
+    if (!showSpeedSlider && !showVolumeSlider && !showCCMenu) return;
+    const handleOutsideInteraction = (e) => {
+      if (!e.target.closest || !e.target.closest('.cvp-popover-anchor')) {
+        setShowSpeedSlider(false);
+        setShowVolumeSlider(false);
+        setShowCCMenu(false);
+      }
+    };
+    document.addEventListener('click', handleOutsideInteraction);
+    document.addEventListener('touchstart', handleOutsideInteraction);
+    return () => {
+      document.removeEventListener('click', handleOutsideInteraction);
+      document.removeEventListener('touchstart', handleOutsideInteraction);
+    };
+  }, [showSpeedSlider, showVolumeSlider, showCCMenu]);
+
   const timelineRef = useRef(null);
   const isDraggingTimeline = useRef(false);
 
@@ -773,35 +804,79 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
 
                   {/* Speed Selection */}
                   <div 
+                    className="cvp-popover-anchor"
                     style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '10px', margin: '-10px' }}
-                    onMouseEnter={() => { setShowSpeedSlider(true); setShowVolumeSlider(false); }}
-                    onMouseLeave={() => setShowSpeedSlider(false)}
+                    onMouseEnter={() => {
+                      if (!isTouchDevice()) {
+                        setShowSpeedSlider(true);
+                        setShowVolumeSlider(false);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (!isTouchDevice()) {
+                        setShowSpeedSlider(false);
+                      }
+                    }}
                   >
                     {showSpeedSlider && (
-                      <div style={{
-                        position: 'absolute',
-                        bottom: 'calc(100% - 5px)',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        background: 'rgba(11, 40, 73, 0.95)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        borderRadius: '8px',
-                        padding: '12px 8px 15px 8px',
-                        zIndex: 10,
-                        height: '125px',
-                        minWidth: '46px',
-                        boxSizing: 'border-box',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        gap: '8px'
-                      }}>
+                      <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          position: 'absolute',
+                          bottom: 'calc(100% - 5px)',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: 'rgba(11, 40, 73, 0.96)',
+                          backdropFilter: 'blur(12px)',
+                          border: '1px solid rgba(255, 255, 255, 0.18)',
+                          borderRadius: '10px',
+                          padding: '10px 8px 12px 8px',
+                          zIndex: 10,
+                          minWidth: '58px',
+                          boxSizing: 'border-box',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)'
+                        }}
+                      >
                         <span style={{ fontSize: '11px', color: '#ffffff', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
                           {playbackSpeed.toFixed(1)}x
                         </span>
-                        <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+
+                        {/* Quick preset speed pills for effortless mobile touch */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', width: '100%' }}>
+                          {[0.75, 1.0, 1.25, 1.5, 2.0].map(s => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                changeSpeed(s);
+                                setShowSpeedSlider(false);
+                              }}
+                              style={{
+                                background: Math.abs(playbackSpeed - s) < 0.05 ? 'rgba(255, 255, 255, 0.28)' : 'rgba(255, 255, 255, 0.08)',
+                                border: 'none',
+                                borderRadius: '4px',
+                                color: '#ffffff',
+                                padding: '3px 6px',
+                                fontSize: '11px',
+                                fontWeight: Math.abs(playbackSpeed - s) < 0.05 ? '700' : '500',
+                                cursor: 'pointer',
+                                textAlign: 'center',
+                                fontFamily: 'monospace',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              {s.toFixed(2).replace(/\.?0+$/, '')}x
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Fine-tuning range slider */}
+                        <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
                           <input 
                             type="range"
                             min="0.5"
@@ -818,7 +893,12 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                     <button
                       className="cvp-speed-btn"
                       title={lang === 'ar' ? 'سرعة التشغيل' : 'Playback Speed'}
-                      onClick={() => { setShowSpeedSlider(!showSpeedSlider); setShowVolumeSlider(false); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowSpeedSlider(prev => !prev);
+                        setShowVolumeSlider(false);
+                        setShowCCMenu(false);
+                      }}
                       onDoubleClick={() => changeSpeed(1)}
                       style={{
                         background: 'none',
@@ -842,35 +922,70 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
 
                   {/* Volume Selection */}
                   <div 
+                    className="cvp-popover-anchor"
                     style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '10px', margin: '-10px' }}
-                    onMouseEnter={() => { setShowVolumeSlider(true); setShowSpeedSlider(false); }}
-                    onMouseLeave={() => setShowVolumeSlider(false)}
+                    onMouseEnter={() => {
+                      if (!isTouchDevice()) {
+                        setShowVolumeSlider(true);
+                        setShowSpeedSlider(false);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (!isTouchDevice()) {
+                        setShowVolumeSlider(false);
+                      }
+                    }}
                   >
                     {showVolumeSlider && (
-                      <div style={{
-                        position: 'absolute',
-                        bottom: 'calc(100% - 5px)',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        background: 'rgba(11, 40, 73, 0.95)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        borderRadius: '8px',
-                        padding: '12px 8px 15px 8px',
-                        zIndex: 10,
-                        height: '125px',
-                        minWidth: '46px',
-                        boxSizing: 'border-box',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        gap: '8px'
-                      }}>
+                      <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          position: 'absolute',
+                          bottom: 'calc(100% - 5px)',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: 'rgba(11, 40, 73, 0.96)',
+                          backdropFilter: 'blur(12px)',
+                          border: '1px solid rgba(255, 255, 255, 0.18)',
+                          borderRadius: '10px',
+                          padding: '10px 8px 12px 8px',
+                          zIndex: 10,
+                          minWidth: '56px',
+                          boxSizing: 'border-box',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)'
+                        }}
+                      >
                         <span style={{ fontSize: '10px', color: '#ffffff', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
-                          {Math.round((isMuted ? 0 : volume) * 100)}%
+                          {isMuted ? (lang === 'ar' ? 'مكتوم' : 'Muted') : `${Math.round(volume * 100)}%`}
                         </span>
-                        <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+
+                        {/* Quick Mute / Unmute button inside popover */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleMute();
+                          }}
+                          style={{
+                            background: isMuted ? 'rgba(239, 68, 68, 0.25)' : 'rgba(255, 255, 255, 0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                            borderRadius: '4px',
+                            color: '#ffffff',
+                            padding: '3px 6px',
+                            fontSize: '10px',
+                            cursor: 'pointer',
+                            textAlign: 'center',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {isMuted ? (lang === 'ar' ? 'تشغيل' : 'Unmute') : (lang === 'ar' ? 'كتم' : 'Mute')}
+                        </button>
+
+                        <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <input 
                             type="range"
                             min="0"
@@ -886,7 +1001,16 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                     )}
                     <button 
                       title={lang === 'ar' ? 'مستوى الصوت / كتم' : 'Volume / Mute'}
-                      onClick={toggleMute}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isTouchDevice()) {
+                          setShowVolumeSlider(prev => !prev);
+                          setShowSpeedSlider(false);
+                          setShowCCMenu(false);
+                        } else {
+                          toggleMute();
+                        }
+                      }}
                       style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                     >
                       {isMuted || volume === 0 ? (
@@ -901,47 +1025,71 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
 
                   {/* CC Subtitles Selection */}
                   <div 
+                    className="cvp-popover-anchor"
                     style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '10px', margin: '-10px' }}
-                    onMouseEnter={() => { setShowCCMenu(true); setShowSpeedSlider(false); setShowVolumeSlider(false); }}
-                    onMouseLeave={() => setShowCCMenu(false)}
+                    onMouseEnter={() => {
+                      if (!isTouchDevice()) {
+                        setShowCCMenu(true);
+                        setShowSpeedSlider(false);
+                        setShowVolumeSlider(false);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (!isTouchDevice()) {
+                        setShowCCMenu(false);
+                      }
+                    }}
                   >
                     {showCCMenu && (
-                      <div style={{
-                        position: 'absolute',
-                        bottom: 'calc(100% - 5px)',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        background: 'rgba(11, 40, 73, 0.96)',
-                        backdropFilter: 'blur(12px)',
-                        border: '1px solid rgba(255, 255, 255, 0.18)',
-                        borderRadius: '8px',
-                        padding: '6px',
-                        zIndex: 10,
-                        minWidth: '120px',
-                        boxSizing: 'border-box',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'stretch',
-                        gap: '4px'
-                      }}>
+                      <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          position: 'absolute',
+                          bottom: 'calc(100% - 5px)',
+                          right: lang === 'ar' ? 'auto' : '-10px',
+                          left: lang === 'ar' ? '-10px' : 'auto',
+                          background: 'rgba(11, 40, 73, 0.96)',
+                          backdropFilter: 'blur(12px)',
+                          border: '1px solid rgba(255, 255, 255, 0.18)',
+                          borderRadius: '10px',
+                          padding: '8px',
+                          zIndex: 10,
+                          minWidth: '130px',
+                          maxWidth: '220px',
+                          maxHeight: '200px',
+                          overflowY: 'auto',
+                          boxSizing: 'border-box',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'stretch',
+                          gap: '4px',
+                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)'
+                        }}
+                      >
                         <div style={{ fontSize: '11px', color: '#ffffff', fontWeight: 'bold', padding: '4px 8px', borderBottom: '1px solid rgba(255, 255, 255, 0.15)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
                           {lang === 'ar' ? 'الترجمة والشرح' : 'Subtitles (CC)'}
                         </div>
                         <button
-                          onClick={() => handleSelectTrack('off')}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectTrack('off');
+                            setShowCCMenu(false);
+                          }}
                           style={{
-                            background: selectedTrackId === 'off' ? 'rgba(255, 255, 255, 0.16)' : 'transparent',
+                            background: selectedTrackId === 'off' ? 'rgba(255, 255, 255, 0.18)' : 'transparent',
                             color: '#ffffff',
                             border: 'none',
                             borderRadius: '4px',
-                            padding: '6px 8px',
+                            padding: '7px 8px',
                             fontSize: '12px',
                             cursor: 'pointer',
                             textAlign: lang === 'ar' ? 'right' : 'left',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            fontWeight: selectedTrackId === 'off' ? 'bold' : 'normal'
+                            fontWeight: selectedTrackId === 'off' ? 'bold' : 'normal',
+                            transition: 'background 0.15s ease'
                           }}
                         >
                           <span>{lang === 'ar' ? 'إيقاف الترجمة' : 'Off'}</span>
@@ -950,20 +1098,26 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                         {tracks.map(t => (
                           <button
                             key={t.id}
-                            onClick={() => handleSelectTrack(t.id)}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectTrack(t.id);
+                              setShowCCMenu(false);
+                            }}
                             style={{
-                              background: selectedTrackId === t.id ? 'rgba(255, 255, 255, 0.16)' : 'transparent',
+                              background: selectedTrackId === t.id ? 'rgba(255, 255, 255, 0.18)' : 'transparent',
                               color: '#ffffff',
                               border: 'none',
                               borderRadius: '4px',
-                              padding: '6px 8px',
+                              padding: '7px 8px',
                               fontSize: '12px',
                               cursor: 'pointer',
                               textAlign: lang === 'ar' ? 'right' : 'left',
                               display: 'flex',
                               justifyContent: 'space-between',
                               alignItems: 'center',
-                              fontWeight: selectedTrackId === t.id ? 'bold' : 'normal'
+                              fontWeight: selectedTrackId === t.id ? 'bold' : 'normal',
+                              transition: 'background 0.15s ease'
                             }}
                           >
                             <span>{t.label || t.srclang || t.id}</span>
@@ -974,7 +1128,12 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                     )}
                     <button 
                       title={lang === 'ar' ? 'الترجمة والشرح (CC)' : 'Closed Captions (CC)'}
-                      onClick={() => { setShowCCMenu(!showCCMenu); setShowSpeedSlider(false); setShowVolumeSlider(false); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowCCMenu(prev => !prev);
+                        setShowSpeedSlider(false);
+                        setShowVolumeSlider(false);
+                      }}
                       style={{ 
                         background: 'none', 
                         border: 'none', 
@@ -982,9 +1141,9 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                         padding: '3px 4px', 
                         cursor: 'pointer', 
                         display: 'flex', 
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        flexDirection: 'column', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
                         position: 'relative'
                       }}
                     >

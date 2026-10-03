@@ -1,0 +1,1327 @@
+{
+  "scannedAt": "2026-10-03T11:35:34.565Z",
+  "totalAssets": 65,
+  "totalReferences": 93,
+  "assets": [
+    {
+      "name": "icon_calendar.svg",
+      "path": "src/assets/icons/icon_calendar.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 367,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 12,
+      "referencesCount": 12,
+      "references": [
+        {
+          "file": "src/features/events/components/CalendarSidebarWidget.jsx",
+          "line": 62,
+          "snippet": "<line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"></line>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/events/components/CalendarSidebarWidget.jsx",
+          "line": 119,
+          "snippet": "<line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"></line>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/news-blog/components/ArticleReaderPage.jsx",
+          "line": 226,
+          "snippet": "<line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"></line>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/shared/components/DatePicker.jsx",
+          "line": 118,
+          "snippet": "<line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"/>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/events/components/CalendarSidebarWidget.jsx",
+          "line": 63,
+          "snippet": "<line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"></line>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/events/components/CalendarSidebarWidget.jsx",
+          "line": 120,
+          "snippet": "<line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"></line>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/news-blog/components/ArticleReaderPage.jsx",
+          "line": 227,
+          "snippet": "<line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"></line>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/shared/components/DatePicker.jsx",
+          "line": 119,
+          "snippet": "<line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"/>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/events/components/CalendarSidebarWidget.jsx",
+          "line": 64,
+          "snippet": "<line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"></line>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/events/components/CalendarSidebarWidget.jsx",
+          "line": 121,
+          "snippet": "<line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"></line>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/news-blog/components/ArticleReaderPage.jsx",
+          "line": 228,
+          "snippet": "<line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"></line>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/shared/components/DatePicker.jsx",
+          "line": 120,
+          "snippet": "<line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"/>",
+          "matchType": "inline-clone"
+        }
+      ]
+    },
+    {
+      "name": "icon_checkmark.svg",
+      "path": "src/assets/icons/icon_checkmark.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 229,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 8,
+      "referencesCount": 8,
+      "references": [
+        {
+          "file": "src/features/assets/AssetsExplorerPage.jsx",
+          "line": 281,
+          "snippet": "<svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" strokeWidth=\"2.5\"><polyline points=\"20 6 9 17 4 12\"/></svg>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/quizzes/QuizWidget.jsx",
+          "line": 166,
+          "snippet": "isRTL ? <>إنهاء الاختبار <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" strokeWidth=\"2.5\"><polyline points=\"20 6 9 17 4 12\" /",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
+          "line": 767,
+          "snippet": "<polyline points=\"20 6 9 17 4 12\"/>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
+          "line": 898,
+          "snippet": "<svg width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#15b47a\" strokeWidth=\"2\" strokeLinecap=\"round\" strokeLinejoin=\"round\" style={{ marginBottom:",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
+          "line": 1076,
+          "snippet": "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" strokeWidth=\"3\" strokeLinecap=\"round\" strokeLinejoin=\"round\" style={{ display:",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/news-blog/components/ArticleEditorPage.jsx",
+          "line": 345,
+          "snippet": "{(saving || uploadingMedia) ? <span className=\"aep-spinner\" /> : <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" strokeWidth=\"",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/profile/components/ProfilePage.jsx",
+          "line": 269,
+          "snippet": "<polyline points=\"20 6 9 17 4 12\"></polyline>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/shared/components/ShareActionButtons.jsx",
+          "line": 136,
+          "snippet": "<polyline points=\"20 6 9 17 4 12\"></polyline>",
+          "matchType": "inline-clone"
+        }
+      ]
+    },
+    {
+      "name": "bg_1.png",
+      "path": "src/assets/bg_1.png",
+      "ext": "png",
+      "type": "image",
+      "sizeBytes": 323127,
+      "directReferencesCount": 7,
+      "inlineReferencesCount": 0,
+      "referencesCount": 7,
+      "references": [
+        {
+          "file": "src/__tests__/image_fetching_and_zero_fallback_integrity.test.jsx",
+          "line": 220,
+          "snippet": "it('never injects legacy bg_1.png or training1..4 fake assets for courses', async () => {",
+          "matchType": "file"
+        },
+        {
+          "file": "src/__tests__/image_fetching_and_zero_fallback_integrity.test.jsx",
+          "line": 234,
+          "snippet": "expect(src).not.toContain('bg_1.png');",
+          "matchType": "file"
+        },
+        {
+          "file": "src/__tests__/image_fetching_and_zero_fallback_integrity.test.jsx",
+          "line": 286,
+          "snippet": "expect(src).not.toContain('bg_1.png');",
+          "matchType": "file"
+        },
+        {
+          "file": "src/__tests__/image_fetching_and_zero_fallback_integrity.test.jsx",
+          "line": 334,
+          "snippet": "expect(src).not.toContain('bg_1.png');",
+          "matchType": "file"
+        },
+        {
+          "file": "src/__tests__/image_fetching_and_zero_fallback_integrity.test.jsx",
+          "line": 359,
+          "snippet": "it('does NOT render an img element or /assets/bg_1.png fallback when program.image is missing', () => {",
+          "matchType": "file"
+        },
+        {
+          "file": "src/__tests__/image_fetching_and_zero_fallback_integrity.test.jsx",
+          "line": 373,
+          "snippet": "// Specifically check that /assets/bg_1.png fallback is NEVER present in the modal DOM",
+          "matchType": "file"
+        },
+        {
+          "file": "src/__tests__/image_fetching_and_zero_fallback_integrity.test.jsx",
+          "line": 376,
+          "snippet": "expect(img.getAttribute('src')).not.toContain('bg_1.png');",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "favicon.svg",
+      "path": "public/favicon.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 524,
+      "directReferencesCount": 5,
+      "inlineReferencesCount": 0,
+      "referencesCount": 5,
+      "references": [
+        {
+          "file": "index.html",
+          "line": 5,
+          "snippet": "<link rel=\"icon\" type=\"image/svg+xml\" href=\"/favicon.svg\" />",
+          "matchType": "file"
+        },
+        {
+          "file": "src/features/assets/AssetsExplorerPage.jsx",
+          "line": 21,
+          "snippet": "// If it's in public folder, it is served from root URL directly (e.g. /favicon.svg)",
+          "matchType": "file"
+        },
+        {
+          "file": "vite.config.js",
+          "line": 48,
+          "snippet": "includeAssets: ['favicon.svg', 'icons.svg'],",
+          "matchType": "file"
+        },
+        {
+          "file": "vite.config.js",
+          "line": 65,
+          "snippet": "src: 'favicon.svg',",
+          "matchType": "file"
+        },
+        {
+          "file": "vite.config.js",
+          "line": 70,
+          "snippet": "src: 'favicon.svg',",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_course_graduation_cap.svg",
+      "path": "src/assets/icons/icon_course_graduation_cap.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 271,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 4,
+      "referencesCount": 4,
+      "references": [
+        {
+          "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
+          "line": 851,
+          "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
+          "line": 199,
+          "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
+          "line": 323,
+          "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/profile/components/ProfilePage.jsx",
+          "line": 551,
+          "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"></path>",
+          "matchType": "inline-clone"
+        }
+      ]
+    },
+    {
+      "name": "arab_world_map_desktop.webp",
+      "path": "src/assets/arab_world_map_desktop.webp",
+      "ext": "webp",
+      "type": "image",
+      "sizeBytes": 225022,
+      "directReferencesCount": 3,
+      "inlineReferencesCount": 0,
+      "referencesCount": 3,
+      "references": [
+        {
+          "file": "MAP_ARCHITECTURE.md",
+          "line": 23,
+          "snippet": "| [`src/assets/arab_world_map_desktop.webp`](src/assets/arab_world_map_desktop.webp) | 2x retina desktop base image (1440×700 px base coordinate space). |",
+          "matchType": "file"
+        },
+        {
+          "file": "scripts/capture_map.js",
+          "line": 6,
+          "snippet": "*   src/assets/arab_world_map_desktop.webp  (1440 x 700 px)",
+          "matchType": "file"
+        },
+        {
+          "file": "src/features/main/components/ArabWorldMapSVG.jsx",
+          "line": 208,
+          "snippet": "import desktopWebP from '../../../assets/arab_world_map_desktop.webp';",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "arab_world_map_mobile.webp",
+      "path": "src/assets/arab_world_map_mobile.webp",
+      "ext": "webp",
+      "type": "image",
+      "sizeBytes": 66124,
+      "directReferencesCount": 3,
+      "inlineReferencesCount": 0,
+      "referencesCount": 3,
+      "references": [
+        {
+          "file": "MAP_ARCHITECTURE.md",
+          "line": 24,
+          "snippet": "| [`src/assets/arab_world_map_mobile.webp`](src/assets/arab_world_map_mobile.webp) | 2x retina mobile base image (390×240 px base coordinate space). |",
+          "matchType": "file"
+        },
+        {
+          "file": "scripts/capture_map.js",
+          "line": 7,
+          "snippet": "*   src/assets/arab_world_map_mobile.webp   (390  x 700 px)",
+          "matchType": "file"
+        },
+        {
+          "file": "src/features/main/components/ArabWorldMapSVG.jsx",
+          "line": 209,
+          "snippet": "import mobileWebP  from '../../../assets/arab_world_map_mobile.webp';",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "about_bg.webp",
+      "path": "src/assets/about_bg.webp",
+      "ext": "webp",
+      "type": "image",
+      "sizeBytes": 16668,
+      "directReferencesCount": 2,
+      "inlineReferencesCount": 0,
+      "referencesCount": 2,
+      "references": [
+        {
+          "file": "src/app.css",
+          "line": 1775,
+          "snippet": "background-image: url('./assets/about_bg.webp');",
+          "matchType": "file"
+        },
+        {
+          "file": "src/features/about-us/AboutUsPage.jsx",
+          "line": 6,
+          "snippet": "import aboutBg          from '../../assets/about_bg.webp';",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "bg_4.webp",
+      "path": "src/assets/bg_4.webp",
+      "ext": "webp",
+      "type": "image",
+      "sizeBytes": 10028,
+      "directReferencesCount": 2,
+      "inlineReferencesCount": 0,
+      "referencesCount": 2,
+      "references": [
+        {
+          "file": "src/app.css",
+          "line": 420,
+          "snippet": "background-image: url('./assets/bg_4.webp');",
+          "matchType": "file"
+        },
+        {
+          "file": "src/app.css",
+          "line": 1397,
+          "snippet": "background-image: url('./assets/bg_4.webp');",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "climamedix_planet_loader.svg",
+      "path": "src/assets/climamedix_planet_loader.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 3835,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 2,
+      "referencesCount": 2,
+      "references": [
+        {
+          "file": "src/features/shared/components/LoadingPlanet.jsx",
+          "line": 9,
+          "snippet": "'M-12.6,116.5c-1.7-3.3,3.1-5.1,5.6-7.6c3.1-3.3,9.8-8.7,9-10.7C1.2,96-5.6,90-9.3,91.4c-0.8,0-5.1,4.8-6.1,5.6c0-1.7-0.3-2.6-0.3-4.2c0-1.1-2.2-2-2-2.8c0.2-1.9,4.8-",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/shared/components/LoadingViewerPage.jsx",
+          "line": 6,
+          "snippet": "'M-12.6,116.5c-1.7-3.3,3.1-5.1,5.6-7.6c3.1-3.3,9.8-8.7,9-10.7C1.2,96-5.6,90-9.3,91.4c-0.8,0-5.1,4.8-6.1,5.6c0-1.7-0.3-2.6-0.3-4.2c0-1.1-2.2-2-2-2.8c0.2-1.9,4.8-",
+          "matchType": "inline-clone"
+        }
+      ]
+    },
+    {
+      "name": "download-button-svgrepo-com.svg",
+      "path": "src/assets/icons/download-button-svgrepo-com.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1074,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 2,
+      "referencesCount": 2,
+      "references": [
+        {
+          "file": "src/features/learning-hub/components/certificates/CertificateGenerator.jsx",
+          "line": 381,
+          "snippet": "<path d=\"M25.462,19.105v6.848H4.515v-6.848H0.489v8.861c0,1.111,0.9,2.012,2.016,2.012h24.967c1.115,0,2.016-0.9,2.016-2.012 v-8.861H25.462z\" />",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/certificates/CertificateGenerator.jsx",
+          "line": 382,
+          "snippet": "<path d=\"M14.62,18.426l-5.764-6.965c0,0-0.877-0.828,0.074-0.828s3.248,0,3.248,0s0-0.557,0-1.416c0-2.449,0-6.906,0-8.723 c0,0-0.129-0.494,0.615-0.494c0.75,0,4.03",
+          "matchType": "inline-clone"
+        }
+      ]
+    },
+    {
+      "name": "footer_logo.svg",
+      "path": "src/assets/footer_logo.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 8814,
+      "directReferencesCount": 2,
+      "inlineReferencesCount": 0,
+      "referencesCount": 2,
+      "references": [
+        {
+          "file": "src/features/main/components/FooterCard.jsx",
+          "line": 1,
+          "snippet": "import footerLogo from '../../../assets/footer_logo.svg'",
+          "matchType": "file"
+        },
+        {
+          "file": "src/features/main/components/HomePage.jsx",
+          "line": 11,
+          "snippet": "import whiteLogo from '../../../assets/footer_logo.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_book.svg",
+      "path": "src/assets/icons/icon_book.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 312,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 2,
+      "referencesCount": 2,
+      "references": [
+        {
+          "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
+          "line": 466,
+          "snippet": "<path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"/>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
+          "line": 467,
+          "snippet": "<path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\"/>",
+          "matchType": "inline-clone"
+        }
+      ]
+    },
+    {
+      "name": "icon_clock.svg",
+      "path": "src/assets/icons/icon_clock.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 264,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 2,
+      "referencesCount": 2,
+      "references": [
+        {
+          "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
+          "line": 914,
+          "snippet": "<svg width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#ffb300\" strokeWidth=\"2\" strokeLinecap=\"round\" strokeLinejoin=\"round\" style={{ marginBottom:",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
+          "line": 348,
+          "snippet": "<polyline points=\"12 6 12 12 16 14\"></polyline>",
+          "matchType": "inline-clone"
+        }
+      ]
+    },
+    {
+      "name": "icon_community.svg",
+      "path": "src/assets/icons/icon_community.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 3317,
+      "directReferencesCount": 2,
+      "inlineReferencesCount": 0,
+      "referencesCount": 2,
+      "references": [
+        {
+          "file": "src/features/about-us/AboutUsPage.jsx",
+          "line": 5,
+          "snippet": "import iconCommunity    from '../../assets/icons/icon_community.svg';",
+          "matchType": "file"
+        },
+        {
+          "file": "src/features/main/components/Header.jsx",
+          "line": 14,
+          "snippet": "import iconCommunity from '../../../assets/icons/icon_community.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_link.svg",
+      "path": "src/assets/icons/icon_link.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 350,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 2,
+      "referencesCount": 2,
+      "references": [
+        {
+          "file": "src/features/shared/components/ShareActionButtons.jsx",
+          "line": 140,
+          "snippet": "<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"></path>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/shared/components/ShareActionButtons.jsx",
+          "line": 141,
+          "snippet": "<path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"></path>",
+          "matchType": "inline-clone"
+        }
+      ]
+    },
+    {
+      "name": "icon_lock.svg",
+      "path": "src/assets/icons/icon_lock.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 288,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 2,
+      "referencesCount": 2,
+      "references": [
+        {
+          "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
+          "line": 866,
+          "snippet": "<path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
+          "line": 331,
+          "snippet": "<path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path>",
+          "matchType": "inline-clone"
+        }
+      ]
+    },
+    {
+      "name": "icon_share.svg",
+      "path": "src/assets/icons/icon_share.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 430,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 2,
+      "referencesCount": 2,
+      "references": [
+        {
+          "file": "src/features/shared/components/ShareActionButtons.jsx",
+          "line": 159,
+          "snippet": "<line x1=\"8.59\" y1=\"13.51\" x2=\"15.42\" y2=\"17.49\"></line>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/shared/components/ShareActionButtons.jsx",
+          "line": 160,
+          "snippet": "<line x1=\"15.41\" y1=\"6.51\" x2=\"8.59\" y2=\"10.49\"></line>",
+          "matchType": "inline-clone"
+        }
+      ]
+    },
+    {
+      "name": "asset_1_globe.svg",
+      "path": "src/assets/icons/asset_1_globe.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1162,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/Header.jsx",
+          "line": 13,
+          "snippet": "import iconGlobe from '../../../assets/icons/asset_1_globe.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "asset_2_opportunities.svg",
+      "path": "src/assets/icons/asset_2_opportunities.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1045,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/Header.jsx",
+          "line": 10,
+          "snippet": "import iconOpportunities from '../../../assets/icons/asset_2_opportunities.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "asset_3_news.svg",
+      "path": "src/assets/icons/asset_3_news.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1030,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/Header.jsx",
+          "line": 6,
+          "snippet": "import iconNews from '../../../assets/icons/asset_3_news.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "bg_1.webp",
+      "path": "src/assets/bg_1.webp",
+      "ext": "webp",
+      "type": "image",
+      "sizeBytes": 8308,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/ColoredBackground.jsx",
+          "line": 1,
+          "snippet": "import bg1 from '../../../assets/bg_1.webp'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "bg_3.webp",
+      "path": "src/assets/bg_3.webp",
+      "ext": "webp",
+      "type": "image",
+      "sizeBytes": 45790,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/HomePage.jsx",
+          "line": 10,
+          "snippet": "import doctorImg from '../../../assets/bg_3.webp'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "contact_mail.svg",
+      "path": "src/assets/icons/contact_mail.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1649,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/FooterCard.jsx",
+          "line": 6,
+          "snippet": "import contactMail from '../../../assets/icons/contact_mail.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "contact_phone.svg",
+      "path": "src/assets/icons/contact_phone.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 973,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/FooterCard.jsx",
+          "line": 7,
+          "snippet": "import contactPhone from '../../../assets/icons/contact_phone.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "contact_web.svg",
+      "path": "src/assets/icons/contact_web.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1042,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/FooterCard.jsx",
+          "line": 8,
+          "snippet": "import contactWeb from '../../../assets/icons/contact_web.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "footer_background.webp",
+      "path": "src/assets/footer_background.webp",
+      "ext": "webp",
+      "type": "image",
+      "sizeBytes": 24534,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/app.css",
+          "line": 392,
+          "snippet": "background-image: url('./assets/footer_background.webp');",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_about.svg",
+      "path": "src/assets/icons/icon_about.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1257,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/Header.jsx",
+          "line": 9,
+          "snippet": "import iconAbout from '../../../assets/icons/icon_about.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_empowerment.svg",
+      "path": "src/assets/icons/icon_empowerment.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1367,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/about-us/AboutUsPage.jsx",
+          "line": 1,
+          "snippet": "import iconEmpowerment  from '../../assets/icons/icon_empowerment.svg';",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_empowerment2.svg",
+      "path": "src/assets/icons/icon_empowerment2.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 2259,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/about-us/AboutUsPage.jsx",
+          "line": 3,
+          "snippet": "import iconEmpowerment2 from '../../assets/icons/icon_empowerment2.svg';",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_home.svg",
+      "path": "src/assets/icons/icon_home.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1481,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/Header.jsx",
+          "line": 5,
+          "snippet": "import iconHome from '../../../assets/icons/icon_home.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_innovation.svg",
+      "path": "src/assets/icons/icon_innovation.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1596,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/about-us/AboutUsPage.jsx",
+          "line": 4,
+          "snippet": "import iconInnovation   from '../../assets/icons/icon_innovation.svg';",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_profile.svg",
+      "path": "src/assets/icons/icon_profile.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 2122,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/Header.jsx",
+          "line": 12,
+          "snippet": "import iconProfile from '../../../assets/icons/icon_profile.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_research.svg",
+      "path": "src/assets/icons/icon_research.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1332,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/Header.jsx",
+          "line": 8,
+          "snippet": "import iconResearch from '../../../assets/icons/icon_research.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_science.svg",
+      "path": "src/assets/icons/icon_science.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1330,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/about-us/AboutUsPage.jsx",
+          "line": 2,
+          "snippet": "import iconScience      from '../../assets/icons/icon_science.svg';",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_search.svg",
+      "path": "src/assets/icons/icon_search.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 905,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/Header.jsx",
+          "line": 11,
+          "snippet": "import iconSearch from '../../../assets/icons/icon_search.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_training.svg",
+      "path": "src/assets/icons/icon_training.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1376,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/Header.jsx",
+          "line": 7,
+          "snippet": "import iconTraining from '../../../assets/icons/icon_training.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icons.svg",
+      "path": "public/icons.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 5031,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "vite.config.js",
+          "line": 48,
+          "snippet": "includeAssets: ['favicon.svg', 'icons.svg'],",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "left-svg.svg",
+      "path": "src/assets/left-svg.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 14230,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/NeatScripples.jsx",
+          "line": 1,
+          "snippet": "import leftScribble from '../../../assets/left-svg.svg';",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "logo_en.svg",
+      "path": "src/assets/logo_en.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 4364,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/Header.jsx",
+          "line": 3,
+          "snippet": "import logoEn from '../../../assets/logo_en.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "logo.svg",
+      "path": "src/assets/logo.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 8797,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/Header.jsx",
+          "line": 2,
+          "snippet": "import logo from '../../../assets/logo.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "right-svg.svg",
+      "path": "src/assets/right-svg.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 14897,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/NeatScripples.jsx",
+          "line": 2,
+          "snippet": "import rightScribble from '../../../assets/right-svg.svg';",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "social_fb.svg",
+      "path": "src/assets/icons/social_fb.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1274,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/FooterCard.jsx",
+          "line": 3,
+          "snippet": "import socialFb from '../../../assets/icons/social_fb.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "social_in.svg",
+      "path": "src/assets/icons/social_in.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 676,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/FooterCard.jsx",
+          "line": 2,
+          "snippet": "import socialIn from '../../../assets/icons/social_in.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "social_insta.svg",
+      "path": "src/assets/icons/social_insta.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1216,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/FooterCard.jsx",
+          "line": 4,
+          "snippet": "import socialInsta from '../../../assets/icons/social_insta.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "social_x.svg",
+      "path": "src/assets/icons/social_x.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 604,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/FooterCard.jsx",
+          "line": 5,
+          "snippet": "import socialX from '../../../assets/icons/social_x.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "topbackgroundtext.svg",
+      "path": "src/assets/topbackgroundtext.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 258754,
+      "directReferencesCount": 1,
+      "inlineReferencesCount": 0,
+      "referencesCount": 1,
+      "references": [
+        {
+          "file": "src/features/main/components/TopBackground.jsx",
+          "line": 1,
+          "snippet": "import topBgText from '../../../assets/topbackgroundtext.svg'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "about_bg.svg",
+      "path": "src/assets/about_bg.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1589776,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "bg_2.png",
+      "path": "src/assets/bg_2.png",
+      "ext": "png",
+      "type": "image",
+      "sizeBytes": 465104,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "bg_2.webp",
+      "path": "src/assets/bg_2.webp",
+      "ext": "webp",
+      "type": "image",
+      "sizeBytes": 21772,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "bg_3.png",
+      "path": "src/assets/bg_3.png",
+      "ext": "png",
+      "type": "image",
+      "sizeBytes": 1617233,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "bg_4.png",
+      "path": "src/assets/bg_4.png",
+      "ext": "png",
+      "type": "image",
+      "sizeBytes": 124958,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "footer background.png",
+      "path": "src/assets/footer background.png",
+      "ext": "png",
+      "type": "image",
+      "sizeBytes": 396579,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "icon_contact.svg",
+      "path": "src/assets/icons/icon_contact.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1045,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "icon_favorite.svg",
+      "path": "src/assets/icons/icon_favorite.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1820,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "icon_globe.svg",
+      "path": "src/assets/icons/icon_globe.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 4375,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "icon_hamburger.svg",
+      "path": "src/assets/icons/icon_hamburger.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 312,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "icon_news.svg",
+      "path": "src/assets/icons/icon_news.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 361,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "icon_opportunities.svg",
+      "path": "src/assets/icons/icon_opportunities.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 392,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "javascript.svg",
+      "path": "src/assets/javascript.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 863,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "leftsvg.svg",
+      "path": "src/assets/leftsvg.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 14230,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "svgbackground.svg",
+      "path": "src/assets/svgbackground.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 1589776,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "test-audio.m4a",
+      "path": "public/test-audio.m4a",
+      "ext": "m4a",
+      "type": "media",
+      "sizeBytes": 3526812,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "topbackgroundtext.webp",
+      "path": "src/assets/topbackgroundtext.webp",
+      "ext": "webp",
+      "type": "image",
+      "sizeBytes": 4910,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "vite.svg",
+      "path": "src/assets/vite.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 8709,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    }
+  ]
+}

@@ -81,6 +81,7 @@ const VIDEO_SOURCE_DIRS = [
 ];
 
 const SUBTITLES_AR_DIRS = [
+  resolve(process.cwd(), 'scripts', 'subtitles_ar'),
   'C:\\Users\\CLICK\\Downloads\\videos of modules\\subtitles',
   resolve(process.cwd(), 'subtitles')
 ];

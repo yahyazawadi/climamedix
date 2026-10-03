@@ -966,4 +966,228 @@ describe('Multimedia Player Video & Audio Engine Test Suite (55 Tests)', () => {
       });
     });
   });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 7. Closed Captions (CC), Subtitle Parsing & Arabic Rendering (9 Tests)
+  // ──────────────────────────────────────────────────────────────────────────
+  describe('7. Closed Captions (CC), Subtitle Parsing & Arabic Rendering (9 Tests)', () => {
+    const srtSample = `1
+00:00:01,000 --> 00:00:04,500
+مرحباً بكم في مساق التغير المناخي والقطاع الصحي.
+هذه الدورة تقدم مفاهيم استراتيجية مهمة!
+
+2
+00:00:05,000 --> 00:00:08,200
+Welcome to Climate & Health course.
+`;
+
+    const vttSample = `WEBVTT
+
+00:01.000 --> 00:04.500
+مقدمة شاملة عن الاستدامة.
+
+00:05.000 --> 00:09.000
+Second cue in English.
+`;
+
+    it('renders the CC toggle button in video controls', () => {
+      render(
+        <CustomVideoPlayer videoUrl="https://example.com/test.mp4" lessonTitle="Test" lang="ar" />
+      );
+
+      const ccBtn = screen.getByTitle('الترجمة والشرح (CC)');
+      expect(ccBtn).toBeDefined();
+    });
+
+    it('renders the CC toggle button with English tooltip when lang is en', () => {
+      render(
+        <CustomVideoPlayer videoUrl="https://example.com/test.mp4" lessonTitle="Test" lang="en" />
+      );
+
+      const ccBtn = screen.getByTitle('Closed Captions (CC)');
+      expect(ccBtn).toBeDefined();
+    });
+
+    it('clicking CC button opens track picker menu with Off and track options', () => {
+      const tracks = [
+        { id: 'ar', label: 'العربية', srclang: 'ar', content: srtSample },
+        { id: 'en', label: 'English', srclang: 'en', content: vttSample }
+      ];
+
+      render(
+        <CustomVideoPlayer videoUrl="https://example.com/test.mp4" lessonTitle="Test" lang="ar" tracks={tracks} />
+      );
+
+      const ccBtn = screen.getByTitle('الترجمة والشرح (CC)');
+      fireEvent.click(ccBtn);
+
+      expect(screen.getByText('الترجمة والشرح')).toBeDefined();
+      expect(screen.getByText('إيقاف الترجمة')).toBeDefined();
+      expect(screen.getByText('العربية')).toBeDefined();
+      expect(screen.getByText('English')).toBeDefined();
+    });
+
+    it('selecting a track saves preference to localStorage', () => {
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+      const tracks = [
+        { id: 'ar', label: 'العربية', srclang: 'ar', content: srtSample }
+      ];
+
+      render(
+        <CustomVideoPlayer videoUrl="https://example.com/test.mp4" lessonTitle="Test" lang="ar" tracks={tracks} />
+      );
+
+      const ccBtn = screen.getByTitle('الترجمة والشرح (CC)');
+      fireEvent.click(ccBtn);
+
+      const arTrackBtn = screen.getByText('العربية');
+      fireEvent.click(arTrackBtn);
+
+      expect(setItemSpy).toHaveBeenCalledWith('lms_cc_pref', 'ar');
+      setItemSpy.mockRestore();
+    });
+
+    it('displays parsed subtitle cue synchronized with video currentTime', async () => {
+      const tracks = [
+        { id: 'ar', label: 'العربية', srclang: 'ar', content: srtSample }
+      ];
+
+      const { container } = render(
+        <CustomVideoPlayer videoUrl="https://example.com/test.mp4" lessonTitle="Test" lang="ar" tracks={tracks} />
+      );
+
+      // Select Arabic track
+      const ccBtn = screen.getByTitle('الترجمة والشرح (CC)');
+      fireEvent.click(ccBtn);
+      fireEvent.click(screen.getByText('العربية'));
+
+      const video = container.querySelector('video');
+      
+      // Advance to 2.5s (within cue 1: 1s -> 4.5s)
+      Object.defineProperty(video, 'currentTime', { value: 2.5, configurable: true });
+      fireEvent.timeUpdate(video);
+
+      await waitFor(() => {
+        expect(screen.getByText(/مرحباً بكم في مساق التغير المناخي/)).toBeDefined();
+      });
+    });
+
+    it('applies direction: rtl and unicode-bidi: plaintext for multi-line Arabic cues', async () => {
+      const tracks = [
+        { id: 'ar', label: 'العربية', srclang: 'ar', content: srtSample }
+      ];
+
+      const { container } = render(
+        <CustomVideoPlayer videoUrl="https://example.com/test.mp4" lessonTitle="Test" lang="ar" tracks={tracks} />
+      );
+
+      const ccBtn = screen.getByTitle('الترجمة والشرح (CC)');
+      fireEvent.click(ccBtn);
+      fireEvent.click(screen.getByText('العربية'));
+
+      const video = container.querySelector('video');
+      Object.defineProperty(video, 'currentTime', { value: 2.5, configurable: true });
+      fireEvent.timeUpdate(video);
+
+      await waitFor(() => {
+        const cueTextEl = screen.getByText(/مرحباً بكم في مساق التغير المناخي/);
+        expect(cueTextEl.style.direction).toBe('rtl');
+        expect(cueTextEl.style.unicodeBidi).toBe('plaintext');
+        expect(cueTextEl.style.textAlign).toBe('center');
+      });
+    });
+
+    it('hides active cue when currentTime moves past cue end time', async () => {
+      const tracks = [
+        { id: 'ar', label: 'العربية', srclang: 'ar', content: srtSample }
+      ];
+
+      const { container } = render(
+        <CustomVideoPlayer videoUrl="https://example.com/test.mp4" lessonTitle="Test" lang="ar" tracks={tracks} />
+      );
+
+      const ccBtn = screen.getByTitle('الترجمة والشرح (CC)');
+      fireEvent.click(ccBtn);
+      fireEvent.click(screen.getByText('العربية'));
+
+      const video = container.querySelector('video');
+      
+      // At 2.5s -> cue is active
+      Object.defineProperty(video, 'currentTime', { value: 2.5, configurable: true });
+      fireEvent.timeUpdate(video);
+      expect(screen.queryByText(/مرحباً بكم في مساق التغير المناخي/)).not.toBeNull();
+
+      // At 4.8s -> cue ended (gap before cue 2 at 5.0s)
+      Object.defineProperty(video, 'currentTime', { value: 4.8, configurable: true });
+      fireEvent.timeUpdate(video);
+
+      await waitFor(() => {
+        expect(screen.queryByText(/مرحباً بكم في مساق التغير المناخي/)).toBeNull();
+      });
+    });
+
+    it('selecting "Off" clears active subtitles immediately', async () => {
+      const tracks = [
+        { id: 'ar', label: 'العربية', srclang: 'ar', content: srtSample }
+      ];
+
+      const { container } = render(
+        <CustomVideoPlayer videoUrl="https://example.com/test.mp4" lessonTitle="Test" lang="ar" tracks={tracks} />
+      );
+
+      const ccBtn = screen.getByTitle('الترجمة والشرح (CC)');
+      fireEvent.click(ccBtn);
+      fireEvent.click(screen.getByText('العربية'));
+
+      const video = container.querySelector('video');
+      Object.defineProperty(video, 'currentTime', { value: 2.5, configurable: true });
+      fireEvent.timeUpdate(video);
+
+      expect(screen.queryByText(/مرحباً بكم في مساق التغير المناخي/)).not.toBeNull();
+
+      // Turn CC Off
+      fireEvent.click(ccBtn);
+      fireEvent.click(screen.getByText('إيقاف الترجمة'));
+
+      await waitFor(() => {
+        expect(screen.queryByText(/مرحباً بكم في مساق التغير المناخي/)).toBeNull();
+      });
+    });
+
+    it('loads and parses subtitles from remote src file via fetch', async () => {
+      const originalFetch = global.fetch;
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve(vttSample)
+      });
+
+      const tracks = [
+        { id: 'remote-vtt', label: 'WebVTT Stream', srclang: 'ar', src: 'https://cdn.climamedix.org/subtitles/intro.vtt' }
+      ];
+
+      const { container } = render(
+        <CustomVideoPlayer videoUrl="https://example.com/test.mp4" lessonTitle="Test" lang="ar" tracks={tracks} />
+      );
+
+      const ccBtn = screen.getByTitle('الترجمة والشرح (CC)');
+      fireEvent.click(ccBtn);
+      fireEvent.click(screen.getByText('WebVTT Stream'));
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith('https://cdn.climamedix.org/subtitles/intro.vtt');
+      });
+
+      const video = container.querySelector('video');
+      Object.defineProperty(video, 'currentTime', { value: 2.0, configurable: true });
+      fireEvent.timeUpdate(video);
+
+      await waitFor(() => {
+        expect(screen.getByText('مقدمة شاملة عن الاستدامة.')).toBeDefined();
+      });
+
+      global.fetch = originalFetch;
+    });
+  });
 });
+
+

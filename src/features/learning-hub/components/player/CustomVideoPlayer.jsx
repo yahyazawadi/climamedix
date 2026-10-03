@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'preact/hooks';
 import { supabase } from '../../../../utils/supabaseClient';
 import { getSecureVideoUrl } from '../../services/lmsService';
+import { parseSubtitles, getActiveCue } from '../../../../utils/subtitleParser';
 
-export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 'ar', userId, lessonId, courseId }) {
+export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 'ar', userId, lessonId, courseId, tracks = [] }) {
   const [resolvedUrl, setResolvedUrl] = useState(null);
   const [resolving, setResolving] = useState(false);
   const [videoError, setVideoError] = useState(false);
@@ -16,6 +17,18 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
   const [volume, setVolume] = useState(1);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [showSpeedSlider, setShowSpeedSlider] = useState(false);
+  const [showCCMenu, setShowCCMenu] = useState(false);
+
+  // CC Subtitle states
+  const [selectedTrackId, setSelectedTrackId] = useState(() => {
+    try {
+      return localStorage.getItem('lms_cc_pref') || 'off';
+    } catch (e) {
+      return 'off';
+    }
+  });
+  const [parsedCues, setParsedCues] = useState([]);
+  const [activeCue, setActiveCue] = useState(null);
 
   const telemetry = useRef({
     maxPercentage: 0,
@@ -45,6 +58,13 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
 
     if (videoUrl.startsWith('http') || videoUrl.startsWith('blob:')) {
       setResolvedUrl(videoUrl);
+      return;
+    }
+
+    // Direct R2 key resolution fallback
+    const r2Base = (import.meta.env.VITE_R2_PUBLIC_URL || '').replace(/\/+$/, '');
+    if (r2Base) {
+      setResolvedUrl(`${r2Base}/${videoUrl}`);
       return;
     }
 
@@ -235,6 +255,56 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
     }
   }
 
+  // Handle track loading & parsing (supports .vtt, .srt, or inline content)
+  useEffect(() => {
+    if (selectedTrackId === 'off') {
+      setParsedCues([]);
+      setActiveCue(null);
+      return;
+    }
+
+    const currentTrack = tracks.find(t => t.id === selectedTrackId);
+    if (!currentTrack) {
+      setParsedCues([]);
+      setActiveCue(null);
+      return;
+    }
+
+    // Direct content provided
+    if (currentTrack.content) {
+      const parsed = parseSubtitles(currentTrack.content);
+      setParsedCues(parsed);
+      return;
+    }
+
+    // Remote or local file (.vtt or .srt)
+    if (currentTrack.src) {
+      fetch(currentTrack.src)
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.text();
+        })
+        .then(text => {
+          const parsed = parseSubtitles(text);
+          setParsedCues(parsed);
+        })
+        .catch(err => {
+          console.error('Failed to load subtitle track:', err);
+          setParsedCues([]);
+        });
+    }
+  }, [selectedTrackId, tracks]);
+
+  function handleSelectTrack(trackId) {
+    setSelectedTrackId(trackId);
+    try {
+      localStorage.setItem('lms_cc_pref', trackId);
+    } catch (e) {
+      // Ignore local storage error in private/restricted browsing
+    }
+    setShowCCMenu(false);
+  }
+
   return (
     <div 
       onMouseEnter={() => setShowControls(true)}
@@ -273,6 +343,13 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                 const ct = videoRef.current.currentTime;
                 const dur = videoRef.current.duration || 0;
                 setCurrentTime(ct);
+
+                if (parsedCues.length > 0) {
+                  const cue = getActiveCue(parsedCues, ct);
+                  setActiveCue(cue);
+                } else if (activeCue) {
+                  setActiveCue(null);
+                }
                 
                 if (ct > telemetry.current.furthestSecond) {
                   telemetry.current.furthestSecond = ct;
@@ -292,6 +369,52 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
             crossOrigin="anonymous"
           />
 
+          {/* Subtitle / Closed Caption Overlay (Broadcast Standard) */}
+          {activeCue && (
+            <div 
+              style={{
+                position: 'absolute',
+                left: '50%',
+                bottom: showControls ? '80px' : '26px',
+                transform: 'translateX(-50%)',
+                maxWidth: '78%',
+                width: 'auto',
+                pointerEvents: 'none',
+                zIndex: 4,
+                textAlign: 'center',
+                transition: 'bottom 0.2s ease',
+                display: 'flex',
+                justifyContent: 'center'
+              }}
+            >
+              <div 
+                style={{
+                  display: 'inline-block',
+                  background: 'rgba(0, 0, 0, 0.78)',
+                  backdropFilter: 'blur(6px)',
+                  WebkitBackdropFilter: 'blur(6px)',
+                  color: '#ffffff',
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  fontSize: 'clamp(13px, 1.8vw, 16px)',
+                  lineHeight: '1.38',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  direction: activeCue.isRtl ? 'rtl' : 'ltr',
+                  unicodeBidi: 'plaintext',
+                  fontFamily: activeCue.isRtl ? "'Cairo', 'Alexandria', system-ui, sans-serif" : "'Inter', system-ui, sans-serif",
+                  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.5)',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.9), 0 0 1px rgba(0, 0, 0, 0.8)',
+                  whiteSpace: 'pre-line',
+                  maxHeight: '4.2em',
+                  overflow: 'hidden'
+                }}
+              >
+                {activeCue.text}
+              </div>
+            </div>
+          )}
+
           {/* Center Play/Pause Overlay Button */}
           {(!isPlaying || showControls) && (
             <div 
@@ -307,27 +430,42 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                 transition: 'opacity 0.25s ease'
               }}
             >
-              <div style={{
-                width: '70px',
-                height: '70px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'transparent',
-                border: '2px solid #15b47a',
-                boxShadow: '0 0 20px rgba(21, 180, 122, 0.5), inset 0 0 15px rgba(21, 180, 122, 0.3)',
-                color: '#15b47a',
-                transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease'
-              }}
-              onClick={togglePlay}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#15b47a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#15b47a'; e.currentTarget.style.transform = 'scale(1)'; }}
+              <div 
+                style={{
+                  width: '68px',
+                  height: '68px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(255, 255, 255, 0.92)',
+                  border: '2px solid #ffffff',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.35)',
+                  color: '#0b2849',
+                  transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease'
+                }}
+                onClick={togglePlay}
+                onMouseEnter={(e) => { 
+                  e.currentTarget.style.background = '#15b47a'; 
+                  e.currentTarget.style.color = '#ffffff'; 
+                  e.currentTarget.style.borderColor = '#15b47a'; 
+                  e.currentTarget.style.transform = 'scale(1.08)'; 
+                }}
+                onMouseLeave={(e) => { 
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.92)'; 
+                  e.currentTarget.style.color = '#0b2849'; 
+                  e.currentTarget.style.borderColor = '#ffffff'; 
+                  e.currentTarget.style.transform = 'scale(1)'; 
+                }}
               >
                 {isPlaying ? (
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                  </svg>
                 ) : (
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z"/></svg>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6.5 5v14l11-7z"/>
+                  </svg>
                 )}
               </div>
             </div>
@@ -361,7 +499,8 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
               padding: '24px 20px 14px 20px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '12px'
+              gap: '12px',
+              direction: 'ltr'
             }}>
               
               {/* Timeline seekable slider bar */}
@@ -373,19 +512,36 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                   background: 'rgba(255,255,255,0.3)',
                   borderRadius: '3px',
                   cursor: 'pointer',
-                  position: 'relative'
+                  position: 'relative',
+                  direction: 'ltr'
                 }}
               >
                 <div 
                   style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
                     width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
                     height: '100%',
                     background: '#15b47a',
                     borderRadius: '3px',
-                    position: 'relative',
                     boxShadow: '0 0 8px #15b47a'
                   }}
-                />
+                >
+                  {/* Scrubber thumb circle */}
+                  <div style={{
+                    position: 'absolute',
+                    right: '-5px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    background: '#ffffff',
+                    boxShadow: '0 0 6px rgba(0,0,0,0.6)',
+                    pointerEvents: 'none'
+                  }} />
+                </div>
               </div>
 
               {/* Controls buttons row */}
@@ -567,6 +723,104 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                     </button>
                   </div>
 
+                  {/* CC Subtitles Selection */}
+                  <div 
+                    style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '10px', margin: '-10px' }}
+                    onMouseEnter={() => { setShowCCMenu(true); setShowSpeedSlider(false); setShowVolumeSlider(false); }}
+                    onMouseLeave={() => setShowCCMenu(false)}
+                  >
+                    {showCCMenu && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: 'calc(100% - 5px)',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        background: 'rgba(11, 40, 73, 0.96)',
+                        backdropFilter: 'blur(12px)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)',
+                        borderRadius: '8px',
+                        padding: '6px',
+                        zIndex: 10,
+                        minWidth: '120px',
+                        boxSizing: 'border-box',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'stretch',
+                        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.6)',
+                        gap: '4px'
+                      }}>
+                        <div style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold', padding: '4px 8px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
+                          {lang === 'ar' ? 'الترجمة والشرح' : 'Subtitles (CC)'}
+                        </div>
+                        <button
+                          onClick={() => handleSelectTrack('off')}
+                          style={{
+                            background: selectedTrackId === 'off' ? 'rgba(21, 180, 122, 0.2)' : 'transparent',
+                            color: selectedTrackId === 'off' ? '#15b47a' : '#ffffff',
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '6px 8px',
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                            textAlign: lang === 'ar' ? 'right' : 'left',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            fontWeight: selectedTrackId === 'off' ? 'bold' : 'normal'
+                          }}
+                        >
+                          <span>{lang === 'ar' ? 'إيقاف الترجمة' : 'Off'}</span>
+                          {selectedTrackId === 'off' && <span>✓</span>}
+                        </button>
+                        {tracks.map(t => (
+                          <button
+                            key={t.id}
+                            onClick={() => handleSelectTrack(t.id)}
+                            style={{
+                              background: selectedTrackId === t.id ? 'rgba(21, 180, 122, 0.2)' : 'transparent',
+                              color: selectedTrackId === t.id ? '#15b47a' : '#ffffff',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '6px 8px',
+                              fontSize: '12px',
+                              cursor: 'pointer',
+                              textAlign: lang === 'ar' ? 'right' : 'left',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              fontWeight: selectedTrackId === t.id ? 'bold' : 'normal'
+                            }}
+                          >
+                            <span>{t.label || t.srclang || t.id}</span>
+                            {selectedTrackId === t.id && <span>✓</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <button 
+                      title={lang === 'ar' ? 'الترجمة والشرح (CC)' : 'Closed Captions (CC)'}
+                      onClick={() => { setShowCCMenu(!showCCMenu); setShowSpeedSlider(false); setShowVolumeSlider(false); }}
+                      style={{ 
+                        background: selectedTrackId !== 'off' ? 'rgba(21, 180, 122, 0.25)' : 'none', 
+                        border: selectedTrackId !== 'off' ? '1px solid #15b47a' : 'none', 
+                        color: selectedTrackId !== 'off' ? '#15b47a' : '#fff', 
+                        padding: '3px 6px', 
+                        borderRadius: '4px',
+                        cursor: 'pointer', 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        lineHeight: 1
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2" ry="2"/>
+                        <path d="M7 15h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H7v6zM15 15h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-2v6z"/>
+                      </svg>
+                    </button>
+                  </div>
+
                   <button 
                     title={lang === 'ar' ? 'تكبير الشاشة' : 'Fullscreen'}
                     onClick={toggleFullscreen}
@@ -581,20 +835,57 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
           )}
         </>
       ) : (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ff4d4d', fontSize: '15px', flexDirection: 'column', gap: '8px' }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span>{lang === 'ar' ? 'الفيديو غير متوفر أو الرابط تالف' : 'Video not available or link corrupted'}</span>
-          <button 
-            onClick={() => {
-              setResolvedUrl('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4');
-              setVideoError(false);
-            }}
-            style={{ marginTop: '12px', padding: '6px 16px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontSize: '12px' }}
-          >
-            {lang === 'ar' ? 'تحميل فيديو تجريبي (للاختبار)' : 'Load Sample Video (Testing)'}
-          </button>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: '15px', flexDirection: 'column', gap: '10px', background: 'rgba(11,40,73,0.96)', padding: '20px', textAlign: 'center' }}>
+          {!navigator.onLine ? (
+            <>
+              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(239,68,68,0.18)', color: '#ef4444', marginBottom: '4px' }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                  <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+                  <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+                  <path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
+                  <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                  <line x1="12" y1="20" x2="12.01" y2="20"/>
+                </svg>
+              </div>
+              <span style={{ fontWeight: 'bold' }}>{lang === 'ar' ? 'لا يوجد اتصال بالإنترنت' : 'No Internet Connection'}</span>
+              <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', maxWidth: '360px' }}>
+                {lang === 'ar' ? 'يرجى التحقق من اتصال الشبكة لاستئناف بث المحاضرة.' : 'Please check your network connection to stream this video lesson.'}
+              </span>
+              <button 
+                onClick={() => {
+                  setVideoError(false);
+                  setResolving(true);
+                  if (lessonId && courseId) {
+                    getSecureVideoUrl(lessonId, courseId).then(u => { setResolvedUrl(u); setResolving(false); }).catch(() => setResolving(false));
+                  } else {
+                    setResolving(false);
+                  }
+                }}
+                style={{ marginTop: '6px', padding: '7px 20px', background: '#15b47a', border: 'none', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold' }}
+              >
+                {lang === 'ar' ? 'إعادة المحاولة' : 'Retry'}
+              </button>
+            </>
+          ) : (
+            <>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>{lang === 'ar' ? 'الفيديو غير متوفر أو تعذر تحميله' : 'Video not available or failed to load'}</span>
+              <button 
+                onClick={() => {
+                  setVideoError(false);
+                  setResolving(true);
+                  setTimeout(() => setResolving(false), 500);
+                }}
+                style={{ marginTop: '8px', padding: '6px 16px', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontSize: '12px' }}
+              >
+                {lang === 'ar' ? 'إعادة المحاولة' : 'Retry'}
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

@@ -669,17 +669,62 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                   )}
                 </div>
               ) : activeLesson ? (
-                <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '100%', margin: '0 auto' }}>
-                  <h3 style={{ color: '#0b2849', fontSize: '22px', fontWeight: 'bold', marginBottom: '24px', lineHeight: '1.4' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', maxWidth: '100%', margin: '0 auto' }}>
+                  {/* 1. Dedicated Master Video Player at the VERY TOP */}
+                  {activeLesson.video_url && (() => {
+                    const r2Base = (import.meta.env.VITE_R2_PUBLIC_URL || '').replace(/\/+$/, '');
+                    const resolvedVideoUrl = activeLesson.video_url.startsWith('http') || activeLesson.video_url.startsWith('blob:')
+                      ? activeLesson.video_url
+                      : `${r2Base}/${activeLesson.video_url}`;
+
+                    const resolvedTracks = (() => {
+                      if (activeLesson.subtitles && Array.isArray(activeLesson.subtitles) && activeLesson.subtitles.length > 0) {
+                        return activeLesson.subtitles;
+                      }
+                      if (activeLesson.tracks && Array.isArray(activeLesson.tracks) && activeLesson.tracks.length > 0) {
+                        return activeLesson.tracks;
+                      }
+                      if (activeLesson.video_url) {
+                        const match = activeLesson.video_url.match(/(m\d+v\d+)/i);
+                        if (match) {
+                          const code = match[1].toLowerCase();
+                          return [
+                            {
+                              id: 'ar',
+                              label: 'العربية',
+                              srclang: 'ar',
+                              src: `${r2Base}/subtitles/ar/${code}.vtt`
+                            },
+                            {
+                              id: 'en',
+                              label: 'English',
+                              srclang: 'en',
+                              src: `${r2Base}/subtitles/en/${code}.vtt`
+                            }
+                          ];
+                        }
+                      }
+                      return [];
+                    })();
+
+                    return (
+                      <div style={{ width: '100%', marginBottom: '28px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(11,40,73,0.12)' }}>
+                        <CustomVideoPlayer 
+                          videoUrl={resolvedVideoUrl} 
+                          lang={lang} 
+                          userId={userId} 
+                          lessonId={activeLessonId} 
+                          courseId={course?.id}
+                          tracks={resolvedTracks} 
+                        />
+                      </div>
+                    );
+                  })()}
+
+                  {/* 2. Lesson Title beneath Video Player */}
+                  <h3 style={{ color: '#0b2849', fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', lineHeight: '1.4' }}>
                     {lessonTitle}
                   </h3>
-
-                  {/* Dedicated Video Player for lesson.video_url */}
-                  {activeLesson.video_url && (
-                    <div style={{ marginBottom: '32px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(11,40,73,0.08)' }}>
-                      <CustomVideoPlayer videoUrl={activeLesson.video_url} lang={lang} userId={userId} lessonId={activeLessonId} courseId={course?.id} />
-                    </div>
-                  )}
 
                   {/* Unified Rich Text Content (Contains Native Audio/Video) */}
                   {lessonContent && (

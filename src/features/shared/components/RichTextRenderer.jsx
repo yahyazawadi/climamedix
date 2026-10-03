@@ -23,7 +23,25 @@ export function RichTextRenderer({ html, lang = 'ar', userId, lessonId, courseId
       // -- Intercept Media Tags --
       if (tagName === 'video') {
         const src = node.getAttribute('src');
-        return <div key={index} style={{ margin: '20px 0' }}><CustomVideoPlayer videoUrl={src} lang={lang} userId={userId} lessonId={lessonId} courseId={courseId} /></div>;
+        const trackNodes = Array.from(node.querySelectorAll('track'));
+        const embeddedTracks = trackNodes.map((tr, idx) => ({
+          id: tr.getAttribute('srclang') || tr.getAttribute('id') || `track-${idx}`,
+          label: tr.getAttribute('label') || tr.getAttribute('srclang') || 'Subtitle',
+          srclang: tr.getAttribute('srclang') || 'ar',
+          src: tr.getAttribute('src') || ''
+        }));
+        return (
+          <div key={index} style={{ margin: '20px 0' }}>
+            <CustomVideoPlayer 
+              videoUrl={src} 
+              lang={lang} 
+              userId={userId} 
+              lessonId={lessonId} 
+              courseId={courseId} 
+              tracks={embeddedTracks} 
+            />
+          </div>
+        );
       }
       
       if (tagName === 'audio') {

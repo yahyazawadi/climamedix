@@ -461,8 +461,13 @@ function LoadingSkeleton() {
 function EmptyState({ lang, message }) {
   return (
     <div style={{ textAlign: 'center', padding: '80px 20px', background: 'rgba(255,255,255,0.5)', borderRadius: '24px', border: '1px dashed rgba(11,40,73,0.2)' }}>
-      <div style={{ fontSize: '48px', marginBottom: '16px' }}>📚</div>
-      <p style={{ color: 'rgba(11,40,73,0.55)', fontSize: '16px' }}>{message}</p>
+      <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(11,40,73,0.06)', color: '#0b2849', marginBottom: '16px' }}>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+      </div>
+      <p style={{ color: 'rgba(11,40,73,0.65)', fontSize: '15px', fontWeight: '500' }}>{message}</p>
     </div>
   );
 }

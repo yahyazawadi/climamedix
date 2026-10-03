@@ -67,6 +67,7 @@ function parseArgs() {
   let unusedOnly = false;
   let inlineOnly = false;
   let iconsOnly = false;
+  let noIcons = false;
   let searchQuery = '';
   const targets: string[] = [];
 
@@ -90,6 +91,8 @@ function parseArgs() {
       inlineOnly = true;
     } else if (arg === '-i' || arg === '--icons') {
       iconsOnly = true;
+    } else if (arg === '--no-icons' || arg === '--exclude-icons') {
+      noIcons = true;
     } else if (arg === '-q' || arg === '--query' || arg === '--search') {
       searchQuery = args[++i] || '';
     } else if (!arg.startsWith('-')) {
@@ -106,7 +109,7 @@ function parseArgs() {
     targets.push('.');
   }
 
-  return { verbose, svgOnly, pngOnly, unusedOnly, inlineOnly, iconsOnly, searchQuery, targets };
+  return { verbose, svgOnly, pngOnly, unusedOnly, inlineOnly, iconsOnly, noIcons, searchQuery, targets };
 }
 
 function printHelp() {
@@ -393,6 +396,12 @@ function main() {
   if (opts.iconsOnly) {
     filteredAssets = filteredAssets.filter(
       a => a.relativePath.includes('icon') || a.fileName.toLowerCase().includes('icon') || a.type === 'svg'
+    );
+  }
+
+  if (opts.noIcons) {
+    filteredAssets = filteredAssets.filter(
+      a => !a.relativePath.toLowerCase().includes('icon')
     );
   }
 

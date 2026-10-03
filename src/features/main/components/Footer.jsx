@@ -49,6 +49,7 @@ export function Footer({ onJoinClick, onNavigate, onPolicyClick, lang, currentVi
                 <li><a href="/news" onClick={(e) => { e.preventDefault(); onNavigate('news'); }}>{lang === 'ar' ? 'الأخبار والمدونة' : 'News & Blog'}</a></li>
                 <li><a href="/opportunities" onClick={(e) => { e.preventDefault(); onNavigate('opportunities'); }}>{lang === 'ar' ? 'الفرص والمنح' : 'Opportunities'}</a></li>
                 <li><a href="/events" onClick={(e) => { e.preventDefault(); onNavigate('events'); }}>{lang === 'ar' ? 'الأنشطة والفعاليات' : 'Events & Activities'}</a></li>
+                <li><a href="/assets" onClick={(e) => { e.preventDefault(); onNavigate('assets'); }}>{lang === 'ar' ? 'مستكشف الأيقونات والأصول' : 'Assets & Icons'}</a></li>
                 <li><a href="/write-article" onClick={(e) => { e.preventDefault(); onNavigate('write-article'); }}>{lang === 'ar' ? 'كتابة مقال' : 'Write Article'}</a></li>
               </ul>
             </div>

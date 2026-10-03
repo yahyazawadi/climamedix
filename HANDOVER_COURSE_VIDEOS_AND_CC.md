@@ -3,7 +3,7 @@
 **Date**: 2026-10-02  
 **Repository**: `yahyazawadi/climamedix` (`c:\Users\CLICK\Desktop\climamedix-pwa`)  
 **Media Assets Location**: `C:\Users\CLICK\Downloads\videos of modules\`  
-**Target Course**: `0509ec71-4043-43d4-9865-b3bca0510458` (الماجستير المصغر في التغير المناخي والصحة العامة / Mini-Masterclass: Climate Change & Public Health)  
+**Target Course**: `0509ec71-4043-43d4-9865-b3bca0510458` (زمالة إعداد المثقف الصحي: التغير المناخي وصحة المجتمع / Community Health Educator Fellowship: Climate Change & Population Health)  
 
 ---
 

@@ -197,13 +197,67 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
     }
   }
 
-  function handleTimelineClick(e) {
-    if (!videoRef.current || !duration) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const width = rect.width;
-    const newTime = (clickX / width) * duration;
+  const timelineRef = useRef(null);
+  const isDraggingTimeline = useRef(false);
+
+  function seekFromEvent(e) {
+    if (!videoRef.current || !timelineRef.current) return;
+    const dur = duration || videoRef.current.duration || 0;
+    if (!dur) return;
+
+    const rect = timelineRef.current.getBoundingClientRect();
+    const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+    if (typeof clientX !== 'number' || isNaN(clientX)) return;
+
+    const offsetX = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    const targetPct = rect.width > 0 ? offsetX / rect.width : 0;
+    const newTime = targetPct * dur;
+
     videoRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  }
+
+  function handleTimelineMouseDown(e) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    isDraggingTimeline.current = true;
+    seekFromEvent(e);
+
+    const handleMouseMove = (moveEvent) => {
+      if (!isDraggingTimeline.current) return;
+      seekFromEvent(moveEvent);
+    };
+
+    const handleMouseUp = (upEvent) => {
+      if (!isDraggingTimeline.current) return;
+      seekFromEvent(upEvent);
+      isDraggingTimeline.current = false;
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  }
+
+  function handleTimelineTouchStart(e) {
+    isDraggingTimeline.current = true;
+    seekFromEvent(e);
+
+    const handleTouchMove = (moveEvent) => {
+      if (!isDraggingTimeline.current) return;
+      seekFromEvent(moveEvent);
+    };
+
+    const handleTouchEnd = (upEvent) => {
+      if (!isDraggingTimeline.current) return;
+      isDraggingTimeline.current = false;
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd);
   }
 
   function formatTime(seconds) {
@@ -319,15 +373,54 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
         marginBottom: '32px',
         overflow: 'hidden',
         position: 'relative',
-        boxShadow: 'inset 0 0 40px rgba(0,0,0,0.8), 0 12px 30px rgba(11, 40, 73, 0.15)',
         border: '1px solid rgba(0, 76, 109, 0.12)'
       }}
     >
+      <style>{`
+        .custom-video-range-slider {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 70px;
+          height: 4px;
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
+          outline: none;
+          transform: rotate(-90deg);
+          transform-origin: center;
+          margin: 33px -33px;
+        }
+        .custom-video-range-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: #0b2849 !important;
+          cursor: pointer;
+          border: 2px solid #ffffff !important;
+          box-shadow: none !important;
+          transition: transform 0.15s ease;
+        }
+        .custom-video-range-slider::-moz-range-thumb {
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: #0b2849 !important;
+          cursor: pointer;
+          border: 2px solid #ffffff !important;
+          box-shadow: none !important;
+          transition: transform 0.15s ease;
+        }
+        .custom-video-range-slider::-webkit-slider-thumb:hover,
+        .custom-video-range-slider::-moz-range-thumb:hover {
+          transform: scale(1.25);
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
       {(videoLoading || resolving) ? (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.15)', borderTop: '3px solid #15b47a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.2)', borderTop: '3px solid #0b2849', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           {lang === 'ar' ? 'جاري تحميل الفيديو...' : 'Loading video...'}
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       ) : (resolvedUrl && !videoError) ? (
         <>
@@ -342,7 +435,9 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
               if (videoRef.current) {
                 const ct = videoRef.current.currentTime;
                 const dur = videoRef.current.duration || 0;
-                setCurrentTime(ct);
+                if (!isDraggingTimeline.current) {
+                  setCurrentTime(ct);
+                }
 
                 if (parsedCues.length > 0) {
                   const cue = getActiveCue(parsedCues, ct);
@@ -390,7 +485,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
               <div 
                 style={{
                   display: 'inline-block',
-                  background: 'rgba(0, 0, 0, 0.78)',
+                  background: 'rgba(0, 0, 0, 0.85)',
                   backdropFilter: 'blur(6px)',
                   WebkitBackdropFilter: 'blur(6px)',
                   color: '#ffffff',
@@ -403,8 +498,6 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                   direction: activeCue.isRtl ? 'rtl' : 'ltr',
                   unicodeBidi: 'plaintext',
                   fontFamily: activeCue.isRtl ? "'Cairo', 'Alexandria', system-ui, sans-serif" : "'Inter', system-ui, sans-serif",
-                  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.5)',
-                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.9), 0 0 1px rgba(0, 0, 0, 0.8)',
                   whiteSpace: 'pre-line',
                   maxHeight: '4.2em',
                   overflow: 'hidden'
@@ -438,23 +531,20 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: 'rgba(255, 255, 255, 0.92)',
-                  border: '2px solid #ffffff',
-                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.35)',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  border: 'none',
                   color: '#0b2849',
-                  transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease'
+                  transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease'
                 }}
                 onClick={togglePlay}
                 onMouseEnter={(e) => { 
-                  e.currentTarget.style.background = '#15b47a'; 
+                  e.currentTarget.style.background = '#0b2849'; 
                   e.currentTarget.style.color = '#ffffff'; 
-                  e.currentTarget.style.borderColor = '#15b47a'; 
                   e.currentTarget.style.transform = 'scale(1.08)'; 
                 }}
                 onMouseLeave={(e) => { 
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.92)'; 
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)'; 
                   e.currentTarget.style.color = '#0b2849'; 
-                  e.currentTarget.style.borderColor = '#ffffff'; 
                   e.currentTarget.style.transform = 'scale(1)'; 
                 }}
               >
@@ -464,7 +554,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                   </svg>
                 ) : (
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M6.5 5v14l11-7z"/>
+                    <path d="M8 5v14l11-7z"/>
                   </svg>
                 )}
               </div>
@@ -484,7 +574,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
               alignItems: 'center',
               pointerEvents: 'none'
             }}>
-              <span style={{ fontSize: '15px', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+              <span style={{ fontSize: '15px', fontWeight: 'bold' }}>
                 {lessonTitle}
               </span>
             </div>
@@ -503,44 +593,61 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
               direction: 'ltr'
             }}>
               
-              {/* Timeline seekable slider bar */}
+              {/* Timeline seekable slider bar with generous hit area & full drag/click support */}
               <div 
-                onClick={handleTimelineClick}
+                ref={timelineRef}
+                onMouseDown={handleTimelineMouseDown}
+                onTouchStart={handleTimelineTouchStart}
+                onClick={seekFromEvent}
                 style={{
+                  width: '100%',
+                  padding: '10px 0',
+                  margin: '-10px 0',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  direction: 'ltr',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  touchAction: 'none'
+                }}
+              >
+                <div style={{
                   width: '100%',
                   height: '6px',
                   background: 'rgba(255,255,255,0.3)',
                   borderRadius: '3px',
-                  cursor: 'pointer',
                   position: 'relative',
-                  direction: 'ltr'
-                }}
-              >
-                <div 
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: 0,
-                    width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
-                    height: '100%',
-                    background: '#15b47a',
-                    borderRadius: '3px',
-                    boxShadow: '0 0 8px #15b47a'
-                  }}
-                >
-                  {/* Scrubber thumb circle */}
-                  <div style={{
-                    position: 'absolute',
-                    right: '-5px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    background: '#ffffff',
-                    boxShadow: '0 0 6px rgba(0,0,0,0.6)',
-                    pointerEvents: 'none'
-                  }} />
+                  direction: 'ltr',
+                  pointerEvents: 'none'
+                }}>
+                  <div 
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #0b2849, #1b4b7a)',
+                      border: '1px solid rgba(255,255,255,0.4)',
+                      boxSizing: 'border-box',
+                      borderRadius: '3px'
+                    }}
+                  >
+                    {/* Scrubber thumb circle */}
+                    <div style={{
+                      position: 'absolute',
+                      right: '-6px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      background: '#0b2849',
+                      border: '2px solid #ffffff',
+                      boxSizing: 'border-box',
+                      pointerEvents: 'none'
+                    }} />
+                  </div>
                 </div>
               </div>
 
@@ -620,10 +727,9 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
                         gap: '8px'
                       }}>
-                        <span style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
+                        <span style={{ fontSize: '11px', color: '#ffffff', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
                           {playbackSpeed.toFixed(1)}x
                         </span>
                         <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -634,7 +740,8 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                             step="0.1"
                             value={playbackSpeed}
                             onInput={(e) => changeSpeed(parseFloat(e.target.value))}
-                            className="custom-range-slider"
+                            onChange={(e) => changeSpeed(parseFloat(e.target.value))}
+                            className="custom-video-range-slider"
                           />
                         </div>
                       </div>
@@ -644,20 +751,19 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                       onClick={() => { setShowSpeedSlider(!showSpeedSlider); setShowVolumeSlider(false); }}
                       onDoubleClick={() => changeSpeed(1)}
                       style={{
-                        background: 'rgba(255, 255, 255, 0.12)',
-                        border: '1px solid rgba(255, 255, 255, 0.25)',
+                        background: 'none',
+                        border: 'none',
                         color: '#ffffff',
-                        borderRadius: '6px',
-                        padding: '4px 8px',
-                        fontSize: '12px',
+                        padding: '0 4px',
+                        fontSize: '13px',
                         cursor: 'pointer',
-                        fontWeight: 'bold',
+                        fontWeight: '600',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        minWidth: '40px',
                         outline: 'none',
-                        lineHeight: '1'
+                        lineHeight: '1',
+                        fontFamily: 'monospace'
                       }}
                     >
                       <span>{playbackSpeed.toFixed(1)}x</span>
@@ -689,10 +795,9 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.5)',
                         gap: '8px'
                       }}>
-                        <span style={{ fontSize: '10px', color: '#15b47a', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
+                        <span style={{ fontSize: '10px', color: '#ffffff', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
                           {Math.round((isMuted ? 0 : volume) * 100)}%
                         </span>
                         <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -703,7 +808,8 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                             step="0.05"
                             value={isMuted ? 0 : volume}
                             onInput={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                            className="custom-range-slider"
+                            onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                            className="custom-video-range-slider"
                           />
                         </div>
                       </div>
@@ -746,17 +852,16 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'stretch',
-                        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.6)',
                         gap: '4px'
                       }}>
-                        <div style={{ fontSize: '11px', color: '#15b47a', fontWeight: 'bold', padding: '4px 8px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
+                        <div style={{ fontSize: '11px', color: '#ffffff', fontWeight: 'bold', padding: '4px 8px', borderBottom: '1px solid rgba(255, 255, 255, 0.15)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
                           {lang === 'ar' ? 'الترجمة والشرح' : 'Subtitles (CC)'}
                         </div>
                         <button
                           onClick={() => handleSelectTrack('off')}
                           style={{
-                            background: selectedTrackId === 'off' ? 'rgba(21, 180, 122, 0.2)' : 'transparent',
-                            color: selectedTrackId === 'off' ? '#15b47a' : '#ffffff',
+                            background: selectedTrackId === 'off' ? 'rgba(255, 255, 255, 0.16)' : 'transparent',
+                            color: '#ffffff',
                             border: 'none',
                             borderRadius: '4px',
                             padding: '6px 8px',
@@ -777,8 +882,8 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                             key={t.id}
                             onClick={() => handleSelectTrack(t.id)}
                             style={{
-                              background: selectedTrackId === t.id ? 'rgba(21, 180, 122, 0.2)' : 'transparent',
-                              color: selectedTrackId === t.id ? '#15b47a' : '#ffffff',
+                              background: selectedTrackId === t.id ? 'rgba(255, 255, 255, 0.16)' : 'transparent',
+                              color: '#ffffff',
                               border: 'none',
                               borderRadius: '4px',
                               padding: '6px 8px',
@@ -801,23 +906,34 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                       title={lang === 'ar' ? 'الترجمة والشرح (CC)' : 'Closed Captions (CC)'}
                       onClick={() => { setShowCCMenu(!showCCMenu); setShowSpeedSlider(false); setShowVolumeSlider(false); }}
                       style={{ 
-                        background: selectedTrackId !== 'off' ? 'rgba(21, 180, 122, 0.25)' : 'none', 
-                        border: selectedTrackId !== 'off' ? '1px solid #15b47a' : 'none', 
-                        color: selectedTrackId !== 'off' ? '#15b47a' : '#fff', 
-                        padding: '3px 6px', 
-                        borderRadius: '4px',
+                        background: 'none', 
+                        border: 'none', 
+                        color: selectedTrackId !== 'off' ? '#ffffff' : 'rgba(255, 255, 255, 0.75)', 
+                        padding: '3px 4px', 
                         cursor: 'pointer', 
                         display: 'flex', 
+                        flexDirection: 'column',
                         alignItems: 'center',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        lineHeight: 1
+                        justifyContent: 'center',
+                        position: 'relative'
                       }}
                     >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="2" y="4" width="20" height="16" rx="2" ry="2"/>
-                        <path d="M7 15h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H7v6zM15 15h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-2v6z"/>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="3" ry="3"/>
+                        <path d="M10 9H8a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2"/>
+                        <path d="M18 9h-2a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2"/>
                       </svg>
+                      {selectedTrackId !== 'off' && (
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '-1px',
+                          left: '4px',
+                          right: '4px',
+                          height: '2px',
+                          background: '#ffffff',
+                          borderRadius: '1px'
+                        }} />
+                      )}
                     </button>
                   </div>
 
@@ -863,7 +979,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                     setResolving(false);
                   }
                 }}
-                style={{ marginTop: '6px', padding: '7px 20px', background: '#15b47a', border: 'none', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold' }}
+                style={{ marginTop: '6px', padding: '7px 20px', background: '#0b2849', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold' }}
               >
                 {lang === 'ar' ? 'إعادة المحاولة' : 'Retry'}
               </button>
@@ -891,3 +1007,4 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
     </div>
   );
 }
+

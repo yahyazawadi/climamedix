@@ -348,7 +348,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '32px 32px 24px 32px', borderBottom: '1px solid rgba(11,40,73,0.08)', background: '#ffffff', flexShrink: 0 }}>
           <div>
-            <span style={{ fontSize: '11px', color: isLocked ? '#ffb300' : '#15b47a', fontWeight: 'bold', display: 'block', marginBottom: '2px' }}>
+            <span style={{ fontSize: '11px', color: isLocked ? '#ffb300' : '#004c6d', fontWeight: 'bold', display: 'block', marginBottom: '2px' }}>
               {isLocked 
                 ? (lang === 'ar' ? 'معاينة المساق' : 'Course Preview')
                 : (lang === 'ar' ? 'مساق نشط' : 'Active Course')
@@ -360,7 +360,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {!isLocked && (
-              <span style={{ fontSize: '13px', color: '#15b47a', fontWeight: 'bold' }}>
+              <span style={{ fontSize: '13px', color: '#0b2849', fontWeight: 'bold' }}>
                 {allLessons.length > 0 ? Math.round((completedSet.size / allLessons.length) * 100) : 0}% {lang === 'ar' ? 'مكتمل' : 'complete'}
               </span>
             )}
@@ -434,7 +434,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                                 top: '-4px', // Reach into half of the 8px gap
                                 height: 'calc(50% + 4px)',
                                 width: '2px',
-                                background: completedSet.has(mod.lessons[index - 1].id) ? '#15b47a' : 'rgba(11, 40, 73, 0.08)',
+                                background: completedSet.has(mod.lessons[index - 1].id) ? '#004c6d' : 'rgba(11, 40, 73, 0.08)',
                                 zIndex: 1
                               }} />
                             )}
@@ -446,7 +446,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                                 top: '50%',
                                 height: 'calc(50% + 4px)',
                                 width: '2px',
-                                background: isDone ? '#15b47a' : 'rgba(11, 40, 73, 0.08)',
+                                background: isDone ? '#004c6d' : 'rgba(11, 40, 73, 0.08)',
                                 zIndex: 1
                               }} />
                             )}
@@ -454,9 +454,9 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                             {/* The Dot */}
                             <div style={{
                               width: '14px', height: '14px', borderRadius: '50%',
-                              background: isDone ? '#15b47a' : (isActive ? '#004c6d' : '#ffffff'),
-                              border: `2px solid ${isDone ? '#15b47a' : (isActive ? '#004c6d' : 'rgba(11, 40, 73, 0.2)')}`,
-                              boxShadow: isActive ? '0 0 0 4px rgba(0, 76, 109, 0.15)' : (isDone ? '0 0 0 4px rgba(21, 180, 122, 0.15)' : 'none'),
+                              background: isDone ? '#004c6d' : (isActive ? '#004c6d' : '#ffffff'),
+                              border: `2px solid ${isDone ? '#004c6d' : (isActive ? '#004c6d' : 'rgba(11, 40, 73, 0.2)')}`,
+                              boxShadow: 'none',
                               transition: 'all 0.2s ease',
                               position: 'absolute',
                               top: '50%',
@@ -781,7 +781,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                           title={lang === 'ar' ? 'اضغط للتراجع (غير مكتمل)' : 'Click to unmark as incomplete'}
                           style={{ 
                             background: 'none', border: 'none', cursor: 'pointer', padding: '8px 0',
-                            color: '#15b47a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14.5px',
+                            color: '#004c6d', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14.5px',
                             transition: 'opacity 0.2s ease'
                           }}
                           onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
@@ -794,13 +794,13 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                         </button>
                       </div>
                     ) : quizData ? (
-                      <Button variant="gradient" onClick={() => setQuizMode(true)}>
+                      <Button onClick={() => setQuizMode(true)} style={{ background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)', boxShadow: 'none' }}>
                         {lastQuizScore !== null
                           ? (lang === 'ar' ? 'إعادة خوض الاختبار' : 'Retake Quiz')
                           : (lang === 'ar' ? 'خوض اختبار الدرس لقفل التقدم' : 'Take Lesson Quiz')}
                       </Button>
                     ) : (
-                      <Button variant="gradient" onClick={handleMarkComplete}>
+                      <Button onClick={handleMarkComplete} style={{ background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)', boxShadow: 'none' }}>
                         {lang === 'ar' ? 'تحديد الدرس كمكتمل' : 'Mark as Complete'}
                       </Button>
                     )}

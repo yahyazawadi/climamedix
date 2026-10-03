@@ -24,7 +24,13 @@ interface InlineSvgMatch {
   viewBox?: string;
   width?: string;
   height?: string;
+  stroke?: string;
+  fill?: string;
+  ariaLabel?: string;
+  context?: string;
+  shapes?: string;
   snippet: string;
+  rawContent: string;
 }
 
 interface IconComponentMatch {
@@ -48,6 +54,13 @@ function formatBytes(bytes: number): string {
 
 function parseArgs() {
   const args = process.argv.slice(2);
+
+  // 1. Running ic with no arguments displays help menu (ic = ic --help)
+  if (args.length === 0) {
+    printHelp();
+    process.exit(0);
+  }
+
   let verbose = false;
   let svgOnly = false;
   let pngOnly = false;
@@ -63,7 +76,7 @@ function parseArgs() {
       printHelp();
       process.exit(0);
     } else if (arg === '--version') {
-      console.log('IC (Icon, SVG & Asset Locator) version 1.0.0');
+      console.log('IC (Icon, SVG & Asset Locator) version 1.1.0');
       process.exit(0);
     } else if (arg === '-v' || arg === '--verbose') {
       verbose = true;
@@ -97,37 +110,38 @@ function parseArgs() {
 }
 
 function printHelp() {
-  console.log(`\x1b[1mIC (Icon, SVG & Asset Locator)\x1b[0m — Universal Asset Finder, Auditor & Icon Scanner CLI
-Scans, locates, and audits SVG vectors, PNG/WebP images, inline <svg> tags, and icon components.
-Detects where assets are imported, finds orphaned/unused files, and traces icon usage.
+  console.log(`\x1b[1mIC (Icon, SVG & Asset Locator)\x1b[0m — Universal Asset Finder, Auditor & Inline <svg> Scanner CLI
+Scans, locates, and audits SVG vectors, inline <svg> tags, PNG/WebP images, and icon components.
+Detects where assets are imported, finds orphaned/unused files, and locates <svg> tags wherever they are.
 
 \x1b[1mUSAGE:\x1b[0m
   ic [options] [query] [paths...]
 
 \x1b[1mEXAMPLES:\x1b[0m
-  ic                             # Scan workspace & show complete asset inventory
-  ic globe                       # Search for any asset or icon matching "globe"
-  ic src/ -v                     # Verbose scan of src folder with line numbers & usages
-  ic -s                          # Show only SVG assets and vector files
+  ic .                           # Scan workspace for all assets and inline <svg> tags
+  ic globe                       # Search for any asset, inline <svg>, or icon matching "globe"
+  ic cap                         # Search for graduation cap, hat, or course SVGs
+  ic svg                         # Locate all SVG assets and inline <svg> elements
+  ic src/ -v                     # Verbose scan of src folder with line numbers & snippets
+  ic -s                          # Show only SVG assets and inline <svg> tags
   ic -p                          # Show only PNG and raster images
   ic -u                          # Audit unused/orphaned assets (never referenced in code)
-  ic --inline                    # Scan and locate all inline <svg> elements in UI code
   ic -i                          # List all icon files and component usages (Lucide, etc.)
-  ic calendar src/               # Search for calendar icons and imports inside src/
+  ic calendar src/               # Search for calendar icons and <svg> tags inside src/
 
 \x1b[1mOPTIONS:\x1b[0m
-  [query]                        Search keyword to filter assets by name, path, or content
-  -s, --svg                      Filter for SVG vector files only
+  [query]                        Search keyword to filter assets and inline <svg> tags
+  -s, --svg                      Filter for SVG vector files and inline <svg> elements
   -p, --png                      Filter for PNG / raster images only
   -u, --unused                   Audit mode: list only orphaned assets with 0 code references
-  --inline                       Scan and display inline <svg> elements in JSX/HTML
+  --inline                       Display only inline <svg> tags found across UI code
   -i, --icons                    Display icon assets and icon component imports (e.g. Lucide)
-  -v, --verbose                  Show full paths, dimensions, file size, and line references
+  -v, --verbose                  Show full paths, dimensions, file size, context, and code snippets
   -h, --help                     Display this help menu
   --version                      Display tool version
 
 \x1b[1mSUITE OF COMPANION TOOLS:\x1b[0m
-  ic                             Icon, SVG & Asset Locator (Universal Asset Finder & Auditor)
+  ic                             Icon, SVG & Asset Locator (Universal Asset Finder & <svg> Scanner)
   fd                             Font & Text Detector (Typography & Text Instance Scanner)
   er                             Emoji Remover (Universal Emoji Detector & Purger CLI)
   bc                             Barber Checker (Design System & Color Contrast Auditor)`);
@@ -245,11 +259,6 @@ function scanCodeForAssetReferences(
   const inlineSvgs: InlineSvgMatch[] = [];
   const iconComponents: IconComponentMatch[] = [];
 
-  const assetLookup = new Map<string, AssetFile>();
-  for (const asset of assets) {
-    assetLookup.set(asset.fileName.toLowerCase(), asset);
-  }
-
   for (const codeFile of codeFiles) {
     let content = '';
     try {
@@ -261,7 +270,7 @@ function scanCodeForAssetReferences(
     const relCodePath = path.relative(process.cwd(), codeFile) || codeFile;
     const lines = content.split(/\r?\n/);
 
-    // Match icon component imports (e.g. lucide-react, lucide-preact)
+    // 1. Match icon component imports (e.g. lucide-react, lucide-preact)
     const iconImportRegex = /import\s*\{([^}]+)\}\s*from\s*['"](lucide-react|lucide-preact|react-icons[^'"]*)['"]/g;
     let iconMatch;
     while ((iconMatch = iconImportRegex.exec(content)) !== null) {
@@ -283,29 +292,54 @@ function scanCodeForAssetReferences(
       }
     }
 
-    // 1. Scan for inline SVGs and asset references line by line
+    // 2. Scan for ALL inline <svg> tags wherever they appear (single-line or multi-line)
+    const svgRegex = /<svg\b([^>]*)>([\s\S]*?)<\/svg>/gi;
+    let svgTagMatch;
+    while ((svgTagMatch = svgRegex.exec(content)) !== null) {
+      const tagAttributes = svgTagMatch[1];
+      const innerContent = svgTagMatch[2];
+      const fullMatch = svgTagMatch[0];
+      const matchIndex = svgTagMatch.index;
+
+      const prefix = content.slice(0, matchIndex);
+      const linesBefore = prefix.split(/\r?\n/);
+      const lineNum = linesBefore.length;
+      const colNum = linesBefore[linesBefore.length - 1].length + 1;
+
+      const vb = tagAttributes.match(/viewBox=["']([^"']+)["']/i)?.[1];
+      const w = tagAttributes.match(/width=["']([^"']+)["']/i)?.[1];
+      const h = tagAttributes.match(/height=["']([^"']+)["']/i)?.[1];
+      const stroke = tagAttributes.match(/stroke=["']([^"']+)["']/i)?.[1];
+      const fill = tagAttributes.match(/fill=["']([^"']+)["']/i)?.[1];
+      const ariaLabel = tagAttributes.match(/aria-label=["']([^"']+)["']/i)?.[1];
+
+      // Extract preceding context (comments or parent component elements within preceding lines)
+      const contextLines = linesBefore.slice(-3).map(l => l.trim()).filter(l => l.length > 0 && !l.startsWith('<div')).join(' ');
+
+      // Extract shape breakdown
+      const shapes = (innerContent.match(/<(path|circle|rect|polygon|polyline|line)\b/gi) || []).map(s => s.replace('<', '')).join(', ');
+
+      inlineSvgs.push({
+        file: relCodePath,
+        line: lineNum,
+        col: colNum,
+        viewBox: vb,
+        width: w,
+        height: h,
+        stroke,
+        fill,
+        ariaLabel,
+        context: contextLines || undefined,
+        shapes: shapes || undefined,
+        snippet: fullMatch.slice(0, 150).replace(/\s+/g, ' '),
+        rawContent: `${relCodePath} ${tagAttributes} ${innerContent} ${contextLines}`,
+      });
+    }
+
+    // 3. Scan for asset file references line by line
     lines.forEach((lineText, idx) => {
       const lineNum = idx + 1;
-      const svgTagMatch = lineText.match(/<svg\b([^>]*)>/i);
-      if (svgTagMatch) {
-        const tagAttributes = svgTagMatch[1];
-        const vb = tagAttributes.match(/viewBox=["']([^"']+)["']/i)?.[1];
-        const w = tagAttributes.match(/width=["']([^"']+)["']/i)?.[1];
-        const h = tagAttributes.match(/height=["']([^"']+)["']/i)?.[1];
-        inlineSvgs.push({
-          file: relCodePath,
-          line: lineNum,
-          col: (svgTagMatch.index || 0) + 1,
-          viewBox: vb,
-          width: w,
-          height: h,
-          snippet: lineText.trim().slice(0, 100),
-        });
-      }
-
-      // 3. Scan for asset file references
       for (const asset of assets) {
-        // Fast checks: check if file name or stem appears in line
         if (lineText.includes(asset.fileName)) {
           asset.references.push({
             file: relCodePath,
@@ -335,12 +369,12 @@ function main() {
   allAssetPaths = Array.from(new Set(allAssetPaths));
   allCodePaths = Array.from(new Set(allCodePaths));
 
-  console.log(`\x1b[1m[ic]\x1b[0m Scanning ${allAssetPaths.length} asset files and ${allCodePaths.length} code files...`);
+  console.log(`\x1b[1m[ic]\x1b[0m Scanning ${allAssetPaths.length} asset files and ${allCodePaths.length} code files for assets & <svg> tags...`);
 
   // Analyze all assets
   const assets: AssetFile[] = allAssetPaths.map(analyzeAssetFile);
 
-  // Scan code for references, inline SVGs, and icon components
+  // Scan code for references, inline <svg> tags wherever they are, and icon components
   const { inlineSvgs, iconComponents } = scanCodeForAssetReferences(allCodePaths, assets);
 
   // Filter based on options
@@ -369,11 +403,15 @@ function main() {
     );
   }
 
-  // Display Inline SVGs if requested or if query matches
+  // Filter Inline <svg> tags: matches query against file path, tag attributes, inner paths, or context
   let matchedInlineSvgs = inlineSvgs;
   if (opts.searchQuery) {
     const q = opts.searchQuery.toLowerCase();
-    matchedInlineSvgs = inlineSvgs.filter(s => s.file.toLowerCase().includes(q) || s.snippet.toLowerCase().includes(q));
+    if (q === 'svg' || q === '<svg>' || q === '<svg') {
+      matchedInlineSvgs = inlineSvgs;
+    } else {
+      matchedInlineSvgs = inlineSvgs.filter(s => s.rawContent.toLowerCase().includes(q));
+    }
   }
 
   // Display Icon Components if requested or if query matches
@@ -385,70 +423,79 @@ function main() {
     );
   }
 
-  // OUTPUT RESULTS
-  if (!opts.inlineOnly) {
-    if (filteredAssets.length === 0) {
-      if (opts.unusedOnly) {
-        console.log(`\n\x1b[32m✔ Excellent: No orphaned or unused assets detected! All assets are referenced in code.\x1b[0m`);
-      } else {
-        console.log(`\n\x1b[33mNo asset files matched the search criteria.\x1b[0m`);
-      }
-    } else {
-      console.log(`\n\x1b[1mASSET FILES (${filteredAssets.length} found):\x1b[0m`);
+  // 1. OUTPUT ASSET FILES (unless user asked for inline only)
+  if (!opts.inlineOnly && !opts.pngOnly && filteredAssets.length > 0) {
+    console.log(`\n\x1b[1mASSET FILES (${filteredAssets.length} found):\x1b[0m`);
 
-      // Group by directory
-      const grouped = new Map<string, AssetFile[]>();
-      for (const a of filteredAssets) {
-        const dir = path.dirname(a.relativePath) || '.';
-        if (!grouped.has(dir)) grouped.set(dir, []);
-        grouped.get(dir)!.push(a);
-      }
+    const grouped = new Map<string, AssetFile[]>();
+    for (const a of filteredAssets) {
+      const dir = path.dirname(a.relativePath) || '.';
+      if (!grouped.has(dir)) grouped.set(dir, []);
+      grouped.get(dir)!.push(a);
+    }
 
-      for (const [dir, dirAssets] of grouped) {
-        console.log(`\n\x1b[36m${dir}/\x1b[0m`);
-        for (const a of dirAssets) {
-          const typeBadge = a.type === 'svg'
-            ? `\x1b[35m[svg]\x1b[0m`
-            : a.type === 'png'
-            ? `\x1b[34m[png]\x1b[0m`
-            : `\x1b[33m[${a.type}]\x1b[0m`;
+    for (const [dir, dirAssets] of grouped) {
+      console.log(`\n\x1b[36m${dir}/\x1b[0m`);
+      for (const a of dirAssets) {
+        const typeBadge = a.type === 'svg'
+          ? `\x1b[35m[svg]\x1b[0m`
+          : a.type === 'png'
+          ? `\x1b[34m[png]\x1b[0m`
+          : `\x1b[33m[${a.type}]\x1b[0m`;
 
-          const metaStr = a.dimensions
-            ? `\x1b[90m(${a.dimensions}, ${a.sizeFormatted})\x1b[0m`
-            : a.viewBox
-            ? `\x1b[90m(viewBox="${a.viewBox}", ${a.sizeFormatted})\x1b[0m`
-            : `\x1b[90m(${a.sizeFormatted})\x1b[0m`;
+        const metaStr = a.dimensions
+          ? `\x1b[90m(${a.dimensions}, ${a.sizeFormatted})\x1b[0m`
+          : a.viewBox
+          ? `\x1b[90m(viewBox="${a.viewBox}", ${a.sizeFormatted})\x1b[0m`
+          : `\x1b[90m(${a.sizeFormatted})\x1b[0m`;
 
-          const refCountStr = a.references.length === 0
-            ? `\x1b[31m[UNUSED / ORPHAN]\x1b[0m`
-            : `\x1b[32m[${a.references.length} reference${a.references.length > 1 ? 's' : ''}]\x1b[0m`;
+        const refCountStr = a.references.length === 0
+          ? `\x1b[31m[UNUSED / ORPHAN]\x1b[0m`
+          : `\x1b[32m[${a.references.length} reference${a.references.length > 1 ? 's' : ''}]\x1b[0m`;
 
-          console.log(`  ${typeBadge} \x1b[1m${a.fileName}\x1b[0m ${metaStr} ${refCountStr}`);
+        console.log(`  ${typeBadge} \x1b[1m${a.fileName}\x1b[0m ${metaStr} ${refCountStr}`);
 
-          if (opts.verbose && a.references.length > 0) {
-            for (const ref of a.references) {
-              console.log(`    \x1b[90m↳\x1b[0m \x1b[36m${ref.file}\x1b[0m:\x1b[33m${ref.line}\x1b[0m \x1b[90m${ref.snippet.slice(0, 80)}\x1b[0m`);
-            }
+        if (opts.verbose && a.references.length > 0) {
+          for (const ref of a.references) {
+            console.log(`    \x1b[90m↳\x1b[0m \x1b[36m${ref.file}\x1b[0m:\x1b[33m${ref.line}\x1b[0m \x1b[90m${ref.snippet.slice(0, 80)}\x1b[0m`);
           }
         }
       }
     }
   }
 
-  // Display Inline SVGs if flagged or verbose
-  if (opts.inlineOnly || (opts.verbose && matchedInlineSvgs.length > 0)) {
-    console.log(`\n\x1b[1mINLINE <svg> ELEMENTS (${matchedInlineSvgs.length} detected):\x1b[0m`);
-    for (const isvg of matchedInlineSvgs.slice(0, 30)) {
-      const vbStr = isvg.viewBox ? ` viewBox="${isvg.viewBox}"` : '';
-      const dimStr = isvg.width && isvg.height ? ` ${isvg.width}x${isvg.height}` : '';
-      console.log(`  \x1b[36m${isvg.file}\x1b[0m:\x1b[33m${isvg.line}:${isvg.col}\x1b[0m \x1b[35m<svg>\x1b[0m\x1b[90m${vbStr}${dimStr}\x1b[0m`);
-    }
-    if (matchedInlineSvgs.length > 30) {
-      console.log(`  \x1b[90m... and ${matchedInlineSvgs.length - 30} more inline SVGs\x1b[0m`);
+  // 2. OUTPUT INLINE <svg> TAGS (ALWAYS DISPLAY WHEN SEARCHING OR REQUESTED)
+  if (!opts.pngOnly && !opts.unusedOnly) {
+    if (matchedInlineSvgs.length > 0) {
+      console.log(`\n\x1b[1mINLINE <svg> TAGS LOCATED (${matchedInlineSvgs.length} tags found):\x1b[0m`);
+
+      // Group inline SVGs by file
+      const svgGrouped = new Map<string, InlineSvgMatch[]>();
+      for (const s of matchedInlineSvgs) {
+        if (!svgGrouped.has(s.file)) svgGrouped.set(s.file, []);
+        svgGrouped.get(s.file)!.push(s);
+      }
+
+      for (const [file, items] of svgGrouped) {
+        console.log(`\n\x1b[36m${file}\x1b[0m:`);
+        for (const item of items) {
+          const vbStr = item.viewBox ? ` viewBox="${item.viewBox}"` : '';
+          const dimStr = item.width && item.height ? ` ${item.width}x${item.height}` : '';
+          const contextStr = item.context ? ` \x1b[90m[${item.context.slice(0, 60)}]\x1b[0m` : '';
+          const shapesStr = item.shapes ? ` \x1b[33m(${item.shapes})\x1b[0m` : '';
+
+          console.log(`  \x1b[33mline ${item.line}:${item.col}\x1b[0m \x1b[35m<svg>\x1b[0m\x1b[90m${vbStr}${dimStr}\x1b[0m${shapesStr}${contextStr}`);
+          if (opts.verbose) {
+            console.log(`    \x1b[90m↳ ${item.snippet}\x1b[0m`);
+          }
+        }
+      }
+    } else if (opts.searchQuery && (opts.searchQuery.includes('svg') || opts.inlineOnly)) {
+      console.log(`\n\x1b[33mNo inline <svg> tags matched the search criteria.\x1b[0m`);
     }
   }
 
-  // Display Icon Components if flagged or verbose or query matched
+  // 3. OUTPUT ICON COMPONENTS
   if (opts.iconsOnly || (opts.searchQuery && matchedIconComponents.length > 0) || opts.verbose) {
     if (matchedIconComponents.length > 0) {
       console.log(`\n\x1b[1mICON COMPONENT USAGES (${matchedIconComponents.length} imports):\x1b[0m`);
@@ -472,18 +519,18 @@ function main() {
 
   console.log(`\n\x1b[1m[ic SUMMARY]\x1b[0m`);
   console.log(`  Total Asset Files:    ${totalAssets}`);
-  console.log(`  - SVGs:               ${totalSvg}`);
-  console.log(`  - PNGs:               ${totalPng}`);
-  console.log(`  - WebPs:              ${totalWebp}`);
-  console.log(`  Inline <svg> in code: ${inlineSvgs.length}`);
-  console.log(`  Icon Components:      ${iconComponents.length}`);
+  console.log(`  - SVGs on disk:       ${totalSvg}`);
+  console.log(`  - PNGs on disk:       ${totalPng}`);
+  console.log(`  - WebPs on disk:      ${totalWebp}`);
+  console.log(`  \x1b[35mInline <svg> in code: ${inlineSvgs.length} tags located\x1b[0m`);
+  console.log(`  Icon Components:      ${iconComponents.length} imports`);
   console.log(`  Total Asset Footprint:${formatBytes(totalDiskBytes)}`);
   if (totalUnused > 0) {
     console.log(`  \x1b[31mUnused / Orphaned:    ${totalUnused} files (run 'ic -u' to list them)\x1b[0m`);
   } else {
     console.log(`  \x1b[32mUnused / Orphaned:    0 files (100% asset hygiene!)\x1b[0m`);
   }
-  console.log(`\x1b[90mTip: Run 'ic <query>' to locate any icon, 'ic -v' for verbose, or 'ic -u' for orphan audit.\x1b[0m\n`);
+  console.log(`\x1b[90mTip: Run 'ic <query>' to locate any icon/tag, 'ic -v' for verbose, or 'ic -s' for SVGs.\x1b[0m\n`);
 }
 
 main();

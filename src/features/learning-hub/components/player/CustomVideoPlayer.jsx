@@ -8,16 +8,22 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
   const [resolving, setResolving] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const videoRef = useRef(null);
+  const containerRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  // showControlsRef mirrors showControls synchronously so timer callbacks
+  // and click handlers never read a stale closure value.
+  const showControlsRef = useRef(true);
+  const setControls = (val) => { showControlsRef.current = val; setShowControls(val); };
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [volume, setVolume] = useState(1);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [showSpeedSlider, setShowSpeedSlider] = useState(false);
   const [showCCMenu, setShowCCMenu] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // CC Subtitle states
   const [selectedTrackId, setSelectedTrackId] = useState(() => {
@@ -188,14 +194,79 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
     }
   }
 
-  function toggleFullscreen() {
-    if (!videoRef.current) return;
-    if (videoRef.current.requestFullscreen) {
-      videoRef.current.requestFullscreen();
-    } else if (videoRef.current.webkitRequestFullscreen) {
-      videoRef.current.webkitRequestFullscreen();
+  const lockLandscape = async () => {
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock('landscape');
+      } else if (screen.lockOrientation) {
+        screen.lockOrientation('landscape');
+      } else if (screen.mozLockOrientation) {
+        screen.mozLockOrientation('landscape');
+      } else if (screen.msLockOrientation) {
+        screen.msLockOrientation('landscape');
+      }
+    } catch (e) {
+      // Orientation lock may fail if device doesn't support it or in desktop browsers; safely ignore
+    }
+  };
+
+  const unlockOrientation = () => {
+    try {
+      if (screen.orientation && screen.orientation.unlock) {
+        screen.orientation.unlock();
+      } else if (screen.unlockOrientation) {
+        screen.unlockOrientation();
+      } else if (screen.mozUnlockOrientation) {
+        screen.mozUnlockOrientation();
+      } else if (screen.msUnlockOrientation) {
+        screen.msUnlockOrientation();
+      }
+    } catch (e) {}
+  };
+
+  async function toggleFullscreen() {
+    const isFull = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+    if (isFull) {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen().catch(() => {});
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+      unlockOrientation();
+    } else {
+      const elem = containerRef.current || videoRef.current;
+      if (!elem) return;
+      try {
+        if (elem.requestFullscreen) {
+          await elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          await elem.webkitRequestFullscreen();
+        } else if (videoRef.current && videoRef.current.webkitEnterFullscreen) {
+          videoRef.current.webkitEnterFullscreen();
+        }
+        // Rotate screen to maximize if video is in landscape format
+        await lockLandscape();
+      } catch (err) {
+        console.error('Fullscreen request error:', err);
+      }
     }
   }
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFull = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      setIsFullscreen(isFull);
+      if (!isFull) {
+        unlockOrientation();
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   function isTouchDevice() {
     if (typeof window === 'undefined') return false;
@@ -227,6 +298,73 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
       document.removeEventListener('touchstart', handleOutsideInteraction);
     };
   }, [showSpeedSlider, showVolumeSlider, showCCMenu]);
+
+  // 2.3-second auto-hide timer for controls and menus during playback
+  const controlsTimerRef = useRef(null);
+
+  const resetControlsTimer = () => {
+    if (controlsTimerRef.current) {
+      clearTimeout(controlsTimerRef.current);
+      controlsTimerRef.current = null;
+    }
+    if (videoRef.current && !videoRef.current.paused) {
+      controlsTimerRef.current = setTimeout(() => {
+        setControls(false);
+        setShowCCMenu(false);
+        setShowSpeedSlider(false);
+        setShowVolumeSlider(false);
+      }, 2300);
+    }
+  };
+
+  useEffect(() => {
+    if (isPlaying) {
+      resetControlsTimer();
+    } else {
+      if (controlsTimerRef.current) {
+        clearTimeout(controlsTimerRef.current);
+        controlsTimerRef.current = null;
+      }
+      setControls(true);
+    }
+    return () => {
+      if (controlsTimerRef.current) {
+        clearTimeout(controlsTimerRef.current);
+      }
+    };
+  }, [isPlaying]);
+
+  const handleOverlayClick = (e) => {
+    // Let bottom controls and popovers handle their own events
+    if (e?.target?.closest?.('.cvp-bottom-overlay') || e?.target?.closest?.('.cvp-popover-anchor')) {
+      return;
+    }
+    // Center button uses stopPropagation and handles its own click
+    if (e?.target?.closest?.('.cvp-center-play')) {
+      return;
+    }
+
+    e?.stopPropagation?.();
+
+    // Use the ref (not the stale closure) so we always read the real current value
+    const controlsOpen = showControlsRef.current || showCCMenu || showSpeedSlider || showVolumeSlider;
+
+    if (controlsOpen) {
+      // Controls are visible — hide everything
+      setControls(false);
+      setShowCCMenu(false);
+      setShowSpeedSlider(false);
+      setShowVolumeSlider(false);
+      if (controlsTimerRef.current) {
+        clearTimeout(controlsTimerRef.current);
+        controlsTimerRef.current = null;
+      }
+    } else {
+      // Controls are hidden — reveal them
+      setControls(true);
+      resetControlsTimer();
+    }
+  };
 
   const timelineRef = useRef(null);
   const isDraggingTimeline = useRef(false);
@@ -392,22 +530,62 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
 
   return (
     <div 
-      onMouseEnter={() => setShowControls(true)}
-      onMouseLeave={() => setShowControls(false)}
+      ref={containerRef}
+      onMouseMove={() => {
+        if (!showControlsRef.current) {
+          setControls(true);
+        }
+        resetControlsTimer();
+      }}
+      onMouseEnter={() => {
+        setControls(true);
+        resetControlsTimer();
+      }}
+      onMouseLeave={() => {
+        if (isPlaying) {
+          setControls(false);
+          setShowCCMenu(false);
+          setShowSpeedSlider(false);
+          setShowVolumeSlider(false);
+          if (controlsTimerRef.current) {
+            clearTimeout(controlsTimerRef.current);
+            controlsTimerRef.current = null;
+          }
+        }
+      }}
+      className={`cvp-player-container ${isFullscreen ? 'is-fullscreen' : ''}`}
       style={{
-        width: '100%',
-        aspectRatio: '16/9',
-        minHeight: '300px',
+        width: isFullscreen ? '100vw' : '100%',
+        height: isFullscreen ? '100vh' : 'auto',
+        aspectRatio: isFullscreen ? 'auto' : '16/9',
+        minHeight: isFullscreen ? '100vh' : '300px',
         flexShrink: 0,
         background: '#000000',
-        borderRadius: '16px',
-        marginBottom: '32px',
+        borderRadius: isFullscreen ? '0' : '16px',
+        marginBottom: isFullscreen ? '0' : '32px',
         overflow: 'hidden',
         position: 'relative',
-        border: '1px solid rgba(0, 76, 109, 0.12)'
+        border: isFullscreen ? 'none' : '1px solid rgba(0, 76, 109, 0.12)',
+        cursor: (isPlaying && !showControls) ? 'none' : 'default'
       }}
     >
       <style>{`
+        .cvp-player-container:fullscreen,
+        .cvp-player-container:-webkit-full-screen {
+          width: 100vw !important;
+          height: 100vh !important;
+          border-radius: 0 !important;
+          border: none !important;
+          margin: 0 !important;
+          aspect-ratio: auto !important;
+          background: #000000 !important;
+        }
+        .cvp-player-container:fullscreen video,
+        .cvp-player-container:-webkit-full-screen video {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: contain !important;
+        }
         .custom-video-range-slider {
           -webkit-appearance: none;
           appearance: none;
@@ -552,7 +730,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
             ref={videoRef}
             src={resolvedUrl}
             style={{ width: '100%', height: '100%', objectFit: 'contain', cursor: 'pointer' }}
-            onClick={togglePlay}
+            onClick={handleOverlayClick}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
             onTimeUpdate={() => {
@@ -606,22 +784,30 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
             </div>
           )}
 
-          {/* Center Play/Pause Overlay Button */}
-          {(!isPlaying || showControls) && (
-            <div 
-              onClick={togglePlay}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'rgba(0, 0, 0, 0.35)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'opacity 0.25s ease'
-              }}
-            >
-              <div 
+          {/* Click/touch catcher — ALWAYS rendered so taps never fall through to the native video element.
+              Transparent when controls are hidden; dimmed when controls/paused overlay is shown.
+              onTouchEnd fires immediately on mobile (no 300ms delay); preventDefault blocks the
+              follow-up synthetic click so we never double-fire. */}
+          <div
+            onClick={handleOverlayClick}
+            onTouchEnd={(e) => { e.preventDefault(); handleOverlayClick(e); }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: showControls
+                ? (isPlaying ? 'rgba(0, 0, 0, 0.35)' : 'rgba(0, 0, 0, 0.45)')
+                : 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              zIndex: 2,
+              touchAction: 'manipulation',
+            }}
+          >
+            {/* Center play/pause — visible only when controls are shown or video is paused */}
+            {(!isPlaying || showControls) && (
+              <div
                 className="cvp-center-play"
                 style={{
                   width: '68px',
@@ -633,18 +819,32 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                   background: 'rgba(255, 255, 255, 0.95)',
                   border: 'none',
                   color: '#0b2849',
-                  transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease'
+                  transition: 'background 0.2s ease, color 0.2s ease, transform 0.2s ease',
+                  cursor: 'pointer',
+                  touchAction: 'manipulation',
                 }}
-                onClick={togglePlay}
-                onMouseEnter={(e) => { 
-                  e.currentTarget.style.background = '#0b2849'; 
-                  e.currentTarget.style.color = '#ffffff'; 
-                  e.currentTarget.style.transform = 'scale(1.08)'; 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  togglePlay(e);
+                  setControls(true);
+                  resetControlsTimer();
                 }}
-                onMouseLeave={(e) => { 
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)'; 
-                  e.currentTarget.style.color = '#0b2849'; 
-                  e.currentTarget.style.transform = 'scale(1)'; 
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  togglePlay(e);
+                  setControls(true);
+                  resetControlsTimer();
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#0b2849';
+                  e.currentTarget.style.color = '#ffffff';
+                  e.currentTarget.style.transform = 'scale(1.08)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+                  e.currentTarget.style.color = '#0b2849';
+                  e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
                 {isPlaying ? (
@@ -657,8 +857,8 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                   </svg>
                 )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Top Overlay details */}
           {showControls && (
@@ -681,16 +881,24 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
 
           {/* Bottom Controls Overlay */}
           {showControls && (
-            <div className="cvp-bottom-overlay" style={{
-              position: 'absolute',
-              bottom: 0, left: 0, right: 0,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)',
-              padding: '24px 20px 14px 20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-              direction: 'ltr'
-            }}>
+            <div 
+              className="cvp-bottom-overlay" 
+              onClick={(e) => {
+                e.stopPropagation();
+                resetControlsTimer();
+              }}
+              style={{
+                position: 'absolute',
+                bottom: 0, left: 0, right: 0,
+                background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)',
+                padding: '24px 20px 14px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                direction: 'ltr',
+                zIndex: 5
+              }}
+            >
               
               {/* Timeline seekable slider bar with generous hit area & full drag/click support */}
               <div 
@@ -898,6 +1106,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                         setShowSpeedSlider(prev => !prev);
                         setShowVolumeSlider(false);
                         setShowCCMenu(false);
+                        resetControlsTimer();
                       }}
                       onDoubleClick={() => changeSpeed(1)}
                       style={{
@@ -1007,6 +1216,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                           setShowVolumeSlider(prev => !prev);
                           setShowSpeedSlider(false);
                           setShowCCMenu(false);
+                          resetControlsTimer();
                         } else {
                           toggleMute();
                         }
@@ -1046,15 +1256,15 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                         style={{
                           position: 'absolute',
                           bottom: 'calc(100% - 5px)',
-                          right: lang === 'ar' ? 'auto' : '-10px',
-                          left: lang === 'ar' ? '-10px' : 'auto',
+                          right: '0px',
+                          left: 'auto',
                           background: 'rgba(11, 40, 73, 0.96)',
                           backdropFilter: 'blur(12px)',
                           border: '1px solid rgba(255, 255, 255, 0.18)',
                           borderRadius: '10px',
                           padding: '8px',
                           zIndex: 10,
-                          minWidth: '130px',
+                          minWidth: '140px',
                           maxWidth: '220px',
                           maxHeight: '200px',
                           overflowY: 'auto',
@@ -1063,7 +1273,8 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                           flexDirection: 'column',
                           alignItems: 'stretch',
                           gap: '4px',
-                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)'
+                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
+                          direction: lang === 'ar' ? 'rtl' : 'ltr'
                         }}
                       >
                         <div style={{ fontSize: '11px', color: '#ffffff', fontWeight: 'bold', padding: '4px 8px', borderBottom: '1px solid rgba(255, 255, 255, 0.15)', textAlign: lang === 'ar' ? 'right' : 'left' }}>
@@ -1133,6 +1344,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                         setShowCCMenu(prev => !prev);
                         setShowSpeedSlider(false);
                         setShowVolumeSlider(false);
+                        resetControlsTimer();
                       }}
                       style={{ 
                         background: 'none', 
@@ -1167,11 +1379,19 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                   </div>
 
                   <button 
-                    title={lang === 'ar' ? 'تكبير الشاشة' : 'Fullscreen'}
+                    title={lang === 'ar' ? (isFullscreen ? 'تصغير الشاشة' : 'تكبير الشاشة') : (isFullscreen ? 'Exit Fullscreen' : 'Fullscreen')}
                     onClick={toggleFullscreen}
                     style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                    {isFullscreen ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                      </svg>
+                    )}
                   </button>
                 </div>
               </div>

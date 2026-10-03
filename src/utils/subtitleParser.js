@@ -124,8 +124,9 @@ export function parseSubtitles(content) {
 }
 
 /**
- * Splits monolithic long cues (>85 chars or >6s) into clean 1-2 line broadcast-safe sub-cues
- * with proportional timestamp distribution across natural phrase and sentence boundaries.
+ * Splits long cues (>85 chars or >6s) into clean, balanced broadcast-safe sub-cues
+ * with orphan-prevention (never leaves a single or trailing couple of words alone)
+ * and proportional timestamp distribution across natural phrase boundaries.
  * @param {object} cue
  * @param {number} maxChars
  * @param {number} maxDuration
@@ -137,7 +138,7 @@ export function splitCueIntoBroadcastLines(cue, maxChars = 85, maxDuration = 6.0
     return [cue];
   }
 
-  // Split on sentence terminators: . ! ? ؟ or newlines
+  // 1. Split on major sentence terminators: . ! ? ؟ or newlines
   const rawSentences = cue.text
     .split(/([.!?؟\n]+)/)
     .filter(Boolean);
@@ -150,41 +151,79 @@ export function splitCueIntoBroadcastLines(cue, maxChars = 85, maxDuration = 6.0
     if (full) sentences.push(full);
   }
 
+  // Helper to balance long text into chunks without creating orphan words
+  function balanceSegment(text, charLimit = maxChars, minWords = 4) {
+    const words = text.split(/\s+/).filter(Boolean);
+    if (words.length <= minWords || text.length <= charLimit) {
+      return [text];
+    }
+
+    // Target equal-sized chunks so lines read naturally
+    const numChunks = Math.ceil(text.length / charLimit);
+    const targetChars = Math.ceil(text.length / numChunks);
+
+    const chunks = [];
+    let currentWords = [];
+    let currentLen = 0;
+
+    for (let i = 0; i < words.length; i++) {
+      const w = words[i];
+      const remainingWords = words.length - (i + 1);
+      const addedLen = (currentWords.length === 0 ? 0 : 1) + w.length;
+
+      const wouldExceed = (currentLen + addedLen > targetChars && currentWords.length >= minWords);
+      const hasEnoughRemaining = remainingWords >= minWords;
+
+      if (wouldExceed && hasEnoughRemaining) {
+        chunks.push(currentWords.join(' '));
+        currentWords = [w];
+        currentLen = w.length;
+      } else {
+        currentWords.push(w);
+        currentLen += addedLen;
+      }
+    }
+
+    if (currentWords.length > 0) {
+      // If trailing chunk is an orphan (fewer than minWords), merge with previous and divide evenly
+      if (chunks.length > 0 && currentWords.length < minWords) {
+        const prevWords = chunks.pop().split(' ');
+        const combined = [...prevWords, ...currentWords];
+        const mid = Math.ceil(combined.length / 2);
+        chunks.push(combined.slice(0, mid).join(' '));
+        chunks.push(combined.slice(mid).join(' '));
+      } else {
+        chunks.push(currentWords.join(' '));
+      }
+    }
+    return chunks;
+  }
+
   const rawParts = [];
   for (const s of (sentences.length > 0 ? sentences : [cue.text])) {
     if (s.length <= maxChars) {
       rawParts.push(s);
     } else {
-      // Split by comma / semicolon clauses
+      // Split on clause punctuation (, ، ; ؛) if present, else balanced word split
       const clauses = s.split(/([,،;؛]+)/).filter(Boolean);
-      let buf = '';
-      for (let j = 0; j < clauses.length; j += 2) {
-        const cText = clauses[j] || '';
-        const cPunct = clauses[j + 1] || '';
-        const chunk = (cText + cPunct).trim();
-        if ((buf + ' ' + chunk).trim().length > maxChars && buf) {
-          rawParts.push(buf.trim());
-          buf = chunk;
-        } else {
-          buf = (buf + ' ' + chunk).trim();
-        }
-      }
-      if (buf) {
-        if (buf.length > maxChars) {
-          const words = buf.split(/\s+/);
-          let wordBuf = '';
-          for (const w of words) {
-            if ((wordBuf + ' ' + w).trim().length > maxChars && wordBuf) {
-              rawParts.push(wordBuf.trim());
-              wordBuf = w;
-            } else {
-              wordBuf = (wordBuf + ' ' + w).trim();
-            }
+      if (clauses.length > 2) {
+        let buf = '';
+        for (let j = 0; j < clauses.length; j += 2) {
+          const cText = clauses[j] || '';
+          const cPunct = clauses[j + 1] || '';
+          const chunk = (cText + cPunct).trim();
+          if ((buf + ' ' + chunk).trim().length > maxChars && buf) {
+            rawParts.push(...balanceSegment(buf.trim(), maxChars));
+            buf = chunk;
+          } else {
+            buf = (buf + ' ' + chunk).trim();
           }
-          if (wordBuf) rawParts.push(wordBuf.trim());
-        } else {
-          rawParts.push(buf);
         }
+        if (buf) {
+          rawParts.push(...balanceSegment(buf.trim(), maxChars));
+        }
+      } else {
+        rawParts.push(...balanceSegment(s, maxChars));
       }
     }
   }

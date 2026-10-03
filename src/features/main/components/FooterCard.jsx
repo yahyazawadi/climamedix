@@ -1,4 +1,5 @@
 import footerLogo from '../../../assets/footer_logo.svg'
+import whiteLogoEn from '../../../assets/logo_en_white.webp'
 import socialIn from '../../../assets/icons/social_in.svg'
 import socialFb from '../../../assets/icons/social_fb.svg'
 import socialInsta from '../../../assets/icons/social_insta.svg'
@@ -11,7 +12,7 @@ export function FooterCard({ lang }) {
   return (
     <div class="figma-footer-card">
       <div class="figma-footer-logo-wrap">
-        <img src={footerLogo} alt="كلايما ميدكس" />
+        <img src={lang === 'en' ? whiteLogoEn : footerLogo} alt={lang === 'en' ? 'ClimaMedix' : 'كلايما ميدكس'} />
       </div>
       
       <div class="figma-footer-section">

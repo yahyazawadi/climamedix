@@ -19,6 +19,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
   const showControlsRef = useRef(true);
   const setControls = (val) => { showControlsRef.current = val; setShowControls(val); };
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [showSpeedPresets, setShowSpeedPresets] = useState(false);
   const [volume, setVolume] = useState(1);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [showSpeedSlider, setShowSpeedSlider] = useState(false);
@@ -48,6 +49,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
     setCurrentTime(0);
     setDuration(0);
     setPlaybackSpeed(1);
+    setShowSpeedPresets(false);
     setShowSpeedSlider(false);
     setShowVolumeSlider(false);
     if (videoRef.current) {
@@ -287,6 +289,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
     const handleOutsideInteraction = (e) => {
       if (!e.target.closest || !e.target.closest('.cvp-popover-anchor')) {
         setShowSpeedSlider(false);
+        setShowSpeedPresets(false);
         setShowVolumeSlider(false);
         setShowCCMenu(false);
       }
@@ -312,6 +315,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
         setControls(false);
         setShowCCMenu(false);
         setShowSpeedSlider(false);
+        setShowSpeedPresets(false);
         setShowVolumeSlider(false);
       }, 2300);
     }
@@ -354,6 +358,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
       setControls(false);
       setShowCCMenu(false);
       setShowSpeedSlider(false);
+      setShowSpeedPresets(false);
       setShowVolumeSlider(false);
       if (controlsTimerRef.current) {
         clearTimeout(controlsTimerRef.current);
@@ -1010,6 +1015,170 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                     </svg>
                   </button>
 
+                  {/* Speed Selection */}
+                  <div 
+                    className="cvp-popover-anchor"
+                    style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '10px', margin: '-10px' }}
+                    onMouseEnter={() => {
+                      if (!isTouchDevice()) {
+                        setShowSpeedSlider(true);
+                        setShowVolumeSlider(false);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (!isTouchDevice()) {
+                        setShowSpeedSlider(false);
+                      }
+                    }}
+                  >
+                    {showSpeedSlider && (
+                      <div 
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          position: 'absolute',
+                          bottom: 'calc(100% - 5px)',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: 'rgba(11, 40, 73, 0.96)',
+                          backdropFilter: 'blur(12px)',
+                          border: '1px solid rgba(255, 255, 255, 0.18)',
+                          borderRadius: '10px',
+                          padding: '10px 8px 12px 8px',
+                          zIndex: 10,
+                          minWidth: '58px',
+                          boxSizing: 'border-box',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)'
+                        }}
+                      >
+                        <span style={{ fontSize: '11px', color: '#ffffff', fontWeight: 'bold', fontFamily: 'monospace', textAlign: 'center' }}>
+                          {playbackSpeed.toFixed(1)}x
+                        </span>
+
+                        {/* Quick preset speed pills toggle (dropmenu bottom arrow) */}
+                        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowSpeedPresets(prev => !prev);
+                            }}
+                            title={lang === 'ar' ? 'خيارات السرعة' : 'Preset Speeds'}
+                            style={{
+                              background: showSpeedPresets ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+                              border: '1px solid rgba(255, 255, 255, 0.15)',
+                              borderRadius: '4px',
+                              color: '#ffffff',
+                              padding: '2px 6px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '3px',
+                              width: '100%',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            <span style={{ fontSize: '10px', opacity: 0.85 }}>{lang === 'ar' ? 'خيارات' : 'List'}</span>
+                            <svg 
+                              width="10" 
+                              height="10" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="2.5" 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                              style={{
+                                transform: showSpeedPresets ? 'rotate(180deg)' : 'rotate(0deg)',
+                                transition: 'transform 0.2s ease'
+                              }}
+                            >
+                              <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                          </button>
+
+                          {showSpeedPresets && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', width: '100%', marginTop: '4px' }}>
+                              {[0.75, 1.0, 1.25, 1.5, 2.0].map(s => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    changeSpeed(s);
+                                    setShowSpeedSlider(false);
+                                    setShowSpeedPresets(false);
+                                  }}
+                                  style={{
+                                    background: Math.abs(playbackSpeed - s) < 0.05 ? 'rgba(255, 255, 255, 0.28)' : 'rgba(255, 255, 255, 0.08)',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    color: '#ffffff',
+                                    padding: '3px 6px',
+                                    fontSize: '11px',
+                                    fontWeight: Math.abs(playbackSpeed - s) < 0.05 ? '700' : '500',
+                                    cursor: 'pointer',
+                                    textAlign: 'center',
+                                    fontFamily: 'monospace',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                >
+                                  {s.toFixed(2).replace(/\.?0+$/, '')}x
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Fine-tuning range slider */}
+                        <div style={{ height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
+                          <input 
+                            type="range"
+                            min="0.5"
+                            max="2.0"
+                            step="0.1"
+                            value={playbackSpeed}
+                            onInput={(e) => changeSpeed(parseFloat(e.target.value))}
+                            onChange={(e) => changeSpeed(parseFloat(e.target.value))}
+                            className="custom-video-range-slider"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    <button
+                      className="cvp-speed-btn"
+                      title={lang === 'ar' ? 'سرعة التشغيل' : 'Playback Speed'}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowSpeedSlider(prev => !prev);
+                        setShowVolumeSlider(false);
+                        setShowCCMenu(false);
+                        resetControlsTimer();
+                      }}
+                      onDoubleClick={() => changeSpeed(1)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#ffffff',
+                        padding: '0 4px',
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        outline: 'none',
+                        lineHeight: '1',
+                        fontFamily: 'monospace'
+                      }}
+                    >
+                      <span>{playbackSpeed.toFixed(1)}x</span>
+                    </button>
+                  </div>
 
                   {/* Volume Selection */}
                   <div 

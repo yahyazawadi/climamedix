@@ -1,7 +1,7 @@
 {
-  "scannedAt": "2026-10-03T11:35:34.565Z",
-  "totalAssets": 65,
-  "totalReferences": 93,
+  "scannedAt": "2026-10-03T14:37:51.934Z",
+  "totalAssets": 67,
+  "totalReferences": 95,
   "assets": [
     {
       "name": "icon_calendar.svg",
@@ -351,7 +351,7 @@
       "references": [
         {
           "file": "src/app.css",
-          "line": 1775,
+          "line": 1782,
           "snippet": "background-image: url('./assets/about_bg.webp');",
           "matchType": "file"
         },
@@ -381,7 +381,7 @@
         },
         {
           "file": "src/app.css",
-          "line": 1397,
+          "line": 1404,
           "snippet": "background-image: url('./assets/bg_4.webp');",
           "matchType": "file"
         }
@@ -604,6 +604,30 @@
       ]
     },
     {
+      "name": "logo_en_white.webp",
+      "path": "src/assets/logo_en_white.webp",
+      "ext": "webp",
+      "type": "image",
+      "sizeBytes": 14678,
+      "directReferencesCount": 2,
+      "inlineReferencesCount": 0,
+      "referencesCount": 2,
+      "references": [
+        {
+          "file": "src/features/main/components/FooterCard.jsx",
+          "line": 2,
+          "snippet": "import whiteLogoEn from '../../../assets/logo_en_white.webp'",
+          "matchType": "file"
+        },
+        {
+          "file": "src/features/main/components/HomePage.jsx",
+          "line": 12,
+          "snippet": "import whiteLogoEn from '../../../assets/logo_en_white.webp'",
+          "matchType": "file"
+        }
+      ]
+    },
+    {
       "name": "asset_1_globe.svg",
       "path": "src/assets/icons/asset_1_globe.svg",
       "ext": "svg",
@@ -705,7 +729,7 @@
       "references": [
         {
           "file": "src/features/main/components/FooterCard.jsx",
-          "line": 6,
+          "line": 7,
           "snippet": "import contactMail from '../../../assets/icons/contact_mail.svg'",
           "matchType": "file"
         }
@@ -723,7 +747,7 @@
       "references": [
         {
           "file": "src/features/main/components/FooterCard.jsx",
-          "line": 7,
+          "line": 8,
           "snippet": "import contactPhone from '../../../assets/icons/contact_phone.svg'",
           "matchType": "file"
         }
@@ -741,7 +765,7 @@
       "references": [
         {
           "file": "src/features/main/components/FooterCard.jsx",
-          "line": 8,
+          "line": 9,
           "snippet": "import contactWeb from '../../../assets/icons/contact_web.svg'",
           "matchType": "file"
         }
@@ -1047,7 +1071,7 @@
       "references": [
         {
           "file": "src/features/main/components/FooterCard.jsx",
-          "line": 3,
+          "line": 4,
           "snippet": "import socialFb from '../../../assets/icons/social_fb.svg'",
           "matchType": "file"
         }
@@ -1065,7 +1089,7 @@
       "references": [
         {
           "file": "src/features/main/components/FooterCard.jsx",
-          "line": 2,
+          "line": 3,
           "snippet": "import socialIn from '../../../assets/icons/social_in.svg'",
           "matchType": "file"
         }
@@ -1083,7 +1107,7 @@
       "references": [
         {
           "file": "src/features/main/components/FooterCard.jsx",
-          "line": 4,
+          "line": 5,
           "snippet": "import socialInsta from '../../../assets/icons/social_insta.svg'",
           "matchType": "file"
         }
@@ -1101,7 +1125,7 @@
       "references": [
         {
           "file": "src/features/main/components/FooterCard.jsx",
-          "line": 5,
+          "line": 6,
           "snippet": "import socialX from '../../../assets/icons/social_x.svg'",
           "matchType": "file"
         }
@@ -1274,6 +1298,17 @@
       "ext": "svg",
       "type": "svg",
       "sizeBytes": 14230,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 0,
+      "referencesCount": 0,
+      "references": []
+    },
+    {
+      "name": "logo_en_white.png",
+      "path": "src/assets/logo_en_white.png",
+      "ext": "png",
+      "type": "image",
+      "sizeBytes": 51786,
       "directReferencesCount": 0,
       "inlineReferencesCount": 0,
       "referencesCount": 0,

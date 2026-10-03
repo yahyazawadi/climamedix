@@ -27,7 +27,7 @@ This handover document tracks the line-by-line verification, linguistic review, 
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
 | **Module 1** | Lesson 1 | [`m1v1.vtt`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/scripts/subtitles_ar/m1v1.vtt) | 147 | 7.8 KB | ✅ **Verified by User** | ✅ Synced (`0b9fc0f`) |
 | | Lesson 2 | [`m1v2.vtt`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/scripts/subtitles_ar/m1v2.vtt) | 394 | 15.3 KB | 🟡 **In Progress (Active)** | ⏳ Pending User Completion |
-| | Lesson 3 | [`m1v3.vtt`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/scripts/subtitles_ar/m1v3.vtt) | 147 | 9.8 KB | ⚪ In Queue | ⚪ Initial Draft Ready |
+| | Lesson 3 | [`m1v3.vtt`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/scripts/subtitles_ar/m1v3.vtt) | 367 | 11.3 KB | ✅ **Verified by User** | ⏳ Ready to Sync |
 | | Lesson 4 | [`m1v4.vtt`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/scripts/subtitles_ar/m1v4.vtt) | 415 | 12.4 KB | ⚪ In Queue | ⚪ Initial Draft Ready |
 | | Lesson 5 | [`m1v5.vtt`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/scripts/subtitles_ar/m1v5.vtt) | 175 | 10.0 KB | ⚪ In Queue | ⚪ Initial Draft Ready |
 | **Module 2** | Lesson 1 | [`m2v1.vtt`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/scripts/subtitles_ar/m2v1.vtt) | 153 | 9.5 KB | ⚪ In Queue | ⚪ Initial Draft Ready |

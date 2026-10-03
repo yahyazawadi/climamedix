@@ -9,6 +9,7 @@ import { DynamicHomeSlider } from './DynamicHomeSlider'
 import { ArabWorldMapSVG } from './ArabWorldMapSVG'
 import doctorImg from '../../../assets/bg_3.webp'
 import whiteLogo from '../../../assets/footer_logo.svg'
+import whiteLogoEn from '../../../assets/logo_en_white.webp'
 
 export function HomePage({ lang, setCurrentView, setOpenedModal, onNavigate }) {
   const t = translations[lang] || translations.ar;
@@ -110,7 +111,11 @@ export function HomePage({ lang, setCurrentView, setOpenedModal, onNavigate }) {
               {/* Right Side: Text Column */}
               <div className="figma-hero-text-col">
                 <div className="figma-hero-white-text-group">
-                  <img src={whiteLogo} className="figma-hero-white-logo" alt="كلايما ميدكس" />
+                  <img 
+                    src={lang === 'en' ? whiteLogoEn : whiteLogo} 
+                    className={`figma-hero-white-logo ${lang === 'en' ? 'en' : ''}`} 
+                    alt={lang === 'en' ? 'ClimaMedix' : 'كلايما ميدكس'} 
+                  />
                   <h2 className="figma-hero-subtitle">{t.heroSubtitle}</h2>
                 </div>
                 <p className="figma-hero-description">

@@ -681,6 +681,13 @@ html[lang="en"] .figma-nav-text {
   /* No align-self override — inherits flex-end, stays right-aligned with text */
 }
 
+.figma-hero-white-logo.en {
+  width: 175px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
 .figma-hero-subtitle {
   font-family: 'Tajawal', sans-serif;
   font-size: 22px;

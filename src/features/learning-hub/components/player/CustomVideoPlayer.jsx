@@ -416,6 +416,99 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
           transform: scale(1.25);
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .cvp-caption-container {
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 90%;
+          max-width: 94%;
+          pointer-events: none;
+          z-index: 4;
+          text-align: center;
+          transition: bottom 0.2s ease;
+          display: flex;
+          justify-content: center;
+        }
+        .cvp-caption-container.has-controls {
+          bottom: 80px;
+        }
+        .cvp-caption-container.no-controls {
+          bottom: 24px;
+        }
+        .cvp-caption-text {
+          display: inline-block;
+          background: rgba(0, 0, 0, 0.88);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          color: #ffffff;
+          padding: 8px 24px;
+          border-radius: 8px;
+          font-size: clamp(14px, 2vw, 17px);
+          line-height: 1.45;
+          font-weight: 600;
+          text-align: center;
+          white-space: normal;
+          min-width: 75%;
+          max-width: 100%;
+          box-sizing: border-box;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+        }
+        @media (max-width: 768px) {
+          .cvp-top-overlay {
+            padding: 10px 14px !important;
+          }
+          .cvp-top-overlay span {
+            font-size: 13px !important;
+          }
+          .cvp-bottom-overlay {
+            padding: 12px 10px 8px 10px !important;
+            gap: 8px !important;
+          }
+          .cvp-center-play {
+            width: 48px !important;
+            height: 48px !important;
+          }
+          .cvp-center-play svg {
+            width: 20px !important;
+            height: 20px !important;
+          }
+          .cvp-btn-row-left, .cvp-btn-row-right {
+            gap: 8px !important;
+          }
+          .cvp-desktop-only {
+            display: none !important;
+          }
+          .cvp-time-display {
+            font-size: 11px !important;
+          }
+          .cvp-speed-btn {
+            font-size: 11px !important;
+            padding: 0 2px !important;
+          }
+          .cvp-caption-container {
+            width: 96% !important;
+            max-width: 98% !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+          }
+          .cvp-caption-container.has-controls {
+            bottom: 56px !important;
+          }
+          .cvp-caption-container.no-controls {
+            bottom: 16px !important;
+          }
+          .cvp-caption-text {
+            width: 100% !important;
+            min-width: 92% !important;
+            max-width: 100% !important;
+            font-size: 13.5px !important;
+            line-height: 1.4 !important;
+            padding: 6px 14px !important;
+            white-space: normal !important;
+            box-sizing: border-box !important;
+            border-radius: 6px !important;
+          }
+        }
       `}</style>
       {(videoLoading || resolving) ? (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px', flexDirection: 'column', gap: '12px' }}>
@@ -467,43 +560,17 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
           {/* Subtitle / Closed Caption Overlay (Broadcast Standard) */}
           {activeCue && (
             <div 
-              style={{
-                position: 'absolute',
-                left: '50%',
-                bottom: showControls ? '80px' : '26px',
-                transform: 'translateX(-50%)',
-                maxWidth: '78%',
-                width: 'auto',
-                pointerEvents: 'none',
-                zIndex: 4,
-                textAlign: 'center',
-                transition: 'bottom 0.2s ease',
-                display: 'flex',
-                justifyContent: 'center'
-              }}
+              className={`cvp-caption-container ${showControls ? 'has-controls' : 'no-controls'}`}
             >
               <div 
+                className="cvp-caption-text"
                 style={{
-                  display: 'inline-block',
-                  background: 'rgba(0, 0, 0, 0.85)',
-                  backdropFilter: 'blur(6px)',
-                  WebkitBackdropFilter: 'blur(6px)',
-                  color: '#ffffff',
-                  padding: '5px 12px',
-                  borderRadius: '6px',
-                  fontSize: 'clamp(13px, 1.8vw, 16px)',
-                  lineHeight: '1.38',
-                  fontWeight: '600',
-                  textAlign: 'center',
                   direction: activeCue.isRtl ? 'rtl' : 'ltr',
                   unicodeBidi: 'plaintext',
-                  fontFamily: activeCue.isRtl ? "'Cairo', 'Alexandria', system-ui, sans-serif" : "'Inter', system-ui, sans-serif",
-                  whiteSpace: 'pre-line',
-                  maxHeight: '4.2em',
-                  overflow: 'hidden'
+                  fontFamily: activeCue.isRtl ? "'Cairo', 'Alexandria', system-ui, sans-serif" : "'Inter', system-ui, sans-serif"
                 }}
               >
-                {activeCue.text}
+                {(activeCue.text || '').replace(/\r?\n+/g, ' ')}
               </div>
             </div>
           )}
@@ -524,6 +591,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
               }}
             >
               <div 
+                className="cvp-center-play"
                 style={{
                   width: '68px',
                   height: '68px',
@@ -563,7 +631,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
 
           {/* Top Overlay details */}
           {showControls && (
-            <div style={{
+            <div className="cvp-top-overlay" style={{
               position: 'absolute',
               top: 0, left: 0, right: 0,
               background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
@@ -582,7 +650,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
 
           {/* Bottom Controls Overlay */}
           {showControls && (
-            <div style={{
+            <div className="cvp-bottom-overlay" style={{
               position: 'absolute',
               bottom: 0, left: 0, right: 0,
               background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%)',
@@ -653,7 +721,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
 
               {/* Controls buttons row */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#fff', direction: 'ltr' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div className="cvp-btn-row-left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <button 
                     onClick={togglePlay}
                     title={lang === 'ar' ? (isPlaying ? 'إيقاف مؤقت' : 'تشغيل') : (isPlaying ? 'Pause' : 'Play')}
@@ -669,16 +737,17 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                   </button>
 
                   {/* Time Indicator */}
-                  <span style={{ fontSize: '13px', fontFamily: 'monospace' }}>
+                  <span className="cvp-time-display" style={{ fontSize: '13px', fontFamily: 'monospace' }}>
                     {formatTime(currentTime)} / {formatTime(duration)}
                   </span>
                 </div>
 
                 {/* Speed, Volume, Tools, and Fullscreen buttons */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div className="cvp-btn-row-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   
-                  {/* Copy Frame Button */}
+                  {/* Copy Frame Button (Desktop Only) */}
                   <button 
+                    className="cvp-desktop-only"
                     onClick={copyFrame}
                     title={lang === 'ar' ? 'نسخ لقطة من الفيديو' : 'Copy Frame'}
                     style={{ background: 'none', border: 'none', color: '#fff', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
@@ -747,6 +816,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                       </div>
                     )}
                     <button
+                      className="cvp-speed-btn"
                       title={lang === 'ar' ? 'سرعة التشغيل' : 'Playback Speed'}
                       onClick={() => { setShowSpeedSlider(!showSpeedSlider); setShowVolumeSlider(false); }}
                       onDoubleClick={() => changeSpeed(1)}

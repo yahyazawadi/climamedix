@@ -25,6 +25,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
   const [quizPassed, setQuizPassed] = useState(false);
   const [lastQuizScore, setLastQuizScore] = useState(null);
   const [collapsedModules, setCollapsedModules] = useState(new Set());
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   const [loading, setLoading] = useState(true);
 
@@ -326,6 +327,253 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
 
   return (
     <>
+      <style>{`
+        @keyframes fadeInCdm {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .cdm-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 32px 32px 24px 32px;
+          border-bottom: 1px solid rgba(11,40,73,0.08);
+          background: #ffffff;
+          flex-shrink: 0;
+        }
+        .cdm-mobile-syllabus-btn {
+          display: none;
+        }
+        .cdm-drawer-header {
+          display: none;
+        }
+        .cdm-layout-body {
+          display: flex;
+          flex-grow: 1;
+          min-height: 0;
+          height: calc(100vh - 80px);
+        }
+        .cdm-sidebar-wrapper {
+          width: 300px;
+          border-inline-end: 1px solid rgba(11,40,73,0.08);
+          overflow-y: auto;
+          padding: 24px 20px;
+          flex-shrink: 0;
+          background: #f8fafc;
+        }
+        .cdm-main-panel-scroll {
+          position: absolute;
+          inset: 0;
+          overflow-y: auto;
+          padding: 40px;
+          z-index: 1;
+        }
+        .cdm-lesson-title {
+          color: #0b2849;
+          font-size: 24px;
+          font-weight: bold;
+          margin-bottom: 24px;
+          line-height: 1.4;
+        }
+        .cdm-lesson-content-card {
+          background: #ffffff;
+          padding: 40px;
+          border-radius: 16px;
+          box-shadow: 0 4px 24px rgba(11,40,73,0.04);
+          color: rgba(11,40,73,0.8);
+          font-size: 16px;
+          line-height: 1.9;
+          margin-bottom: 32px;
+          flex-grow: 1;
+        }
+        .cdm-action-bar {
+          border-top: 1px solid rgba(11,40,73,0.08);
+          padding-top: 24px;
+          padding-bottom: 24px;
+          display: flex;
+          justify-content: flex-end;
+          gap: 12px;
+          margin-top: auto;
+        }
+
+        .cdm-header-top-row {
+          display: flex;
+          align-items: center;
+        }
+        .cdm-header-bottom-row {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        .cdm-close-btn-mobile {
+          display: none;
+        }
+        .cdm-close-btn-desktop {
+          display: flex;
+        }
+
+        @media (max-width: 768px) {
+          .cdm-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px 10px 14px !important;
+            gap: 10px !important;
+          }
+          .cdm-header-left {
+            width: 100% !important;
+            min-width: 0 !important;
+          }
+          .cdm-header-badge {
+            font-size: 10px !important;
+            margin-bottom: 2px !important;
+          }
+          .cdm-header-title {
+            font-size: 14.5px !important;
+            line-height: 1.35 !important;
+            margin: 0 !important;
+            white-space: normal !important;
+          }
+          .cdm-header-right {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            width: 100% !important;
+            gap: 8px !important;
+            padding-top: 8px !important;
+            border-top: 1px solid rgba(11,40,73,0.06) !important;
+          }
+          .cdm-header-right-left {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+          }
+          .cdm-header-right-right {
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+          }
+          .cdm-progress-pill {
+            font-size: 11px !important;
+            padding: 2px 7px !important;
+            background: rgba(11,40,73,0.05) !important;
+            border-radius: 6px;
+          }
+          .cdm-mobile-syllabus-btn {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 5px;
+            background: #004c6d !important;
+            color: #ffffff !important;
+            border: none !important;
+            padding: 5px 10px !important;
+            border-radius: 8px !important;
+            font-size: 11.5px !important;
+            font-weight: 600 !important;
+            cursor: pointer;
+            white-space: nowrap;
+          }
+          .cdm-btn-circle {
+            width: 32px !important;
+            height: 32px !important;
+            font-size: 15px !important;
+          }
+          .cdm-layout-body {
+            height: calc(100vh - 92px) !important;
+          }
+          .cdm-sidebar-overlay {
+            position: fixed !important;
+            inset: 0 !important;
+            background: rgba(11, 40, 73, 0.48) !important;
+            backdrop-filter: blur(4px) !important;
+            z-index: 1050 !important;
+            display: flex !important;
+            justify-content: flex-start !important;
+            animation: fadeInCdm 0.2s ease !important;
+          }
+          .cdm-sidebar-overlay.ltr-dir {
+            justify-content: flex-end !important;
+          }
+          .cdm-sidebar-wrapper {
+            position: fixed !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            width: 85% !important;
+            max-width: 330px !important;
+            z-index: 1060 !important;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3) !important;
+            padding: 14px 14px 28px 14px !important;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            border-inline-end: none !important;
+          }
+          .cdm-sidebar-wrapper.rtl-closed {
+            transform: translateX(105%) !important;
+            pointer-events: none !important;
+          }
+          .cdm-sidebar-wrapper.rtl-open {
+            right: 0 !important;
+            transform: translateX(0) !important;
+            pointer-events: auto !important;
+          }
+          .cdm-sidebar-wrapper.ltr-closed {
+            transform: translateX(-105%) !important;
+            pointer-events: none !important;
+          }
+          .cdm-sidebar-wrapper.ltr-open {
+            left: 0 !important;
+            transform: translateX(0) !important;
+            pointer-events: auto !important;
+          }
+          .cdm-drawer-header {
+            display: flex !important;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(11,40,73,0.08);
+          }
+          .cdm-drawer-close-btn {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(11,40,73,0.06);
+            border: none;
+            cursor: pointer;
+            color: #0b2849;
+            font-size: 15px;
+          }
+          .cdm-main-panel-scroll {
+            padding: 12px 10px 30px 10px !important;
+          }
+          .cdm-video-container {
+            margin-bottom: 14px !important;
+            border-radius: 12px !important;
+          }
+          .cdm-lesson-title {
+            font-size: 17px !important;
+            margin-bottom: 12px !important;
+          }
+          .cdm-lesson-content-card {
+            padding: 16px 12px !important;
+            font-size: 14px !important;
+            line-height: 1.7 !important;
+            margin-bottom: 16px !important;
+            border-radius: 12px !important;
+          }
+          .cdm-action-bar {
+            padding-top: 14px !important;
+            padding-bottom: 14px !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+          .cdm-action-bar button {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
+      `}</style>
       <div style={{
         position: 'fixed', inset: 0,
         background: '#ffffff',
@@ -346,30 +594,52 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
       }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '32px 32px 24px 32px', borderBottom: '1px solid rgba(11,40,73,0.08)', background: '#ffffff', flexShrink: 0 }}>
-          <div>
-            <span style={{ fontSize: '11px', color: isLocked ? '#ffb300' : '#004c6d', fontWeight: 'bold', display: 'block', marginBottom: '2px' }}>
-              {isLocked 
-                ? (lang === 'ar' ? 'معاينة المساق' : 'Course Preview')
-                : (lang === 'ar' ? 'مساق نشط' : 'Active Course')
-              }
-            </span>
-            <h2 style={{ color: '#0b2849', fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
+        <div className="cdm-header">
+          {/* Top on Mobile (or Start on Desktop): The Noun Name (Course Title & Badge) */}
+          <div className="cdm-header-left">
+            {isLocked && (
+              <span className="cdm-header-badge" style={{ fontSize: '11px', color: '#ffb300', fontWeight: 'bold', display: 'block', marginBottom: '2px' }}>
+                {lang === 'ar' ? 'معاينة المساق' : 'Course Preview'}
+              </span>
+            )}
+            <h2 className="cdm-header-title" style={{ color: '#0b2849', fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
               {lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)}
             </h2>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {!isLocked && (
-              <span style={{ fontSize: '13px', color: '#0b2849', fontWeight: 'bold' }}>
-                {allLessons.length > 0 ? Math.round((completedSet.size / allLessons.length) * 100) : 0}% {lang === 'ar' ? 'مكتمل' : 'complete'}
-              </span>
-            )}
+
+          {/* Beneath on Mobile (or End on Desktop): The Toolbar with Syllabus, Progress, Share & Close */}
+          <div className="cdm-header-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div className="cdm-header-right-left" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {!isLocked && modules.length > 0 && (
+                <button 
+                  type="button"
+                  className="cdm-mobile-syllabus-btn"
+                  onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+                  title={lang === 'ar' ? 'فتح المنهج وقائمة الدروس' : 'View Syllabus & Lessons'}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                  </svg>
+                  <span>{lang === 'ar' ? 'المنهج' : 'Syllabus'}</span>
+                  <span style={{ opacity: 0.85, fontSize: '10.5px' }}>({completedSet.size}/{allLessons.length})</span>
+                </button>
+              )}
+
+              {!isLocked && (
+                <span className="cdm-progress-pill" style={{ fontSize: '13px', color: '#0b2849', fontWeight: 'bold' }}>
+                  {allLessons.length > 0 ? Math.round((completedSet.size / allLessons.length) * 100) : 0}% {lang === 'ar' ? 'مكتمل' : 'complete'}
+                </span>
+              )}
+            </div>
             
-            <div style={{ display: 'flex', gap: '8px', position: 'relative' }}>
+            <div className="cdm-header-right-right" style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
               <ShareActionButtons lang={lang} title={lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)} />
 
               <button 
                 onClick={onClose} 
+                className="cdm-btn-circle"
                 style={{ background: 'rgba(11,40,73,0.06)', border: 'none', fontSize: '20px', color: '#0b2849', cursor: 'pointer', width: '38px', height: '38px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
                 title={lang === 'ar' ? 'إغلاق' : 'Close'}
               >
@@ -384,11 +654,37 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
             {lang === 'ar' ? 'جاري تحميل المنهج...' : 'Loading syllabus...'}
           </div>
         ) : (
-          <div style={{ display: 'flex', flexGrow: 1, minHeight: 0, height: 'calc(100vh - 80px)' }}>
+          <div className="cdm-layout-body">
 
-            {/* Sidebar: Module + Lesson List */}
+            {/* Mobile Drawer Backdrop */}
+            {!isLocked && mobileDrawerOpen && (
+              <div 
+                className={`cdm-sidebar-overlay ${lang === 'ar' ? 'rtl-dir' : 'ltr-dir'}`}
+                onClick={() => setMobileDrawerOpen(false)}
+              />
+            )}
+
+            {/* Sidebar: Module + Lesson List (Static on Desktop, Sliding Drawer on Mobile) */}
             {!isLocked && (
-              <div style={{ width: '300px', borderInlineEnd: '1px solid rgba(11,40,73,0.08)', overflowY: 'auto', padding: '24px 20px', flexShrink: 0, background: '#f8fafc' }}>
+              <div className={`cdm-sidebar-wrapper ${lang === 'ar' ? (mobileDrawerOpen ? 'rtl-open' : 'rtl-closed') : (mobileDrawerOpen ? 'ltr-open' : 'ltr-closed')}`}>
+                <div className="cdm-drawer-header">
+                  <div>
+                    <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#0b2849' }}>
+                      {lang === 'ar' ? 'فهرس المنهج والدروس' : 'Curriculum & Lessons'}
+                    </span>
+                    <span style={{ display: 'block', fontSize: '11px', color: 'rgba(11,40,73,0.6)' }}>
+                      {completedSet.size} / {allLessons.length} {lang === 'ar' ? 'مكتمل' : 'completed'}
+                    </span>
+                  </div>
+                  <button 
+                    className="cdm-drawer-close-btn"
+                    onClick={() => setMobileDrawerOpen(false)}
+                    title={lang === 'ar' ? 'إغلاق القائمة' : 'Close'}
+                  >
+                    ✕
+                  </button>
+                </div>
+
               {modules.map(mod => {
                 const isCollapsed = collapsedModules.has(mod.id);
                 return (
@@ -476,7 +772,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
 
                           {/* The Card */}
                           <div
-                            onClick={() => { setActiveLessonId(les.id); setQuizMode(false); }}
+                            onClick={() => { setActiveLessonId(les.id); setQuizMode(false); setMobileDrawerOpen(false); }}
                             style={{
                               flexGrow: 1,
                               padding: '12px 14px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px',
@@ -519,7 +815,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                    </span>
                    <div style={{ display: 'flex', marginTop: '12px' }}>
                      <div
-                        onClick={() => { setActiveLessonId('CERTIFICATE_MODULE'); setQuizMode(false); }}
+                        onClick={() => { setActiveLessonId('CERTIFICATE_MODULE'); setQuizMode(false); setMobileDrawerOpen(false); }}
                         style={{
                           flexGrow: 1,
                           padding: '12px 14px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px',
@@ -544,7 +840,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
             <div style={{ flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
               <AmbientParticles />
               {/* Main Content Panel */}
-              <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '40px', zIndex: 1 }}>
+              <div className="cdm-main-panel-scroll">
                 {isLocked ? (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
                   {course.cover_image ? (
@@ -708,7 +1004,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                     })();
 
                     return (
-                      <div style={{ width: '100%', marginBottom: '28px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(11,40,73,0.12)' }}>
+                      <div className="cdm-video-container" style={{ width: '100%', marginBottom: '28px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(11,40,73,0.12)' }}>
                         <CustomVideoPlayer 
                           videoUrl={resolvedVideoUrl} 
                           lang={lang} 
@@ -722,23 +1018,13 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                   })()}
 
                   {/* 2. Lesson Title beneath Video Player */}
-                  <h3 style={{ color: '#0b2849', fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', lineHeight: '1.4' }}>
+                  <h3 className="cdm-lesson-title">
                     {lessonTitle}
                   </h3>
 
                   {/* Unified Rich Text Content (Contains Native Audio/Video) */}
                   {lessonContent && (
-                    <div style={{ 
-                      background: '#ffffff',
-                      padding: '40px',
-                      borderRadius: '16px',
-                      boxShadow: '0 4px 24px rgba(11,40,73,0.04)',
-                      color: 'rgba(11,40,73,0.8)', 
-                      fontSize: '16px', 
-                      lineHeight: '1.9', 
-                      marginBottom: '32px', 
-                      flexGrow: 1 
-                    }}>
+                    <div className="cdm-lesson-content-card">
                       <RichTextRenderer html={lessonContent} lang={lang} userId={userId} lessonId={activeLessonId} courseId={course?.id} />
                     </div>
                   )}
@@ -758,7 +1044,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                   )}
 
                   {/* Action Bar */}
-                  <div style={{ borderTop: '1px solid rgba(11,40,73,0.08)', paddingTop: '24px', paddingBottom: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: 'auto' }}>
+                  <div className="cdm-action-bar">
                     {isCurrentCompleted ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         {lastQuizScore !== null && (

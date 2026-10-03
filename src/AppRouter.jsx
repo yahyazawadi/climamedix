@@ -26,6 +26,7 @@ const SliderManagerPage = lazy(() => import('./features/admin/components/SliderM
 const LoadingViewerPage = lazy(() => import('./features/shared/components/LoadingViewerPage').then(m => ({ default: m.LoadingViewerPage })));
 const PrivacyPolicyPage = lazy(() => import('./features/legal/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
 const CopyrightPolicyPage = lazy(() => import('./features/legal/CopyrightPolicyPage').then(m => ({ default: m.CopyrightPolicyPage })));
+const AssetsExplorerPage = lazy(() => import('./features/assets/AssetsExplorerPage').then(m => ({ default: m.AssetsExplorerPage })));
 
 const ROUTE_ALIASES = {
   // Public Pages
@@ -35,6 +36,7 @@ const ROUTE_ALIASES = {
   'join': ['/join', '/apply', '/membership', '/register-network'],
   'profile': ['/profile', '/account', '/me', '/settings'],
   'loading': ['/loading', '/loader', '/planet-test'],
+  'assets': ['/assets', '/asset-explorer', '/icons-list'],
   'privacy': ['/privacy', '/terms', '/privacy-policy', '/terms-of-use'],
   'copyright': ['/copyright', '/intellectual-property', '/publishing-policy', '/ip'],
   
@@ -414,6 +416,7 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
     if (currentView === 'verify') return <CertificateVerificationPage lang={lang} certId={window.location.pathname.split('/').pop()} />;
     
     if (currentView === 'loading') return <LoadingViewerPage lang={lang} />;
+    if (currentView === 'assets') return <AssetsExplorerPage lang={lang} onNavigate={simpleNav} />;
     if (currentView === 'privacy') return <PrivacyPolicyPage lang={lang} onNavigate={simpleNav} />;
     if (currentView === 'copyright') return <CopyrightPolicyPage lang={lang} onNavigate={simpleNav} />;
 

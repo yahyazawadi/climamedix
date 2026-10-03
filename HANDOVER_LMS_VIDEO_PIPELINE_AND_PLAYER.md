@@ -2,7 +2,7 @@
 
 **Project**: ClimaMedix PWA (`yahyazawadi/climamedix`)  
 **Date**: October 3, 2026  
-**Target Course**: `0509ec71-4043-43d4-9865-b3bca0510458` (الماجستير المصغر في التغير المناخي والصحة العامة / Mini-Masterclass: Climate Change & Public Health)  
+**Target Course**: `0509ec71-4043-43d4-9865-b3bca0510458` (زمالة إعداد المثقف الصحي: التغير المناخي وصحة المجتمع / Community Health Educator Fellowship: Climate Change & Population Health)  
 **Production / Test Environment**: Dev server running on `http://localhost:9090`
 
 ---
@@ -82,8 +82,8 @@ All 14 master course lessons have been processed, optimized with hardware-accele
 The curriculum structure is fully synchronized in Supabase:
 
 * **Course**: `0509ec71-4043-43d4-9865-b3bca0510458`
-  * `title_ar`: الماجستير المصغر في التغير المناخي والصحة العامة
-  * `title_en`: Mini-Masterclass: Climate Change & Public Health
+  * `title_ar`: زمالة إعداد المثقف الصحي: التغير المناخي وصحة المجتمع
+  * `title_en`: Community Health Educator Fellowship: Climate Change & Population Health
 * **Module 1**: `66666666-6666-6666-6666-666666666601`
   * `sequence_order`: 1
   * 5 Lessons (`77777777-7777-7777-7777-777777770101` to `0105`)

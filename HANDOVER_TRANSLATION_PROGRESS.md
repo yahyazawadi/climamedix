@@ -2,7 +2,7 @@
 
 **Date**: 2026-10-03  
 **Workspace**: `c:\Users\CLICK\Desktop\climamedix-pwa`  
-**Target Course**: `0509ec71-4043-43d4-9865-b3bca0510458` (الماجستير المصغر في التغير المناخي والصحة العامة / Mini-Masterclass: Climate Change & Public Health)  
+**Target Course**: `0509ec71-4043-43d4-9865-b3bca0510458` (زمالة إعداد المثقف الصحي: التغير المناخي وصحة المجتمع / Community Health Educator Fellowship: Climate Change & Population Health)  
 **Arabic Subtitles Directory**: [`scripts/subtitles_ar/`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/scripts/subtitles_ar)  
 **English Subtitles Directory**: [`scripts/subtitles_en/`](file:///c:/Users/CLICK/Desktop/climamedix-pwa/scripts/subtitles_en)  
 

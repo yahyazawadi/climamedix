@@ -1,8 +1,8 @@
-import iconEmpowerment  from '../../assets/icon_empowerment.svg';
-import iconScience      from '../../assets/icon_science.svg';
-import iconEmpowerment2 from '../../assets/icon_empowerment2.svg';
-import iconInnovation   from '../../assets/icon_innovation.svg';
-import iconCommunity    from '../../assets/icon_community.svg';
+import iconEmpowerment  from '../../assets/icons/icon_empowerment.svg';
+import iconScience      from '../../assets/icons/icon_science.svg';
+import iconEmpowerment2 from '../../assets/icons/icon_empowerment2.svg';
+import iconInnovation   from '../../assets/icons/icon_innovation.svg';
+import iconCommunity    from '../../assets/icons/icon_community.svg';
 import aboutBg          from '../../assets/about_bg.webp';
 import { translations } from '../../i18n/translations';
 

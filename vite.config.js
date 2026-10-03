@@ -2,16 +2,53 @@ import { defineConfig } from 'vite'
 import preact from '@preact/preset-vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+import { scanAllAssets } from './scripts/assetScanner.js'
+import { generateAssetsManifest } from './scripts/generateAssetsManifest.js'
+
+function assetScannerPlugin() {
+  return {
+    name: 'vite-plugin-asset-scanner',
+    buildStart() {
+      // Auto-generate fresh manifest on build / start
+      try {
+        generateAssetsManifest(process.cwd());
+      } catch (err) {
+        console.warn('[vite-plugin-asset-scanner] Could not generate build-time manifest:', err);
+      }
+    },
+    configureServer(server) {
+      server.middlewares.use('/api/assets', (req, res, next) => {
+        if (req.method === 'GET') {
+          try {
+            // Dynamically scan the filesystem on demand for 100% fresh, real-time data
+            const data = scanAllAssets(process.cwd());
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            res.setHeader('Cache-Control', 'no-store');
+            res.end(JSON.stringify(data));
+          } catch (err) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: err.message }));
+          }
+          return;
+        }
+        next();
+      });
+    }
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     preact(),
+    assetScannerPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons.svg'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg}'],
-        maximumFileSizeToCacheInBytes: 500000,
+        maximumFileSizeToCacheInBytes: 3000000,
       },
       manifest: {
         name: 'كلايما ميدكس | العمل المناخي والصحة',

@@ -257,7 +257,8 @@ export async function getSecureVideoUrl(lessonId, courseId) {
   }
 
   const publicUrl = import.meta.env.VITE_R2_PUBLIC_URL || 'https://pub-4bc58eedbff74d8bafb3dea5edd751f5.r2.dev';
-  return `${publicUrl}/${videoKey}`;
+  const fullUrl = `${publicUrl}/${videoKey}`;
+  return fullUrl.includes('?') ? fullUrl : `${fullUrl}?v=1080p`;
 }
 
 // ─── CERTIFICATES ─────────────────────────────────────────────────────────────

@@ -969,9 +969,10 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                   {/* 1. Dedicated Master Video Player at the VERY TOP */}
                   {activeLesson.video_url && (() => {
                     const r2Base = (import.meta.env.VITE_R2_PUBLIC_URL || '').replace(/\/+$/, '');
-                    const resolvedVideoUrl = activeLesson.video_url.startsWith('http') || activeLesson.video_url.startsWith('blob:')
+                    const rawUrl = activeLesson.video_url.startsWith('http') || activeLesson.video_url.startsWith('blob:')
                       ? activeLesson.video_url
                       : `${r2Base}/${activeLesson.video_url}`;
+                    const resolvedVideoUrl = rawUrl.includes('?') ? rawUrl : `${rawUrl}?v=1080p`;
 
                     const resolvedTracks = (() => {
                       if (activeLesson.subtitles && Array.isArray(activeLesson.subtitles) && activeLesson.subtitles.length > 0) {

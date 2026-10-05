@@ -76,6 +76,8 @@ const TARGET_COURSE_ID = '0509ec71-4043-43d4-9865-b3bca0510458';
 
 // Asset storage source folders (with multi-path fallbacks)
 const VIDEO_SOURCE_DIRS = [
+  'C:\\Users\\CLICK\\Downloads\\videos of modules\\videos_h264_1080p',
+  resolve(process.cwd(), 'videos_h264_1080p'),
   'C:\\Users\\CLICK\\Downloads\\videos of modules\\videos_nvenc_hevc',
   resolve(process.cwd(), 'videos_nvenc_hevc')
 ];

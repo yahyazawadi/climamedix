@@ -12,10 +12,11 @@ export function ShareActionButtons({
   const [linkCopied, setLinkCopied] = useState(false);
   const [shareSpinning, setShareSpinning] = useState(false);
 
-  const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
+  const getShareUrl = () => url || (typeof window !== 'undefined' ? window.location.href : '');
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(shareUrl);
+    const targetUrl = getShareUrl();
+    navigator.clipboard.writeText(targetUrl);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
   };
@@ -24,11 +25,12 @@ export function ShareActionButtons({
     setShareSpinning(true);
     setTimeout(() => setShareSpinning(false), 2000);
     
+    const targetUrl = getShareUrl();
     if (navigator.share) {
       try {
         await navigator.share({
           title: title,
-          url: shareUrl
+          url: targetUrl
         });
       } catch (err) {
         console.error('Error sharing:', err);

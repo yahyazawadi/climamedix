@@ -1,5 +1,5 @@
 {
-  "scannedAt": "2026-10-03T14:37:51.934Z",
+  "scannedAt": "2026-10-05T14:38:27.715Z",
   "totalAssets": 67,
   "totalReferences": 95,
   "assets": [
@@ -141,7 +141,7 @@
         },
         {
           "file": "src/features/shared/components/ShareActionButtons.jsx",
-          "line": 136,
+          "line": 138,
           "snippet": "<polyline points=\"20 6 9 17 4 12\"></polyline>",
           "matchType": "inline-clone"
         }
@@ -543,13 +543,13 @@
       "references": [
         {
           "file": "src/features/shared/components/ShareActionButtons.jsx",
-          "line": 140,
+          "line": 142,
           "snippet": "<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"></path>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/shared/components/ShareActionButtons.jsx",
-          "line": 141,
+          "line": 143,
           "snippet": "<path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"></path>",
           "matchType": "inline-clone"
         }
@@ -591,13 +591,13 @@
       "references": [
         {
           "file": "src/features/shared/components/ShareActionButtons.jsx",
-          "line": 159,
+          "line": 161,
           "snippet": "<line x1=\"8.59\" y1=\"13.51\" x2=\"15.42\" y2=\"17.49\"></line>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/shared/components/ShareActionButtons.jsx",
-          "line": 160,
+          "line": 162,
           "snippet": "<line x1=\"15.41\" y1=\"6.51\" x2=\"8.59\" y2=\"10.49\"></line>",
           "matchType": "inline-clone"
         }

@@ -232,9 +232,27 @@ export function LearningHubPage({ lang, onNavigate }) {
           <div style={{ marginTop: '20px' }}>
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
+                const targetId = new URLSearchParams(window.location.search).get('course') || '0509ec71-4043-43d4-9865-b3bca0510458';
+                try {
+                  const url = new URL(window.location);
+                  url.searchParams.set('course', targetId);
+                  window.history.replaceState({}, '', url);
+                } catch (e) {}
                 setContinueAsGuest(true);
-                loadData();
+                setLoading(true);
+                try {
+                  const courses = await fetchCourses();
+                  setAllCourses(courses || []);
+                  const mainCourse = (courses || []).find(c => c.id === targetId) || (courses || [])[0];
+                  if (mainCourse) {
+                    setSelectedCourse(mainCourse._raw || mainCourse);
+                  }
+                } catch (err) {
+                  console.error('Error opening main course as guest:', err);
+                } finally {
+                  setLoading(false);
+                }
               }}
               style={{
                 background: 'none',

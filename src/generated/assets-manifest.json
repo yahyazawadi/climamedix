@@ -1,5 +1,5 @@
 {
-  "scannedAt": "2026-10-09T14:15:23.293Z",
+  "scannedAt": "2026-10-09T14:16:41.213Z",
   "totalAssets": 67,
   "totalReferences": 95,
   "assets": [
@@ -267,7 +267,7 @@
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 368,
+          "line": 386,
           "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
           "matchType": "inline-clone"
         },
@@ -471,13 +471,13 @@
       "references": [
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 511,
+          "line": 529,
           "snippet": "<path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"/>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 512,
+          "line": 530,
           "snippet": "<path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\"/>",
           "matchType": "inline-clone"
         }
@@ -501,7 +501,7 @@
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 393,
+          "line": 411,
           "snippet": "<polyline points=\"12 6 12 12 16 14\"></polyline>",
           "matchType": "inline-clone"
         }
@@ -573,7 +573,7 @@
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 376,
+          "line": 394,
           "snippet": "<path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path>",
           "matchType": "inline-clone"
         }

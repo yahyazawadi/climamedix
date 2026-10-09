@@ -26,3 +26,4 @@ To keep track of the growing application surface area, here is a definitive list
 *   [http://localhost:5174/admin/users](http://localhost:5174/admin/users) | **`/admin/users` / `/admin/members`** - User Role Management Dashboard *(Requires: `manage:system`)*
 *   [http://localhost:5174/admin/stats](http://localhost:5174/admin/stats) | **`/admin/stats` / `/admin/analytics`** - Analytics & Statistics Dashboard *(Requires: `view:user_stats`)*
 *   [http://localhost:5174/admin/certificates](http://localhost:5174/admin/certificates) | **`/admin/certificates` / `/admin/certs`** - Certificate Audit Dashboard *(Requires: `issue:certs`)*
+## Remote SSH Setup  

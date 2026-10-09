@@ -84,12 +84,21 @@ export const getViewFromPath = (path) => {
     return 'article';
   }
   
+  if (p === '/meeting' || p === '/meet') {
+    if (typeof window !== 'undefined') {
+      window.location.replace('https://meet.google.com/dhu-mvmr-dyp');
+    }
+    return 'newhome';
+  }
+
   return 'newhome'; // Default fallback
 };
 
 export const isKnownPath = (path) => {
   let p = path.replace(/\/$/, "");
   if (!p) return true;
+
+  if (p === '/meeting' || p === '/meet') return true;
 
   for (const aliases of Object.values(ROUTE_ALIASES)) {
     if (aliases.includes(p)) return true;

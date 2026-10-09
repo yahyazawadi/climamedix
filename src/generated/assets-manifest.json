@@ -1,5 +1,5 @@
 {
-  "scannedAt": "2026-10-09T14:16:41.213Z",
+  "scannedAt": "2026-10-09T14:40:22.109Z",
   "totalAssets": 67,
   "totalReferences": 95,
   "assets": [
@@ -231,13 +231,13 @@
         },
         {
           "file": "vite.config.js",
-          "line": 65,
+          "line": 66,
           "snippet": "src: 'favicon.svg',",
           "matchType": "file"
         },
         {
           "file": "vite.config.js",
-          "line": 70,
+          "line": 71,
           "snippet": "src: 'favicon.svg',",
           "matchType": "file"
         }

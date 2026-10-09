@@ -49,6 +49,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg}'],
         maximumFileSizeToCacheInBytes: 3000000,
+        navigateFallback: null,
       },
       manifest: {
         name: 'كلايما ميدكس | العمل المناخي والصحة',

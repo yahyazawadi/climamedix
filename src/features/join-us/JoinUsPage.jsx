@@ -150,7 +150,11 @@ export function JoinUsPage({ lang, onNavigate }) {
       .then(res => res.json())
       .then(data => {
         if (data && data.city && data.country_name) {
-          setForm(prev => ({ ...prev, city: data.city, country: data.country_name }));
+          const rawCountry = data.country_name.toLowerCase();
+          const country = (rawCountry.includes('palestin') || rawCountry.includes('israel') || rawCountry.includes('west bank') || rawCountry.includes('gaza'))
+            ? (lang === 'ar' ? 'فلسطين' : 'Palestine')
+            : data.country_name;
+          setForm(prev => ({ ...prev, city: data.city, country }));
         }
       })
       .catch(err => console.error('Could not fetch location:', err));

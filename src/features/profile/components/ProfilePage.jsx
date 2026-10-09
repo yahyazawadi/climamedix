@@ -56,10 +56,32 @@ const getIpLocation = (forceRefresh = false) => {
   return _ipLocationCache;
 };
 
+const TITLE_OPTIONS = [
+  { value: 'Dr', labelAr: 'د. / الدكتور (Doctor / MD)', labelEn: 'Dr. / Doctor (MD)' },
+  { value: 'Dr_f', labelAr: 'د. / الدكتورة (Doctor / MD)', labelEn: 'Dr. / Doctor (Female)' },
+  { value: 'Prof', labelAr: 'أ.د. / البروفيسور (Professor)', labelEn: 'Prof. / Professor' },
+  { value: 'Prof_f', labelAr: 'أ.د. / البروفيسورة (Professor)', labelEn: 'Prof. / Professor (Female)' },
+  { value: 'Consultant', labelAr: 'طبيب استشاري (Consultant Physician)', labelEn: 'Consultant Physician' },
+  { value: 'Specialist', labelAr: 'طبيب أخصائي (Specialist Physician)', labelEn: 'Specialist Physician' },
+  { value: 'Resident', labelAr: 'طبيب مقيم (Resident Physician)', labelEn: 'Resident Physician' },
+  { value: 'AssocProf', labelAr: 'أستاذ مشارك (Associate Professor)', labelEn: 'Associate Professor' },
+  { value: 'AsstProf', labelAr: 'أستاذ مساعد (Assistant Professor)', labelEn: 'Assistant Professor' },
+  { value: 'PharmD', labelAr: 'د. صيدلي / صيدلاني (PharmD / Pharmacist)', labelEn: 'PharmD / Pharmacist' },
+  { value: 'Nurse', labelAr: 'أخصائي تمريض سريري (Clinical Nurse)', labelEn: 'Clinical Nurse Specialist' },
+  { value: 'Eng', labelAr: 'م. / مهندس (Engineer)', labelEn: 'Eng. / Engineer' },
+  { value: 'Eng_f', labelAr: 'م. / مهندسة (Engineer)', labelEn: 'Eng. / Engineer (Female)' },
+  { value: 'Researcher', labelAr: 'باحث علمي (Scientific Researcher)', labelEn: 'Scientific Researcher' },
+  { value: 'Mr', labelAr: 'السيد (Mr.)', labelEn: 'Mr.' },
+  { value: 'Ms', labelAr: 'السيدة (Ms.)', labelEn: 'Ms.' },
+  { value: 'Mrs', labelAr: 'السيدة (Mrs.)', labelEn: 'Mrs.' },
+  { value: 'Other', labelAr: 'لقب آخر / مخصص...', labelEn: 'Other / Custom Title...' }
+];
+
 export function ProfilePage({ lang, onNavigate }) {
   const { user, userProfile } = useAuth();
   const t = translations[lang] || translations.ar;
   const isArabic = lang === 'ar';
+  const [customTitleActive, setCustomTitleActive] = useState(false);
   
   const [formData, setFormData] = useState({
     title: 'Mr',
@@ -84,12 +106,30 @@ export function ProfilePage({ lang, onNavigate }) {
   const [alert, setAlert] = useState(null);
   const fileInputRef = useRef(null);
 
+  const normalizeCountry = (country) => {
+    if (!country) return '';
+    const trimmed = country.trim();
+    const lower = trimmed.toLowerCase();
+    if (
+      lower.includes('palestin') ||
+      lower.includes('israel') ||
+      lower.includes('west bank') ||
+      lower.includes('gaza') ||
+      lower.includes('فلسطين') ||
+      lower.includes('إسرائيل')
+    ) {
+      return isArabic ? 'فلسطين' : 'Palestine';
+    }
+    return trimmed;
+  };
+
   const handleDetectLocation = () => {
     setLocating(true);
     getIpLocation(true)
       .then(data => {
         if (data && data.city && data.country_name) {
-          setFormData(prev => ({ ...prev, city: data.city, country: data.country_name }));
+          const detectedCountry = normalizeCountry(data.country_name);
+          setFormData(prev => ({ ...prev, city: data.city, country: detectedCountry }));
         } else {
           setAlert({ type: 'error', message: isArabic ? 'تعذّر تحديد الموقع تلقائياً' : 'Could not detect location automatically' });
         }
@@ -106,7 +146,7 @@ export function ProfilePage({ lang, onNavigate }) {
         full_name: userProfile.full_name || '',
         birthdate: userProfile.birthdate || '',
         city: userProfile.city || '',
-        country: userProfile.country || '',
+        country: normalizeCountry(userProfile.country || ''),
         profession: userProfile.profession || '',
         university_or_org: userProfile.university_or_org || '',
         specialty: userProfile.specialty || '',
@@ -125,7 +165,7 @@ export function ProfilePage({ lang, onNavigate }) {
             setFormData(prev => ({
               ...prev,
               city: prev.city || data.city,
-              country: prev.country || data.country_name
+              country: prev.country || normalizeCountry(data.country_name)
             }));
           }
         });
@@ -214,17 +254,21 @@ export function ProfilePage({ lang, onNavigate }) {
     }
   };
 
+  useEffect(() => {
+    if (!user) {
+      try {
+        sessionStorage.setItem('cm_auth_redirect', '/profile');
+      } catch (e) {}
+      if (typeof onNavigate === 'function') {
+        onNavigate('auth');
+      } else {
+        window.location.href = '/login';
+      }
+    }
+  }, [user, onNavigate]);
+
   if (!user) {
-    return (
-      <div className="profile-page-viewport" dir={isArabic ? 'rtl' : 'ltr'}>
-        <div className="profile-main-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-          <GlassCard style={{ padding: '40px', textAlign: 'center', maxWidth: '400px' }}>
-            <h3 style={{ color: '#0b2849', marginBottom: '15px' }}>{isArabic ? 'سجل الدخول للمتابعة' : 'Please Login to Continue'}</h3>
-            <Button variant="gradient" onClick={() => onNavigate('auth')}>{t.login}</Button>
-          </GlassCard>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const role = userProfile?.role || 'user';
@@ -337,17 +381,39 @@ export function ProfilePage({ lang, onNavigate }) {
                       <label className="form-field-label">{t.titleLabel}</label>
                       <div className="custom-select-wrapper">
                         <select 
-                          value={formData.title} 
-                          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                          value={TITLE_OPTIONS.some(o => o.value === formData.title) ? formData.title : (formData.title ? 'Other' : 'Mr')} 
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === 'Other') {
+                              setCustomTitleActive(true);
+                              setFormData({ ...formData, title: '' });
+                            } else {
+                              setCustomTitleActive(false);
+                              setFormData({ ...formData, title: val });
+                            }
+                          }}
                           className="form-input-field select-field"
+                          dir={isArabic ? 'rtl' : 'ltr'}
                         >
-                          <option value="Mr">{isArabic ? 'السيد' : 'Mr'}</option>
-                          <option value="Ms">{isArabic ? 'السيدة' : 'Ms'}</option>
-                          <option value="Dr">{isArabic ? 'الدكتور' : 'Dr'}</option>
-                          <option value="Prof">{isArabic ? 'البروفيسور' : 'Prof'}</option>
+                          {TITLE_OPTIONS.map(opt => (
+                            <option key={opt.value} value={opt.value} dir={isArabic ? 'rtl' : 'ltr'}>
+                              {isArabic ? opt.labelAr : opt.labelEn}
+                            </option>
+                          ))}
                         </select>
                         <span className="select-arrow-icon">▼</span>
                       </div>
+                      {(customTitleActive || (!TITLE_OPTIONS.some(o => o.value === formData.title) && formData.title !== '')) && (
+                        <input
+                          type="text"
+                          placeholder={isArabic ? 'اكتب اللقب أو الدرجة الأكاديمية...' : 'Enter your degree or title...'}
+                          value={formData.title}
+                          onInput={(e) => setFormData({ ...formData, title: e.target.value })}
+                          className="form-input-field"
+                          style={{ marginTop: '8px' }}
+                          dir={isArabic ? 'rtl' : 'ltr'}
+                        />
+                      )}
                     </div>
 
                     <div>
@@ -389,7 +455,15 @@ export function ProfilePage({ lang, onNavigate }) {
                         type="text" 
                         value={formData.country} 
                         onInput={(e) => setFormData({ ...formData, country: e.target.value })}
+                        onBlur={(e) => {
+                          const val = e.target.value;
+                          const norm = normalizeCountry(val);
+                          if (norm && norm !== val) {
+                            setFormData({ ...formData, country: norm });
+                          }
+                        }}
                         className="form-input-field" 
+                        placeholder={isArabic ? 'الدولة' : 'Country'}
                       />
                     </div>
 
@@ -438,11 +512,12 @@ export function ProfilePage({ lang, onNavigate }) {
                             value={formData.profession} 
                             onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
                             className="form-input-field select-field"
+                            dir={isArabic ? 'rtl' : 'ltr'}
                           >
-                            <option value="doctor">{t.professionDoctor}</option>
-                            <option value="researcher">{t.professionResearcher}</option>
-                            <option value="student">{t.professionStudent}</option>
-                            <option value="other">{t.professionOther}</option>
+                            <option value="doctor" dir={isArabic ? 'rtl' : 'ltr'}>{t.professionDoctor}</option>
+                            <option value="researcher" dir={isArabic ? 'rtl' : 'ltr'}>{t.professionResearcher}</option>
+                            <option value="student" dir={isArabic ? 'rtl' : 'ltr'}>{t.professionStudent}</option>
+                            <option value="other" dir={isArabic ? 'rtl' : 'ltr'}>{t.professionOther}</option>
                           </select>
                           <span className="select-arrow-icon">▼</span>
                         </div>

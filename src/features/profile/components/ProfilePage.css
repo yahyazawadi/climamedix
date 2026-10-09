@@ -370,13 +370,33 @@
 .custom-select-wrapper {
   position: relative;
   width: 100%;
+  max-width: 100%;
 }
 
 .select-field {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   appearance: none;
   -webkit-appearance: none;
+  -moz-appearance: none;
   cursor: pointer;
-  padding-inline-end: 40px !important;
+  padding-inline-start: 16px;
+  padding-inline-end: 42px;
+  background-color: rgba(255, 255, 255, 0.85);
+  text-align: start;
+}
+
+[dir="rtl"] .select-field,
+[dir="rtl"] .select-field option {
+  text-align: right;
+  direction: rtl;
+}
+
+[dir="ltr"] .select-field,
+[dir="ltr"] .select-field option {
+  text-align: left;
+  direction: ltr;
 }
 
 .select-arrow-icon {
@@ -527,3 +547,94 @@
     transform: rotate(360deg);
   }
 }
+
+/* Mobile Responsiveness Overrides */
+.profile-grid-col-left,
+.profile-grid-col-right {
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .profile-page-viewport {
+    padding: 100px 14px 40px 14px;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  .profile-main-container {
+    width: 100%;
+    max-width: 100%;
+    gap: 20px;
+  }
+
+  .profile-glass-card,
+  .form-card,
+  .pfp-card,
+  .lms-widget-card {
+    padding: 20px 16px !important;
+    border-radius: 16px;
+  }
+
+  .pfp-card {
+    position: relative;
+    top: auto;
+  }
+
+  .form-section-block {
+    width: 100% !important;
+    gap: 16px !important;
+  }
+
+  .form-fields-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .form-fields-grid > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .custom-select-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .form-input-field {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .style-location-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  .detect-location-btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  .conditional-input-wrapper {
+    margin-inline-start: 0 !important;
+    padding: 12px 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .form-submit-container {
+    width: 100% !important;
+  }
+
+  .form-submit-container button {
+    width: 100% !important;
+  }
+}
+

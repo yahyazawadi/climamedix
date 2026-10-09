@@ -30,6 +30,7 @@ export function LearningHubPage({ lang, onNavigate }) {
   const [showCertFor, setShowCertFor] = useState(null); // course title string for cert generator
 
   const [activeTab, setActiveTab] = useState('discover'); // 'discover' | 'my-courses'
+  const [continueAsGuest, setContinueAsGuest] = useState(false);
 
   // ─── Load Data ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -51,8 +52,8 @@ export function LearningHubPage({ lang, onNavigate }) {
     try {
       const [courses, enrollments, certs] = await Promise.all([
         fetchCourses(),
-        fetchEnrollments(user.id),
-        fetchUserCertificates(user.id),
+        user ? fetchEnrollments(user.id) : Promise.resolve([]),
+        user ? fetchUserCertificates(user.id) : Promise.resolve([]),
       ]);
 
       setAllCourses(courses || []);
@@ -129,10 +130,7 @@ export function LearningHubPage({ lang, onNavigate }) {
   // ─── Enroll Handler ───────────────────────────────────────────────────────
   async function handleEnroll(course) {
     if (!user) {
-      try {
-        sessionStorage.setItem('cm_auth_redirect', window.location.pathname + window.location.search);
-      } catch (e) {}
-      onNavigate('auth');
+      handleSelectCourse(course);
       return;
     }
     if (enrollingId) return;
@@ -198,14 +196,14 @@ export function LearningHubPage({ lang, onNavigate }) {
 
   // ─── Access Logic ─────────────────────────────────────────────────────────
   function getCourseAccess(course) {
-    if (!user) return 'locked';
+    if (!user) return 'full';
     if (course.full_access_permission_key && hasPermission(course.full_access_permission_key)) return 'full';
     if (!course.teaser_permission_key || course.teaser_permission_key === 'view:public_content' || hasPermission(course.teaser_permission_key)) return 'teaser';
     return 'locked';
   }
 
   // ─── Not Logged In ────────────────────────────────────────────────────────
-  if (!user) {
+  if (!user && !continueAsGuest) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f0f4f8', padding: '20px' }}>
         <GlassCard style={{ padding: '48px', maxWidth: '560px', textAlign: 'center' }}>
@@ -230,6 +228,33 @@ export function LearningHubPage({ lang, onNavigate }) {
           }}>
             {lang === 'ar' ? 'تسجيل الدخول / إنشاء حساب' : 'Log In / Sign Up'}
           </Button>
+
+          <div style={{ marginTop: '20px' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setContinueAsGuest(true);
+                loadData();
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#0b2849',
+                textDecoration: 'underline',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                padding: '4px 8px',
+                display: 'inline-block',
+                transition: 'color 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#15b47a'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#0b2849'}
+            >
+              {lang === 'ar' ? 'أو تابع دون تسجيل دخول' : 'Or continue without signing in'}
+            </button>
+          </div>
         </GlassCard>
       </div>
     );
@@ -433,8 +458,8 @@ export function LearningHubPage({ lang, onNavigate }) {
         <CourseDetailModal
           lang={lang}
           course={selectedCourse}
-          userId={user.id}
-          isLocked={getCourseAccess(selectedCourse) === 'locked'}
+          userId={user?.id || null}
+          isLocked={user ? (getCourseAccess(selectedCourse) === 'locked') : false}
           onClose={handleCloseCourseModal}
           onLessonCompleted={handleLessonCompleted}
           onCourseCompleted={handleCourseCompleted}

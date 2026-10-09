@@ -108,7 +108,7 @@ export async function fetchCompletedLessons(userId, courseId) {
   const allLessonIds = modules.flatMap(m => (m.lessons || []).map(l => l.id));
   const totalLessons = allLessonIds.length;
   
-  if (totalLessons === 0) return { completedSet: new Set(), totalLessons: 0 };
+  if (totalLessons === 0 || !userId) return { completedSet: new Set(), totalLessons };
 
   const { data, error } = await supabase
     .from('lesson_completions')
@@ -125,6 +125,7 @@ export async function fetchCompletedLessons(userId, courseId) {
  * Uses upsert to avoid duplicate key errors if called twice.
  */
 export async function markLessonComplete(userId, lessonId) {
+  if (!userId) return;
   const { error } = await supabase
     .from('lesson_completions')
     .upsert({ user_id: userId, lesson_id: lessonId }, { onConflict: 'user_id,lesson_id' });

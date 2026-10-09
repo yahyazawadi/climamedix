@@ -1,5 +1,5 @@
 {
-  "scannedAt": "2026-10-09T18:31:50.225Z",
+  "scannedAt": "2026-10-09T18:42:38.677Z",
   "totalAssets": 67,
   "totalReferences": 95,
   "assets": [
@@ -135,7 +135,7 @@
         },
         {
           "file": "src/features/profile/components/ProfilePage.jsx",
-          "line": 310,
+          "line": 314,
           "snippet": "<polyline points=\"20 6 9 17 4 12\"></polyline>",
           "matchType": "inline-clone"
         },
@@ -273,7 +273,7 @@
         },
         {
           "file": "src/features/profile/components/ProfilePage.jsx",
-          "line": 615,
+          "line": 621,
           "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"></path>",
           "matchType": "inline-clone"
         }

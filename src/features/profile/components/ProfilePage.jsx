@@ -7,6 +7,7 @@ import { Button } from '../../shared/components/Button';
 import { GlassCard } from '../../shared/components/GlassCard';
 import './ProfilePage.css';
 import { DatePicker } from '../../shared/components/DatePicker';
+import { CustomSelect } from '../../shared/components/CustomSelect';
 
 // Client-side image converter to WebP using HTML Canvas
 const convertToWebP = (file) => {
@@ -379,30 +380,25 @@ export function ProfilePage({ lang, onNavigate }) {
                   <div className="form-fields-grid">
                     <div>
                       <label className="form-field-label">{t.titleLabel}</label>
-                      <div className="custom-select-wrapper">
-                        <select 
-                          value={TITLE_OPTIONS.some(o => o.value === formData.title) ? formData.title : (formData.title ? 'Other' : 'Mr')} 
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (val === 'Other') {
-                              setCustomTitleActive(true);
-                              setFormData({ ...formData, title: '' });
-                            } else {
-                              setCustomTitleActive(false);
-                              setFormData({ ...formData, title: val });
-                            }
-                          }}
-                          className="form-input-field select-field"
-                          dir={isArabic ? 'rtl' : 'ltr'}
-                        >
-                          {TITLE_OPTIONS.map(opt => (
-                            <option key={opt.value} value={opt.value} dir={isArabic ? 'rtl' : 'ltr'}>
-                              {isArabic ? opt.labelAr : opt.labelEn}
-                            </option>
-                          ))}
-                        </select>
-                        <span className="select-arrow-icon">▼</span>
-                      </div>
+                      <CustomSelect
+                        id="profileTitleSelect"
+                        value={TITLE_OPTIONS.some(o => o.value === formData.title) ? formData.title : (formData.title ? 'Other' : 'Mr')}
+                        onChange={(val) => {
+                          if (val === 'Other') {
+                            setCustomTitleActive(true);
+                            setFormData({ ...formData, title: '' });
+                          } else {
+                            setCustomTitleActive(false);
+                            setFormData({ ...formData, title: val });
+                          }
+                        }}
+                        options={TITLE_OPTIONS.map(opt => ({
+                          value: opt.value,
+                          label: isArabic ? opt.labelAr : opt.labelEn
+                        }))}
+                        dir={isArabic ? 'rtl' : 'ltr'}
+                        maxHeight="230px"
+                      />
                       {(customTitleActive || (!TITLE_OPTIONS.some(o => o.value === formData.title) && formData.title !== '')) && (
                         <input
                           type="text"
@@ -507,20 +503,19 @@ export function ProfilePage({ lang, onNavigate }) {
                     <div className="form-fields-grid">
                       <div>
                         <label className="form-field-label">{t.professionLabel}</label>
-                        <div className="custom-select-wrapper">
-                          <select 
-                            value={formData.profession} 
-                            onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-                            className="form-input-field select-field"
-                            dir={isArabic ? 'rtl' : 'ltr'}
-                          >
-                            <option value="doctor" dir={isArabic ? 'rtl' : 'ltr'}>{t.professionDoctor}</option>
-                            <option value="researcher" dir={isArabic ? 'rtl' : 'ltr'}>{t.professionResearcher}</option>
-                            <option value="student" dir={isArabic ? 'rtl' : 'ltr'}>{t.professionStudent}</option>
-                            <option value="other" dir={isArabic ? 'rtl' : 'ltr'}>{t.professionOther}</option>
-                          </select>
-                          <span className="select-arrow-icon">▼</span>
-                        </div>
+                        <CustomSelect
+                          id="profileProfessionSelect"
+                          value={formData.profession || 'doctor'}
+                          onChange={(val) => setFormData({ ...formData, profession: val })}
+                          options={[
+                            { value: 'doctor', label: t.professionDoctor },
+                            { value: 'researcher', label: t.professionResearcher },
+                            { value: 'student', label: t.professionStudent },
+                            { value: 'other', label: t.professionOther }
+                          ]}
+                          dir={isArabic ? 'rtl' : 'ltr'}
+                          maxHeight="200px"
+                        />
                       </div>
 
                       <div>

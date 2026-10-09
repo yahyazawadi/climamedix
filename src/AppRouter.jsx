@@ -352,7 +352,39 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
   const renderView = () => {
     if (currentView === 'home' || currentView === 'newhome' || currentView === 'debug') return <NewHomePage lang={lang} setCurrentView={setCurrentView} setOpenedModal={setOpenedModal} onNavigate={simpleNav} />;
     if (currentView === 'about') return <AboutUsPage lang={lang} onJoinClick={() => navigate('join')} onNavigate={(view, sectionId) => navigate(view, sectionId)} />;
-    if (currentView === 'auth') return <AuthPage lang={lang} onAuthSuccess={() => setCurrentView('newhome')} />;
+    if (currentView === 'auth') return (
+      <AuthPage 
+        lang={lang} 
+        onAuthSuccess={() => {
+          let redirectUrl = null;
+          try {
+            redirectUrl = sessionStorage.getItem('cm_auth_redirect');
+            if (redirectUrl) sessionStorage.removeItem('cm_auth_redirect');
+          } catch (e) {}
+          if (!redirectUrl) {
+            try {
+              const params = new URLSearchParams(window.location.search);
+              redirectUrl = params.get('redirect');
+            } catch (e) {}
+          }
+          if (redirectUrl && (redirectUrl.startsWith('/') || redirectUrl.startsWith('http'))) {
+            let pathWithQuery = redirectUrl;
+            if (redirectUrl.startsWith('http')) {
+              try {
+                const u = new URL(redirectUrl);
+                pathWithQuery = u.pathname + u.search;
+              } catch (e) {}
+            }
+            const [targetPath] = pathWithQuery.split('?');
+            const targetView = getViewFromPath(targetPath);
+            window.history.pushState({}, '', pathWithQuery);
+            setCurrentView(targetView);
+          } else {
+            setCurrentView('newhome');
+          }
+        }} 
+      />
+    );
     if (currentView === 'opportunities') return <OpportunitiesPage lang={lang} onNavigate={simpleNav} />;
     if (currentView === 'join') return <JoinUsPage lang={lang} onNavigate={navigate} />;
     if (currentView === 'write-article') return (

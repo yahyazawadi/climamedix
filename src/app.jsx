@@ -6,7 +6,7 @@ import { Footer } from './features/main/components/Footer'
 import { TopBackground } from './features/main/components/TopBackground'
 import { NeatScripples } from './features/main/components/NeatScripples'
 import { ColoredBackground } from './features/main/components/ColoredBackground'
-import { AppRouter, useAppRouting } from './AppRouter'
+import { AppRouter, useAppRouting, getViewFromPath } from './AppRouter'
 import { AuthProvider, useAuth } from './features/auth/hooks/useAuth'
 import { translations } from './i18n/translations'
 import { LoadingPlanet } from './features/shared/components/LoadingPlanet'
@@ -52,6 +52,31 @@ function AppContent() {
   }, []);
 
   const { navigate } = useAppRouting(currentView, setCurrentView, setOpenedModal);
+
+  // Restore pending target URL after successful login (including OAuth redirects)
+  useEffect(() => {
+    if (user) {
+      try {
+        const savedRedirect = sessionStorage.getItem('cm_auth_redirect');
+        if (savedRedirect && (savedRedirect.startsWith('/') || savedRedirect.startsWith('http'))) {
+          sessionStorage.removeItem('cm_auth_redirect');
+          let pathWithQuery = savedRedirect;
+          if (savedRedirect.startsWith('http')) {
+            try {
+              const u = new URL(savedRedirect);
+              pathWithQuery = u.pathname + u.search;
+            } catch (e) {}
+          }
+          const [targetPath] = pathWithQuery.split('?');
+          const targetView = getViewFromPath(targetPath);
+          window.history.replaceState({}, '', pathWithQuery);
+          setCurrentView(targetView);
+        }
+      } catch (e) {
+        console.warn('Error restoring auth redirect:', e);
+      }
+    }
+  }, [user]);
   // Theme Switch handler
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';

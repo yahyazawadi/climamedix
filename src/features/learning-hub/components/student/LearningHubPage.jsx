@@ -34,7 +34,16 @@ export function LearningHubPage({ lang, onNavigate }) {
   // ─── Load Data ───────────────────────────────────────────────────────────
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (user) loadData();
+    if (user) {
+      loadData();
+    } else if (typeof window !== 'undefined') {
+      try {
+        const full = window.location.pathname + window.location.search;
+        if (full.includes('/courses') || full.includes('/course') || full.includes('course=')) {
+          sessionStorage.setItem('cm_auth_redirect', full);
+        }
+      } catch (e) {}
+    }
   }, [user]);
 
   async function loadData() {
@@ -119,7 +128,13 @@ export function LearningHubPage({ lang, onNavigate }) {
 
   // ─── Enroll Handler ───────────────────────────────────────────────────────
   async function handleEnroll(course) {
-    if (!user) { onNavigate('auth'); return; }
+    if (!user) {
+      try {
+        sessionStorage.setItem('cm_auth_redirect', window.location.pathname + window.location.search);
+      } catch (e) {}
+      onNavigate('auth');
+      return;
+    }
     if (enrollingId) return;
 
     // Check if already enrolled
@@ -207,7 +222,12 @@ export function LearningHubPage({ lang, onNavigate }) {
               ? 'يرجى تسجيل الدخول للوصول إلى المساقات التعليمية والاختبارات والشهادات.'
               : 'Please log in to access training courses, quizzes, and certificates.'}
           </p>
-          <Button variant="gradient" onClick={() => onNavigate('auth')}>
+          <Button variant="gradient" onClick={() => {
+            try {
+              sessionStorage.setItem('cm_auth_redirect', window.location.pathname + window.location.search);
+            } catch (e) {}
+            onNavigate('auth');
+          }}>
             {lang === 'ar' ? 'تسجيل الدخول / إنشاء حساب' : 'Log In / Sign Up'}
           </Button>
         </GlassCard>

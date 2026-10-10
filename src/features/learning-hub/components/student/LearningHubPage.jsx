@@ -156,6 +156,15 @@ export function LearningHubPage({ lang, onNavigate }) {
     }
   }
 
+  // ─── Auto-Refresh State Every 5 Minutes ───────────────────────────────────
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => {
+      loadData();
+    }, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [user]);
+
   // ─── Course Modal ─────────────────────────────────────────────────────────
   function handleSelectCourse(course) {
     setSelectedCourse(course._raw || course);
@@ -167,6 +176,9 @@ export function LearningHubPage({ lang, onNavigate }) {
     url.searchParams.delete('course');
     url.searchParams.delete('lesson');
     window.history.replaceState({}, '', url);
+    if (user) {
+      loadData();
+    }
   }
 
   // Called by CourseDetailModal when a lesson is completed
@@ -423,11 +435,7 @@ export function LearningHubPage({ lang, onNavigate }) {
                             <Button variant="gradient" style={{ width: '100%', fontSize: '13px' }} onClick={(e) => { e.stopPropagation(); handleSelectCourse(course); }}>
                               {lang === 'ar' ? 'متابعة التعلم' : 'Continue Learning'}
                             </Button>
-                          ) : access === 'teaser' ? (
-                            <Button variant="gradient" style={{ width: '100%', fontSize: '13px', background: 'linear-gradient(90deg, #0b2849, #004c6d)' }} onClick={(e) => { e.stopPropagation(); handleSelectCourse(course); }}>
-                              {lang === 'ar' ? 'تصفح المساق كزائر' : 'Browse as Guest'}
-                            </Button>
-                          ) : (
+                          ) : user ? (
                             <Button
                               variant="gradient"
                               style={{ width: '100%', fontSize: '13px' }}
@@ -437,6 +445,10 @@ export function LearningHubPage({ lang, onNavigate }) {
                               {enrollingId === course.id
                                 ? (lang === 'ar' ? 'جاري التسجيل...' : 'Enrolling...')
                                 : (lang === 'ar' ? 'التسجيل في المساق' : 'Enroll Now')}
+                            </Button>
+                          ) : (
+                            <Button variant="gradient" style={{ width: '100%', fontSize: '13px', background: 'linear-gradient(90deg, #0b2849, #004c6d)' }} onClick={(e) => { e.stopPropagation(); handleSelectCourse(course); }}>
+                              {lang === 'ar' ? 'تصفح المساق كزائر' : 'Browse as Guest'}
                             </Button>
                           )}
                         </div>

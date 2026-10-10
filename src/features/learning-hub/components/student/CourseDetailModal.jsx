@@ -13,7 +13,9 @@ import {
   unmarkLessonComplete,
   fetchQuiz,
   submitQuizAttempt,
-  fetchPassedAttempt
+  fetchPassedAttempt,
+  checkEnrollment,
+  enrollInCourse
 } from '../../services/lmsService';
 
 export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted, onDownloadCertificate }) {
@@ -39,7 +41,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
   if (!course) return null;
 
   const allLessons = modules.flatMap(m => m.lessons || []);
-  const activeLesson = allLessons.find(l => l.id === activeLessonId) || allLessons[0];
+  const activeLesson = activeLessonId === 'CERTIFICATE_MODULE' ? null : (allLessons.find(l => l.id === activeLessonId) || allLessons[0]);
 
   // ─── Body Scroll Lock ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -75,6 +77,15 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
         }
 
         if (targetLessonId) setActiveLessonId(targetLessonId);
+
+        // Ensure user is actively enrolled in Supabase when opening course
+        if (userId && course?.id) {
+          checkEnrollment(userId, course.id).then(enr => {
+            if (!enr) {
+              enrollInCourse(userId, course.id).catch(console.error);
+            }
+          }).catch(console.error);
+        }
       } catch (err) {
         console.error('CourseDetailModal load error:', err);
       } finally {
@@ -83,6 +94,22 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
     }
     load();
   }, [course.id, userId]);
+
+  // ─── Periodic Progress & State Sync (every 5 minutes) ─────────────────────
+  useEffect(() => {
+    if (!userId || !course?.id) return;
+    const interval = setInterval(async () => {
+      try {
+        const { completedSet: freshSet } = await fetchCompletedLessons(userId, course.id);
+        if (freshSet && freshSet.size > 0) {
+          setCompletedSet(prev => new Set([...prev, ...freshSet]));
+        }
+      } catch (err) {
+        console.error('Periodic progress sync error:', err);
+      }
+    }, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [userId, course?.id]);
 
   useEffect(() => {
     async function loadCertRequest() {
@@ -129,8 +156,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
         setCertRequest({
           course_id: course.id,
           user_id: userId || 'mock-user-123',
-          requested_name_ar: certNameAr,
-          requested_name_en: certNameEn,
+          requested_name_ar: certNameAr, requested_name_en: certNameEn,
           status: 'pending',
           requested_at: new Date().toISOString()
         });
@@ -143,8 +169,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
     const payload = {
       course_id: course.id,
       user_id: userId,
-      requested_name_ar: certNameAr,
-      requested_name_en: certNameEn,
+      requested_name_ar: certNameAr, requested_name_en: certNameEn,
       status: 'pending',
       rejection_reason: null,
       requested_at: new Date().toISOString()
@@ -244,17 +269,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
         if (onLessonCompleted) onLessonCompleted(course.id, pct, remaining);
       } catch (err) {
         console.error('Mark complete error:', err);
-        if (err.code === '42501' || err.message?.includes('violates row-level security')) {
-          // Teaser user or no DB permission: keep it in memory
-          const newSet = new Set([...completedSet, activeLessonId]);
-          setCompletedSet(newSet);
-          
-          const completedCount = newSet.size;
-          const total = allLessons.length;
-          const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
-          const remaining = total - completedCount;
-          if (onLessonCompleted) onLessonCompleted(course.id, pct, remaining);
-        }
+        alert(lang === 'ar' ? 'تعذر مزامنة حفظ التقدم مع السيرفر. يرجى التأكد من اتصال الإنترنت أو تسجيل الدخول.' : 'Could not sync completion to server. Please check your connection or sign in.');
       }
     }
   }
@@ -275,15 +290,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
       if (onLessonCompleted) onLessonCompleted(course.id, pct, remaining);
     } catch (err) {
       console.error('Mark complete error:', err);
-      if (err.code === '42501' || err.message?.includes('violates row-level security')) {
-        const newSet = new Set([...completedSet, activeLessonId]);
-        setCompletedSet(newSet);
-        const completedCount = newSet.size;
-        const total = allLessons.length;
-        const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
-        const remaining = total - completedCount;
-        if (onLessonCompleted) onLessonCompleted(course.id, pct, remaining);
-      }
+      alert(lang === 'ar' ? 'تعذر مزامنة حفظ التقدم مع السيرفر. يرجى التأكد من اتصال الإنترنت أو تسجيل الدخول.' : 'Could not sync completion to server. Please check your connection or sign in.');
     }
   }
 
@@ -972,7 +979,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                     const rawUrl = activeLesson.video_url.startsWith('http') || activeLesson.video_url.startsWith('blob:')
                       ? activeLesson.video_url
                       : `${r2Base}/${activeLesson.video_url}`;
-                    const resolvedVideoUrl = rawUrl.includes('?') ? rawUrl : `${rawUrl}?v=1080p`;
+                    const resolvedVideoUrl = rawUrl;
 
                     const resolvedTracks = (() => {
                       if (activeLesson.subtitles && Array.isArray(activeLesson.subtitles) && activeLesson.subtitles.length > 0) {

@@ -654,7 +654,7 @@ describe('Student Learning Hub Catalog & Course Detail Modal Exhaustive Suite (5
       fireEvent.click(screen.getByText('عرض الشهادة'));
 
       await waitFor(() => {
-        expect(screen.getByText('تحميل الشهادة بصيغة PNG')).toBeInTheDocument();
+        expect(screen.getByTitle('صورة عالية الجودة شفافة الخلفية')).toBeInTheDocument();
       });
 
       // Close modal
@@ -662,7 +662,7 @@ describe('Student Learning Hub Catalog & Course Detail Modal Exhaustive Suite (5
       fireEvent.click(closeCertBtn);
 
       await waitFor(() => {
-        expect(screen.queryByText('تحميل الشهادة بصيغة PNG')).not.toBeInTheDocument();
+        expect(screen.queryByTitle('صورة عالية الجودة شفافة الخلفية')).not.toBeInTheDocument();
       });
     });
   });
@@ -1007,7 +1007,8 @@ describe('Student Learning Hub Catalog & Course Detail Modal Exhaustive Suite (5
       expect(onLessonCompleted).toHaveBeenCalledWith('crs-free-1', 67, 1);
     });
 
-    it('resiliently maintains in-memory completion when DB throws RLS 42501 permission error', async () => {
+    it('alerts user when DB throws error during mark complete', async () => {
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
       const rlsError = new Error('new row violates row-level security policy for table user_lesson_progress');
       rlsError.code = '42501';
       lmsService.markLessonComplete.mockRejectedValueOnce(rlsError);
@@ -1036,11 +1037,10 @@ describe('Student Learning Hub Catalog & Course Detail Modal Exhaustive Suite (5
 
       fireEvent.click(screen.getByText('تحديد الدرس كمكتمل'));
 
-      // In-memory update still succeeds
       await waitFor(() => {
-        expect(screen.getByText('تم إتمام هذا الدرس بنجاح!')).toBeInTheDocument();
+        expect(alertSpy).toHaveBeenCalledWith('تعذر مزامنة حفظ التقدم مع السيرفر. يرجى التأكد من اتصال الإنترنت أو تسجيل الدخول.');
       });
-      expect(onLessonCompleted).toHaveBeenCalledWith('crs-free-1', 67, 1);
+      alertSpy.mockRestore();
     });
 
     it('displays overall course completion percentage in header (33%)', async () => {
@@ -1676,8 +1676,8 @@ describe('Student Learning Hub Catalog & Course Detail Modal Exhaustive Suite (5
       fireEvent.click(screen.getByText('تحميل الشهادة'));
 
       await waitFor(() => {
-        // CertificateGenerator renders canvas
-        expect(document.querySelector('canvas')).toBeInTheDocument();
+        // CertificateGenerator renders svg preview
+        expect(document.querySelector('svg')).toBeInTheDocument();
       });
 
       // Close certificate generator modal using its specific close button (with fontSize 22px)

@@ -140,6 +140,15 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
         ? 'footer' 
         : (hash || (['about', 'research', 'training', 'upcoming', 'contact'].includes(segment) ? segment : null));
 
+      // If navigating to auth, always scroll to top and avoid restoring previous page scroll
+      if (getViewFromPath(p) === 'auth') {
+        if (window.__lenis) {
+          window.__lenis.scrollTo(0, { immediate: true });
+        }
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        return;
+      }
+
       const performScroll = () => {
         if (target === 'footer' || target === 'contact') {
           const bottomEl = document.getElementById('footer-bottom');
@@ -239,7 +248,9 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
       }
     };
 
-    scrollToTarget();
+    if (getViewFromPath(window.location.pathname) !== 'auth') {
+      scrollToTarget();
+    }
     window.addEventListener('hashchange', scrollToTarget);
 
     window.addEventListener('popstate', handlePopState);
@@ -251,6 +262,9 @@ export function useAppRouting(currentView, setCurrentView, setOpenedModal) {
 
   useEffect(() => {
     if (currentView === 'auth') {
+      if (window.__lenis) {
+        window.__lenis.scrollTo(0, { immediate: true });
+      }
       window.scrollTo(0, 0);
     }
   }, [currentView]);

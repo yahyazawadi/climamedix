@@ -1,5 +1,5 @@
 {
-  "scannedAt": "2026-10-10T12:23:37.853Z",
+  "scannedAt": "2026-10-10T12:35:54.579Z",
   "totalAssets": 67,
   "totalReferences": 97,
   "assets": [
@@ -261,19 +261,19 @@
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 224,
+          "line": 229,
           "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 398,
+          "line": 399,
           "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 546,
+          "line": 547,
           "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
           "matchType": "inline-clone"
         },
@@ -363,13 +363,13 @@
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 425,
+          "line": 426,
           "snippet": "<polyline points=\"12 6 12 12 16 14\"></polyline>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 571,
+          "line": 572,
           "snippet": "<polyline points=\"12 6 12 12 16 14\"></polyline>",
           "matchType": "inline-clone"
         }
@@ -507,13 +507,13 @@
       "references": [
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 689,
+          "line": 690,
           "snippet": "<path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"/>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 690,
+          "line": 691,
           "snippet": "<path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\"/>",
           "matchType": "inline-clone"
         }
@@ -585,7 +585,7 @@
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 554,
+          "line": 555,
           "snippet": "<path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path>",
           "matchType": "inline-clone"
         }

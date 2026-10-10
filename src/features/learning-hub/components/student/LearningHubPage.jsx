@@ -117,8 +117,13 @@ export function LearningHubPage({ lang, onNavigate }) {
         }
       }
       if (urlCourseId) {
-        const c = (courses || []).find(x => x.id === urlCourseId);
-        if (c) setSelectedCourse(c);
+        const isUserEnrolled = validEnrolled.some(e => e.id === urlCourseId) || certCourseIds.has(urlCourseId);
+        // Only auto-open course modal from URL if user is ALREADY enrolled!
+        // Otherwise, show them the new full course screen so they can enroll.
+        if (isUserEnrolled) {
+          const c = (courses || []).find(x => x.id === urlCourseId);
+          if (c) setSelectedCourse(c);
+        }
       }
     } catch (err) {
       console.error('LearningHub loadData error:', err);
@@ -256,10 +261,6 @@ export function LearningHubPage({ lang, onNavigate }) {
                 try {
                   const courses = await fetchCourses();
                   setAllCourses(courses || []);
-                  const mainCourse = (courses || []).find(c => c.id === targetId) || (courses || [])[0];
-                  if (mainCourse) {
-                    setSelectedCourse(mainCourse._raw || mainCourse);
-                  }
                 } catch (err) {
                   console.error('Error opening main course as guest:', err);
                 } finally {

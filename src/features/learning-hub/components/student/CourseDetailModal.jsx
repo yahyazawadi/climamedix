@@ -44,37 +44,29 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
 
   if (!course) return null;
 
-  const visibleModules = (() => {
-    if (isAdmin) {
-      return modules;
-    }
-    const visible = [];
-    for (let i = 0; i < modules.length; i++) {
-      const mod = modules[i];
-      if (i === 0) {
-        visible.push(mod);
-      } else {
-        const prevMod = modules[i - 1];
-        const prevVideos = (prevMod.lessons || []).filter(l => Boolean(l.video_url));
-        const targetLessons = prevVideos.length > 0 ? prevVideos : (prevMod.lessons || []);
-        if (targetLessons.length === 0) {
-          break;
-        }
-        const finishedCount = targetLessons.filter(l => completedSet.has(l.id)).length;
-        const completionRate = finishedCount / targetLessons.length;
-        if (completionRate >= 0.9) {
-          visible.push(mod);
-        } else {
-          break;
-        }
+  function isModuleUnlocked(modIndex) {
+    if (isAdmin) return true;
+    if (modIndex === 0) return true;
+    for (let i = 1; i <= modIndex; i++) {
+      const prevMod = modules[i - 1];
+      const prevVideos = (prevMod?.lessons || []).filter(l => Boolean(l.video_url));
+      const targetLessons = prevVideos.length > 0 ? prevVideos : (prevMod?.lessons || []);
+      if (targetLessons.length === 0) return false;
+      const finishedCount = targetLessons.filter(l => completedSet.has(l.id)).length;
+      if ((finishedCount / targetLessons.length) < 0.9) {
+        return false;
       }
     }
-    return visible;
-  })();
+    return true;
+  }
 
   const allLessons = modules.flatMap(m => m.lessons || []);
-  const accessibleLessons = visibleModules.flatMap(m => m.lessons || []);
-  const activeLesson = activeLessonId === 'CERTIFICATE_MODULE' ? null : (accessibleLessons.find(l => l.id === activeLessonId) || accessibleLessons[0]);
+  const unlockedLessons = modules
+    .filter((_, idx) => isModuleUnlocked(idx))
+    .flatMap(m => m.lessons || []);
+  const activeLesson = activeLessonId === 'CERTIFICATE_MODULE' 
+    ? null 
+    : (unlockedLessons.find(l => l.id === activeLessonId) || unlockedLessons[0] || allLessons[0]);
 
   // ─── Body Scroll Lock ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -99,14 +91,32 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
         const params = new URLSearchParams(window.location.search);
         const urlLessonId = params.get('lesson');
 
+        const isUnlockedInitially = (idx) => {
+          if (isAdmin) return true;
+          if (idx === 0) return true;
+          for (let i = 1; i <= idx; i++) {
+            const prev = (syllabus || [])[i - 1];
+            const prevVids = (prev?.lessons || []).filter(l => Boolean(l.video_url));
+            const targets = prevVids.length > 0 ? prevVids : (prev?.lessons || []);
+            if (targets.length === 0) return false;
+            const done = targets.filter(l => completedSet.has(l.id)).length;
+            if ((done / targets.length) < 0.9) return false;
+          }
+          return true;
+        };
+
+        const initialUnlockedLessons = (syllabus || [])
+          .filter((_, idx) => isUnlockedInitially(idx))
+          .flatMap(m => m.lessons || []);
+
         let targetLessonId = null;
         if (urlLessonId) {
-          const exists = (syllabus || []).some(m => m.lessons?.some(l => l.id === urlLessonId));
+          const exists = initialUnlockedLessons.some(l => l.id === urlLessonId);
           if (exists) targetLessonId = urlLessonId;
         }
         
         if (!targetLessonId) {
-          targetLessonId = (syllabus?.[0]?.lessons || [])[0]?.id;
+          targetLessonId = initialUnlockedLessons[0]?.id || (syllabus?.[0]?.lessons || [])[0]?.id;
         }
 
         if (targetLessonId) setActiveLessonId(targetLessonId);
@@ -725,7 +735,8 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                   </button>
                 </div>
 
-              {visibleModules.map(mod => {
+              {modules.map((mod, modIndex) => {
+                const isModLocked = !isModuleUnlocked(modIndex);
                 const isCollapsed = collapsedModules.has(mod.id);
                 return (
                   <div key={mod.id} style={{ marginBottom: '20px' }}>
@@ -734,13 +745,32 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                       style={{ 
                         width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                         background: 'none', border: 'none', cursor: 'pointer', padding: '4px', 
-                        textAlign: lang === 'ar' ? 'right' : 'left', marginBottom: '4px'
+                        textAlign: lang === 'ar' ? 'right' : 'left', marginBottom: '4px',
+                        gap: '8px'
                       }}
                     >
-                      <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#004c6d', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        {lang === 'ar' ? mod.title_ar : (mod.title_en || mod.title_ar)}
-                      </span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#004c6d" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isCollapsed ? (lang === 'ar' ? 'rotate(90deg)' : 'rotate(-90deg)') : 'rotate(0deg)', transition: 'transform 0.2s', opacity: 0.6 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 'bold', color: isModLocked ? 'rgba(11,40,73,0.45)' : '#004c6d', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          {lang === 'ar' ? mod.title_ar : (mod.title_en || mod.title_ar)}
+                        </span>
+                        {isModLocked && (
+                          <span style={{ 
+                            fontSize: '10px', 
+                            background: 'rgba(239, 68, 68, 0.1)', 
+                            color: '#ef4444', 
+                            padding: '2px 8px', 
+                            borderRadius: '10px', 
+                            fontWeight: 'bold',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            {lang === 'ar' ? 'مغلق (أكمل 90% من الوحدة السابقة)' : 'Locked'}
+                          </span>
+                        )}
+                      </div>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isModLocked ? 'rgba(11,40,73,0.3)' : '#004c6d'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isCollapsed ? (lang === 'ar' ? 'rotate(90deg)' : 'rotate(-90deg)') : 'rotate(0deg)', transition: 'transform 0.2s', opacity: 0.6 }}>
                         <polyline points="6 9 12 15 18 9"/>
                       </svg>
                     </button>
@@ -790,8 +820,8 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                             {/* The Dot */}
                             <div style={{
                               width: '14px', height: '14px', borderRadius: '50%',
-                              background: isDone ? '#004c6d' : (isActive ? '#004c6d' : '#ffffff'),
-                              border: `2px solid ${isDone ? '#004c6d' : (isActive ? '#004c6d' : 'rgba(11, 40, 73, 0.2)')}`,
+                              background: isModLocked ? 'rgba(11,40,73,0.06)' : (isDone ? '#004c6d' : (isActive ? '#004c6d' : '#ffffff')),
+                              border: `2px solid ${isModLocked ? 'rgba(11,40,73,0.15)' : (isDone ? '#004c6d' : (isActive ? '#004c6d' : 'rgba(11, 40, 73, 0.2)'))}`,
                               boxShadow: 'none',
                               transition: 'all 0.2s ease',
                               position: 'absolute',
@@ -812,20 +842,33 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
 
                           {/* The Card */}
                           <div
-                            onClick={() => { setActiveLessonId(les.id); setQuizMode(false); setMobileDrawerOpen(false); }}
+                            onClick={() => {
+                              if (isModLocked) return;
+                              setActiveLessonId(les.id);
+                              setQuizMode(false);
+                              setMobileDrawerOpen(false);
+                            }}
                             style={{
                               flexGrow: 1,
-                              padding: '12px 14px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px',
+                              padding: '12px 14px', borderRadius: '10px',
+                              cursor: isModLocked ? 'not-allowed' : 'pointer',
+                              fontSize: '13px',
                               background: isActive ? '#004c6d' : 'transparent',
-                              color: isActive ? '#fff' : '#0b2849',
+                              color: isModLocked ? 'rgba(11,40,73,0.4)' : (isActive ? '#fff' : '#0b2849'),
                               border: '1px solid rgba(11,40,73,0.07)',
                               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                               fontWeight: isActive ? 'bold' : 'normal', transition: 'all 0.15s',
-                              gap: '12px'
+                              gap: '12px',
+                              opacity: isModLocked ? 0.6 : 1
                             }}
                           >
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', flexGrow: 1 }}>
-                              <span>{title}</span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {isModLocked && (
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.6 }}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                )}
+                                <span>{title}</span>
+                              </div>
                               {les.duration && (
                                 <span style={{ fontSize: '11px', opacity: isActive ? 0.8 : 0.5, fontWeight: 'normal' }}>
                                   {les.duration} {lang === 'ar' ? 'دقيقة' : 'mins'}
@@ -841,7 +884,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
               </div>
             );
           })}
-          {visibleModules.length === 0 && (
+          {modules.length === 0 && (
                 <p style={{ fontSize: '13px', color: 'rgba(11,40,73,0.4)', textAlign: 'center', padding: '20px 0' }}>
                   {lang === 'ar' ? 'لا توجد وحدات بعد.' : 'No modules yet.'}
                 </p>

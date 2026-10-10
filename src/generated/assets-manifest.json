@@ -1,5 +1,5 @@
 {
-  "scannedAt": "2026-10-10T13:20:14.608Z",
+  "scannedAt": "2026-10-10T17:43:34.773Z",
   "totalAssets": 67,
   "totalReferences": 97,
   "assets": [
@@ -111,19 +111,19 @@
         },
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 774,
+          "line": 807,
           "snippet": "<polyline points=\"20 6 9 17 4 12\"/>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 905,
+          "line": 938,
           "snippet": "<svg width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#15b47a\" strokeWidth=\"2\" strokeLinecap=\"round\" strokeLinejoin=\"round\" style={{ marginBottom:",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 1084,
+          "line": 1117,
           "snippet": "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" strokeWidth=\"3\" strokeLinecap=\"round\" strokeLinejoin=\"round\" style={{ display:",
           "matchType": "inline-clone"
         },
@@ -255,7 +255,7 @@
       "references": [
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 858,
+          "line": 891,
           "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
           "matchType": "inline-clone"
         },
@@ -357,7 +357,7 @@
       "references": [
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 921,
+          "line": 954,
           "snippet": "<svg width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#ffb300\" strokeWidth=\"2\" strokeLinecap=\"round\" strokeLinejoin=\"round\" style={{ marginBottom:",
           "matchType": "inline-clone"
         },
@@ -507,13 +507,13 @@
       "references": [
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 693,
+          "line": 694,
           "snippet": "<path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"/>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 694,
+          "line": 695,
           "snippet": "<path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\"/>",
           "matchType": "inline-clone"
         }
@@ -579,7 +579,7 @@
       "references": [
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 873,
+          "line": 906,
           "snippet": "<path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path>",
           "matchType": "inline-clone"
         },

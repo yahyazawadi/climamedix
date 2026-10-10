@@ -641,6 +641,7 @@ export function LearningHubPage({ lang, onNavigate }) {
           lang={lang}
           course={selectedCourse}
           userId={user?.id || null}
+          userProfile={userProfile}
           isLocked={user ? (getCourseAccess(selectedCourse) === 'locked') : false}
           onClose={handleCloseCourseModal}
           onLessonCompleted={handleLessonCompleted}

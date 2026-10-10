@@ -6,6 +6,7 @@ import { RichTextRenderer } from '../../../shared/components/RichTextRenderer';
 import { AmbientParticles } from '../../../shared/components/AmbientParticles';
 import { ShareActionButtons } from '../../../shared/components/ShareActionButtons';
 import { CustomVideoPlayer } from '../player/CustomVideoPlayer';
+import { useAuth } from '../../../auth/hooks/useAuth';
 import {
   fetchCourseSyllabus,
   fetchCompletedLessons,
@@ -18,7 +19,11 @@ import {
   enrollInCourse
 } from '../../services/lmsService';
 
-export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted, onDownloadCertificate }) {
+export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: propUserProfile, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted, onDownloadCertificate }) {
+  const auth = useAuth ? useAuth() : null;
+  const userProfile = propUserProfile !== undefined ? propUserProfile : auth?.userProfile;
+  const isAdmin = Boolean(userProfile && (userProfile.role === 'admin' || userProfile.role === 'superadmin'));
+
   const [modules, setModules] = useState([]);
   const [activeLessonId, setActiveLessonId] = useState(null);
   const [completedSet, setCompletedSet] = useState(new Set());
@@ -37,11 +42,39 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
   const [certNameAr, setCertNameAr] = useState('');
   const [certNameEn, setCertNameEn] = useState('');
 
-
   if (!course) return null;
 
+  const visibleModules = (() => {
+    if (isAdmin) {
+      return modules;
+    }
+    const visible = [];
+    for (let i = 0; i < modules.length; i++) {
+      const mod = modules[i];
+      if (i === 0) {
+        visible.push(mod);
+      } else {
+        const prevMod = modules[i - 1];
+        const prevVideos = (prevMod.lessons || []).filter(l => Boolean(l.video_url));
+        const targetLessons = prevVideos.length > 0 ? prevVideos : (prevMod.lessons || []);
+        if (targetLessons.length === 0) {
+          break;
+        }
+        const finishedCount = targetLessons.filter(l => completedSet.has(l.id)).length;
+        const completionRate = finishedCount / targetLessons.length;
+        if (completionRate >= 0.9) {
+          visible.push(mod);
+        } else {
+          break;
+        }
+      }
+    }
+    return visible;
+  })();
+
   const allLessons = modules.flatMap(m => m.lessons || []);
-  const activeLesson = activeLessonId === 'CERTIFICATE_MODULE' ? null : (allLessons.find(l => l.id === activeLessonId) || allLessons[0]);
+  const accessibleLessons = visibleModules.flatMap(m => m.lessons || []);
+  const activeLesson = activeLessonId === 'CERTIFICATE_MODULE' ? null : (accessibleLessons.find(l => l.id === activeLessonId) || accessibleLessons[0]);
 
   // ─── Body Scroll Lock ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -692,7 +725,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
                   </button>
                 </div>
 
-              {modules.map(mod => {
+              {visibleModules.map(mod => {
                 const isCollapsed = collapsedModules.has(mod.id);
                 return (
                   <div key={mod.id} style={{ marginBottom: '20px' }}>
@@ -808,7 +841,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, isLocked, onUpg
               </div>
             );
           })}
-          {modules.length === 0 && (
+          {visibleModules.length === 0 && (
                 <p style={{ fontSize: '13px', color: 'rgba(11,40,73,0.4)', textAlign: 'center', padding: '20px 0' }}>
                   {lang === 'ar' ? 'لا توجد وحدات بعد.' : 'No modules yet.'}
                 </p>

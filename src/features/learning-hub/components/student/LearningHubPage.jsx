@@ -42,6 +42,7 @@ export function LearningHubPage({ lang, onNavigate }) {
         const full = window.location.pathname + window.location.search;
         if (full.includes('/courses') || full.includes('/course') || full.includes('course=')) {
           sessionStorage.setItem('cm_auth_redirect', full);
+          localStorage.setItem('cm_auth_redirect', full);
         }
       } catch (e) {}
     }
@@ -239,7 +240,9 @@ export function LearningHubPage({ lang, onNavigate }) {
           </p>
           <Button variant="gradient" onClick={() => {
             try {
-              sessionStorage.setItem('cm_auth_redirect', window.location.pathname + window.location.search);
+              const fullPath = window.location.pathname + window.location.search;
+              sessionStorage.setItem('cm_auth_redirect', fullPath);
+              localStorage.setItem('cm_auth_redirect', fullPath);
             } catch (e) {}
             onNavigate('auth');
           }}>

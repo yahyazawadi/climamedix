@@ -367,8 +367,11 @@ export function AppRouter({ currentView, setCurrentView, lang, setOpenedModal, n
         onAuthSuccess={() => {
           let redirectUrl = null;
           try {
-            redirectUrl = sessionStorage.getItem('cm_auth_redirect');
-            if (redirectUrl) sessionStorage.removeItem('cm_auth_redirect');
+            redirectUrl = sessionStorage.getItem('cm_auth_redirect') || localStorage.getItem('cm_auth_redirect');
+            if (redirectUrl) {
+              sessionStorage.removeItem('cm_auth_redirect');
+              localStorage.removeItem('cm_auth_redirect');
+            }
           } catch (e) {}
           if (!redirectUrl) {
             try {

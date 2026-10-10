@@ -57,9 +57,10 @@ function AppContent() {
   useEffect(() => {
     if (user) {
       try {
-        const savedRedirect = sessionStorage.getItem('cm_auth_redirect');
+        const savedRedirect = sessionStorage.getItem('cm_auth_redirect') || localStorage.getItem('cm_auth_redirect');
         if (savedRedirect && (savedRedirect.startsWith('/') || savedRedirect.startsWith('http'))) {
           sessionStorage.removeItem('cm_auth_redirect');
+          localStorage.removeItem('cm_auth_redirect');
           let pathWithQuery = savedRedirect;
           if (savedRedirect.startsWith('http')) {
             try {

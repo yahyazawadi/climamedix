@@ -95,6 +95,7 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
       return (
         (p.full_name && p.full_name.toLowerCase().includes(s)) ||
         (p.email && p.email.toLowerCase().includes(s)) ||
+        (p.country && p.country.toLowerCase().includes(s)) ||
         (p.role && p.role.toLowerCase().includes(s)) ||
         (p.profession && p.profession.toLowerCase().includes(s))
       );
@@ -324,6 +325,7 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
                   <tr>
                     <th>{lang === 'ar' ? 'المستخدم' : 'User'}</th>
                     <th>{lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</th>
+                    <th>{lang === 'ar' ? 'الدولة' : 'Country'}</th>
                     <th>{lang === 'ar' ? 'الدور' : 'Role'}</th>
                     <th>{lang === 'ar' ? 'إجراء' : 'Action'}</th>
                   </tr>
@@ -331,7 +333,7 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
                 <tbody>
                   {paginatedProfiles.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="umd-no-results">
+                      <td colSpan={5} className="umd-no-results">
                         {lang === 'ar' ? 'لا توجد نتائج مطابقة' : 'No matching results'}
                       </td>
                     </tr>
@@ -352,6 +354,13 @@ export function UserManagementDashboard({ lang = 'ar', onNavigate }) {
                           </div>
                         </td>
                         <td className="umd-email-cell">{profile.email}</td>
+                        <td className="umd-country-cell">
+                          {profile.country ? (
+                            <span className="umd-country-badge">{profile.country}</span>
+                          ) : (
+                            <span className="umd-empty-dash">—</span>
+                          )}
+                        </td>
                         <td>
                           <span className={`umd-role-badge role-${profile.role}`}>
                             {profile.role}

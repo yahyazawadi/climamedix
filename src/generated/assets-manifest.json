@@ -1,7 +1,7 @@
 {
-  "scannedAt": "2026-10-10T11:55:21.560Z",
+  "scannedAt": "2026-10-10T12:23:37.853Z",
   "totalAssets": 67,
-  "totalReferences": 95,
+  "totalReferences": 97,
   "assets": [
     {
       "name": "icon_calendar.svg",
@@ -250,8 +250,8 @@
       "type": "svg",
       "sizeBytes": 271,
       "directReferencesCount": 0,
-      "inlineReferencesCount": 4,
-      "referencesCount": 4,
+      "inlineReferencesCount": 5,
+      "referencesCount": 5,
       "references": [
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
@@ -268,6 +268,12 @@
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
           "line": 398,
+          "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
+          "line": 546,
           "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
           "matchType": "inline-clone"
         },
@@ -336,6 +342,36 @@
           "line": 209,
           "snippet": "import mobileWebP  from '../../../assets/arab_world_map_mobile.webp';",
           "matchType": "file"
+        }
+      ]
+    },
+    {
+      "name": "icon_clock.svg",
+      "path": "src/assets/icons/icon_clock.svg",
+      "ext": "svg",
+      "type": "svg",
+      "sizeBytes": 264,
+      "directReferencesCount": 0,
+      "inlineReferencesCount": 3,
+      "referencesCount": 3,
+      "references": [
+        {
+          "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
+          "line": 921,
+          "snippet": "<svg width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#ffb300\" strokeWidth=\"2\" strokeLinecap=\"round\" strokeLinejoin=\"round\" style={{ marginBottom:",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
+          "line": 425,
+          "snippet": "<polyline points=\"12 6 12 12 16 14\"></polyline>",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
+          "line": 571,
+          "snippet": "<polyline points=\"12 6 12 12 16 14\"></polyline>",
+          "matchType": "inline-clone"
         }
       ]
     },
@@ -471,38 +507,14 @@
       "references": [
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 541,
+          "line": 689,
           "snippet": "<path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"/>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 542,
+          "line": 690,
           "snippet": "<path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\"/>",
-          "matchType": "inline-clone"
-        }
-      ]
-    },
-    {
-      "name": "icon_clock.svg",
-      "path": "src/assets/icons/icon_clock.svg",
-      "ext": "svg",
-      "type": "svg",
-      "sizeBytes": 264,
-      "directReferencesCount": 0,
-      "inlineReferencesCount": 2,
-      "referencesCount": 2,
-      "references": [
-        {
-          "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 921,
-          "snippet": "<svg width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#ffb300\" strokeWidth=\"2\" strokeLinecap=\"round\" strokeLinejoin=\"round\" style={{ marginBottom:",
-          "matchType": "inline-clone"
-        },
-        {
-          "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 423,
-          "snippet": "<polyline points=\"12 6 12 12 16 14\"></polyline>",
           "matchType": "inline-clone"
         }
       ]
@@ -573,7 +585,7 @@
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 406,
+          "line": 554,
           "snippet": "<path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path>",
           "matchType": "inline-clone"
         }

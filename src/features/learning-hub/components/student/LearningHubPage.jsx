@@ -362,7 +362,155 @@ export function LearningHubPage({ lang, onNavigate }) {
               <LoadingSkeleton />
             ) : allCourses.length === 0 ? (
               <EmptyState lang={lang} message={lang === 'ar' ? 'لا توجد مساقات متاحة حالياً.' : 'No courses available yet.'} />
-            ) : (
+            ) : allCourses.length === 1 ? (() => {
+              const course = allCourses[0];
+              const access = getCourseAccess(course);
+              const isAlreadyEnrolled = enrolledCourseIds.has(course.id);
+              const title = lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar);
+              const desc = lang === 'ar' ? course.description_ar : (course.description_en || course.description_ar);
+
+              return (
+                <div
+                  style={{
+                    background: '#ffffff',
+                    borderRadius: '24px',
+                    border: '1px solid rgba(11, 40, 73, 0.1)',
+                    boxShadow: '0 20px 50px rgba(11, 40, 73, 0.08)',
+                    overflow: 'hidden',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+                    gap: '0',
+                    transition: 'all 0.3s ease',
+                  }}
+                  className="cdm-hero-showcase-card"
+                >
+                  {/* Visual Media Column */}
+                  <div style={{ position: 'relative', minHeight: '360px', background: '#0b2849', overflow: 'hidden' }}>
+                    {course.cover_image ? (
+                      <img
+                        src={course.cover_image}
+                        alt={title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #0b2849, #004c6d)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+                          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                        </svg>
+                      </div>
+                    )}
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(11,40,73,0.85) 0%, rgba(11,40,73,0.2) 60%, transparent 100%)' }} />
+                    <span style={{
+                      position: 'absolute',
+                      top: '20px',
+                      right: lang === 'ar' ? '20px' : 'auto',
+                      left: lang === 'ar' ? 'auto' : '20px',
+                      background: 'rgba(21, 180, 122, 0.95)',
+                      backdropFilter: 'blur(10px)',
+                      color: '#fff',
+                      fontSize: '13px',
+                      padding: '6px 16px',
+                      borderRadius: '30px',
+                      fontWeight: 'bold',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                    }}>
+                      {course.category || (lang === 'ar' ? 'برنامج معتمد' : 'Certified Program')}
+                    </span>
+
+                    {/* Media Footer Details */}
+                    <div style={{ position: 'absolute', bottom: '24px', right: lang === 'ar' ? '24px' : 'auto', left: lang === 'ar' ? 'auto' : '24px', color: '#fff' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15b47a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span>{course.duration || '12 أسبوعاً'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content & Actions Column */}
+                  <div style={{ padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
+                    <div>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(21, 180, 122, 0.1)', color: '#15b47a', padding: '6px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', marginBottom: '16px' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        {lang === 'ar' ? 'المساق التدريبي المتاح حالياً' : 'Featured Active Course'}
+                      </div>
+
+                      <h2 style={{ color: '#0b2849', fontSize: '26px', fontWeight: '800', lineHeight: '1.4', margin: '0 0 16px 0' }}>
+                        {title}
+                      </h2>
+
+                      {desc && (
+                        <p style={{ color: 'rgba(11, 40, 73, 0.75)', fontSize: '15px', lineHeight: '1.8', margin: '0 0 24px 0' }}>
+                          {desc}
+                        </p>
+                      )}
+
+                      {/* Course Highlights Badges */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 14px', borderRadius: '10px', fontSize: '13px', color: '#0b2849', fontWeight: '600' }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#004c6d" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                          <span>{lang === 'ar' ? '14 درساً تطبيقياً' : '14 Video Lessons'}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 14px', borderRadius: '10px', fontSize: '13px', color: '#0b2849', fontWeight: '600' }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#004c6d" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                          <span>{lang === 'ar' ? 'وحدتان دراسيتان' : '2 Modules'}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 14px', borderRadius: '10px', fontSize: '13px', color: '#0b2849', fontWeight: '600' }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15b47a" strokeWidth="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                          <span>{lang === 'ar' ? 'شهادة إتمام معتمدة' : 'Official Certificate'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Bar */}
+                    <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap', borderTop: '1px solid rgba(11, 40, 73, 0.08)', paddingTop: '20px' }}>
+                      {access === 'locked' ? (
+                        <Button variant="outline" style={{ minWidth: '220px', borderColor: '#004c6d', color: '#004c6d', fontSize: '15px', padding: '14px 28px' }} onClick={() => onNavigate('join-us')}>
+                          {lang === 'ar' ? 'ترقية الحساب للوصول' : 'Upgrade for Access'}
+                        </Button>
+                      ) : isAlreadyEnrolled ? (
+                        <Button variant="gradient" style={{ minWidth: '220px', fontSize: '15px', padding: '14px 28px' }} onClick={() => handleSelectCourse(course)}>
+                          {lang === 'ar' ? 'متابعة التعلم والانتقال للمساق' : 'Continue Learning'}
+                        </Button>
+                      ) : user ? (
+                        <Button
+                          variant="gradient"
+                          style={{ minWidth: '220px', fontSize: '15px', padding: '14px 28px' }}
+                          onClick={() => handleEnroll(course)}
+                          disabled={enrollingId === course.id}
+                        >
+                          {enrollingId === course.id
+                            ? (lang === 'ar' ? 'جاري التسجيل في المساق...' : 'Enrolling...')
+                            : (lang === 'ar' ? 'التسجيل في المساق والبدء الآن' : 'Enroll in Course Now')}
+                        </Button>
+                      ) : (
+                        <Button variant="gradient" style={{ minWidth: '220px', fontSize: '15px', padding: '14px 28px' }} onClick={() => handleSelectCourse(course)}>
+                          {lang === 'ar' ? 'استعراض المساق كزائر' : 'Browse as Guest'}
+                        </Button>
+                      )}
+                      
+                      <button
+                        type="button"
+                        onClick={() => handleSelectCourse(course)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#0b2849',
+                          textDecoration: 'underline',
+                          cursor: 'pointer',
+                          fontWeight: '600',
+                          fontSize: '14px'
+                        }}
+                      >
+                        {lang === 'ar' ? 'معاينة المنهج والدروس' : 'Preview Syllabus'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })() : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '28px' }}>
                 {allCourses.map(course => {
                   const access = getCourseAccess(course);

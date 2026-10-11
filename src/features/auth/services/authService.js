@@ -80,18 +80,10 @@ export const authService = {
    * Sign in with OAuth providers (Google, Facebook, Apple, Twitter/X, etc.)
    */
   async signInWithOAuth(provider) {
-    let redirectTarget = window.location.origin;
-    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-      const devPort = window.location.port || '9090';
-      // In Supabase, if localhost URLs are not in the allowlist, Supabase redirects to Site URL.
-      // We pass the dev port in the redirect query or cookie
-      document.cookie = `cm_dev_port=${devPort}; domain=.climateaction.site; path=/; max-age=3600; SameSite=None; Secure`;
-      redirectTarget = `${window.location.origin}?dev_port=${devPort}`;
-    }
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: redirectTarget,
+        redirectTo: window.location.origin,
       },
     });
     if (error) throw error;

@@ -157,21 +157,7 @@ export function AuthProvider({ children, initialProfile = null, initialDevAdmin 
     const init = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        let currentUser = session?.user ?? null;
-        if (!currentUser && typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-          if (localStorage.getItem('cm_dev_admin_local') === 'true') {
-            currentUser = { id: '00000000-0000-0000-0000-000000000001', email: 'admin@localhost.dev' };
-            setUser(currentUser);
-            setUserProfile({
-              id: '00000000-0000-0000-0000-000000000001',
-              full_name: 'Dev Super Admin',
-              role: 'superadmin',
-              profession: 'Lead System Architect'
-            });
-            setLoading(false);
-            return;
-          }
-        }
+        const currentUser = session?.user ?? null;
         setUser(currentUser);
         setAccessToken(session?.access_token ?? null);
         if (currentUser) {

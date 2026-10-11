@@ -182,45 +182,6 @@ export function AuthPage({ onAuthSuccess, lang = 'ar' }) {
                     : (lang === 'ar' ? 'المتابعة باستخدام Google' : 'Continue with Google')}
                 </span>
               </button>
-
-              {/* Localhost Dev Login Shortcut */}
-              {typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
-                <button
-                  type="button"
-                  id="dev-admin-shortcut-btn"
-                  onClick={async () => {
-                    setLoading(true);
-                    try {
-                      localStorage.setItem('cm_dev_admin_local', 'true');
-                      // Set an instant superadmin mock user
-                      window.location.href = window.location.origin + '/admin/courses';
-                    } catch (e) {
-                      console.error(e);
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    width: '100%',
-                    marginTop: '12px',
-                    padding: '12px 16px',
-                    borderRadius: '10px',
-                    background: 'rgba(21, 180, 122, 0.1)',
-                    border: '1.5px dashed #15b47a',
-                    color: '#004c6d',
-                    fontWeight: 'bold',
-                    fontSize: '13.5px',
-                    cursor: 'pointer',
-                    fontFamily: 'inherit'
-                  }}
-                >
-                  ⚡ {lang === 'ar' ? 'دخول فوري كمسؤول (Localhost Dev Admin)' : 'Fast Localhost Dev Admin Login'}
-                </button>
-              )}
             </div>
 
             {/* Security Notice */}

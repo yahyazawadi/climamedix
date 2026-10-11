@@ -80,6 +80,14 @@ export const authService = {
    * Sign in with OAuth providers (Google, Facebook, Apple, Twitter/X, etc.)
    */
   async signInWithOAuth(provider) {
+    if (typeof window !== 'undefined' && window.location.origin) {
+      try {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          localStorage.setItem('cm_dev_origin', window.location.origin);
+          document.cookie = `cm_dev_origin=${encodeURIComponent(window.location.origin)}; path=/; max-age=3600; SameSite=Lax`;
+        }
+      } catch (e) {}
+    }
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {

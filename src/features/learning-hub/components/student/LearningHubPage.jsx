@@ -389,21 +389,21 @@ export function LearningHubPage({ lang, onNavigate }) {
                   className="cdm-hero-showcase-card"
                 >
                   {/* Visual Media Column */}
-                  <div style={{ position: 'relative', minHeight: '360px', background: '#0b2849', overflow: 'hidden' }}>
+                  <div style={{ position: 'relative', minHeight: '260px', background: '#0b2849', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {course.cover_image ? (
                       <img
                         src={course.cover_image}
                         alt={title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        style={{ width: '100%', height: '100%', maxHeight: '420px', objectFit: 'contain' }}
                       />
                     ) : (
-                      <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #0b2849, #004c6d)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: '100%', height: '100%', minHeight: '260px', background: 'linear-gradient(135deg, #0b2849, #004c6d)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
                           <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
                         </svg>
                       </div>
                     )}
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(11,40,73,0.85) 0%, rgba(11,40,73,0.2) 60%, transparent 100%)' }} />
+                    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(to top, rgba(11,40,73,0.6) 0%, rgba(11,40,73,0.1) 60%, transparent 100%)' }} />
                     <span style={{
                       position: 'absolute',
                       top: '20px',

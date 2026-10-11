@@ -455,11 +455,19 @@ export function LearningHubPage({ lang, onNavigate }) {
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 14px', borderRadius: '10px', fontSize: '13px', color: '#0b2849', fontWeight: '600' }}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#004c6d" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                          <span>{lang === 'ar' ? '14 درساً تطبيقياً' : '14 Video Lessons'}</span>
+                          <span>{(() => {
+                            const lessonCount = (course.modules || []).reduce((acc, m) => acc + (m.lessons?.length || 0), 0) || 30;
+                            return lang === 'ar' ? `${lessonCount} درساً تطبيقياً` : `${lessonCount} Video Lessons`;
+                          })()}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 14px', borderRadius: '10px', fontSize: '13px', color: '#0b2849', fontWeight: '600' }}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#004c6d" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                          <span>{lang === 'ar' ? 'وحدتان دراسيتان' : '2 Modules'}</span>
+                          <span>{(() => {
+                            const modCount = course.modules?.length || 4;
+                            return lang === 'ar' 
+                              ? (modCount === 4 ? '4 وحدات دراسية' : `${modCount} وحدات دراسية`)
+                              : `${modCount} Modules`;
+                          })()}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 14px', borderRadius: '10px', fontSize: '13px', color: '#0b2849', fontWeight: '600' }}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15b47a" strokeWidth="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>

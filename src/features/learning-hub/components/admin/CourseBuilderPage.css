@@ -4,6 +4,13 @@
   flex-direction: column;
   background: #f8fafc;
   direction: ltr;
+  padding-top: 106px;
+}
+
+@media (max-width: 768px) {
+  .course-builder-page {
+    padding-top: 96px;
+  }
 }
 
 .course-builder-page.rtl {
@@ -13,7 +20,7 @@
 /* Banner */
 .cb-banner {
   background: linear-gradient(90deg, #15b47a 0%, #12a978 5%, #0c8774 23%, #066d71 41%, #025a6e 60%, #004f6d 79%, #004c6d 100%);
-  padding: 160px 20px 50px 20px;
+  padding: 50px 20px 50px 20px;
   color: #ffffff;
   text-align: center;
 }

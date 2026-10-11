@@ -389,7 +389,7 @@ export function LearningHubPage({ lang, onNavigate }) {
                   className="cdm-hero-showcase-card"
                 >
                   {/* Visual Media Column */}
-                  <div style={{ position: 'relative', minHeight: '260px', background: '#0b2849', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  <div style={{ position: 'relative', minHeight: '260px', background: '#eaf3f7', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {course.cover_image ? (
                       <img
                         src={course.cover_image}
@@ -397,13 +397,13 @@ export function LearningHubPage({ lang, onNavigate }) {
                         style={{ width: '100%', height: '100%', maxHeight: '420px', objectFit: 'contain' }}
                       />
                     ) : (
-                      <div style={{ width: '100%', height: '100%', minHeight: '260px', background: 'linear-gradient(135deg, #0b2849, #004c6d)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+                      <div style={{ width: '100%', height: '100%', minHeight: '260px', background: '#eaf3f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#004c6d" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
                           <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
                         </svg>
                       </div>
                     )}
-                    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(to top, rgba(11,40,73,0.6) 0%, rgba(11,40,73,0.1) 60%, transparent 100%)' }} />
+                    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(to top, rgba(234, 243, 247, 0.7) 0%, transparent 40%)' }} />
                     <span style={{
                       position: 'absolute',
                       top: '20px',
@@ -416,15 +416,15 @@ export function LearningHubPage({ lang, onNavigate }) {
                       padding: '6px 16px',
                       borderRadius: '30px',
                       fontWeight: 'bold',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                     }}>
                       {course.category || (lang === 'ar' ? 'برنامج معتمد' : 'Certified Program')}
                     </span>
 
                     {/* Media Footer Details */}
-                    <div style={{ position: 'absolute', bottom: '24px', right: lang === 'ar' ? '24px' : 'auto', left: lang === 'ar' ? 'auto' : '24px', color: '#fff' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600' }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15b47a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <div style={{ position: 'absolute', bottom: '20px', right: lang === 'ar' ? '20px' : 'auto', left: lang === 'ar' ? 'auto' : '20px', color: '#0b2849', background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(8px)', padding: '4px 12px', borderRadius: '20px', border: '1px solid rgba(11,40,73,0.08)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: '700' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15b47a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="10"></circle>
                           <polyline points="12 6 12 12 16 14"></polyline>
                         </svg>

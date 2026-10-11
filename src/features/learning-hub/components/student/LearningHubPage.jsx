@@ -51,7 +51,7 @@ export function LearningHubPage({ lang, onNavigate }) {
   async function loadData() {
     setLoading(true);
     try {
-      const [courses, enrollments, certs] = await Promise.all([
+      const [courses, initialEnrollments, certs] = await Promise.all([
         fetchCourses(),
         user ? fetchEnrollments(user.id) : Promise.resolve([]),
         user ? fetchUserCertificates(user.id) : Promise.resolve([]),
@@ -59,6 +59,25 @@ export function LearningHubPage({ lang, onNavigate }) {
 
       setAllCourses(courses || []);
       setUserCerts(certs || []);
+
+      let enrollments = initialEnrollments || [];
+
+      // Auto-enroll logged-in users in available courses if they are not enrolled yet
+      if (user && courses && courses.length > 0) {
+        const enrolledCourseIds = new Set(enrollments.map(e => e.course_id));
+        for (const c of courses) {
+          if (!enrolledCourseIds.has(c.id)) {
+            try {
+              const newEnr = await enrollInCourse(user.id, c.id);
+              if (newEnr) {
+                enrollments.push({ ...newEnr, course: c });
+              }
+            } catch (err) {
+              console.warn('Auto-enroll skipped or already exists for course:', c.id, err);
+            }
+          }
+        }
+      }
 
       // Enrich each enrollment with progress data
       const enriched = await Promise.all(
@@ -173,7 +192,11 @@ export function LearningHubPage({ lang, onNavigate }) {
 
   // ─── Course Modal ─────────────────────────────────────────────────────────
   function handleSelectCourse(course) {
-    setSelectedCourse(course._raw || course);
+    const rawCourse = course._raw || course;
+    if (user && rawCourse?.id) {
+      enrollInCourse(user.id, rawCourse.id).catch(() => {});
+    }
+    setSelectedCourse(rawCourse);
   }
 
   function handleCloseCourseModal() {

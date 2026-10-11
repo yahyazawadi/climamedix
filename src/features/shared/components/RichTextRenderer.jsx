@@ -2,7 +2,7 @@ import { createElement } from 'preact';
 import { CustomVideoPlayer } from '../../learning-hub/components/player/CustomVideoPlayer';
 import { CustomAudioPlayer } from './CustomAudioPlayer';
 
-export function RichTextRenderer({ html, lang = 'ar', userId, lessonId, courseId }) {
+export function RichTextRenderer({ html, lang = 'ar', userId, lessonId, courseId, onVideoCompleted }) {
   if (!html) return null;
 
   // Parse the HTML string into a DOM tree
@@ -39,6 +39,7 @@ export function RichTextRenderer({ html, lang = 'ar', userId, lessonId, courseId
               lessonId={lessonId} 
               courseId={courseId} 
               tracks={embeddedTracks} 
+              onVideoCompleted={onVideoCompleted}
             />
           </div>
         );

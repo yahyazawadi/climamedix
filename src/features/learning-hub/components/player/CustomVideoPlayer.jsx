@@ -3,10 +3,11 @@ import { supabase } from '../../../../utils/supabaseClient';
 import { getSecureVideoUrl } from '../../services/lmsService';
 import { parseSubtitles, getActiveCue } from '../../../../utils/subtitleParser';
 
-export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 'ar', userId, lessonId, courseId, tracks = [] }) {
+export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 'ar', userId, lessonId, courseId, tracks = [], onVideoCompleted }) {
   const [resolvedUrl, setResolvedUrl] = useState(null);
   const [resolving, setResolving] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const autoCompletedRef = useRef(false);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -56,6 +57,7 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
       videoRef.current.playbackRate = 1;
     }
     telemetry.current = { maxPercentage: 0, furthestSecond: 0, actualPlayDuration: 0, lastPlayStart: null };
+    autoCompletedRef.current = false;
     setVideoError(false);
 
     // Resolve URL
@@ -756,10 +758,27 @@ export function CustomVideoPlayer({ videoUrl, videoLoading, lessonTitle, lang = 
                 if (ct > telemetry.current.furthestSecond) {
                   telemetry.current.furthestSecond = ct;
                   if (dur > 0) {
-                    telemetry.current.maxPercentage = (ct / dur) * 100;
+                    const pct = (ct / dur) * 100;
+                    telemetry.current.maxPercentage = pct;
+                    if (pct >= 90 && !autoCompletedRef.current) {
+                      autoCompletedRef.current = true;
+                      if (onVideoCompleted) {
+                        try { onVideoCompleted(); } catch (err) { console.error('onVideoCompleted error:', err); }
+                      }
+                    }
                   }
                 }
               }
+            }}
+            onEnded={() => {
+              setIsPlaying(false);
+              if (!autoCompletedRef.current) {
+                autoCompletedRef.current = true;
+                if (onVideoCompleted) {
+                  try { onVideoCompleted(); } catch (err) { console.error('onVideoCompleted error:', err); }
+                }
+              }
+              flushTelemetry();
             }}
             onLoadedMetadata={() => {
               if (videoRef.current) setDuration(videoRef.current.duration);

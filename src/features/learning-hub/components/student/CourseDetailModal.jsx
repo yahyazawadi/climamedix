@@ -365,6 +365,14 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
     : '';
 
   const isCurrentCompleted = completedSet.has(activeLessonId);
+  const currentLessonIndex = allLessons.findIndex(l => l.id === activeLessonId);
+  const nextLesson = (currentLessonIndex >= 0 && currentLessonIndex < allLessons.length - 1) ? allLessons[currentLessonIndex + 1] : null;
+
+  function handleAutoVideoComplete() {
+    if (!completedSet.has(activeLessonId) && !quizData) {
+      handleMarkComplete();
+    }
+  }
 
   function toggleModuleCollapse(modId) {
     setCollapsedModules(prev => {
@@ -437,13 +445,21 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
           flex-grow: 1;
         }
         .cdm-action-bar {
-          border-top: 1px solid rgba(11,40,73,0.08);
-          padding-top: 24px;
-          padding-bottom: 24px;
+          position: sticky;
+          bottom: 0;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-top: 1px solid rgba(11,40,73,0.12);
+          padding: 16px 24px;
           display: flex;
-          justify-content: flex-end;
+          justify-content: space-between;
+          align-items: center;
           gap: 12px;
-          margin-top: auto;
+          margin-top: 24px;
+          border-radius: 14px 14px 0 0;
+          box-shadow: 0 -6px 24px rgba(11,40,73,0.06);
+          z-index: 20;
         }
 
         .cdm-header-top-row {
@@ -613,13 +629,23 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
             border-radius: 12px !important;
           }
           .cdm-action-bar {
-            padding-top: 14px !important;
-            padding-bottom: 14px !important;
-            flex-direction: column !important;
+            position: sticky !important;
+            bottom: 0 !important;
+            background: rgba(255, 255, 255, 0.96) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            padding: 12px 14px !important;
+            margin-top: 16px !important;
+            border-radius: 12px 12px 0 0 !important;
+            box-shadow: 0 -4px 20px rgba(11,40,73,0.08) !important;
+            z-index: 20 !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
             gap: 10px !important;
           }
           .cdm-action-bar button {
-            width: 100% !important;
+            width: auto !important;
+            flex-grow: 1 !important;
             justify-content: center !important;
           }
         }
@@ -1088,7 +1114,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                     })();
 
                     return (
-                      <div className="cdm-video-container" style={{ width: '100%', marginBottom: '28px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(11,40,73,0.12)' }}>
+                      <div className="cdm-video-container" style={{ width: '100%', marginBottom: '20px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(11,40,73,0.12)' }}>
                         <CustomVideoPlayer 
                           videoUrl={resolvedVideoUrl} 
                           lang={lang} 
@@ -1096,10 +1122,88 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                           lessonId={activeLessonId} 
                           courseId={course?.id}
                           tracks={resolvedTracks} 
+                          onVideoCompleted={handleAutoVideoComplete}
                         />
                       </div>
                     );
                   })()}
+
+                  {/* Quick-Action & Completion Status Bar (Visible right beneath video before scrolling) */}
+                  <div className="cdm-quick-status-bar" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    background: isCurrentCompleted ? 'rgba(21, 180, 122, 0.08)' : 'rgba(11, 40, 73, 0.04)',
+                    border: isCurrentCompleted ? '1px solid rgba(21, 180, 122, 0.25)' : '1px solid rgba(11, 40, 73, 0.1)',
+                    borderRadius: '12px',
+                    padding: '12px 18px',
+                    marginBottom: '24px',
+                    flexWrap: 'wrap'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {isCurrentCompleted ? (
+                        <>
+                          <span style={{ 
+                            width: '28px', height: '28px', borderRadius: '50%', background: '#15b47a', color: '#fff', 
+                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                          }}>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                          </span>
+                          <div>
+                            <span style={{ fontWeight: 'bold', color: '#15b47a', fontSize: '14px', display: 'block' }}>
+                              {lang === 'ar' ? 'تم إتمام هذا الدرس بنجاح!' : 'Lesson Completed!'}
+                            </span>
+                            <span style={{ fontSize: '11.5px', color: 'rgba(11,40,73,0.6)' }}>
+                              {lang === 'ar' ? 'تم حفظ نقاطك والتقدم في حسابك' : 'Points & progress recorded'}
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <span style={{ 
+                            width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(11,40,73,0.08)', color: '#0b2849', 
+                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', flexShrink: 0 
+                          }}>
+                            ▶
+                          </span>
+                          <div>
+                            <span style={{ fontWeight: 'bold', color: '#0b2849', fontSize: '13.5px', display: 'block' }}>
+                              {quizData 
+                                ? (lang === 'ar' ? 'يتطلب اجتياز اختبار الدرس لاحتساب النقاط' : 'Quiz required to complete') 
+                                : (lang === 'ar' ? 'يُحتسب التقدم تلقائياً عند إكمال مشاهدة الفيديو (≥90%)' : 'Auto-completes after watching video (≥90%)')}
+                            </span>
+                            <span style={{ fontSize: '11.5px', color: 'rgba(11,40,73,0.6)' }}>
+                              {quizData 
+                                ? (lang === 'ar' ? 'خض الاختبار عند الانتهاء من الدرس' : 'Take quiz when ready')
+                                : (lang === 'ar' ? 'أو يمكنك الضغط على زر الإكمال أدناه' : 'Or mark complete manually')}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {!isCurrentCompleted && (
+                        quizData ? (
+                          <Button onClick={() => setQuizMode(true)} style={{ padding: '7px 16px', fontSize: '13px', background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)', boxShadow: 'none' }}>
+                            {lastQuizScore !== null
+                              ? (lang === 'ar' ? 'إعادة الاختبار' : 'Retake Quiz')
+                              : (lang === 'ar' ? 'خوض الاختبار' : 'Take Quiz')}
+                          </Button>
+                        ) : (
+                          <Button onClick={handleMarkComplete} style={{ padding: '7px 16px', fontSize: '13px', background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)', boxShadow: 'none' }}>
+                            {lang === 'ar' ? '✓ تحديد الدرس كمكتمل' : '✓ Mark as Complete'}
+                          </Button>
+                        )
+                      )}
+                      {isCurrentCompleted && nextLesson && (
+                        <Button onClick={() => setActiveLessonId(nextLesson.id)} style={{ padding: '7px 16px', fontSize: '13px', background: 'linear-gradient(90deg, #004c6d 0%, #0b2849 100%)', boxShadow: 'none' }}>
+                          {lang === 'ar' ? 'الدرس التالي ←' : 'Next Lesson →'}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
 
                   {/* 2. Lesson Title beneath Video Player */}
                   <h3 className="cdm-lesson-title">
@@ -1127,52 +1231,70 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                     </div>
                   )}
 
-                  {/* Action Bar */}
+                  {/* Sticky Action Bar */}
                   <div className="cdm-action-bar">
                     {isCurrentCompleted ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        {lastQuizScore !== null && (
-                          <div style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            background: lastQuizScore >= (quizData?.passing_score ?? 80) ? 'rgba(21,180,122,0.1)' : 'rgba(255,77,77,0.1)',
-                            border: `1px solid ${lastQuizScore >= (quizData?.passing_score ?? 80) ? '#15b47a' : '#ff4d4d'}`,
-                            borderRadius: '10px', padding: '8px 16px'
-                          }}>
-                            <span style={{ fontSize: '20px', fontWeight: 'bold', color: lastQuizScore >= (quizData?.passing_score ?? 80) ? '#15b47a' : '#ff4d4d' }}>
-                              {lastQuizScore}%
-                            </span>
-                            <span style={{ fontSize: '12px', color: 'rgba(11,40,73,0.6)' }}>
-                              {lang === 'ar' ? 'درجتك' : 'Your Score'}
-                            </span>
-                          </div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '16px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          {lastQuizScore !== null && (
+                            <div style={{
+                              display: 'flex', alignItems: 'center', gap: '8px',
+                              background: lastQuizScore >= (quizData?.passing_score ?? 80) ? 'rgba(21,180,122,0.1)' : 'rgba(255,77,77,0.1)',
+                              border: `1px solid ${lastQuizScore >= (quizData?.passing_score ?? 80) ? '#15b47a' : '#ff4d4d'}`,
+                              borderRadius: '10px', padding: '6px 14px'
+                            }}>
+                              <span style={{ fontSize: '18px', fontWeight: 'bold', color: lastQuizScore >= (quizData?.passing_score ?? 80) ? '#15b47a' : '#ff4d4d' }}>
+                                {lastQuizScore}%
+                              </span>
+                              <span style={{ fontSize: '11px', color: 'rgba(11,40,73,0.6)' }}>
+                                {lang === 'ar' ? 'درجتك' : 'Your Score'}
+                              </span>
+                            </div>
+                          )}
+                          <button 
+                            onClick={handleUnmarkComplete}
+                            title={lang === 'ar' ? 'اضغط للتراجع (غير مكتمل)' : 'Click to unmark as incomplete'}
+                            style={{ 
+                              background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0',
+                              color: '#15b47a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px',
+                              transition: 'opacity 0.2s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block' }}><polyline points="20 6 9 17 4 12"/></svg>
+                            {quizData 
+                              ? (lang === 'ar' ? 'تم اجتياز الاختبار بنجاح!' : 'Quiz passed successfully!')
+                              : (lang === 'ar' ? 'تم إتمام هذا الدرس بنجاح!' : 'Lesson completed!')}
+                          </button>
+                        </div>
+
+                        {nextLesson && (
+                          <Button onClick={() => setActiveLessonId(nextLesson.id)} style={{ background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)', boxShadow: 'none' }}>
+                            {lang === 'ar' ? 'الدرس التالي ←' : 'Next Lesson →'}
+                          </Button>
                         )}
-                        <button 
-                          onClick={handleUnmarkComplete}
-                          title={lang === 'ar' ? 'اضغط للتراجع (غير مكتمل)' : 'Click to unmark as incomplete'}
-                          style={{ 
-                            background: 'none', border: 'none', cursor: 'pointer', padding: '8px 0',
-                            color: '#004c6d', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14.5px',
-                            transition: 'opacity 0.2s ease'
-                          }}
-                          onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
-                          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block' }}><polyline points="20 6 9 17 4 12"/></svg>
-                          {quizData 
-                            ? (lang === 'ar' ? 'تم اجتياز الاختبار بنجاح!' : 'Quiz passed successfully!')
-                            : (lang === 'ar' ? 'تم إتمام هذا الدرس بنجاح!' : 'Lesson completed!')}
-                        </button>
                       </div>
                     ) : quizData ? (
-                      <Button onClick={() => setQuizMode(true)} style={{ background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)', boxShadow: 'none' }}>
-                        {lastQuizScore !== null
-                          ? (lang === 'ar' ? 'إعادة خوض الاختبار' : 'Retake Quiz')
-                          : (lang === 'ar' ? 'خوض اختبار الدرس لقفل التقدم' : 'Take Lesson Quiz')}
-                      </Button>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '12px' }}>
+                        <span style={{ fontSize: '13px', color: 'rgba(11,40,73,0.7)', fontWeight: '500' }}>
+                          {lang === 'ar' ? 'يتطلب اجتياز الاختبار لاحتساب الدرس' : 'Quiz required to complete lesson'}
+                        </span>
+                        <Button onClick={() => setQuizMode(true)} style={{ background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)', boxShadow: 'none' }}>
+                          {lastQuizScore !== null
+                            ? (lang === 'ar' ? 'إعادة خوض الاختبار' : 'Retake Quiz')
+                            : (lang === 'ar' ? 'خوض اختبار الدرس لقفل التقدم' : 'Take Lesson Quiz')}
+                        </Button>
+                      </div>
                     ) : (
-                      <Button onClick={handleMarkComplete} style={{ background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)', boxShadow: 'none' }}>
-                        {lang === 'ar' ? 'تحديد الدرس كمكتمل' : 'Mark as Complete'}
-                      </Button>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '12px' }}>
+                        <span style={{ fontSize: '13px', color: 'rgba(11,40,73,0.7)', fontWeight: '500' }}>
+                          {lang === 'ar' ? 'يتم الاحتساب تلقائياً عند إنهاء الفيديو، أو اضغط هنا:' : 'Auto-completes after video, or mark here:'}
+                        </span>
+                        <Button onClick={handleMarkComplete} style={{ background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)', boxShadow: 'none' }}>
+                          {lang === 'ar' ? '✓ تحديد الدرس كمكتمل' : '✓ Mark as Complete'}
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>

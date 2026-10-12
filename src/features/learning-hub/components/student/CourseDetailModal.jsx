@@ -1176,7 +1176,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                             <span style={{ fontSize: '11.5px', color: 'rgba(11,40,73,0.6)' }}>
                               {quizData 
                                 ? (lang === 'ar' ? 'خض الاختبار عند الانتهاء من الدرس' : 'Take quiz when ready')
-                                : (lang === 'ar' ? 'أو يمكنك الضغط على زر الإكمال أدناه' : 'Or mark complete manually')}
+                                : (lang === 'ar' ? 'أو يمكنك الضغط على زر الإكمال المباشر' : 'Or mark complete manually')}
                             </span>
                           </div>
                         </>
@@ -1231,72 +1231,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                     </div>
                   )}
 
-                  {/* Sticky Action Bar */}
-                  <div className="cdm-action-bar">
-                    {isCurrentCompleted ? (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '16px', flexWrap: 'wrap' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          {lastQuizScore !== null && (
-                            <div style={{
-                              display: 'flex', alignItems: 'center', gap: '8px',
-                              background: lastQuizScore >= (quizData?.passing_score ?? 80) ? 'rgba(21,180,122,0.1)' : 'rgba(255,77,77,0.1)',
-                              border: `1px solid ${lastQuizScore >= (quizData?.passing_score ?? 80) ? '#15b47a' : '#ff4d4d'}`,
-                              borderRadius: '10px', padding: '6px 14px'
-                            }}>
-                              <span style={{ fontSize: '18px', fontWeight: 'bold', color: lastQuizScore >= (quizData?.passing_score ?? 80) ? '#15b47a' : '#ff4d4d' }}>
-                                {lastQuizScore}%
-                              </span>
-                              <span style={{ fontSize: '11px', color: 'rgba(11,40,73,0.6)' }}>
-                                {lang === 'ar' ? 'درجتك' : 'Your Score'}
-                              </span>
-                            </div>
-                          )}
-                          <button 
-                            onClick={handleUnmarkComplete}
-                            title={lang === 'ar' ? 'اضغط للتراجع (غير مكتمل)' : 'Click to unmark as incomplete'}
-                            style={{ 
-                              background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0',
-                              color: '#15b47a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px',
-                              transition: 'opacity 0.2s ease'
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
-                            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-                          >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline-block' }}><polyline points="20 6 9 17 4 12"/></svg>
-                            {quizData 
-                              ? (lang === 'ar' ? 'تم اجتياز الاختبار بنجاح!' : 'Quiz passed successfully!')
-                              : (lang === 'ar' ? 'تم إتمام هذا الدرس بنجاح!' : 'Lesson completed!')}
-                          </button>
-                        </div>
-
-                        {nextLesson && (
-                          <Button onClick={() => setActiveLessonId(nextLesson.id)} style={{ background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)', boxShadow: 'none' }}>
-                            {lang === 'ar' ? 'الدرس التالي ←' : 'Next Lesson →'}
-                          </Button>
-                        )}
-                      </div>
-                    ) : quizData ? (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '12px' }}>
-                        <span style={{ fontSize: '13px', color: 'rgba(11,40,73,0.7)', fontWeight: '500' }}>
-                          {lang === 'ar' ? 'يتطلب اجتياز الاختبار لاحتساب الدرس' : 'Quiz required to complete lesson'}
-                        </span>
-                        <Button onClick={() => setQuizMode(true)} style={{ background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)', boxShadow: 'none' }}>
-                          {lastQuizScore !== null
-                            ? (lang === 'ar' ? 'إعادة خوض الاختبار' : 'Retake Quiz')
-                            : (lang === 'ar' ? 'خوض اختبار الدرس لقفل التقدم' : 'Take Lesson Quiz')}
-                        </Button>
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '12px' }}>
-                        <span style={{ fontSize: '13px', color: 'rgba(11,40,73,0.7)', fontWeight: '500' }}>
-                          {lang === 'ar' ? 'يتم الاحتساب تلقائياً عند إنهاء الفيديو، أو اضغط هنا:' : 'Auto-completes after video, or mark here:'}
-                        </span>
-                        <Button onClick={handleMarkComplete} style={{ background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)', boxShadow: 'none' }}>
-                          {lang === 'ar' ? '✓ تحديد الدرس كمكتمل' : '✓ Mark as Complete'}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                  {/* Bottom Action Bar removed in favor of top quick status bar */}
                 </div>
               ) : (
                 <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto', textAlign: 'center', animation: 'fadeIn 0.5s ease' }}>

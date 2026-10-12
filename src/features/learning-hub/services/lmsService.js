@@ -319,3 +319,148 @@ export async function fetchUserCertificates(userId) {
   if (error) throw error;
   return data;
 }
+
+// ─── LESSON COMMENTS & DISCUSSIONS ──────────────────────────────────────────
+
+/**
+ * Fetch all comments and replies for a specific lesson.
+ * Joins author profile and heart count, plus whether current user has liked it.
+ */
+export async function fetchLessonComments(lessonId, currentUserId = null) {
+  const { data: comments, error: commentsError } = await supabase
+    .from('lesson_comments')
+    .select(`
+      *,
+      profile:profiles (
+        id,
+        full_name,
+        avatar_url,
+        role
+      )
+    `)
+    .eq('lesson_id', lessonId)
+    .order('created_at', { ascending: true });
+
+  if (commentsError) throw commentsError;
+  if (!comments || comments.length === 0) return [];
+
+  // Fetch hearts for all comments in this lesson
+  const commentIds = comments.map(c => c.id);
+  const { data: hearts, error: heartsError } = await supabase
+    .from('lesson_comment_hearts')
+    .select('comment_id, user_id')
+    .in('comment_id', commentIds);
+
+  if (heartsError) {
+    console.warn('Failed to load comment hearts:', heartsError);
+  }
+
+  // Aggregate heart counts and user heart status
+  const heartsMap = {};
+  (hearts || []).forEach(h => {
+    if (!heartsMap[h.comment_id]) {
+      heartsMap[h.comment_id] = { count: 0, isHearted: false };
+    }
+    heartsMap[h.comment_id].count += 1;
+    if (currentUserId && h.user_id === currentUserId) {
+      heartsMap[h.comment_id].isHearted = true;
+    }
+  });
+
+  return comments.map(c => ({
+    ...c,
+    heartCount: heartsMap[c.id]?.count || 0,
+    isHearted: heartsMap[c.id]?.isHearted || false
+  }));
+}
+
+/**
+ * Post a new comment or reply to a lesson.
+ */
+export async function postLessonComment({ courseId, lessonId, userId, content, parentId = null }) {
+  const { data, error } = await supabase
+    .from('lesson_comments')
+    .insert({
+      course_id: courseId,
+      lesson_id: lessonId,
+      user_id: userId,
+      parent_id: parentId,
+      content: content.trim()
+    })
+    .select(`
+      *,
+      profile:profiles (
+        id,
+        full_name,
+        avatar_url,
+        role
+      )
+    `)
+    .single();
+
+  if (error) throw error;
+  return {
+    ...data,
+    heartCount: 0,
+    isHearted: false
+  };
+}
+
+/**
+ * Update an existing comment's text.
+ */
+export async function updateLessonComment(commentId, userId, newContent) {
+  const { data, error } = await supabase
+    .from('lesson_comments')
+    .update({
+      content: newContent.trim(),
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', commentId)
+    .eq('user_id', userId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Delete a comment.
+ */
+export async function deleteLessonComment(commentId, userId) {
+  const { error } = await supabase
+    .from('lesson_comments')
+    .delete()
+    .eq('id', commentId)
+    .eq('user_id', userId);
+
+  if (error) throw error;
+  return true;
+}
+
+/**
+ * Toggle heart on a comment.
+ */
+export async function toggleCommentHeart(commentId, userId, isCurrentlyHearted) {
+  if (isCurrentlyHearted) {
+    const { error } = await supabase
+      .from('lesson_comment_hearts')
+      .delete()
+      .eq('comment_id', commentId)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    return false;
+  } else {
+    const { error } = await supabase
+      .from('lesson_comment_hearts')
+      .insert({
+        comment_id: commentId,
+        user_id: userId
+      });
+
+    if (error) throw error;
+    return true;
+  }
+}

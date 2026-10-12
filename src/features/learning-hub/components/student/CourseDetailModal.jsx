@@ -18,6 +18,7 @@ import {
   checkEnrollment,
   enrollInCourse
 } from '../../services/lmsService';
+import { LessonCommentsSection } from '../comments/LessonCommentsSection';
 
 export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: propUserProfile, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted, onDownloadCertificate }) {
   const auth = useAuth ? useAuth() : null;
@@ -27,6 +28,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
   const [modules, setModules] = useState([]);
   const [activeLessonId, setActiveLessonId] = useState(null);
   const [completedSet, setCompletedSet] = useState(new Set());
+  const [isEnrolled, setIsEnrolled] = useState(false);
   const [quizData, setQuizData] = useState(null);
   const [quizMode, setQuizMode] = useState(false);
   const [quizPassed, setQuizPassed] = useState(false);
@@ -121,13 +123,13 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
 
         if (targetLessonId) setActiveLessonId(targetLessonId);
 
-        // Ensure user is actively enrolled in Supabase when opening course
+        // Check if user is actively enrolled in Supabase
         if (userId && course?.id) {
           checkEnrollment(userId, course.id).then(enr => {
-            if (!enr) {
-              enrollInCourse(userId, course.id).catch(console.error);
-            }
+            setIsEnrolled(Boolean(enr && enr.status === 'active'));
           }).catch(console.error);
+        } else {
+          setIsEnrolled(false);
         }
       } catch (err) {
         console.error('CourseDetailModal load error:', err);
@@ -1230,6 +1232,16 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                       />
                     </div>
                   )}
+
+                  {/* Lesson Comments & Q&A Discussion Section */}
+                  <LessonCommentsSection
+                    lang={lang}
+                    courseId={course.id}
+                    lessonId={activeLessonId}
+                    userId={userId}
+                    userProfile={userProfile}
+                    isEnrolled={isEnrolled}
+                  />
 
                   {/* Bottom Action Bar removed in favor of top quick status bar */}
                 </div>

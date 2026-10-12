@@ -329,20 +329,28 @@ export async function fetchUserCertificates(userId) {
 export async function fetchLessonComments(lessonId, currentUserId = null) {
   const { data: comments, error: commentsError } = await supabase
     .from('lesson_comments')
-    .select(`
-      *,
-      profile:profiles (
-        id,
-        full_name,
-        avatar_url,
-        role
-      )
-    `)
+    .select('*')
     .eq('lesson_id', lessonId)
     .order('created_at', { ascending: true });
 
   if (commentsError) throw commentsError;
   if (!comments || comments.length === 0) return [];
+
+  // Fetch author profiles for all commenters
+  const userIds = [...new Set(comments.map(c => c.user_id))];
+  const { data: profiles, error: profilesError } = await supabase
+    .from('profiles')
+    .select('id, full_name, avatar_url, role')
+    .in('id', userIds);
+
+  if (profilesError) {
+    console.warn('Failed to load commenter profiles:', profilesError);
+  }
+
+  const profileMap = {};
+  (profiles || []).forEach(p => {
+    profileMap[p.id] = p;
+  });
 
   // Fetch hearts for all comments in this lesson
   const commentIds = comments.map(c => c.id);
@@ -369,6 +377,7 @@ export async function fetchLessonComments(lessonId, currentUserId = null) {
 
   return comments.map(c => ({
     ...c,
+    profile: profileMap[c.user_id] || null,
     heartCount: heartsMap[c.id]?.count || 0,
     isHearted: heartsMap[c.id]?.isHearted || false
   }));
@@ -387,20 +396,21 @@ export async function postLessonComment({ courseId, lessonId, userId, content, p
       parent_id: parentId,
       content: content.trim()
     })
-    .select(`
-      *,
-      profile:profiles (
-        id,
-        full_name,
-        avatar_url,
-        role
-      )
-    `)
+    .select('*')
     .single();
 
   if (error) throw error;
+
+  // Fetch author profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, full_name, avatar_url, role')
+    .eq('id', userId)
+    .maybeSingle();
+
   return {
     ...data,
+    profile: profile || null,
     heartCount: 0,
     isHearted: false
   };
@@ -418,11 +428,13 @@ export async function updateLessonComment(commentId, userId, newContent) {
     })
     .eq('id', commentId)
     .eq('user_id', userId)
-    .select()
-    .single();
+    .select();
 
   if (error) throw error;
-  return data;
+  if (!data || data.length === 0) {
+    throw new Error('Not authorized or comment not found');
+  }
+  return data[0];
 }
 
 /**

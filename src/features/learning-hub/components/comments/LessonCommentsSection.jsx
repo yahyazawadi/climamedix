@@ -200,9 +200,22 @@ export function LessonCommentsSection({
         paddingTop: '28px',
         borderTop: '1px solid rgba(11, 40, 73, 0.08)',
         direction: isRtl ? 'rtl' : 'ltr',
-        textAlign: isRtl ? 'right' : 'left'
+        textAlign: isRtl ? 'right' : 'left',
+        fontFamily: "'Tajawal', system-ui, -apple-system, sans-serif"
       }}
     >
+      <style>{`
+        .cdm-comments-section,
+        .cdm-comments-section * {
+          font-family: 'Tajawal', system-ui, -apple-system, sans-serif !important;
+        }
+        .cdm-comments-section textarea::placeholder {
+          font-family: 'Tajawal', system-ui, -apple-system, sans-serif !important;
+          color: rgba(11, 40, 73, 0.45);
+          font-size: 13.5px;
+          opacity: 1;
+        }
+      `}</style>
       {/* Header */}
       <div
         style={{
@@ -347,9 +360,10 @@ export function LessonCommentsSection({
                   opacity: submitting || !newCommentText.trim() ? 0.6 : 1,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  gap: '8px'
                 }}
               >
+                <span>{isRtl ? 'إرسال التعليق' : 'Post Comment'}</span>
                 <svg
                   width="14"
                   height="14"
@@ -359,11 +373,11 @@ export function LessonCommentsSection({
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  style={{ transform: isRtl ? 'scaleX(-1)' : 'none' }}
                 >
                   <line x1="22" y1="2" x2="11" y2="13" />
                   <polygon points="22 2 15 22 11 13 2 9 22 2" />
                 </svg>
-                {isRtl ? 'إرسال التعليق' : 'Post Comment'}
               </button>
             </div>
           </form>
@@ -433,22 +447,21 @@ export function LessonCommentsSection({
                       onCancelEdit={() => setEditingId(null)}
                     />
 
-                    {/* Replies Container */}
+                    {/* Replies Container (YouTube-style clean indented list) */}
                     {replies.length > 0 && (
                       <div
                         style={{
-                          marginTop: '14px',
-                          paddingTop: '12px',
-                          borderTop: '1px solid rgba(11, 40, 73, 0.05)',
+                          marginTop: '16px',
+                          paddingTop: '14px',
                           marginRight: isRtl ? '24px' : '0',
                           marginLeft: isRtl ? '0' : '24px',
-                          borderRight: isRtl ? '2px solid rgba(21, 180, 122, 0.3)' : 'none',
-                          borderLeft: isRtl ? 'none' : '2px solid rgba(21, 180, 122, 0.3)',
-                          paddingRight: isRtl ? '14px' : '0',
-                          paddingLeft: isRtl ? '0' : '14px',
+                          borderRight: isRtl ? '1px solid rgba(11, 40, 73, 0.12)' : 'none',
+                          borderLeft: isRtl ? 'none' : '1px solid rgba(11, 40, 73, 0.12)',
+                          paddingRight: isRtl ? '16px' : '0',
+                          paddingLeft: isRtl ? '0' : '16px',
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: '12px'
+                          gap: '14px'
                         }}
                       >
                         {replies.map(reply => (
@@ -542,7 +555,7 @@ export function LessonCommentsSection({
                             disabled={submitting || !replyText.trim()}
                             onClick={() => handleSubmitReply(comment.id)}
                             style={{
-                              background: '#15b47a',
+                              background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)',
                               color: '#ffffff',
                               border: 'none',
                               borderRadius: '6px',
@@ -550,10 +563,27 @@ export function LessonCommentsSection({
                               fontSize: '12px',
                               fontWeight: 'bold',
                               cursor: submitting || !replyText.trim() ? 'not-allowed' : 'pointer',
-                              opacity: submitting || !replyText.trim() ? 0.6 : 1
+                              opacity: submitting || !replyText.trim() ? 0.6 : 1,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px'
                             }}
                           >
-                            {isRtl ? 'إرسال الرد' : 'Reply'}
+                            <span>{isRtl ? 'إرسال الرد' : 'Reply'}</span>
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              style={{ transform: isRtl ? 'scaleX(-1)' : 'none' }}
+                            >
+                              <line x1="22" y1="2" x2="11" y2="13" />
+                              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
                           </button>
                         </div>
                       </div>
@@ -605,19 +635,39 @@ function CommentCard({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Avatar or initial */}
+          {/* Avatar (Uploaded avatar_url > Google auth pfp > Initial fallback) */}
+          {comment.profile?.avatar_url ? (
+            <img
+              src={comment.profile.avatar_url}
+              alt={authorName}
+              style={{
+                width: isReply ? '28px' : '34px',
+                height: isReply ? '28px' : '34px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '1px solid rgba(11, 40, 73, 0.1)',
+                flexShrink: 0
+              }}
+              onError={e => {
+                e.currentTarget.style.display = 'none';
+                if (e.currentTarget.nextSibling) {
+                  e.currentTarget.nextSibling.style.display = 'flex';
+                }
+              }}
+            />
+          ) : null}
           <div
             style={{
-              width: isReply ? '26px' : '32px',
-              height: isReply ? '26px' : '32px',
+              width: isReply ? '28px' : '34px',
+              height: isReply ? '28px' : '34px',
               borderRadius: '50%',
-              background: isInstructor ? '#15b47a' : 'rgba(11, 40, 73, 0.1)',
+              background: isInstructor ? '#15b47a' : 'rgba(11, 40, 73, 0.08)',
               color: isInstructor ? '#ffffff' : '#0b2849',
-              display: 'flex',
+              display: comment.profile?.avatar_url ? 'none' : 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 'bold',
-              fontSize: isReply ? '11px' : '13px',
+              fontSize: isReply ? '12px' : '14px',
               flexShrink: 0
             }}
           >
@@ -671,18 +721,24 @@ function CommentCard({
               onClick={() => onStartEdit(comment)}
               title={isRtl ? 'تعديل' : 'Edit'}
               style={{
-                background: 'none',
+                background: 'rgba(11, 40, 73, 0.05)',
                 border: 'none',
                 cursor: 'pointer',
-                color: 'rgba(11, 40, 73, 0.4)',
-                padding: '4px',
+                color: '#0b2849',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background 0.2s ease'
               }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(11, 40, 73, 0.1)')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'rgba(11, 40, 73, 0.05)')}
             >
               <svg
-                width="13"
-                height="13"
+                width="15"
+                height="15"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -698,18 +754,24 @@ function CommentCard({
               onClick={() => onDelete(comment.id)}
               title={isRtl ? 'حذف' : 'Delete'}
               style={{
-                background: 'none',
+                background: 'rgba(230, 57, 70, 0.06)',
                 border: 'none',
                 cursor: 'pointer',
-                color: 'rgba(255, 77, 77, 0.6)',
-                padding: '4px',
+                color: '#e63946',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background 0.2s ease'
               }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(230, 57, 70, 0.15)')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'rgba(230, 57, 70, 0.06)')}
             >
               <svg
-                width="13"
-                height="13"
+                width="15"
+                height="15"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -809,60 +871,69 @@ function CommentCard({
           <button
             onClick={() => onToggleHeart(comment.id, comment.isHearted)}
             style={{
-              background: 'none',
+              background: comment.isHearted ? 'rgba(230, 57, 70, 0.1)' : 'rgba(11, 40, 73, 0.05)',
               border: 'none',
               cursor: 'pointer',
-              padding: '4px 0',
+              padding: '5px 10px',
+              borderRadius: '20px',
               display: 'flex',
               alignItems: 'center',
-              gap: '5px',
-              color: comment.isHearted ? '#ff4d4d' : 'rgba(11, 40, 73, 0.5)',
+              gap: '6px',
+              color: comment.isHearted ? '#e63946' : '#0b2849',
               fontSize: '12px',
               fontWeight: comment.isHearted ? 'bold' : 'normal',
-              transition: 'transform 0.15s ease'
+              transition: 'background 0.2s ease, transform 0.15s ease'
             }}
-            onMouseDown={e => (e.currentTarget.style.transform = 'scale(1.2)')}
-            onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = comment.isHearted ? 'rgba(230, 57, 70, 0.18)' : 'rgba(11, 40, 73, 0.1)')}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = comment.isHearted ? 'rgba(230, 57, 70, 0.1)' : 'rgba(11, 40, 73, 0.05)')}
           >
             <svg
-              width="14"
-              height="14"
+              width="15"
+              height="15"
               viewBox="0 0 24 24"
-              fill={comment.isHearted ? '#ff4d4d' : 'none'}
-              stroke="currentColor"
+              fill={comment.isHearted ? '#e63946' : 'none'}
+              stroke={comment.isHearted ? '#e63946' : 'currentColor'}
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             >
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
-            <span>{comment.heartCount > 0 ? comment.heartCount : ''}</span>
+            <span style={{ fontSize: '11px', fontWeight: 'bold' }}>
+              {comment.heartCount > 0 ? comment.heartCount : ''}
+            </span>
           </button>
 
-          {/* Reply Button (Only on top-level or replies to open box) */}
+          {/* Reply Button */}
           <button
             onClick={() => onStartReply(comment.id)}
             style={{
-              background: 'none',
+              background: 'rgba(11, 40, 73, 0.05)',
               border: 'none',
               cursor: 'pointer',
-              padding: '4px 0',
+              padding: '5px 12px',
+              borderRadius: '20px',
               display: 'flex',
               alignItems: 'center',
-              gap: '5px',
-              color: 'rgba(11, 40, 73, 0.5)',
-              fontSize: '12px'
+              gap: '6px',
+              color: '#0b2849',
+              fontSize: '12px',
+              fontWeight: '500',
+              transition: 'background 0.2s ease'
             }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(11, 40, 73, 0.1)')}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'rgba(11, 40, 73, 0.05)')}
           >
             <svg
-              width="13"
-              height="13"
+              width="14"
+              height="14"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              style={{ transform: isRtl ? 'scaleX(-1)' : 'none' }}
             >
               <polyline points="9 17 4 12 9 7" />
               <path d="M20 18v-2a4 4 0 0 0-4-4H4" />

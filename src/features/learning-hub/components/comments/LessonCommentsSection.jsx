@@ -18,9 +18,11 @@ export function LessonCommentsSection({
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newCommentText, setNewCommentText] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [replyingToId, setReplyingToId] = useState(null);
   const [replyText, setReplyText] = useState('');
+  const [replyAnonymous, setReplyAnonymous] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
 
@@ -64,10 +66,12 @@ export function LessonCommentsSection({
         courseId,
         lessonId,
         userId,
-        content: newCommentText
+        content: newCommentText,
+        isAnonymous
       });
       setComments(prev => [...prev, created]);
       setNewCommentText('');
+      setIsAnonymous(false);
     } catch (err) {
       console.error('Failed to post comment:', err);
       alert(isRtl ? 'تعذر إرسال التعليق. يرجى المحاولة لاحقاً.' : 'Failed to post comment.');
@@ -87,11 +91,13 @@ export function LessonCommentsSection({
         lessonId,
         userId,
         content: replyText,
-        parentId
+        parentId,
+        isAnonymous: replyAnonymous
       });
       setComments(prev => [...prev, created]);
       setReplyingToId(null);
       setReplyText('');
+      setReplyAnonymous(false);
     } catch (err) {
       console.error('Failed to post reply:', err);
       alert(isRtl ? 'تعذر إرسال الرد.' : 'Failed to post reply.');
@@ -341,10 +347,46 @@ export function LessonCommentsSection({
             <div
               style={{
                 display: 'flex',
-                justifyContent: 'flex-end',
-                marginTop: '10px'
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: '12px'
               }}
             >
+              {/* Anonymous Toggle Pill */}
+              <button
+                type="button"
+                onClick={() => setIsAnonymous(prev => !prev)}
+                style={{
+                  background: isAnonymous ? 'rgba(11, 40, 73, 0.1)' : 'transparent',
+                  border: isAnonymous ? '1px solid rgba(11, 40, 73, 0.25)' : '1px solid rgba(11, 40, 73, 0.12)',
+                  borderRadius: '20px',
+                  padding: '6px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: isAnonymous ? 'bold' : 'normal',
+                  color: isAnonymous ? '#0b2849' : 'rgba(11, 40, 73, 0.65)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                </svg>
+                <span>{isRtl ? 'طرح كمشارك مجهول' : 'Post anonymously'}</span>
+              </button>
+
               <button
                 type="submit"
                 disabled={submitting || !newCommentText.trim()}
@@ -528,63 +570,92 @@ export function LessonCommentsSection({
                         <div
                           style={{
                             display: 'flex',
-                            justifyContent: 'flex-end',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
                             gap: '8px',
                             marginTop: '8px'
                           }}
                         >
+                          {/* Reply Anonymous Toggle */}
                           <button
                             type="button"
-                            onClick={() => {
-                              setReplyingToId(null);
-                              setReplyText('');
-                            }}
+                            onClick={() => setReplyAnonymous(prev => !prev)}
                             style={{
-                              background: 'transparent',
-                              border: 'none',
-                              color: 'rgba(11, 40, 73, 0.6)',
-                              fontSize: '12px',
-                              cursor: 'pointer',
-                              padding: '6px 12px'
-                            }}
-                          >
-                            {isRtl ? 'إلغاء' : 'Cancel'}
-                          </button>
-                          <button
-                            type="button"
-                            disabled={submitting || !replyText.trim()}
-                            onClick={() => handleSubmitReply(comment.id)}
-                            style={{
-                              background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)',
-                              color: '#ffffff',
-                              border: 'none',
-                              borderRadius: '6px',
-                              padding: '6px 16px',
-                              fontSize: '12px',
-                              fontWeight: 'bold',
-                              cursor: submitting || !replyText.trim() ? 'not-allowed' : 'pointer',
-                              opacity: submitting || !replyText.trim() ? 0.6 : 1,
+                              background: replyAnonymous ? 'rgba(11, 40, 73, 0.1)' : 'transparent',
+                              border: replyAnonymous ? '1px solid rgba(11, 40, 73, 0.25)' : '1px solid rgba(11, 40, 73, 0.12)',
+                              borderRadius: '16px',
+                              padding: '4px 10px',
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '6px'
+                              gap: '5px',
+                              cursor: 'pointer',
+                              fontSize: '11px',
+                              fontWeight: replyAnonymous ? 'bold' : 'normal',
+                              color: replyAnonymous ? '#0b2849' : 'rgba(11, 40, 73, 0.65)'
                             }}
                           >
-                            <span>{isRtl ? 'إرسال الرد' : 'Reply'}</span>
-                            <svg
-                              width="12"
-                              height="12"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              style={{ transform: isRtl ? 'scaleX(-1)' : 'none' }}
-                            >
-                              <line x1="22" y1="2" x2="11" y2="13" />
-                              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                              <line x1="1" y1="1" x2="23" y2="23" />
                             </svg>
+                            <span>{isRtl ? 'رد كمجهول' : 'Anonymous'}</span>
                           </button>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReplyingToId(null);
+                                setReplyText('');
+                                setReplyAnonymous(false);
+                              }}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'rgba(11, 40, 73, 0.6)',
+                                fontSize: '12px',
+                                cursor: 'pointer',
+                                padding: '6px 12px'
+                              }}
+                            >
+                              {isRtl ? 'إلغاء' : 'Cancel'}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={submitting || !replyText.trim()}
+                              onClick={() => handleSubmitReply(comment.id)}
+                              style={{
+                                background: 'linear-gradient(90deg, #0b2849 0%, #004c6d 100%)',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '6px',
+                                padding: '6px 16px',
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                                cursor: submitting || !replyText.trim() ? 'not-allowed' : 'pointer',
+                                opacity: submitting || !replyText.trim() ? 0.6 : 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                              }}
+                            >
+                              <span>{isRtl ? 'إرسال الرد' : 'Reply'}</span>
+                              <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                style={{ transform: isRtl ? 'scaleX(-1)' : 'none' }}
+                              >
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -618,10 +689,13 @@ function CommentCard({
   isReply = false
 }) {
   const isOwner = currentUserId && comment.user_id === currentUserId;
-  const authorName =
-    comment.profile?.full_name || (isRtl ? 'طالب مسجل' : 'Enrolled Student');
-  const role = comment.profile?.role;
-  const isInstructor = role === 'admin' || role === 'superadmin' || role === 'instructor';
+  const isAnon = Boolean(comment.is_anonymous);
+  const authorName = isAnon
+    ? (isRtl ? 'مشارك مجهول' : 'Anonymous Student')
+    : (comment.profile?.full_name || (isRtl ? 'طالب مسجل' : 'Enrolled Student'));
+
+  const role = isAnon ? null : comment.profile?.role;
+  const isInstructor = !isAnon && (role === 'admin' || role === 'superadmin' || role === 'instructor');
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -635,44 +709,68 @@ function CommentCard({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Avatar (Uploaded avatar_url > Google auth pfp > Initial fallback) */}
-          {comment.profile?.avatar_url ? (
-            <img
-              src={comment.profile.avatar_url}
-              alt={authorName}
+          {/* Avatar (Anonymous silhouette OR Uploaded / Google pfp OR Initial fallback) */}
+          {isAnon ? (
+            <div
               style={{
                 width: isReply ? '28px' : '34px',
                 height: isReply ? '28px' : '34px',
                 borderRadius: '50%',
-                objectFit: 'cover',
-                border: '1px solid rgba(11, 40, 73, 0.1)',
+                background: 'rgba(11, 40, 73, 0.08)',
+                color: 'rgba(11, 40, 73, 0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 flexShrink: 0
               }}
-              onError={e => {
-                e.currentTarget.style.display = 'none';
-                if (e.currentTarget.nextSibling) {
-                  e.currentTarget.nextSibling.style.display = 'flex';
-                }
-              }}
-            />
-          ) : null}
-          <div
-            style={{
-              width: isReply ? '28px' : '34px',
-              height: isReply ? '28px' : '34px',
-              borderRadius: '50%',
-              background: isInstructor ? '#15b47a' : 'rgba(11, 40, 73, 0.08)',
-              color: isInstructor ? '#ffffff' : '#0b2849',
-              display: comment.profile?.avatar_url ? 'none' : 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 'bold',
-              fontSize: isReply ? '12px' : '14px',
-              flexShrink: 0
-            }}
-          >
-            {authorName.charAt(0).toUpperCase()}
-          </div>
+              title={isRtl ? 'مشارك مجهول' : 'Anonymous'}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+          ) : (
+            <>
+              {comment.profile?.avatar_url ? (
+                <img
+                  src={comment.profile.avatar_url}
+                  alt={authorName}
+                  style={{
+                    width: isReply ? '28px' : '34px',
+                    height: isReply ? '28px' : '34px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '1px solid rgba(11, 40, 73, 0.1)',
+                    flexShrink: 0
+                  }}
+                  onError={e => {
+                    e.currentTarget.style.display = 'none';
+                    if (e.currentTarget.nextSibling) {
+                      e.currentTarget.nextSibling.style.display = 'flex';
+                    }
+                  }}
+                />
+              ) : null}
+              <div
+                style={{
+                  width: isReply ? '28px' : '34px',
+                  height: isReply ? '28px' : '34px',
+                  borderRadius: '50%',
+                  background: isInstructor ? '#15b47a' : 'rgba(11, 40, 73, 0.08)',
+                  color: isInstructor ? '#ffffff' : '#0b2849',
+                  display: comment.profile?.avatar_url ? 'none' : 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 'bold',
+                  fontSize: isReply ? '12px' : '14px',
+                  flexShrink: 0
+                }}
+              >
+                {authorName.charAt(0).toUpperCase()}
+              </div>
+            </>
+          )}
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -680,11 +778,25 @@ function CommentCard({
                 style={{
                   fontSize: isReply ? '12.5px' : '13.5px',
                   fontWeight: 'bold',
-                  color: '#0b2849'
+                  color: isAnon ? 'rgba(11, 40, 73, 0.75)' : '#0b2849'
                 }}
               >
                 {authorName}
               </span>
+
+              {isAnon && isOwner && (
+                <span
+                  style={{
+                    background: 'rgba(11, 40, 73, 0.05)',
+                    color: 'rgba(11, 40, 73, 0.55)',
+                    fontSize: '10px',
+                    padding: '1px 6px',
+                    borderRadius: '4px'
+                  }}
+                >
+                  {isRtl ? '(أنت - مخفي للآخرين)' : '(You - hidden from others)'}
+                </span>
+              )}
 
               {isInstructor && (
                 <span

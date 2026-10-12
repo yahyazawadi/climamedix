@@ -375,18 +375,27 @@ export async function fetchLessonComments(lessonId, currentUserId = null) {
     }
   });
 
-  return comments.map(c => ({
-    ...c,
-    profile: profileMap[c.user_id] || null,
-    heartCount: heartsMap[c.id]?.count || 0,
-    isHearted: heartsMap[c.id]?.isHearted || false
-  }));
+  return comments.map(c => {
+    const isAuthor = currentUserId && c.user_id === currentUserId;
+    // Security sanitization: If comment is marked anonymous and viewer is not the author,
+    // strip the profile data so the real identity is never exposed in client network payloads.
+    const sanitizedProfile = c.is_anonymous && !isAuthor
+      ? null
+      : (profileMap[c.user_id] || null);
+
+    return {
+      ...c,
+      profile: sanitizedProfile,
+      heartCount: heartsMap[c.id]?.count || 0,
+      isHearted: heartsMap[c.id]?.isHearted || false
+    };
+  });
 }
 
 /**
  * Post a new comment or reply to a lesson.
  */
-export async function postLessonComment({ courseId, lessonId, userId, content, parentId = null }) {
+export async function postLessonComment({ courseId, lessonId, userId, content, parentId = null, isAnonymous = false }) {
   const { data, error } = await supabase
     .from('lesson_comments')
     .insert({
@@ -394,7 +403,8 @@ export async function postLessonComment({ courseId, lessonId, userId, content, p
       lesson_id: lessonId,
       user_id: userId,
       parent_id: parentId,
-      content: content.trim()
+      content: content.trim(),
+      is_anonymous: Boolean(isAnonymous)
     })
     .select('*')
     .single();

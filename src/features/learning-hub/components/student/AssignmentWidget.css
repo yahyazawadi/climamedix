@@ -94,6 +94,72 @@
   margin-bottom: 6px;
 }
 
+.cma-upload-zone {
+  border: 2px dashed rgba(11, 40, 73, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  background: rgba(11, 40, 73, 0.015);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.cma-upload-zone:hover {
+  border-color: #004c6d;
+  background: rgba(0, 76, 109, 0.04);
+}
+
+.cma-upload-icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 76, 109, 0.08);
+  color: #004c6d;
+  margin-bottom: 10px;
+}
+
+.cma-upload-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0b2849;
+  margin-bottom: 4px;
+}
+
+.cma-upload-hint {
+  font-size: 11.5px;
+  color: rgba(11, 40, 73, 0.55);
+}
+
+.cma-file-selected-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  margin-top: 10px;
+}
+
+.cma-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e2e8f0;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.cma-progress-bar {
+  height: 100%;
+  background: #004c6d;
+  transition: width 0.2s ease;
+}
+
 .cma-input, .cma-textarea {
   width: 100%;
   padding: 10px 14px;
@@ -116,22 +182,45 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  background: rgba(21, 180, 122, 0.1);
+  padding: 14px 16px;
+  background: rgba(21, 180, 122, 0.08);
   border: 1px solid rgba(21, 180, 122, 0.3);
   border-radius: 10px;
   margin-bottom: 18px;
 }
 
+.cma-status-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #15b47a;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .cma-status-title {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   color: #15b47a;
   margin: 0;
 }
 
 .cma-status-subtitle {
-  font-size: 11.5px;
-  color: rgba(11, 40, 73, 0.65);
-  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: rgba(11, 40, 73, 0.7);
+  margin: 3px 0 0 0;
+}
+
+.cma-submission-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #004c6d;
+  text-decoration: underline;
+  margin-top: 6px;
+  font-weight: 600;
 }

@@ -1,7 +1,7 @@
 {
-  "scannedAt": "2026-10-19T21:53:55.517Z",
+  "scannedAt": "2026-10-19T23:19:26.282Z",
   "totalAssets": 67,
-  "totalReferences": 100,
+  "totalReferences": 101,
   "assets": [
     {
       "name": "icon_calendar.svg",
@@ -94,8 +94,8 @@
       "type": "svg",
       "sizeBytes": 229,
       "directReferencesCount": 0,
-      "inlineReferencesCount": 8,
-      "referencesCount": 8,
+      "inlineReferencesCount": 9,
+      "referencesCount": 9,
       "references": [
         {
           "file": "src/features/assets/AssetsExplorerPage.jsx",
@@ -107,6 +107,12 @@
           "file": "src/features/learning-hub/components/quizzes/QuizWidget.jsx",
           "line": 166,
           "snippet": "isRTL ? <>إنهاء الاختبار <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" strokeWidth=\"2.5\"><polyline points=\"20 6 9 17 4 12\" /",
+          "matchType": "inline-clone"
+        },
+        {
+          "file": "src/features/learning-hub/components/student/AssignmentWidget.jsx",
+          "line": 161,
+          "snippet": "<polyline points=\"20 6 9 17 4 12\" />",
           "matchType": "inline-clone"
         },
         {

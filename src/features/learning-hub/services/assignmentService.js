@@ -1,25 +1,26 @@
+import { uploadFileToR2 } from '../../../utils/s3Client';
+
 /**
  * Assignment Storage & Data Service (SOLID: Single Responsibility & Liskov substitution)
  * 
  * Provides an isolated repository pattern for:
  * 1. Assignment specifications (instructions, deadline, live session meta)
  * 2. Student submissions
- * 3. Graceful Localhost fallback with localStorage persistence
+ * 3. Direct upload to Cloudflare R2
+ * 4. Graceful persistence
  */
 
 const LOCAL_STORAGE_ASSIGNMENTS_KEY = 'cm_live_assignments_v1';
 const LOCAL_STORAGE_SUBMISSIONS_KEY = 'cm_assignment_submissions_v1';
 
-// Seed default live session assignments (e.g. Live Session 1, 2, 3 with Oct 25 deadline)
 const DEFAULT_ASSIGNMENTS = {
-  // Course or Lesson ID mapping
   'default_live_1': {
     id: 'assign_live_1',
     lesson_id: 'live_session_1',
     title_ar: 'واجب الجلسة التفاعلية الأولى (Live Session 1)',
     title_en: 'Live Session 1 Assignment',
-    instructions_ar: 'يرجى تقديم ملخص عن مخرجات الجلسة التفاعلية الأولى وخطة العمل المقترحة قبل موعد إغلاق الكورس يوم 25.',
-    instructions_en: 'Please submit a summary of key findings and proposed action plan before course cutoff on Oct 25.',
+    instructions_ar: 'يرجى رفع ملف الحل بصيغة PDF أو مستند، أو إرفاق الرابط وملاحظاتك قبل موعد إغلاق الكورس يوم 25.',
+    instructions_en: 'Please upload your solution file (PDF or document) or provide a link and notes before the course closure on Oct 25.',
     due_date: '2026-10-25T23:59:59',
     cutoff_date: '2026-10-25T23:59:59',
     max_score: 100
@@ -65,22 +66,35 @@ class LocalAssignmentStore {
 const store = new LocalAssignmentStore();
 
 /**
+ * Upload assignment file to Cloudflare R2
+ */
+export async function uploadAssignmentFileToR2(file, folder = 'assignments', onProgress = null) {
+  if (!file) throw new Error('No file provided for upload.');
+
+  // Enforce 50MB file size limit
+  const maxBytes = 50 * 1024 * 1024;
+  if (file.size > maxBytes) {
+    throw new Error('File exceeds maximum allowed size of 50MB.');
+  }
+
+  return await uploadFileToR2(file, folder, onProgress);
+}
+
+/**
  * Get assignment configured for a specific lesson or live session
  */
 export async function getAssignmentForLesson(lessonId, courseId) {
   const all = store.getAssignments();
-  // Exact match or fallback for demo / any live session
   if (all[lessonId]) return all[lessonId];
   
-  // Dynamic fallback for any session marked as live or matching naming
   return {
     id: `assign_${lessonId}`,
     lesson_id: lessonId,
     course_id: courseId,
     title_ar: 'الواجب العملي للجلسة التفاعلية',
     title_en: 'Live Session Practical Assignment',
-    instructions_ar: 'يرجى إرفاق رابط الحل (Google Drive / GitHub / PDF) وملاحظاتك قبل تاريخ الإغلاق المحدد يوم 25.',
-    instructions_en: 'Submit your solution link or upload and add notes before the deadline on October 25.',
+    instructions_ar: 'يرجى رفع ملف الحل مباشرة أو إرفاق رابط وملاحظاتك قبل الموعد النهائي يوم 25.',
+    instructions_en: 'Upload your solution file directly or provide a link and notes before the deadline on October 25.',
     due_date: '2026-10-25T23:59:59',
     cutoff_date: '2026-10-25T23:59:59',
     max_score: 100
@@ -96,9 +110,19 @@ export async function getUserSubmission(userId, lessonId) {
 }
 
 /**
- * Submit or update student solution
+ * Submit or update student solution (supports both Cloudflare R2 file and URL)
  */
-export async function submitStudentAssignment({ userId, userEmail, userName, lessonId, courseId, solutionUrl, notes }) {
+export async function submitStudentAssignment({ 
+  userId, 
+  userEmail, 
+  userName, 
+  lessonId, 
+  courseId, 
+  fileUrl,
+  fileName,
+  solutionUrl, 
+  notes 
+}) {
   const submissions = store.getSubmissions();
   const existingIdx = submissions.findIndex(s => s.user_id === userId && s.lesson_id === lessonId);
   
@@ -110,7 +134,9 @@ export async function submitStudentAssignment({ userId, userEmail, userName, les
     user_name: userName || 'Student',
     lesson_id: lessonId,
     course_id: courseId,
-    solution_url: solutionUrl,
+    file_url: fileUrl || (existingIdx >= 0 ? submissions[existingIdx].file_url : null),
+    file_name: fileName || (existingIdx >= 0 ? submissions[existingIdx].file_name : null),
+    solution_url: solutionUrl || '',
     notes: notes || '',
     status: 'submitted',
     submitted_at: now,

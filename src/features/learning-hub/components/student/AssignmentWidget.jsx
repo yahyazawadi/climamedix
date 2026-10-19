@@ -17,7 +17,7 @@ import './AssignmentWidget.css';
  * - Alternative solution link (Google Drive / GitHub)
  * - Deadline notices (October 25)
  */
-export function AssignmentWidget({ lesson, courseId, userId, userProfile, lang = 'ar' }) {
+export function AssignmentWidget({ lesson, courseId, userId, userProfile, lang = 'ar', onOpenAdminSubmissions }) {
   const isArabic = lang === 'ar';
   const isAdmin = Boolean(userProfile && (userProfile.role === 'admin' || userProfile.role === 'superadmin'));
   const lessonId = lesson?.id || 'live_session_1';
@@ -142,7 +142,13 @@ export function AssignmentWidget({ lesson, courseId, userId, userProfile, lang =
           {isAdmin && (
             <button 
               type="button"
-              onClick={() => setShowAdminModal(true)}
+              onClick={() => {
+                if (onOpenAdminSubmissions) {
+                  onOpenAdminSubmissions();
+                } else {
+                  setShowAdminModal(true);
+                }
+              }}
               style={{
                 background: '#0b2849',
                 color: '#ffffff',

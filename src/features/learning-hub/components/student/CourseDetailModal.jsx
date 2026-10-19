@@ -20,6 +20,7 @@ import {
 } from '../../services/lmsService';
 import { LessonCommentsSection } from '../comments/LessonCommentsSection';
 import { AssignmentWidget } from './AssignmentWidget';
+import { AdminSubmissionsModal } from '../admin/AdminSubmissionsModal';
 
 export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: propUserProfile, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted, onDownloadCertificate }) {
   const auth = useAuth ? useAuth() : null;
@@ -44,6 +45,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
   const [certRequestLoading, setCertRequestLoading] = useState(false);
   const [certNameAr, setCertNameAr] = useState('');
   const [certNameEn, setCertNameEn] = useState('');
+  const [showAdminSubmissions, setShowAdminSubmissions] = useState(false);
 
   if (!course) return null;
 
@@ -1241,6 +1243,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                     userId={userId}
                     userProfile={userProfile}
                     lang={lang}
+                    onOpenAdminSubmissions={() => setShowAdminSubmissions(true)}
                   />
 
                   {/* Lesson Comments & Q&A Discussion Section */}
@@ -1308,6 +1311,17 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
         </div>
         )}
       </div>
+
+      {/* Admin Submissions Viewer lifted to topmost modal layer */}
+      {isAdmin && showAdminSubmissions && (
+        <AdminSubmissionsModal
+          userProfile={userProfile}
+          courseId={course.id}
+          lessonId={activeLessonId}
+          onClose={() => setShowAdminSubmissions(false)}
+          lang={lang}
+        />
+      )}
     </div>
     </>
   );

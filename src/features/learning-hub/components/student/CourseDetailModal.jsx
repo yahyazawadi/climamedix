@@ -19,6 +19,7 @@ import {
   enrollInCourse
 } from '../../services/lmsService';
 import { LessonCommentsSection } from '../comments/LessonCommentsSection';
+import { AssignmentWidget } from './AssignmentWidget';
 
 export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: propUserProfile, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted, onDownloadCertificate }) {
   const auth = useAuth ? useAuth() : null;
@@ -1232,6 +1233,15 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                       />
                     </div>
                   )}
+
+                  {/* Live Session Assignment Section */}
+                  <AssignmentWidget
+                    lesson={activeLesson}
+                    courseId={course.id}
+                    userId={userId}
+                    userProfile={userProfile}
+                    lang={lang}
+                  />
 
                   {/* Lesson Comments & Q&A Discussion Section */}
                   <LessonCommentsSection

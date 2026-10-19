@@ -1,13 +1,13 @@
 import { uploadFileToR2 } from '../../../utils/s3Client';
 
 /**
- * Assignment Storage & Data Service (SOLID: Single Responsibility & Liskov substitution)
+ * Assignment Storage & Data Service (SOLID: Single Responsibility & Role Isolation)
  * 
  * Provides an isolated repository pattern for:
  * 1. Assignment specifications (instructions, deadline, live session meta)
  * 2. Student submissions
  * 3. Direct upload to Cloudflare R2
- * 4. Graceful persistence
+ * 4. Admin-only submission querying and review
  */
 
 const LOCAL_STORAGE_ASSIGNMENTS_KEY = 'cm_live_assignments_v1';
@@ -154,10 +154,19 @@ export async function submitStudentAssignment({
 }
 
 /**
- * Get all submissions for course/lesson (for Admin/Analytics)
+ * ADMIN ONLY: Fetch all submissions for a course or specific lesson
+ * Strict role guard: non-admin requests will be rejected
  */
-export async function getLessonSubmissions(lessonId) {
+export async function fetchAdminSubmissions({ userProfile, courseId, lessonId }) {
+  const isAdmin = userProfile && (userProfile.role === 'admin' || userProfile.role === 'superadmin');
+  if (!isAdmin) {
+    throw new Error('Unauthorized: Only administrators can view student submissions.');
+  }
+
   const submissions = store.getSubmissions();
-  if (!lessonId) return submissions;
-  return submissions.filter(s => s.lesson_id === lessonId);
+  return submissions.filter(s => {
+    const matchLesson = !lessonId || s.lesson_id === lessonId;
+    const matchCourse = !courseId || s.course_id === courseId;
+    return matchLesson && matchCourse;
+  });
 }

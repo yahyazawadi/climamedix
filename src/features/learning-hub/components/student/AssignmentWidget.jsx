@@ -6,6 +6,7 @@ import {
   submitStudentAssignment, 
   uploadAssignmentFileToR2 
 } from '../../services/assignmentService';
+import { AdminSubmissionsModal } from '../admin/AdminSubmissionsModal';
 import './AssignmentWidget.css';
 
 /**
@@ -18,6 +19,7 @@ import './AssignmentWidget.css';
  */
 export function AssignmentWidget({ lesson, courseId, userId, userProfile, lang = 'ar' }) {
   const isArabic = lang === 'ar';
+  const isAdmin = Boolean(userProfile && (userProfile.role === 'admin' || userProfile.role === 'superadmin'));
   const lessonId = lesson?.id || 'live_session_1';
   const fileInputRef = useRef(null);
 
@@ -25,6 +27,7 @@ export function AssignmentWidget({ lesson, courseId, userId, userProfile, lang =
   const [submission, setSubmission] = useState(null);
   const [solutionUrl, setSolutionUrl] = useState('');
   const [notes, setNotes] = useState('');
+  const [showAdminModal, setShowAdminModal] = useState(false);
   
   // File upload states
   const [selectedFile, setSelectedFile] = useState(null);
@@ -130,19 +133,36 @@ export function AssignmentWidget({ lesson, courseId, userId, userProfile, lang =
     <div className="cma-widget-wrapper" dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="cma-widget-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span className="cma-badge-live">
-            <span className="cma-badge-dot" />
-            {isArabic ? 'جلسة تفاعلية مباشرة' : 'Live Interactive Session'}
-          </span>
-          <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#0b2849' }}>
+          <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#0b2849' }}>
             {isArabic ? 'واجب الجلسة' : 'Session Assignment'}
           </span>
         </div>
 
-        <div className="cma-deadline-alert">
-          <span>
-            {isArabic ? 'الموعد النهائي للتسليم وإغلاق المساق: 25 من الشهر الجاري' : 'Course & Submission Cutoff: Oct 25'}
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {isAdmin && (
+            <button 
+              type="button"
+              onClick={() => setShowAdminModal(true)}
+              style={{
+                background: '#0b2849',
+                color: '#ffffff',
+                border: 'none',
+                padding: '5px 12px',
+                borderRadius: '6px',
+                fontSize: '11.5px',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              {isArabic ? 'لوحة تحكم الواجب (للإدارة)' : 'View Submissions (Admin)'}
+            </button>
+          )}
+
+          <div className="cma-deadline-alert">
+            <span>
+              {isArabic ? 'الموعد النهائي للتسليم وإغلاق المساق: 25 من الشهر الجاري' : 'Course & Submission Cutoff: Oct 25'}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -302,6 +322,17 @@ export function AssignmentWidget({ lesson, courseId, userId, userProfile, lang =
           </div>
         </form>
       </div>
+
+      {/* Admin-Only Submissions Viewer Modal */}
+      {isAdmin && showAdminModal && (
+        <AdminSubmissionsModal
+          userProfile={userProfile}
+          courseId={courseId}
+          lessonId={lessonId}
+          onClose={() => setShowAdminModal(false)}
+          lang={lang}
+        />
+      )}
     </div>
   );
 }

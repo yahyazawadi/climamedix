@@ -1,5 +1,5 @@
 {
-  "scannedAt": "2026-10-19T23:19:26.282Z",
+  "scannedAt": "2026-10-19T23:36:19.866Z",
   "totalAssets": 67,
   "totalReferences": 101,
   "assets": [
@@ -111,7 +111,7 @@
         },
         {
           "file": "src/features/learning-hub/components/student/AssignmentWidget.jsx",
-          "line": 161,
+          "line": 181,
           "snippet": "<polyline points=\"20 6 9 17 4 12\" />",
           "matchType": "inline-clone"
         },

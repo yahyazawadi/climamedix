@@ -26,6 +26,7 @@ import {
 import './CourseBuilderPage.css';
 import { useLmsDragDrop } from '../../hooks/useLmsDragDrop';
 import { RichTextEditor } from '../../../shared/components/RichTextEditor';
+import { AdminSubmissionsModal } from './AdminSubmissionsModal';
 
 const convertToWebP = (file) => {
   return new Promise((resolve, reject) => {
@@ -139,6 +140,7 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
   } = useLmsDragDrop({ modules, setModules, selectedCourse });
 
   const [permissions, setPermissions] = useState([]);
+  const [showSubmissionsModal, setShowSubmissionsModal] = useState(false);
 
   useEffect(() => {
     if (canManage) {
@@ -607,6 +609,22 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
                     <h3 style={{ marginTop: '4px' }}>{lang === 'ar' ? selectedCourse.title_ar : (selectedCourse.title_en || selectedCourse.title_ar)}</h3>
                   </div>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowSubmissionsModal(true)}
+                      style={{
+                        background: '#0b2849',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '6px 14px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {lang === 'ar' ? 'تسليمات الواجبات' : 'View Submissions'}
+                    </button>
                     <CourseSettingsMenu 
                       lang={lang} 
                       onEdit={() => handleEditCourse(selectedCourse)} 
@@ -1075,6 +1093,16 @@ export function CourseBuilderPage({ lang = 'ar', onNavigate }) {
             </div>
           </GlassCard>
         </div>
+      )}
+
+      {/* Admin Submissions Modal */}
+      {showSubmissionsModal && selectedCourse && (
+        <AdminSubmissionsModal
+          userProfile={useAuth().userProfile}
+          courseId={selectedCourse.id}
+          onClose={() => setShowSubmissionsModal(false)}
+          lang={lang}
+        />
       )}
     </div>
   );

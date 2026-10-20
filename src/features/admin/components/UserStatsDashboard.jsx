@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'preact/hooks';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { supabase } from '../../../utils/supabaseClient';
 import { GlassCard } from '../../shared/components/GlassCard';
-import { BarChart, Users, Globe, Briefcase, Activity, Shield, X, User, RefreshCw } from 'lucide-preact';
+import { BarChart, Users, Globe, Briefcase, Activity, Shield, X, User, RefreshCw, GraduationCap } from 'lucide-preact';
+import { CourseAnalyticsPanel } from './CourseAnalyticsPanel';
 import './UserStatsDashboard.css';
 
 const ROLE_COLORS = {
@@ -22,6 +23,7 @@ export function UserStatsDashboard({ lang = 'ar' }) {
 
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('users'); // 'users' | 'course-progress'
 
   // Modal State
   const [selectedCategory, setSelectedCategory] = useState(null); // { type: 'role', value: 'admin', title: 'Admins' }
@@ -136,24 +138,75 @@ export function UserStatsDashboard({ lang = 'ar' }) {
           <div>
             <h1 className="usd-title">
               <BarChart className="usd-title-icon" size={28} />
-              {lang === 'ar' ? 'إحصائيات النظام' : 'System Statistics'}
+              {lang === 'ar' ? 'لوحة التحليلات والإحصائيات' : 'Analytics & Statistics Dashboard'}
             </h1>
             <p className="usd-subtitle">
-              {lang === 'ar' ? 'نظرة شاملة على بيانات المستخدمين' : 'Comprehensive overview of user data'}
+              {lang === 'ar' ? 'إحصائيات المستخدمين ومتابعة حضور وإنجاز طلاب المساق' : 'User statistics & Course student progress tracking'}
             </p>
           </div>
-          <button 
-            className="usd-refresh-btn" 
-            onClick={fetchProfiles} 
-            disabled={loading}
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            {activeTab === 'users' && (
+              <button 
+                className="usd-refresh-btn" 
+                onClick={fetchProfiles} 
+                disabled={loading}
+              >
+                <RefreshCw size={16} className={loading ? 'spinning' : ''} />
+                {lang === 'ar' ? 'تحديث' : 'Refresh'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div style={{ display: 'flex', gap: '10px', marginTop: '20px', borderBottom: '1px solid rgba(11, 40, 73, 0.1)', paddingBottom: '12px' }}>
+          <button
+            type="button"
+            onClick={() => setActiveTab('users')}
+            style={{
+              padding: '8px 18px',
+              borderRadius: '8px',
+              border: 'none',
+              background: activeTab === 'users' ? '#004c6d' : 'rgba(11, 40, 73, 0.05)',
+              color: activeTab === 'users' ? '#ffffff' : '#0b2849',
+              fontWeight: '700',
+              fontSize: '13.5px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
           >
-            <RefreshCw size={16} className={loading ? 'spinning' : ''} />
-            {lang === 'ar' ? 'تحديث' : 'Refresh'}
+            <Users size={16} />
+            {lang === 'ar' ? 'إحصائيات المستخدمين العامة' : 'General User Stats'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('course-progress')}
+            style={{
+              padding: '8px 18px',
+              borderRadius: '8px',
+              border: 'none',
+              background: activeTab === 'course-progress' ? '#15b47a' : 'rgba(21, 180, 122, 0.08)',
+              color: activeTab === 'course-progress' ? '#ffffff' : '#15b47a',
+              fontWeight: '700',
+              fontSize: '13.5px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <GraduationCap size={18} />
+            {lang === 'ar' ? 'تحليلات إنجاز وحضور الطلاب (خاص بالإدارة)' : 'Course Student Progress (Superadmin)'}
           </button>
         </div>
       </div>
 
-      {loading ? (
+      {activeTab === 'course-progress' ? (
+        <CourseAnalyticsPanel lang={lang} />
+      ) : loading ? (
         <div className="usd-loading">{lang === 'ar' ? 'جاري تحميل الإحصائيات...' : 'Loading stats...'}</div>
       ) : (
         <div className="usd-content">

@@ -68,28 +68,57 @@ export async function onRequestGet(context) {
       .eq('course_id', courseId)
       .order('enrolled_at', { ascending: false });
 
-    // 6. Fetch all lesson completions for this course
+    // 6. Fetch completions AND watch telemetry for this course to dynamically normalize completion state
     const lessonIds = allLessons.map(l => l.id);
-    const { data: completions } = await sbAdmin
-      .from('lesson_completions')
-      .select('user_id, lesson_id, completed_at')
-      .in('lesson_id', lessonIds);
+    const [completionsRes, watchMetricsRes] = await Promise.all([
+      sbAdmin.from('lesson_completions').select('user_id, lesson_id, completed_at').in('lesson_id', lessonIds),
+      sbAdmin.from('lesson_watch_metrics').select('user_id, lesson_id, max_percentage_watched, actual_play_duration_seconds, updated_at').in('lesson_id', lessonIds)
+    ]);
 
-    // Group completions per user
+    const completions = completionsRes.data || [];
+    const watchMetrics = watchMetricsRes.data || [];
+
+    // Group progress per user dynamically
     const userCompletionsMap = new Map();
-    (completions || []).forEach(c => {
-      if (!userCompletionsMap.has(c.user_id)) {
-        userCompletionsMap.set(c.user_id, {
-          count: 0,
+
+    const getOrCreateUser = (uid, defaultDate) => {
+      if (!userCompletionsMap.has(uid)) {
+        userCompletionsMap.set(uid, {
           completedLessonIds: new Set(),
-          lastActiveAt: c.completed_at
+          manualCompletedLessonIds: new Set(),
+          watchNormalizedLessonIds: new Set(),
+          totalWatchTimeSeconds: 0,
+          lastActiveAt: defaultDate || null
         });
       }
-      const u = userCompletionsMap.get(c.user_id);
-      u.count++;
+      return userCompletionsMap.get(uid);
+    };
+
+    // A. Add explicit completions
+    completions.forEach(c => {
+      const u = getOrCreateUser(c.user_id, c.completed_at);
       u.completedLessonIds.add(c.lesson_id);
-      if (new Date(c.completed_at) > new Date(u.lastActiveAt)) {
+      u.manualCompletedLessonIds.add(c.lesson_id);
+      if (!u.lastActiveAt || new Date(c.completed_at) > new Date(u.lastActiveAt)) {
         u.lastActiveAt = c.completed_at;
+      }
+    });
+
+    // B. Dynamically normalize with watch telemetry (video completed if watched >= 85%)
+    watchMetrics.forEach(w => {
+      const u = getOrCreateUser(w.user_id, w.updated_at);
+      u.totalWatchTimeSeconds += (w.actual_play_duration_seconds || 0);
+
+      const maxPct = Number(w.max_percentage_watched) || 0;
+      if (maxPct >= 85) {
+        if (!u.completedLessonIds.has(w.lesson_id)) {
+          u.watchNormalizedLessonIds.add(w.lesson_id);
+        }
+        u.completedLessonIds.add(w.lesson_id);
+      }
+
+      if (w.updated_at && (!u.lastActiveAt || new Date(w.updated_at) > new Date(u.lastActiveAt))) {
+        u.lastActiveAt = w.updated_at;
       }
     });
 
@@ -105,8 +134,15 @@ export async function onRequestGet(context) {
     // 8. Assemble structured student analytics records
     const students = (enrollments || []).map(enr => {
       const p = profilesMap.get(enr.user_id) || {};
-      const comp = userCompletionsMap.get(enr.user_id) || { count: 0, completedLessonIds: new Set(), lastActiveAt: null };
-      const completedCount = comp.count;
+      const comp = userCompletionsMap.get(enr.user_id) || {
+        completedLessonIds: new Set(),
+        manualCompletedLessonIds: new Set(),
+        watchNormalizedLessonIds: new Set(),
+        totalWatchTimeSeconds: 0,
+        lastActiveAt: null
+      };
+
+      const completedCount = comp.completedLessonIds.size;
       const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
       return {
@@ -125,6 +161,9 @@ export async function onRequestGet(context) {
         role: p.role || 'user',
         enrolledAt: enr.enrolled_at,
         completedLessonsCount: completedCount,
+        manualCompletedCount: comp.manualCompletedLessonIds.size,
+        watchNormalizedCount: comp.watchNormalizedLessonIds.size,
+        totalWatchTimeSeconds: Math.round(comp.totalWatchTimeSeconds),
         totalLessons,
         progressPercent,
         isCompleted: completedCount >= totalLessons && totalLessons > 0,
@@ -133,16 +172,17 @@ export async function onRequestGet(context) {
       };
     });
 
-    // Sort by progress descending
-    students.sort((a, b) => b.completedLessonsCount - a.completedLessonsCount);
+    // Sort by progress descending, then by watch time
+    students.sort((a, b) => b.completedLessonsCount - a.completedLessonsCount || b.totalWatchTimeSeconds - a.totalWatchTimeSeconds);
 
     const summary = {
       courseId,
       courseTitle: course?.title_ar || course?.title_en || 'المساق التدريبي',
       totalEnrolled: students.length,
-      activeLearners: students.filter(s => s.completedLessonsCount > 0).length,
+      activeLearners: students.filter(s => s.completedLessonsCount > 0 || s.totalWatchTimeSeconds > 0).length,
       fullyCompleted: students.filter(s => s.isCompleted).length,
       averageProgress: students.length > 0 ? Math.round(students.reduce((acc, s) => acc + s.progressPercent, 0) / students.length) : 0,
+      totalNormalizedViaTelemetry: students.reduce((acc, s) => acc + s.watchNormalizedCount, 0),
       totalLessons
     };
 

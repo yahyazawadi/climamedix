@@ -66,11 +66,22 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
     });
   }, [data, searchQuery, filterType]);
 
+  // Format seconds into readable duration (e.g. 2 س 15 د or 45 د)
+  const formatDuration = (totalSec) => {
+    if (!totalSec || totalSec <= 0) return '0 دقيقة';
+    const hrs = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    if (hrs > 0) {
+      return `${hrs} س ${mins} د`;
+    }
+    return `${mins} دقيقة`;
+  };
+
   // Export to CSV
   const handleExportCSV = () => {
     if (!filteredStudents.length) return;
 
-    const headers = ['اسم الطالب', 'البريد الإلكتروني', 'الدولة', 'الدروس المنجزة', 'إجمالي الدروس', 'نسبة الإنجاز', 'الحالة', 'آخر نشاط'];
+    const headers = ['اسم الطالب', 'البريد الإلكتروني', 'الدولة', 'الدروس المنجزة', 'إجمالي الدروس', 'نسبة الإنجاز', 'وقت المشاهدة الفعلي (ثانية)', 'وقت المشاهدة', 'الحالة', 'آخر نشاط'];
     const rows = filteredStudents.map(s => [
       `"${s.name.replace(/"/g, '""')}"`,
       `"${s.email}"`,
@@ -78,6 +89,8 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
       s.completedLessonsCount,
       s.totalLessons,
       `${s.progressPercent}%`,
+      s.totalWatchTimeSeconds || 0,
+      `"${formatDuration(s.totalWatchTimeSeconds)}"`,
       s.isCompleted ? 'مكتمل' : (s.completedLessonsCount > 0 ? 'قيد التقدم' : 'لم يبدأ'),
       `"${new Date(s.lastActiveAt).toLocaleString('ar-EG')}"`
     ]);
@@ -162,7 +175,7 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
         </div>
 
         <div className="cap-stat-card">
-          <div className="cap-stat-label">الطلاب النشطون (أنجزوا دروساً)</div>
+          <div className="cap-stat-label">الطلاب النشطون (حضور أو إنجاز)</div>
           <div className="cap-stat-value" style={{ color: '#004c6d' }}>
             {data?.summary?.activeLearners || 0}
           </div>
@@ -176,7 +189,7 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
           <div className="cap-stat-value" style={{ color: '#15b47a' }}>
             {data?.summary?.fullyCompleted || 0}
           </div>
-          <div className="cap-stat-sub">أنهوا الـ 30 درساً بنجاح</div>
+          <div className="cap-stat-sub">أنهوا الـ {data?.summary?.totalLessons || 30} درساً بنجاح</div>
         </div>
 
         <div className="cap-stat-card">
@@ -184,7 +197,11 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
           <div className="cap-stat-value" style={{ color: '#f59e0b' }}>
             {data?.summary?.averageProgress || 0}%
           </div>
-          <div className="cap-stat-sub">من كامل مفردات البرنامج</div>
+          <div className="cap-stat-sub">
+            {data?.summary?.totalNormalizedViaTelemetry > 0 
+              ? `تم توحيد ${data.summary.totalNormalizedViaTelemetry} درساً من سجلات المشاهدة`
+              : 'من كامل مفردات البرنامج'}
+          </div>
         </div>
       </div>
 
@@ -248,6 +265,7 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
                   <th>الطالب</th>
                   <th>الدولة</th>
                   <th>الدروس المنجزة</th>
+                  <th>وقت المشاهدة</th>
                   <th>نسبة الإنجاز</th>
                   <th>الحالة</th>
                   <th>آخر نشاط</th>
@@ -270,8 +288,20 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
                       </span>
                     </td>
                     <td>
-                      <strong>{student.completedLessonsCount}</strong>
-                      <span style={{ color: 'rgba(11, 40, 73, 0.45)', fontSize: '12px' }}> / {student.totalLessons}</span>
+                      <div>
+                        <strong>{student.completedLessonsCount}</strong>
+                        <span style={{ color: 'rgba(11, 40, 73, 0.45)', fontSize: '12px' }}> / {student.totalLessons}</span>
+                      </div>
+                      {student.watchNormalizedCount > 0 ? (
+                        <div style={{ fontSize: '10.5px', color: '#0284c7', marginTop: '2px' }}>
+                          +{student.watchNormalizedCount} من سجلات المشاهدة
+                        </div>
+                      ) : null}
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '12.5px', fontWeight: '600', color: '#0b2849' }}>
+                        {formatDuration(student.totalWatchTimeSeconds)}
+                      </span>
                     </td>
                     <td>
                       <div className="cap-progress-container">

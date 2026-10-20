@@ -94,6 +94,8 @@ export async function fetchCourseSyllabus(courseId) {
 
 /**
  * Fetch all completed lesson IDs for a user within a course.
+ * Dynamically normalizes completions:
+ * Union of explicit lesson_completions + telemetry records where max_percentage_watched >= 85
  * Returns a Set of lesson UUIDs for O(1) lookup.
  */
 export async function fetchCompletedLessons(userId, courseId) {
@@ -110,14 +112,33 @@ export async function fetchCompletedLessons(userId, courseId) {
   
   if (totalLessons === 0 || !userId) return { completedSet: new Set(), totalLessons };
 
-  const { data, error } = await supabase
-    .from('lesson_completions')
-    .select('lesson_id')
-    .eq('user_id', userId)
-    .in('lesson_id', allLessonIds);
+  const [completionsRes, watchRes] = await Promise.all([
+    supabase
+      .from('lesson_completions')
+      .select('lesson_id')
+      .eq('user_id', userId)
+      .in('lesson_id', allLessonIds),
+    supabase
+      .from('lesson_watch_metrics')
+      .select('lesson_id, max_percentage_watched')
+      .eq('user_id', userId)
+      .in('lesson_id', allLessonIds)
+  ]);
 
-  if (error) throw error;
-  return { completedSet: new Set(data.map(r => r.lesson_id)), totalLessons };
+  if (completionsRes.error) throw completionsRes.error;
+
+  const completedIds = new Set((completionsRes.data || []).map(r => r.lesson_id));
+
+  // Dynamically include lessons where student watched >= 85%
+  if (watchRes.data) {
+    watchRes.data.forEach(w => {
+      if ((Number(w.max_percentage_watched) || 0) >= 85) {
+        completedIds.add(w.lesson_id);
+      }
+    });
+  }
+
+  return { completedSet: completedIds, totalLessons };
 }
 
 /**

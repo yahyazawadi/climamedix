@@ -19,6 +19,8 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all'); // 'all' | 'completed' | 'active' | 'not-started'
+  const [sortKey, setSortKey] = useState('progressPercent'); // 'name' | 'country' | 'completedLessonsCount' | 'totalWatchTimeSeconds' | 'progressPercent' | 'isCompleted' | 'firstSignInAt' | 'lastActiveAt'
+  const [sortDir, setSortDir] = useState('desc'); // 'asc' | 'desc'
 
   useEffect(() => {
     if (!isSuperadmin) return;
@@ -43,11 +45,25 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
     return () => { mounted = false; };
   }, [isSuperadmin]);
 
-  // Filtered students list
+  const handleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      // Sensible defaults: text asc, numbers/dates desc
+      if (key === 'name' || key === 'country') {
+        setSortDir('asc');
+      } else {
+        setSortDir('desc');
+      }
+    }
+  };
+
+  // Filtered and sorted students list (Instant client-side, ZERO extra DB queries)
   const filteredStudents = useMemo(() => {
     if (!data?.students) return [];
 
-    return data.students.filter(student => {
+    const list = data.students.filter(student => {
       // Search filter
       const q = searchQuery.toLowerCase().trim();
       const matchSearch = !q || 
@@ -64,7 +80,56 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
 
       return true;
     });
-  }, [data, searchQuery, filterType]);
+
+    list.sort((a, b) => {
+      let valA;
+      let valB;
+
+      switch (sortKey) {
+        case 'name':
+          valA = (a.name || '').toLowerCase();
+          valB = (b.name || '').toLowerCase();
+          return sortDir === 'asc' ? valA.localeCompare(valB, 'ar') : valB.localeCompare(valA, 'ar');
+        case 'country':
+          valA = (a.country || '').toLowerCase();
+          valB = (b.country || '').toLowerCase();
+          return sortDir === 'asc' ? valA.localeCompare(valB, 'ar') : valB.localeCompare(valA, 'ar');
+        case 'completedLessonsCount':
+          valA = a.completedLessonsCount || 0;
+          valB = b.completedLessonsCount || 0;
+          break;
+        case 'totalWatchTimeSeconds':
+          valA = a.totalWatchTimeSeconds || 0;
+          valB = b.totalWatchTimeSeconds || 0;
+          break;
+        case 'progressPercent':
+          valA = a.progressPercent || 0;
+          valB = b.progressPercent || 0;
+          break;
+        case 'isCompleted':
+          valA = a.isCompleted ? 1 : (a.completedLessonsCount > 0 ? 0.5 : 0);
+          valB = b.isCompleted ? 1 : (b.completedLessonsCount > 0 ? 0.5 : 0);
+          break;
+        case 'firstSignInAt':
+          valA = new Date(a.firstSignInAt || a.enrolledAt || 0).getTime();
+          valB = new Date(b.firstSignInAt || b.enrolledAt || 0).getTime();
+          break;
+        case 'lastActiveAt':
+          valA = new Date(a.lastActiveAt || 0).getTime();
+          valB = new Date(b.lastActiveAt || 0).getTime();
+          break;
+        default:
+          valA = a.progressPercent || 0;
+          valB = b.progressPercent || 0;
+      }
+
+      if (valA < valB) return sortDir === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return list;
+  }, [data, searchQuery, filterType, sortKey, sortDir]);
 
   // Format seconds into readable duration (e.g. 2 س 15 د or 45 د)
   const formatDuration = (totalSec) => {
@@ -263,14 +328,70 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
             <table className="cap-table">
               <thead>
                 <tr>
-                  <th>الطالب</th>
-                  <th>الدولة</th>
-                  <th>الدروس المنجزة</th>
-                  <th>وقت المشاهدة</th>
-                  <th>نسبة الإنجاز</th>
-                  <th>الحالة</th>
-                  <th>أول نشاط (تسجيل الحساب)</th>
-                  <th>آخر نشاط</th>
+                  <th onClick={() => handleSort('name')} className="cap-sortable-th" title="ترتيب حسب اسم الطالب">
+                    <div className="cap-th-content">
+                      <span>الطالب</span>
+                      <span className={`cap-sort-arrow ${sortKey === 'name' ? 'active' : ''}`}>
+                        {sortKey === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                      </span>
+                    </div>
+                  </th>
+                  <th onClick={() => handleSort('country')} className="cap-sortable-th" title="ترتيب حسب الدولة">
+                    <div className="cap-th-content">
+                      <span>الدولة</span>
+                      <span className={`cap-sort-arrow ${sortKey === 'country' ? 'active' : ''}`}>
+                        {sortKey === 'country' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                      </span>
+                    </div>
+                  </th>
+                  <th onClick={() => handleSort('completedLessonsCount')} className="cap-sortable-th" title="ترتيب حسب عدد الدروس المنجزة">
+                    <div className="cap-th-content">
+                      <span>الدروس المنجزة</span>
+                      <span className={`cap-sort-arrow ${sortKey === 'completedLessonsCount' ? 'active' : ''}`}>
+                        {sortKey === 'completedLessonsCount' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                      </span>
+                    </div>
+                  </th>
+                  <th onClick={() => handleSort('totalWatchTimeSeconds')} className="cap-sortable-th" title="ترتيب حسب وقت المشاهدة">
+                    <div className="cap-th-content">
+                      <span>وقت المشاهدة</span>
+                      <span className={`cap-sort-arrow ${sortKey === 'totalWatchTimeSeconds' ? 'active' : ''}`}>
+                        {sortKey === 'totalWatchTimeSeconds' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                      </span>
+                    </div>
+                  </th>
+                  <th onClick={() => handleSort('progressPercent')} className="cap-sortable-th" title="ترتيب حسب نسبة الإنجاز">
+                    <div className="cap-th-content">
+                      <span>نسبة الإنجاز</span>
+                      <span className={`cap-sort-arrow ${sortKey === 'progressPercent' ? 'active' : ''}`}>
+                        {sortKey === 'progressPercent' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                      </span>
+                    </div>
+                  </th>
+                  <th onClick={() => handleSort('isCompleted')} className="cap-sortable-th" title="ترتيب حسب الحالة">
+                    <div className="cap-th-content">
+                      <span>الحالة</span>
+                      <span className={`cap-sort-arrow ${sortKey === 'isCompleted' ? 'active' : ''}`}>
+                        {sortKey === 'isCompleted' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                      </span>
+                    </div>
+                  </th>
+                  <th onClick={() => handleSort('firstSignInAt')} className="cap-sortable-th" title="ترتيب حسب أول نشاط">
+                    <div className="cap-th-content">
+                      <span>أول نشاط (تسجيل الحساب)</span>
+                      <span className={`cap-sort-arrow ${sortKey === 'firstSignInAt' ? 'active' : ''}`}>
+                        {sortKey === 'firstSignInAt' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                      </span>
+                    </div>
+                  </th>
+                  <th onClick={() => handleSort('lastActiveAt')} className="cap-sortable-th" title="ترتيب حسب آخر نشاط">
+                    <div className="cap-th-content">
+                      <span>آخر نشاط</span>
+                      <span className={`cap-sort-arrow ${sortKey === 'lastActiveAt' ? 'active' : ''}`}>
+                        {sortKey === 'lastActiveAt' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                      </span>
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody>

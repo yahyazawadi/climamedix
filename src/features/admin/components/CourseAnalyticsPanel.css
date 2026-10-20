@@ -168,6 +168,36 @@
   color: #0b2849;
   text-align: right;
   border-bottom: 1px solid rgba(11, 40, 73, 0.08);
+  user-select: none;
+}
+
+.cap-sortable-th {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.cap-sortable-th:hover {
+  background: rgba(0, 76, 109, 0.08);
+}
+
+.cap-th-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.cap-sort-arrow {
+  font-size: 11px;
+  color: rgba(11, 40, 73, 0.28);
+  display: inline-block;
+  transition: all 0.15s ease;
+}
+
+.cap-sort-arrow.active {
+  color: #004c6d;
+  font-weight: 900;
+  transform: scale(1.15);
 }
 
 .cap-table td {

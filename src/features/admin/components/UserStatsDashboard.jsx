@@ -48,7 +48,7 @@ export function UserStatsDashboard({ lang = 'ar' }) {
 
   useEffect(() => {
     fetchProfiles();
-  }, [canViewStats]);
+  }, [isSuperadmin]);
 
   const stats = useMemo(() => {
     const total = profiles.length;

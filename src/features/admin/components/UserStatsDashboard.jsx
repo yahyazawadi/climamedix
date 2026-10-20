@@ -4,6 +4,7 @@ import { supabase } from '../../../utils/supabaseClient';
 import { GlassCard } from '../../shared/components/GlassCard';
 import { BarChart, Users, Globe, Briefcase, Activity, Shield, X, User, RefreshCw, GraduationCap } from 'lucide-preact';
 import { CourseAnalyticsPanel } from './CourseAnalyticsPanel';
+import { normalizeCountryName } from '../../../utils/geoUtils';
 import './UserStatsDashboard.css';
 
 const ROLE_COLORS = {
@@ -64,7 +65,8 @@ export function UserStatsDashboard({ lang = 'ar' }) {
     profiles.forEach(p => {
       roles[p.role] = (roles[p.role] || 0) + 1;
       
-      const country = p.country || (lang === 'ar' ? 'غير محدد' : 'Unknown');
+      const rawCountry = p.country || (lang === 'ar' ? 'غير محدد' : 'Unknown');
+      const country = normalizeCountryName(rawCountry, lang === 'ar') || rawCountry;
       countries[country] = (countries[country] || 0) + 1;
       
       const prof = p.profession || (lang === 'ar' ? 'غير محدد' : 'Unknown');
@@ -104,7 +106,8 @@ export function UserStatsDashboard({ lang = 'ar' }) {
       if (selectedCategory.type === 'role') return p.role === selectedCategory.value;
       if (selectedCategory.type === 'online') return p.online === selectedCategory.value;
       if (selectedCategory.type === 'country') {
-        const c = p.country || (lang === 'ar' ? 'غير محدد' : 'Unknown');
+        const rawC = p.country || (lang === 'ar' ? 'غير محدد' : 'Unknown');
+        const c = normalizeCountryName(rawC, lang === 'ar') || rawC;
         return c === selectedCategory.value;
       }
       if (selectedCategory.type === 'profession') {

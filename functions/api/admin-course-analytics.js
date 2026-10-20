@@ -114,7 +114,14 @@ export async function onRequestGet(context) {
         name: p.full_name || 'طالب',
         email: p.email || 'N/A',
         phone: p.phone || '',
-        country: p.country || 'غير محدد',
+        country: (() => {
+          const raw = (p.country || '').trim();
+          const lower = raw.toLowerCase();
+          if (lower.includes('palestin') || lower.includes('israel') || lower.includes('west bank') || lower.includes('gaza') || lower.includes('فلسطين') || lower.includes('إسرائيل')) {
+            return 'فلسطين';
+          }
+          return raw || 'غير محدد';
+        })(),
         role: p.role || 'user',
         enrolledAt: enr.enrolled_at,
         completedLessonsCount: completedCount,

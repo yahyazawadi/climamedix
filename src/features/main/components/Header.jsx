@@ -644,7 +644,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                         </a>
                       )}
                       
-                      {hasPermission('view:user_stats') && (
+                      {userProfile?.role === 'superadmin' && (
                         <a 
                           href="#admin-stats"
                           onClick={(e) => {
@@ -1046,7 +1046,7 @@ export function Header({ activeSection, currentView, onNavigate, user, userProfi
                   </a>
                 )}
 
-                {hasPermission('view:user_stats') && (
+                {userProfile?.role === 'superadmin' && (
                   <a 
                     href="#admin-stats" 
                     onClick={(e) => { e.preventDefault(); onNavigate('admin-stats'); setDrawerOpen(false); }} 

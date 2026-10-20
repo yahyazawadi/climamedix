@@ -18,18 +18,18 @@ const ROLE_COLORS = {
 const BRAND_COLORS = ['#15b47a', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#10b981', '#f43f5e', '#6366f1', '#14b8a6'];
 
 export function UserStatsDashboard({ lang = 'ar' }) {
-  const { hasPermission, loading: authLoading } = useAuth();
-  const canViewStats = hasPermission('view:user_stats');
+  const { userProfile, loading: authLoading } = useAuth();
+  const isSuperadmin = userProfile?.role === 'superadmin';
 
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('users'); // 'users' | 'course-progress'
+  const [activeTab, setActiveTab] = useState('course-progress'); // default directly to course progress for superadmin
 
   // Modal State
   const [selectedCategory, setSelectedCategory] = useState(null); // { type: 'role', value: 'admin', title: 'Admins' }
 
   const fetchProfiles = async () => {
-    if (!canViewStats) return;
+    if (!isSuperadmin) return;
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -123,10 +123,17 @@ export function UserStatsDashboard({ lang = 'ar' }) {
     );
   }
 
-  if (!canViewStats) {
+  if (!isSuperadmin) {
     return (
-      <div className="admin-unauthorized">
-        <h2>{lang === 'ar' ? 'غير مصرح لك بعرض الإحصائيات' : 'Unauthorized to view stats'}</h2>
+      <div className="admin-unauthorized" style={{ textAlign: 'center', padding: '60px 20px' }}>
+        <div style={{ maxWidth: '480px', margin: '0 auto', background: '#fee2e2', border: '1px solid #f87171', borderRadius: '16px', padding: '32px' }}>
+          <h3 style={{ color: '#991b1b', margin: '0 0 10px 0' }}>{lang === 'ar' ? 'صلاحية خاصة بالمسؤول الرئيسي (Superadmin Only)' : 'Superadmin Only Access'}</h3>
+          <p style={{ color: '#7f1d1d', fontSize: '14px', margin: 0 }}>
+            {lang === 'ar' 
+              ? 'هذه اللوحة وجميع إحصائيات الطلاب والمساقات حصرية فقط لحسابات المسؤول الرئيسي (Superadmin).' 
+              : 'This analytics dashboard and all student progress data are strictly exclusive to Superadmin accounts.'}
+          </p>
+        </div>
       </div>
     );
   }

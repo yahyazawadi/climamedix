@@ -329,7 +329,12 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
                     </td>
                     <td>
                       <span style={{ fontSize: '11.5px', color: 'rgba(11, 40, 73, 0.65)' }}>
-                        {student.firstSignInAt ? new Date(student.firstSignInAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }) : 'غير محدد'}
+                        {(() => {
+                          const dateVal = student.firstSignInAt || student.enrolledAt || student.lastActiveAt;
+                          if (!dateVal) return 'غير محدد';
+                          const d = new Date(dateVal);
+                          return isNaN(d.getTime()) ? 'غير محدد' : d.toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
+                        })()}
                       </span>
                     </td>
                     <td>

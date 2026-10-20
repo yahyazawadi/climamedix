@@ -54,41 +54,119 @@ export async function fetchCourseStudentsProgress(courseId = '0509ec71-4043-43d4
   const enrollments = enrollmentsRes.data || [];
 
   const userIds = enrollments.map(e => e.user_id);
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('id, full_name, email, phone, country, role')
-    .in('id', userIds);
+  const [profilesRes, compRes, watchRes] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, full_name, email, phone, country, role, created_at')
+      .in('id', userIds),
+    supabase
+      .from('lesson_completions')
+      .select('user_id, lesson_id, completed_at'),
+    supabase
+      .from('lesson_watch_metrics')
+      .select('user_id, lesson_id, max_percentage_watched, actual_play_duration_seconds, updated_at')
+  ]);
 
-  const profilesMap = new Map((profiles || []).map(p => [p.id, p]));
+  const profilesMap = new Map((profilesRes.data || []).map(p => [p.id, p]));
+  const userProgressMap = new Map();
 
-  // In direct query fallback, assemble student records
+  (compRes.data || []).forEach(c => {
+    if (!userProgressMap.has(c.user_id)) {
+      userProgressMap.set(c.user_id, {
+        completedLessonIds: new Set(),
+        manualCompletedCount: 0,
+        watchNormalizedCount: 0,
+        totalWatchTimeSeconds: 0,
+        lastActiveAt: c.completed_at
+      });
+    }
+    const u = userProgressMap.get(c.user_id);
+    u.completedLessonIds.add(c.lesson_id);
+    u.manualCompletedCount++;
+    if (!u.lastActiveAt || new Date(c.completed_at) > new Date(u.lastActiveAt)) {
+      u.lastActiveAt = c.completed_at;
+    }
+  });
+
+  (watchRes.data || []).forEach(w => {
+    if (!userProgressMap.has(w.user_id)) {
+      userProgressMap.set(w.user_id, {
+        completedLessonIds: new Set(),
+        manualCompletedCount: 0,
+        watchNormalizedCount: 0,
+        totalWatchTimeSeconds: 0,
+        lastActiveAt: w.updated_at
+      });
+    }
+    const u = userProgressMap.get(w.user_id);
+    u.totalWatchTimeSeconds += (w.actual_play_duration_seconds || 0);
+
+    if (Number(w.max_percentage_watched) >= 85) {
+      if (!u.completedLessonIds.has(w.lesson_id)) {
+        u.watchNormalizedCount++;
+        u.completedLessonIds.add(w.lesson_id);
+      }
+    }
+
+    if (w.updated_at && (!u.lastActiveAt || new Date(w.updated_at) > new Date(u.lastActiveAt))) {
+      u.lastActiveAt = w.updated_at;
+    }
+  });
+
+  // Assemble student records
   const students = enrollments.map(enr => {
     const p = profilesMap.get(enr.user_id) || {};
+    const comp = userProgressMap.get(enr.user_id) || {
+      completedLessonIds: new Set(),
+      manualCompletedCount: 0,
+      watchNormalizedCount: 0,
+      totalWatchTimeSeconds: 0,
+      lastActiveAt: null
+    };
+
+    const completedCount = comp.completedLessonIds.size;
+    const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+    const firstSignInAt = p.created_at || enr.enrolled_at;
+
     return {
       userId: enr.user_id,
       name: p.full_name || 'طالب',
       email: p.email || 'N/A',
       phone: p.phone || '',
-      country: p.country || 'غير محدد',
+      country: (() => {
+        const raw = (p.country || '').trim();
+        const lower = raw.toLowerCase();
+        if (lower.includes('palestin') || lower.includes('israel') || lower.includes('west bank') || lower.includes('gaza') || lower.includes('فلسطين') || lower.includes('إسرائيل')) {
+          return 'فلسطين';
+        }
+        return raw || 'غير محدد';
+      })(),
       role: p.role || 'user',
       enrolledAt: enr.enrolled_at,
-      completedLessonsCount: 0,
+      firstSignInAt,
+      completedLessonsCount: completedCount,
+      manualCompletedCount: comp.manualCompletedCount,
+      watchNormalizedCount: comp.watchNormalizedCount,
+      totalWatchTimeSeconds: Math.round(comp.totalWatchTimeSeconds),
       totalLessons,
-      progressPercent: 0,
-      isCompleted: false,
-      lastActiveAt: enr.enrolled_at,
-      completedLessonIds: []
+      progressPercent,
+      isCompleted: completedCount >= totalLessons && totalLessons > 0,
+      lastActiveAt: comp.lastActiveAt || enr.enrolled_at,
+      completedLessonIds: Array.from(comp.completedLessonIds)
     };
   });
+
+  students.sort((a, b) => b.completedLessonsCount - a.completedLessonsCount || b.totalWatchTimeSeconds - a.totalWatchTimeSeconds);
 
   return {
     summary: {
       courseId,
       courseTitle: course?.title_ar || 'المساق التدريبي',
       totalEnrolled: students.length,
-      activeLearners: 0,
-      fullyCompleted: 0,
-      averageProgress: 0,
+      activeLearners: students.filter(s => s.completedLessonsCount > 0 || s.totalWatchTimeSeconds > 0).length,
+      fullyCompleted: students.filter(s => s.isCompleted).length,
+      averageProgress: students.length > 0 ? Math.round(students.reduce((acc, s) => acc + s.progressPercent, 0) / students.length) : 0,
+      totalNormalizedViaTelemetry: students.reduce((acc, s) => acc + s.watchNormalizedCount, 0),
       totalLessons
     },
     students

@@ -81,7 +81,7 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
   const handleExportCSV = () => {
     if (!filteredStudents.length) return;
 
-    const headers = ['اسم الطالب', 'البريد الإلكتروني', 'الدولة', 'الدروس المنجزة', 'إجمالي الدروس', 'نسبة الإنجاز', 'وقت المشاهدة الفعلي (ثانية)', 'وقت المشاهدة', 'الحالة', 'آخر نشاط'];
+    const headers = ['اسم الطالب', 'البريد الإلكتروني', 'الدولة', 'الدروس المنجزة', 'إجمالي الدروس', 'نسبة الإنجاز', 'وقت المشاهدة الفعلي (ثانية)', 'وقت المشاهدة', 'الحالة', 'أول نشاط (تسجيل الحساب)', 'آخر نشاط'];
     const rows = filteredStudents.map(s => [
       `"${s.name.replace(/"/g, '""')}"`,
       `"${s.email}"`,
@@ -92,6 +92,7 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
       s.totalWatchTimeSeconds || 0,
       `"${formatDuration(s.totalWatchTimeSeconds)}"`,
       s.isCompleted ? 'مكتمل' : (s.completedLessonsCount > 0 ? 'قيد التقدم' : 'لم يبدأ'),
+      `"${s.firstSignInAt ? new Date(s.firstSignInAt).toLocaleString('ar-EG') : 'غير متوفر'}"`,
       `"${new Date(s.lastActiveAt).toLocaleString('ar-EG')}"`
     ]);
 
@@ -268,6 +269,7 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
                   <th>وقت المشاهدة</th>
                   <th>نسبة الإنجاز</th>
                   <th>الحالة</th>
+                  <th>أول نشاط (تسجيل الحساب)</th>
                   <th>آخر نشاط</th>
                 </tr>
               </thead>
@@ -324,6 +326,11 @@ export function CourseAnalyticsPanel({ lang = 'ar' }) {
                       ) : (
                         <span className="cap-badge-status zero">لم يبدأ بعد</span>
                       )}
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '11.5px', color: 'rgba(11, 40, 73, 0.65)' }}>
+                        {student.firstSignInAt ? new Date(student.firstSignInAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }) : 'غير محدد'}
+                      </span>
                     </td>
                     <td>
                       <span style={{ fontSize: '11.5px', color: 'rgba(11, 40, 73, 0.65)' }}>

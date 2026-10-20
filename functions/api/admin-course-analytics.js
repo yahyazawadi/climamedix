@@ -122,18 +122,20 @@ export async function onRequestGet(context) {
       }
     });
 
-    // 7. Fetch Profiles for all enrolled users
+    // 7. Fetch Profiles and Auth data for all enrolled users
     const userIds = (enrollments || []).map(e => e.user_id);
-    const { data: profiles } = await sbAdmin
-      .from('profiles')
-      .select('id, full_name, email, phone, country, role, created_at')
-      .in('id', userIds);
+    const [profilesRes, authUsersRes] = await Promise.all([
+      sbAdmin.from('profiles').select('id, full_name, email, phone, country, role, created_at').in('id', userIds),
+      sbAdmin.auth.admin.listUsers({ perPage: 1000 }).catch(() => ({ data: { users: [] } }))
+    ]);
 
-    const profilesMap = new Map((profiles || []).map(p => [p.id, p]));
+    const profilesMap = new Map((profilesRes.data || []).map(p => [p.id, p]));
+    const authUsersMap = new Map((authUsersRes.data?.users || []).map(u => [u.id, u]));
 
     // 8. Assemble structured student analytics records
     const students = (enrollments || []).map(enr => {
       const p = profilesMap.get(enr.user_id) || {};
+      const authUser = authUsersMap.get(enr.user_id) || {};
       const comp = userCompletionsMap.get(enr.user_id) || {
         completedLessonIds: new Set(),
         manualCompletedLessonIds: new Set(),
@@ -144,6 +146,10 @@ export async function onRequestGet(context) {
 
       const completedCount = comp.completedLessonIds.size;
       const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+
+      // First activity / initial registration timestamp
+      const firstSignInAt = authUser.created_at || p.created_at || enr.enrolled_at;
+      const lastSignInAt = authUser.last_sign_in_at || null;
 
       return {
         userId: enr.user_id,
@@ -160,6 +166,8 @@ export async function onRequestGet(context) {
         })(),
         role: p.role || 'user',
         enrolledAt: enr.enrolled_at,
+        firstSignInAt,
+        lastSignInAt,
         completedLessonsCount: completedCount,
         manualCompletedCount: comp.manualCompletedLessonIds.size,
         watchNormalizedCount: comp.watchNormalizedLessonIds.size,
@@ -167,7 +175,7 @@ export async function onRequestGet(context) {
         totalLessons,
         progressPercent,
         isCompleted: completedCount >= totalLessons && totalLessons > 0,
-        lastActiveAt: comp.lastActiveAt || enr.enrolled_at,
+        lastActiveAt: comp.lastActiveAt || lastSignInAt || enr.enrolled_at,
         completedLessonIds: Array.from(comp.completedLessonIds)
       };
     });

@@ -8,6 +8,7 @@ export async function onRequestGet(context) {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'authorization, content-type',
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
     'Content-Type': 'application/json'
   };
 
@@ -69,14 +70,32 @@ export async function onRequestGet(context) {
       .order('enrolled_at', { ascending: false });
 
     // 6. Fetch completions AND watch telemetry for this course to dynamically normalize completion state
+    // PostgREST hard-caps individual requests at 1,000 rows regardless of high range values.
+    // We paginate with a batch loop to fetch 100% of rows across all students.
     const lessonIds = allLessons.map(l => l.id);
-    const [completionsRes, watchMetricsRes] = await Promise.all([
-      sbAdmin.from('lesson_completions').select('user_id, lesson_id, completed_at').in('lesson_id', lessonIds),
-      sbAdmin.from('lesson_watch_metrics').select('user_id, lesson_id, max_percentage_watched, actual_play_duration_seconds, updated_at').in('lesson_id', lessonIds)
-    ]);
+    
+    async function fetchAllRows(tableName, selectCols) {
+      let all = [];
+      let from = 0;
+      const batchSize = 1000;
+      while (true) {
+        const { data, error } = await sbAdmin
+          .from(tableName)
+          .select(selectCols)
+          .in('lesson_id', lessonIds)
+          .range(from, from + batchSize - 1);
+        if (error) throw error;
+        if (data && data.length > 0) all.push(...data);
+        if (!data || data.length < batchSize) break;
+        from += batchSize;
+      }
+      return all;
+    }
 
-    const completions = completionsRes.data || [];
-    const watchMetrics = watchMetricsRes.data || [];
+    const [completions, watchMetrics] = await Promise.all([
+      fetchAllRows('lesson_completions', 'user_id, lesson_id, completed_at'),
+      fetchAllRows('lesson_watch_metrics', 'user_id, lesson_id, max_percentage_watched, actual_play_duration_seconds, updated_at')
+    ]);
 
     // Group progress per user dynamically
     const userCompletionsMap = new Map();

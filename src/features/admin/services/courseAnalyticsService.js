@@ -54,23 +54,36 @@ export async function fetchCourseStudentsProgress(courseId = '0509ec71-4043-43d4
   const enrollments = enrollmentsRes.data || [];
 
   const userIds = enrollments.map(e => e.user_id);
-  const [profilesRes, compRes, watchRes] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('id, full_name, email, phone, country, role, created_at')
-      .in('id', userIds),
-    supabase
-      .from('lesson_completions')
-      .select('user_id, lesson_id, completed_at'),
-    supabase
-      .from('lesson_watch_metrics')
-      .select('user_id, lesson_id, max_percentage_watched, actual_play_duration_seconds, updated_at')
+  const lessonIds = allLessons.map(l => l.id);
+
+  async function fetchAll(table, cols, inCol, inVals) {
+    let all = [];
+    let from = 0;
+    const batchSize = 1000;
+    while (true) {
+      let q = supabase.from(table).select(cols).range(from, from + batchSize - 1);
+      if (inCol && inVals && inVals.length > 0) {
+        q = q.in(inCol, inVals);
+      }
+      const { data, error } = await q;
+      if (error) break;
+      if (data && data.length > 0) all.push(...data);
+      if (!data || data.length < batchSize) break;
+      from += batchSize;
+    }
+    return all;
+  }
+
+  const [profilesData, compsData, watchData] = await Promise.all([
+    fetchAll('profiles', 'id, full_name, email, phone, country, role, created_at', 'id', userIds),
+    fetchAll('lesson_completions', 'user_id, lesson_id, completed_at', 'lesson_id', lessonIds),
+    fetchAll('lesson_watch_metrics', 'user_id, lesson_id, max_percentage_watched, actual_play_duration_seconds, updated_at', 'lesson_id', lessonIds)
   ]);
 
-  const profilesMap = new Map((profilesRes.data || []).map(p => [p.id, p]));
+  const profilesMap = new Map((profilesData || []).map(p => [p.id, p]));
   const userProgressMap = new Map();
 
-  (compRes.data || []).forEach(c => {
+  (compsData || []).forEach(c => {
     if (!userProgressMap.has(c.user_id)) {
       userProgressMap.set(c.user_id, {
         completedLessonIds: new Set(),

@@ -1,24 +1,22 @@
 import { uploadFileToR2 } from '../../../utils/s3Client';
+import { supabase } from '../../../utils/supabaseClient';
 
 /**
- * Assignment Storage & Data Service (SOLID: Single Responsibility & Role Isolation)
+ * Assignment Storage & Data Service (Connected directly to Cloudflare Pages API + Supabase)
  * 
- * Provides an isolated repository pattern for:
- * 1. Assignment specifications (instructions, deadline, live session meta)
- * 2. Student submissions
- * 3. Direct upload to Cloudflare R2
- * 4. Admin-only submission querying and review
+ * Provides:
+ * 1. Assignment specifications
+ * 2. Student submissions direct to Supabase
+ * 3. File uploads to Cloudflare R2
+ * 4. Admin-only submission querying
  */
-
-const LOCAL_STORAGE_ASSIGNMENTS_KEY = 'cm_live_assignments_v1';
-const LOCAL_STORAGE_SUBMISSIONS_KEY = 'cm_assignment_submissions_v1';
 
 const DEFAULT_ASSIGNMENTS = {
   'default_live_1': {
     id: 'assign_live_1',
     lesson_id: 'live_session_1',
-    title_ar: 'واجب الجلسة التفاعلية الأولى (Live Session 1)',
-    title_en: 'Live Session 1 Assignment',
+    title_ar: 'الواجب العملي للجلسة التفاعلية الأولى',
+    title_en: 'Live Session 1 Practical Assignment',
     instructions_ar: 'يرجى رفع ملف الحل بصيغة PDF أو مستند، أو إرفاق الرابط وملاحظاتك قبل موعد إغلاق الكورس يوم 25.',
     instructions_en: 'Please upload your solution file (PDF or document) or provide a link and notes before the course closure on Oct 25.',
     due_date: '2026-10-25T23:59:59',
@@ -27,46 +25,8 @@ const DEFAULT_ASSIGNMENTS = {
   }
 };
 
-class LocalAssignmentStore {
-  getAssignments() {
-    try {
-      const raw = localStorage.getItem(LOCAL_STORAGE_ASSIGNMENTS_KEY);
-      return raw ? { ...DEFAULT_ASSIGNMENTS, ...JSON.parse(raw) } : { ...DEFAULT_ASSIGNMENTS };
-    } catch {
-      return { ...DEFAULT_ASSIGNMENTS };
-    }
-  }
-
-  saveAssignments(data) {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_ASSIGNMENTS_KEY, JSON.stringify(data));
-    } catch (e) {
-      console.warn('LocalStorage save failed:', e);
-    }
-  }
-
-  getSubmissions() {
-    try {
-      const raw = localStorage.getItem(LOCAL_STORAGE_SUBMISSIONS_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  saveSubmissions(data) {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_SUBMISSIONS_KEY, JSON.stringify(data));
-    } catch (e) {
-      console.warn('LocalStorage save failed:', e);
-    }
-  }
-}
-
-const store = new LocalAssignmentStore();
-
 /**
- * Upload assignment file to Cloudflare R2
+ * Upload assignment file directly to Cloudflare R2
  */
 export async function uploadAssignmentFileToR2(file, folder = 'assignments', onProgress = null) {
   if (!file) throw new Error('No file provided for upload.');
@@ -81,14 +41,11 @@ export async function uploadAssignmentFileToR2(file, folder = 'assignments', onP
 }
 
 /**
- * Get assignment configured for a specific lesson or live session
+ * Get assignment details
  */
 export async function getAssignmentForLesson(lessonId, courseId) {
-  const all = store.getAssignments();
-  if (all[lessonId]) return all[lessonId];
-  
   return {
-    id: `assign_${lessonId}`,
+    id: `assign_${lessonId || 'live_1'}`,
     lesson_id: lessonId,
     course_id: courseId,
     title_ar: 'الواجب العملي للجلسة التفاعلية',
@@ -102,15 +59,32 @@ export async function getAssignmentForLesson(lessonId, courseId) {
 }
 
 /**
- * Get user submission for a specific lesson/assignment
+ * Get user submission from Supabase
  */
 export async function getUserSubmission(userId, lessonId) {
-  const submissions = store.getSubmissions();
-  return submissions.find(s => s.user_id === userId && s.lesson_id === lessonId) || null;
+  if (!userId) return null;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    if (!token) return null;
+
+    const res = await fetch(`/api/assignments?lessonId=${encodeURIComponent(lessonId || '')}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.submission || null;
+  } catch (err) {
+    console.warn('Failed to fetch user submission from server:', err);
+    return null;
+  }
 }
 
 /**
- * Submit or update student solution (supports both Cloudflare R2 file and URL)
+ * Submit or update student solution directly to Supabase via serverless function
  */
 export async function submitStudentAssignment({ 
   userId, 
@@ -118,44 +92,44 @@ export async function submitStudentAssignment({
   userName, 
   lessonId, 
   courseId, 
-  fileUrl,
-  fileName,
+  fileUrl, 
+  fileName, 
   solutionUrl, 
   notes 
 }) {
-  const submissions = store.getSubmissions();
-  const existingIdx = submissions.findIndex(s => s.user_id === userId && s.lesson_id === lessonId);
-  
-  const now = new Date().toISOString();
-  const submissionRecord = {
-    id: existingIdx >= 0 ? submissions[existingIdx].id : `sub_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-    user_id: userId || 'local_user',
-    user_email: userEmail || 'student@climamedix.org',
-    user_name: userName || 'Student',
-    lesson_id: lessonId,
-    course_id: courseId,
-    file_url: fileUrl || (existingIdx >= 0 ? submissions[existingIdx].file_url : null),
-    file_name: fileName || (existingIdx >= 0 ? submissions[existingIdx].file_name : null),
-    solution_url: solutionUrl || '',
-    notes: notes || '',
-    status: 'submitted',
-    submitted_at: now,
-    updated_at: now
-  };
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
 
-  if (existingIdx >= 0) {
-    submissions[existingIdx] = submissionRecord;
-  } else {
-    submissions.push(submissionRecord);
+  if (!token) {
+    throw new Error('يجب تسجيل الدخول أولاً لتسليم الواجب.');
   }
 
-  store.saveSubmissions(submissions);
-  return submissionRecord;
+  const res = await fetch('/api/assignments', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      courseId,
+      lessonId,
+      fileUrl,
+      fileName,
+      solutionUrl,
+      notes
+    })
+  });
+
+  const json = await res.json();
+  if (!res.ok || json.error) {
+    throw new Error(json.error || 'Failed to submit assignment');
+  }
+
+  return json.submission;
 }
 
 /**
- * ADMIN ONLY: Fetch all submissions for a course or specific lesson
- * Strict role guard: non-admin requests will be rejected
+ * ADMIN ONLY: Fetch all submissions from Supabase
  */
 export async function fetchAdminSubmissions({ userProfile, courseId, lessonId }) {
   const isAdmin = userProfile && (userProfile.role === 'admin' || userProfile.role === 'superadmin');
@@ -163,10 +137,27 @@ export async function fetchAdminSubmissions({ userProfile, courseId, lessonId })
     throw new Error('Unauthorized: Only administrators can view student submissions.');
   }
 
-  const submissions = store.getSubmissions();
-  return submissions.filter(s => {
-    const matchLesson = !lessonId || s.lesson_id === lessonId;
-    const matchCourse = !courseId || s.course_id === courseId;
-    return matchLesson && matchCourse;
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+
+  if (!token) {
+    throw new Error('Session expired. Please log in again.');
+  }
+
+  let url = '/api/assignments?mode=admin';
+  if (courseId) url += `&courseId=${encodeURIComponent(courseId)}`;
+  if (lessonId) url += `&lessonId=${encodeURIComponent(lessonId)}`;
+
+  const res = await fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
   });
+
+  const json = await res.json();
+  if (!res.ok || json.error) {
+    throw new Error(json.error || 'Failed to fetch admin submissions');
+  }
+
+  return json.submissions || [];
 }

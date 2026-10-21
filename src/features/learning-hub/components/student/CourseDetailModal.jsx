@@ -1236,15 +1236,17 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                     </div>
                   )}
 
-                  {/* Live Session Assignment Section */}
-                  <AssignmentWidget
-                    lesson={activeLesson}
-                    courseId={course.id}
-                    userId={userId}
-                    userProfile={userProfile}
-                    lang={lang}
-                    onOpenAdminSubmissions={() => setShowAdminSubmissions(true)}
-                  />
+                  {/* Live Session Assignment Section (Only for single-video interactive session course) */}
+                  {(allLessons.length === 1 || course.id === 'e1a2b3c4-0000-4000-8000-000000000001') && (
+                    <AssignmentWidget
+                      lesson={activeLesson}
+                      courseId={course.id}
+                      userId={userId}
+                      userProfile={userProfile}
+                      lang={lang}
+                      onOpenAdminSubmissions={() => setShowAdminSubmissions(true)}
+                    />
+                  )}
 
                   {/* Lesson Comments & Q&A Discussion Section */}
                   <LessonCommentsSection

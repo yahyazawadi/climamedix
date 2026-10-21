@@ -124,8 +124,8 @@ export function LoadingViewerPage({ lang = 'ar' }) {
         {/* Description / Subtitle */}
         <div className="climamedix-loader-subtitle">
           {lang === 'ar'
-            ? 'المبادرة الإقليمية لتغير المناخ والصحة'
-            : 'Regional Climate & Health Initiative'}
+            ? 'منصة تعليمية بمجال الصحة العامة والتغير المناخي'
+            : 'Educational Platform for Public Health & Climate Change'}
         </div>
 
         {/* Telemetry Progress Bar */}

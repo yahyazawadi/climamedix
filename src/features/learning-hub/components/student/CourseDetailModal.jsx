@@ -73,6 +73,14 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
     ? null 
     : (unlockedLessons.find(l => l.id === activeLessonId) || unlockedLessons[0] || allLessons[0]);
 
+  // Binary flag for certificate eligibility:
+  // Requires course to have multiple lessons (> 1) and explicit certificate support
+  const isCertificateEligible = Boolean(
+    course?.has_certificate !== false && 
+    allLessons.length > 1 && 
+    course?.id !== 'e1a2b3c4-0000-4000-8000-000000000001'
+  );
+
   // ─── Body Scroll Lock ─────────────────────────────────────────────────────
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -161,7 +169,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
 
   useEffect(() => {
     async function loadCertRequest() {
-      if (allLessons.length > 0 && completedSet.size === allLessons.length) {
+      if (isCertificateEligible && allLessons.length > 0 && completedSet.size === allLessons.length) {
         setCertRequestLoading(true);
         const { data, error } = await supabase
           .from('certificate_requests')
@@ -178,18 +186,18 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
       }
     }
     loadCertRequest();
-  }, [completedSet.size, allLessons.length, course.id, userId]);
+  }, [completedSet.size, allLessons.length, course.id, userId, isCertificateEligible]);
 
   // Support ?mockClaim=1 to immediately unlock certificate claim module during manual testing
   useEffect(() => {
-    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mockClaim') === '1') {
+    if (isCertificateEligible && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mockClaim') === '1') {
       if (allLessons.length > 0) {
         const fullSet = new Set(allLessons.map(l => l.id));
         setCompletedSet(fullSet);
         setActiveLessonId('CERTIFICATE_MODULE');
       }
     }
-  }, [allLessons]);
+  }, [allLessons, isCertificateEligible]);
 
   async function handleSubmitCertRequest() {
     if (!certNameAr || !certNameEn) {
@@ -922,7 +930,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
               )}
               
               {/* Virtual Certificate Module */}
-              {allLessons.length > 0 && completedSet.size === allLessons.length && (
+              {isCertificateEligible && allLessons.length > 0 && completedSet.size === allLessons.length && (
                  <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px dashed rgba(11,40,73,0.1)' }}>
                    <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#15b47a', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>
                      {lang === 'ar' ? 'الوحدة النهائية' : 'Final Module'}

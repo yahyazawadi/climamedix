@@ -1244,7 +1244,17 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                     </div>
                   )}
 
-                  {/* Live Session Assignment Section removed as requested */}
+                  {/* Live Session Assignment Section (Only for First Interactive Lecture Lesson) */}
+                  {activeLesson?.id === 'e1a2b3c4-0000-4000-8000-000000000003' && (
+                    <AssignmentWidget
+                      lesson={activeLesson}
+                      courseId={course.id}
+                      userId={userId}
+                      userProfile={userProfile}
+                      lang={lang}
+                      onOpenAdminSubmissions={() => setShowAdminSubmissions(true)}
+                    />
+                  )}
 
 
                   {/* Lesson Comments & Q&A Discussion Section */}

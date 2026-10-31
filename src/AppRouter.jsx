@@ -31,6 +31,7 @@ const AssetsExplorerPage = lazy(() => import('./features/assets/AssetsExplorerPa
 const ROUTE_ALIASES = {
   // Public Pages
   'newhome': ['/newhome', '/home', '/index', '/main', '/', '/footer', '/contact'],
+  'home': ['/home', '/newhome', '/index', '/main', '/', '/footer', '/contact'],
   'about': ['/about', '/about-us', '/info', '/who-we-are'],
   'auth': ['/login', '/auth', '/signin', '/register', '/signup'],
   'join': ['/join', '/apply', '/membership', '/register-network'],

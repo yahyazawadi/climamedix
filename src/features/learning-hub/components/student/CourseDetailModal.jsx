@@ -23,7 +23,7 @@ import { AssignmentWidget } from './AssignmentWidget';
 import { AdminSubmissionsModal } from '../admin/AdminSubmissionsModal';
 import { toShortId } from '../../../../utils/shortId';
 
-export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: propUserProfile, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted, onDownloadCertificate }) {
+export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: propUserProfile, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted, onDownloadCertificate, onNavigate }) {
   const auth = useAuth ? useAuth() : null;
   const userProfile = propUserProfile !== undefined ? propUserProfile : auth?.userProfile;
   const isAdmin = Boolean(userProfile && (userProfile.role === 'admin' || userProfile.role === 'superadmin'));
@@ -82,16 +82,11 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
     course?.id !== 'e1a2b3c4-0000-4000-8000-000000000001'
   );
 
-  // ─── Body Scroll Lock & Browser Back Handling ─────────────────────────────
+  // ─── Body Scroll Lock & Modal Close Handling ──────────────────────────────
   useEffect(() => {
     document.body.style.overflow = 'hidden';
 
-    // Push a modal state into history so the mobile hardware/browser Back button closes this modal cleanly
-    const modalHistoryState = { climamedix_course_modal: true, courseId: course.id };
-    window.history.pushState(modalHistoryState, '', window.location.href);
-
-    const handlePopState = (e) => {
-      // If user pressed back or modal state is popped, cleanly close the modal
+    const handlePopState = () => {
       if (onClose) {
         onClose();
       }
@@ -102,7 +97,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
       document.body.style.overflow = '';
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [course.id, onClose]);
+  }, [onClose]);
 
   // ─── Load Syllabus + Progress ─────────────────────────────────────────────
   useEffect(() => {
@@ -504,24 +499,29 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
         .cdm-header-top-row {
           display: flex;
           align-items: center;
+          justify-content: space-between;
+          flex-grow: 1;
+          min-width: 0;
+          gap: 12px;
         }
         .cdm-header-bottom-row {
           display: flex;
           align-items: center;
-          gap: 16px;
+          gap: 12px;
+          flex-shrink: 0;
         }
-        .cdm-close-btn-mobile {
+        .cdm-mobile-close-container {
           display: none !important;
         }
-        .cdm-close-btn-desktop {
+        .cdm-desktop-close-container {
           display: flex !important;
         }
 
         @media (max-width: 768px) {
-          .cdm-close-btn-mobile {
+          .cdm-mobile-close-container {
             display: flex !important;
           }
-          .cdm-close-btn-desktop {
+          .cdm-desktop-close-container {
             display: none !important;
           }
           .cdm-header {
@@ -716,80 +716,148 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
 
         {/* Header */}
         <div className="cdm-header">
-          {/* Top Row: Title + Mobile Quick Close Button */}
-          <div className="cdm-header-top-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-            <div className="cdm-header-left" style={{ flexGrow: 1, minWidth: 0, paddingInlineEnd: '10px' }}>
+          {/* Top Row: Title + Mobile Close Button */}
+          <div className="cdm-header-top-row">
+            <div className="cdm-header-left">
               {isLocked && (
                 <span className="cdm-header-badge" style={{ fontSize: '11px', color: '#ffb300', fontWeight: 'bold', display: 'block', marginBottom: '2px' }}>
                   {lang === 'ar' ? 'معاينة المساق' : 'Course Preview'}
                 </span>
               )}
-              <h2 className="cdm-header-title" style={{ color: '#0b2849', fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
+              <h2 className="cdm-header-title" style={{ color: '#0b2849', fontSize: '18px', fontWeight: 'bold', margin: 0, lineHeight: '1.35' }}>
                 {lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)}
               </h2>
             </div>
 
-            <button 
-              onClick={onClose} 
-              className="cdm-btn-circle cdm-close-btn-mobile"
-              style={{ 
-                background: 'rgba(11,40,73,0.08)', 
-                border: 'none', 
-                fontSize: '18px', 
-                color: '#0b2849', 
-                cursor: 'pointer', 
-                width: '36px', 
-                height: '36px', 
-                borderRadius: '50%', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                flexShrink: 0 
-              }}
-              title={lang === 'ar' ? 'إغلاق والعودة' : 'Close and exit'}
-            >
-              ✕
-            </button>
+            {/* Mobile-only Close button */}
+            <div className="cdm-mobile-close-container">
+              <button 
+                type="button"
+                id="cdm-header-close-btn-mobile"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (onClose) onClose();
+                }} 
+                style={{ 
+                  background: 'rgba(239, 68, 68, 0.12)', 
+                  border: '1px solid rgba(239, 68, 68, 0.25)', 
+                  fontSize: '18px', 
+                  color: '#dc2626', 
+                  cursor: 'pointer', 
+                  width: '36px', 
+                  height: '36px', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  flexShrink: 0,
+                  fontWeight: 'bold'
+                }}
+                title={lang === 'ar' ? 'إغلاق والعودة' : 'Close and exit'}
+                aria-label={lang === 'ar' ? 'إغلاق' : 'Close'}
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
-          {/* Toolbar on Desktop/Mobile: Syllabus, Progress, Share & Desktop Close */}
-          <div className="cdm-header-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div className="cdm-header-right-left" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {!isLocked && modules.length > 0 && (
-                <button 
-                  type="button"
-                  className="cdm-mobile-syllabus-btn"
-                  onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
-                  title={lang === 'ar' ? 'فتح المنهج وقائمة الدروس' : 'View Syllabus & Lessons'}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                  </svg>
-                  <span>{lang === 'ar' ? 'المنهج' : 'Syllabus'}</span>
-                  <span style={{ opacity: 0.85, fontSize: '10.5px' }}>({completedSet.size}/{allLessons.length})</span>
-                </button>
-              )}
-
-              {!isLocked && (
-                <span className="cdm-progress-pill" style={{ fontSize: '13px', color: '#0b2849', fontWeight: 'bold' }}>
-                  {allLessons.length > 0 ? Math.round((completedSet.size / allLessons.length) * 100) : 0}% {lang === 'ar' ? 'مكتمل' : 'complete'}
-                </span>
-              )}
-            </div>
-            
-            <div className="cdm-header-right-right" style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
-              <ShareActionButtons 
-                lang={lang} 
-                title={lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)} 
-                url={typeof window !== 'undefined' ? `${window.location.origin}/c/${toShortId(course.id)}` : ''}
-              />
-
+          {/* Tools & Desktop Close */}
+          <div className="cdm-header-bottom-row">
+            {!isLocked && modules.length > 0 && (
               <button 
-                onClick={onClose} 
-                className="cdm-btn-circle cdm-close-btn-desktop"
-                style={{ background: 'rgba(11,40,73,0.06)', border: 'none', fontSize: '20px', color: '#0b2849', cursor: 'pointer', width: '38px', height: '38px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
-                title={lang === 'ar' ? 'إغلاق' : 'Close'}
+                type="button"
+                className="cdm-mobile-syllabus-btn"
+                onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+                title={lang === 'ar' ? 'فتح المنهج وقائمة الدروس' : 'View Syllabus & Lessons'}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <span>{lang === 'ar' ? 'المنهج' : 'Syllabus'}</span>
+                <span style={{ opacity: 0.85, fontSize: '10.5px' }}>({completedSet.size}/{allLessons.length})</span>
+              </button>
+            )}
+
+            {!isLocked && (
+              <span className="cdm-progress-pill" style={{ fontSize: '13px', color: '#0b2849', fontWeight: 'bold' }}>
+                {allLessons.length > 0 ? Math.round((completedSet.size / allLessons.length) * 100) : 0}% {lang === 'ar' ? 'مكتمل' : 'complete'}
+              </span>
+            )}
+
+            {/* Direct Home Navigation Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (onClose) onClose();
+                if (typeof onNavigate === 'function') {
+                  onNavigate('newhome');
+                } else {
+                  window.location.href = '/';
+                }
+              }}
+              style={{
+                background: 'rgba(11, 40, 73, 0.05)',
+                border: '1px solid rgba(11, 40, 73, 0.14)',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                fontSize: '12.5px',
+                fontWeight: 'bold',
+                color: '#0b2849',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap'
+              }}
+              title={lang === 'ar' ? 'العودة للصفحة الرئيسية' : 'Return to Home'}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+              <span>{lang === 'ar' ? 'الرئيسية' : 'Home'}</span>
+            </button>
+
+            <ShareActionButtons 
+              lang={lang} 
+              title={lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)} 
+              url={typeof window !== 'undefined' ? `${window.location.origin}/c/${toShortId(course.id)}` : ''}
+            />
+
+            {/* Desktop Close button */}
+            <div className="cdm-desktop-close-container">
+              <button 
+                type="button"
+                id="cdm-header-close-btn-desktop"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (onClose) onClose();
+                }} 
+                style={{ 
+                  background: 'rgba(239, 68, 68, 0.12)', 
+                  border: '1px solid rgba(239, 68, 68, 0.25)', 
+                  fontSize: '18px', 
+                  color: '#dc2626', 
+                  cursor: 'pointer', 
+                  width: '38px', 
+                  height: '38px', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  flexShrink: 0,
+                  transition: 'background 0.2s, transform 0.15s',
+                  fontWeight: 'bold'
+                }}
+                title={lang === 'ar' ? 'إغلاق والعودة للكورسات' : 'Close and return to courses'}
+                aria-label={lang === 'ar' ? 'إغلاق' : 'Close'}
               >
                 ✕
               </button>

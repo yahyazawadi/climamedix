@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
 import { Button } from '../../../shared/components/Button';
 import { GlassCard } from '../../../shared/components/GlassCard';
 import { useAuth } from '../../../auth/hooks/useAuth';
@@ -28,6 +28,7 @@ export function LearningHubPage({ lang, onNavigate }) {
   const [enrollingId, setEnrollingId] = useState(null); // courseId currently being enrolled
 
   const [selectedCourse, setSelectedCourse] = useState(null); // open CourseDetailModal
+  const initialUrlHandledRef = useRef(false);
   const [showCertFor, setShowCertFor] = useState(null); // course title string for cert generator
 
   const [activeTab, setActiveTab] = useState('discover'); // 'discover' | 'my-courses'
@@ -128,20 +129,23 @@ export function LearningHubPage({ lang, onNavigate }) {
         };
       }));
 
-      // Check URL for course auto-open (supports /courses?courseId=..., /courses?course=..., /c/:id, or /courses/:id)
-      const params = new URLSearchParams(window.location.search);
-      let urlCourseId = params.get('course') || params.get('courseId') || params.get('c');
-      if (!urlCourseId) {
-        const pathParts = window.location.pathname.replace(/\/$/, '').split('/');
-        if (pathParts.length > 2 && (pathParts[1] === 'course' || pathParts[1] === 'courses' || pathParts[1] === 'c')) {
-          urlCourseId = pathParts[2];
+      // Check URL for course auto-open ONCE on initial page mount only!
+      if (!initialUrlHandledRef.current) {
+        initialUrlHandledRef.current = true;
+        const params = new URLSearchParams(window.location.search);
+        let urlCourseId = params.get('course') || params.get('courseId') || params.get('c');
+        if (!urlCourseId) {
+          const pathParts = window.location.pathname.replace(/\/$/, '').split('/');
+          if (pathParts.length > 2 && (pathParts[1] === 'course' || pathParts[1] === 'courses' || pathParts[1] === 'c')) {
+            urlCourseId = pathParts[2];
+          }
         }
-      }
-      if (urlCourseId) {
-        const matchedCourse = matchEntityByShortOrFullId(courses || [], urlCourseId);
-        if (matchedCourse) {
-          // Open course directly when navigated via direct URL link
-          setSelectedCourse(matchedCourse);
+        if (urlCourseId) {
+          const matchedCourse = matchEntityByShortOrFullId(courses || [], urlCourseId);
+          if (matchedCourse) {
+            // Open course directly when navigated via direct URL link
+            setSelectedCourse(matchedCourse);
+          }
         }
       }
     } catch (err) {
@@ -195,26 +199,29 @@ export function LearningHubPage({ lang, onNavigate }) {
     if (user && rawCourse?.id) {
       enrollInCourse(user.id, rawCourse.id).catch(() => {});
     }
+    initialUrlHandledRef.current = true;
     setSelectedCourse(rawCourse);
   }
 
   function handleCloseCourseModal() {
     setSelectedCourse(null);
-    const wasDirectLink = window.location.pathname.startsWith('/c/') || window.location.pathname.startsWith('/course/');
-    if (wasDirectLink) {
-      if (typeof onNavigate === 'function') {
-        onNavigate('home');
-      } else {
-        window.history.pushState({}, '', '/');
-        window.dispatchEvent(new PopStateEvent('popstate'));
-      }
+    initialUrlHandledRef.current = true;
+
+    // Clean address bar: strip /c/:id or /course/:id or /courses/:id, plus all query parameters
+    const currentPath = window.location.pathname.replace(/\/$/, '');
+    const isDirectCoursePath = currentPath.startsWith('/c/') || currentPath.startsWith('/course/') || currentPath.startsWith('/courses/');
+
+    if (isDirectCoursePath && currentPath !== '/courses') {
+      window.history.replaceState({}, '', '/courses');
     } else {
       const url = new URL(window.location);
       url.searchParams.delete('course');
+      url.searchParams.delete('courseId');
       url.searchParams.delete('lesson');
       url.searchParams.delete('c');
-      window.history.replaceState({}, '', url);
+      window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
     }
+
     if (user) {
       loadData();
     }
@@ -685,6 +692,7 @@ export function LearningHubPage({ lang, onNavigate }) {
           userProfile={userProfile}
           isLocked={user ? (getCourseAccess(selectedCourse) === 'locked') : false}
           onClose={handleCloseCourseModal}
+          onNavigate={onNavigate}
           onLessonCompleted={handleLessonCompleted}
           onCourseCompleted={handleCourseCompleted}
           onUpgrade={() => onNavigate('join-us')}

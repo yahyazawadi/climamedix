@@ -52,6 +52,9 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
 
   function isModuleUnlocked(modIndex) {
     if (isAdmin) return true;
+    if (course?.category === 'Fellowship Sessions' || course?.id === '65f81d03-05cb-426f-9281-ecec0835ef5e' || course?.sequential_unlock === false) {
+      return true;
+    }
     if (modIndex === 0) return true;
     for (let i = 1; i <= modIndex; i++) {
       const prevMod = modules[i - 1];
@@ -116,6 +119,9 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
 
         const isUnlockedInitially = (idx) => {
           if (isAdmin) return true;
+          if (course?.category === 'Fellowship Sessions' || course?.id === '65f81d03-05cb-426f-9281-ecec0835ef5e' || course?.sequential_unlock === false) {
+            return true;
+          }
           if (idx === 0) return true;
           for (let i = 1; i <= idx; i++) {
             const prev = (syllabus || [])[i - 1];
@@ -1371,8 +1377,8 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
                     </div>
                   )}
 
-                  {/* Live Session Assignment Section (Only for First Interactive Lecture Lesson) */}
-                  {activeLesson?.id === 'e1a2b3c4-0000-4000-8000-000000000003' && (
+                  {/* Live Session Assignment Section (Only for First Interactive Initiatives Session) */}
+                  {(activeLesson?.id === 'e1a2b3c4-0000-4000-8000-000000000003' || activeLesson?.id === 'd37051ba-8162-4e50-aea7-b3cd1eac4701') && (
                     <AssignmentWidget
                       lesson={activeLesson}
                       courseId={course.id}

@@ -82,13 +82,27 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
     course?.id !== 'e1a2b3c4-0000-4000-8000-000000000001'
   );
 
-  // ─── Body Scroll Lock ─────────────────────────────────────────────────────
+  // ─── Body Scroll Lock & Browser Back Handling ─────────────────────────────
   useEffect(() => {
     document.body.style.overflow = 'hidden';
+
+    // Push a modal state into history so the mobile hardware/browser Back button closes this modal cleanly
+    const modalHistoryState = { climamedix_course_modal: true, courseId: course.id };
+    window.history.pushState(modalHistoryState, '', window.location.href);
+
+    const handlePopState = (e) => {
+      // If user pressed back or modal state is popped, cleanly close the modal
+      if (onClose) {
+        onClose();
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+
     return () => {
       document.body.style.overflow = '';
+      window.removeEventListener('popstate', handlePopState);
     };
-  }, []);
+  }, [course.id, onClose]);
 
   // ─── Load Syllabus + Progress ─────────────────────────────────────────────
   useEffect(() => {
@@ -497,13 +511,19 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
           gap: 16px;
         }
         .cdm-close-btn-mobile {
-          display: none;
+          display: none !important;
         }
         .cdm-close-btn-desktop {
-          display: flex;
+          display: flex !important;
         }
 
         @media (max-width: 768px) {
+          .cdm-close-btn-mobile {
+            display: flex !important;
+          }
+          .cdm-close-btn-desktop {
+            display: none !important;
+          }
           .cdm-header {
             flex-direction: column !important;
             align-items: stretch !important;
@@ -696,19 +716,42 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
 
         {/* Header */}
         <div className="cdm-header">
-          {/* Top on Mobile (or Start on Desktop): The Noun Name (Course Title & Badge) */}
-          <div className="cdm-header-left">
-            {isLocked && (
-              <span className="cdm-header-badge" style={{ fontSize: '11px', color: '#ffb300', fontWeight: 'bold', display: 'block', marginBottom: '2px' }}>
-                {lang === 'ar' ? 'معاينة المساق' : 'Course Preview'}
-              </span>
-            )}
-            <h2 className="cdm-header-title" style={{ color: '#0b2849', fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
-              {lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)}
-            </h2>
+          {/* Top Row: Title + Mobile Quick Close Button */}
+          <div className="cdm-header-top-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <div className="cdm-header-left" style={{ flexGrow: 1, minWidth: 0, paddingInlineEnd: '10px' }}>
+              {isLocked && (
+                <span className="cdm-header-badge" style={{ fontSize: '11px', color: '#ffb300', fontWeight: 'bold', display: 'block', marginBottom: '2px' }}>
+                  {lang === 'ar' ? 'معاينة المساق' : 'Course Preview'}
+                </span>
+              )}
+              <h2 className="cdm-header-title" style={{ color: '#0b2849', fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
+                {lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)}
+              </h2>
+            </div>
+
+            <button 
+              onClick={onClose} 
+              className="cdm-btn-circle cdm-close-btn-mobile"
+              style={{ 
+                background: 'rgba(11,40,73,0.08)', 
+                border: 'none', 
+                fontSize: '18px', 
+                color: '#0b2849', 
+                cursor: 'pointer', 
+                width: '36px', 
+                height: '36px', 
+                borderRadius: '50%', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                flexShrink: 0 
+              }}
+              title={lang === 'ar' ? 'إغلاق والعودة' : 'Close and exit'}
+            >
+              ✕
+            </button>
           </div>
 
-          {/* Beneath on Mobile (or End on Desktop): The Toolbar with Syllabus, Progress, Share & Close */}
+          {/* Toolbar on Desktop/Mobile: Syllabus, Progress, Share & Desktop Close */}
           <div className="cdm-header-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div className="cdm-header-right-left" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               {!isLocked && modules.length > 0 && (
@@ -744,7 +787,7 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
 
               <button 
                 onClick={onClose} 
-                className="cdm-btn-circle"
+                className="cdm-btn-circle cdm-close-btn-desktop"
                 style={{ background: 'rgba(11,40,73,0.06)', border: 'none', fontSize: '20px', color: '#0b2849', cursor: 'pointer', width: '38px', height: '38px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
                 title={lang === 'ar' ? 'إغلاق' : 'Close'}
               >

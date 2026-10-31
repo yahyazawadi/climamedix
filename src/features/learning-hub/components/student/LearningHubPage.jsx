@@ -200,10 +200,15 @@ export function LearningHubPage({ lang, onNavigate }) {
 
   function handleCloseCourseModal() {
     setSelectedCourse(null);
-    const url = new URL(window.location);
-    url.searchParams.delete('course');
-    url.searchParams.delete('lesson');
-    window.history.replaceState({}, '', url);
+    if (window.location.pathname.startsWith('/c/')) {
+      window.history.replaceState({}, '', '/courses');
+    } else {
+      const url = new URL(window.location);
+      url.searchParams.delete('course');
+      url.searchParams.delete('lesson');
+      url.searchParams.delete('c');
+      window.history.replaceState({}, '', url);
+    }
     if (user) {
       loadData();
     }

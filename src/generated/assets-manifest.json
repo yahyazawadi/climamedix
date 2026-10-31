@@ -1,5 +1,5 @@
 {
-  "scannedAt": "2026-10-31T14:58:23.431Z",
+  "scannedAt": "2026-10-31T15:04:09.384Z",
   "totalAssets": 67,
   "totalReferences": 101,
   "assets": [
@@ -117,19 +117,19 @@
         },
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 881,
+          "line": 892,
           "snippet": "<polyline points=\"20 6 9 17 4 12\"/>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 1025,
+          "line": 1036,
           "snippet": "<svg width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#15b47a\" strokeWidth=\"2\" strokeLinecap=\"round\" strokeLinejoin=\"round\" style={{ marginBottom:",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 1169,
+          "line": 1180,
           "snippet": "<svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" strokeWidth=\"3\" strokeLinecap=\"round\" strokeLinejoin=\"round\"><polyline points=",
           "matchType": "inline-clone"
         },
@@ -261,25 +261,25 @@
       "references": [
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 978,
+          "line": 989,
           "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 252,
+          "line": 257,
           "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 424,
+          "line": 429,
           "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 580,
+          "line": 585,
           "snippet": "<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"/><path d=\"M6 12v5c3 3 9 3 12 0v-5\"/>",
           "matchType": "inline-clone"
         },
@@ -309,25 +309,25 @@
         },
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 812,
+          "line": 823,
           "snippet": "<svg width=\"10\" height=\"10\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" strokeWidth=\"2.5\" strokeLinecap=\"round\" strokeLinejoin=\"round\"><rect x=\"3\" y=\"",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 912,
+          "line": 923,
           "snippet": "<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" strokeWidth=\"2.5\" strokeLinecap=\"round\" strokeLinejoin=\"round\" style={{ flexSh",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 993,
+          "line": 1004,
           "snippet": "<path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 588,
+          "line": 593,
           "snippet": "<path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path>",
           "matchType": "inline-clone"
         }
@@ -405,19 +405,19 @@
       "references": [
         {
           "file": "src/features/learning-hub/components/student/CourseDetailModal.jsx",
-          "line": 1041,
+          "line": 1052,
           "snippet": "<svg width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#ffb300\" strokeWidth=\"2\" strokeLinecap=\"round\" strokeLinejoin=\"round\" style={{ marginBottom:",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 451,
+          "line": 456,
           "snippet": "<polyline points=\"12 6 12 12 16 14\"></polyline>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 605,
+          "line": 610,
           "snippet": "<polyline points=\"12 6 12 12 16 14\"></polyline>",
           "matchType": "inline-clone"
         }
@@ -555,13 +555,13 @@
       "references": [
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 724,
+          "line": 729,
           "snippet": "<path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"/>",
           "matchType": "inline-clone"
         },
         {
           "file": "src/features/learning-hub/components/student/LearningHubPage.jsx",
-          "line": 725,
+          "line": 730,
           "snippet": "<path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\"/>",
           "matchType": "inline-clone"
         }

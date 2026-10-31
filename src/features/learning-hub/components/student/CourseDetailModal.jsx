@@ -250,10 +250,21 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
   // ─── URL Syncing ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (!activeLessonId) return;
-    const url = new URL(window.location);
-    url.searchParams.set('course', course.id);
-    url.searchParams.set('lesson', activeLessonId);
-    window.history.replaceState({}, '', url);
+    const currentPath = window.location.pathname.replace(/\/$/, '');
+    const shortCourseId = toShortId(course.id);
+    
+    // If user opened with /c/:shortId (or /c/:id), preserve that clean short path in the address bar!
+    if (currentPath.startsWith('/c/')) {
+      const targetPath = `/c/${shortCourseId}`;
+      if (window.location.pathname !== targetPath || window.location.search) {
+        window.history.replaceState({}, '', targetPath);
+      }
+    } else {
+      const url = new URL(window.location);
+      url.searchParams.set('course', course.id);
+      url.searchParams.set('lesson', activeLessonId);
+      window.history.replaceState({}, '', url);
+    }
   }, [course.id, activeLessonId]);
 
   // ─── Load Quiz + Video when lesson changes ────────────────────────────────

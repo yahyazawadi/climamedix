@@ -74,7 +74,7 @@ export const getViewFromPath = (path) => {
   if (p.startsWith('/verify/') || p.startsWith('/certificate/') || p.startsWith('/cert/')) {
     return 'verify';
   }
-  if (p.startsWith('/course/') || p.startsWith('/courses/')) {
+  if (p.startsWith('/c/') || p.startsWith('/course/') || p.startsWith('/courses/')) {
     return 'courses';
   }
   if (p.startsWith('/research-detail/') || p.startsWith('/research/')) {
@@ -106,7 +106,7 @@ export const isKnownPath = (path) => {
 
   if (
     p.startsWith('/verify/') || p.startsWith('/certificate/') || p.startsWith('/cert/') ||
-    p.startsWith('/course/') || p.startsWith('/courses/') ||
+    p.startsWith('/c/') || p.startsWith('/course/') || p.startsWith('/courses/') ||
     p.startsWith('/research-detail/') || p.startsWith('/research/') ||
     p.startsWith('/article/') || p.startsWith('/news/')
   ) {

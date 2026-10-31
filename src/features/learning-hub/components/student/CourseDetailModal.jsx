@@ -21,6 +21,7 @@ import {
 import { LessonCommentsSection } from '../comments/LessonCommentsSection';
 import { AssignmentWidget } from './AssignmentWidget';
 import { AdminSubmissionsModal } from '../admin/AdminSubmissionsModal';
+import { toShortId } from '../../../../utils/shortId';
 
 export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: propUserProfile, isLocked, onUpgrade, onClose, onLessonCompleted, onCourseCompleted, onDownloadCertificate }) {
   const auth = useAuth ? useAuth() : null;
@@ -724,7 +725,11 @@ export function CourseDetailModal({ lang = 'ar', course, userId, userProfile: pr
             </div>
             
             <div className="cdm-header-right-right" style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
-              <ShareActionButtons lang={lang} title={lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)} />
+              <ShareActionButtons 
+                lang={lang} 
+                title={lang === 'ar' ? course.title_ar : (course.title_en || course.title_ar)} 
+                url={typeof window !== 'undefined' ? `${window.location.origin}/c/${toShortId(course.id)}` : ''}
+              />
 
               <button 
                 onClick={onClose} 

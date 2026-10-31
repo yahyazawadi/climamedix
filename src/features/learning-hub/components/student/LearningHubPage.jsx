@@ -14,6 +14,7 @@ import {
   issueCertificate,
   fetchUserCertificates,
 } from '../../services/lmsService';
+import { matchEntityByShortOrFullId, toShortId } from '../../../../utils/shortId';
 
 export function LearningHubPage({ lang, onNavigate }) {
   const { user, userProfile, hasPermission } = useAuth();
@@ -127,22 +128,20 @@ export function LearningHubPage({ lang, onNavigate }) {
         };
       }));
 
-      // Check URL for course auto-open (supports /courses?courseId=..., /courses?course=..., or /courses/:id)
+      // Check URL for course auto-open (supports /courses?courseId=..., /courses?course=..., /c/:id, or /courses/:id)
       const params = new URLSearchParams(window.location.search);
-      let urlCourseId = params.get('course') || params.get('courseId');
+      let urlCourseId = params.get('course') || params.get('courseId') || params.get('c');
       if (!urlCourseId) {
         const pathParts = window.location.pathname.replace(/\/$/, '').split('/');
-        if (pathParts.length > 2 && (pathParts[1] === 'course' || pathParts[1] === 'courses')) {
+        if (pathParts.length > 2 && (pathParts[1] === 'course' || pathParts[1] === 'courses' || pathParts[1] === 'c')) {
           urlCourseId = pathParts[2];
         }
       }
       if (urlCourseId) {
-        const isUserEnrolled = validEnrolled.some(e => e.id === urlCourseId) || certCourseIds.has(urlCourseId);
-        // Only auto-open course modal from URL if user is ALREADY enrolled!
-        // Otherwise, show them the new full course screen so they can enroll.
-        if (isUserEnrolled) {
-          const c = (courses || []).find(x => x.id === urlCourseId);
-          if (c) setSelectedCourse(c);
+        const matchedCourse = matchEntityByShortOrFullId(courses || [], urlCourseId);
+        if (matchedCourse) {
+          // Open course directly when navigated via direct URL link
+          setSelectedCourse(matchedCourse);
         }
       }
     } catch (err) {

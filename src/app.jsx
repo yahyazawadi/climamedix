@@ -26,7 +26,12 @@ function AppContent() {
   });
   const [activeSection, setActiveSection] = useState('home');
   const [openedModal, setOpenedModal] = useState(null); // 'join', 'policy'
-  const [currentView, setCurrentView] = useState('newhome'); // 'newhome', 'home', or others
+  const [currentView, setCurrentView] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return getViewFromPath(window.location.pathname);
+    }
+    return 'newhome';
+  });
   const [initialLoading, setInitialLoading] = useState(true);
   const { user, userProfile, signOut } = useAuth();
 
